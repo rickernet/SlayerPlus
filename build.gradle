@@ -1,0 +1,113 @@
+plugins {
+	id 'java'
+}
+
+repositories {
+	mavenLocal()
+	maven {
+		url = 'https://repo.runelite.net'
+		content {
+			includeGroupByRegex("net\\.runelite.*")
+		}
+	}
+	mavenCentral()
+}
+
+def runeLiteVersion = 'latest.release'
+def pluginMainClass = 'com.slayerplus.SlayerPlusPluginTest'
+def isolatedRunClasses = layout.projectDirectory.dir('.gradle/slayerplus-run-classes')
+
+dependencies {
+	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
+
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+	testImplementation 'junit:junit:4.13.2'
+	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
+	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+}
+
+group = 'com.slayerplus'
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+	options.release.set(11)
+}
+
+/*
+ * A development client loads plugin classes lazily. Pointing it directly at
+ * build/classes lets a concurrent `test`/IDE compile temporarily remove a class
+ * that the live JVM has not loaded yet, causing NoClassDefFoundError in-game.
+ * Launch from a stable copy outside build/ so later compilation cannot mutate
+ * the running client's classpath.
+ */
+tasks.register('prepareRunClasses', Sync) {
+	dependsOn tasks.named('testClasses')
+	from sourceSets.main.output
+	from sourceSets.test.output
+	into isolatedRunClasses
+}
+
+tasks.register('run', JavaExec) {
+	dependsOn tasks.named('prepareRunClasses')
+	classpath = files(isolatedRunClasses) + configurations.testRuntimeClasspath
+	mainClass = pluginMainClass
+
+	jvmArgs "-ea"
+	args "--developer-mode", "--debug"
+
+	doFirst {
+		def requiredClass = isolatedRunClasses.file(
+			'com/slayerplus/SlayerBankRouteCatalog.class'
+		).asFile
+		if (!requiredClass.isFile() || requiredClass.length() <= 0) {
+			throw new GradleException(
+				'Missing SlayerBankRouteCatalog from isolated RuneLite run classpath'
+			)
+		}
+	}
+}
+
+/*
+ * Explicit pre-release routing gate. The ordinary development test suite can
+ * stay green while researched terminals are being authored; this task enables
+ * the zero-failure assertion and must pass before publishing SlayerPlus.
+ */
+tasks.register('releaseRouteCheck', Test) {
+	dependsOn tasks.named('testClasses')
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	systemProperty 'slayerplus.releaseRouteCheck', 'true'
+	filter {
+		includeTestsMatching(
+			'com.slayerplus.SlayerRouteReleaseValidatorTest.completeReleaseMatrixHasNoRoutingFailures'
+		)
+	}
+}
+
+tasks.register('shadowJar', Jar) {
+	dependsOn configurations.testRuntimeClasspath
+	manifest {
+		attributes('Main-Class': pluginMainClass, 'Multi-Release': true)
+	}
+
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from sourceSets.main.output
+	from sourceSets.test.output
+	from {
+		configurations.testRuntimeClasspath.collect { file ->
+			file.isDirectory() ? file : zipTree(file)
+		}
+	}
+
+	exclude 'META-INF/INDEX.LIST'
+	exclude 'META-INF/*.SF'
+	exclude 'META-INF/*.DSA'
+	exclude 'META-INF/*.RSA'
+	exclude '**/module-info.class'
+
+	group = BasePlugin.BUILD_GROUP
+	archiveClassifier.set('shadow')
+	archiveFileName.set("${rootProject.name}-${project.version}-all.jar")
+}
