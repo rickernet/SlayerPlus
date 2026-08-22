@@ -1,0 +1,64 @@
+# SlayerPlus task location options v1
+# O<TAB>aliases(|)<TAB>location<TAB>method<TAB>travel<TAB>cannon<TAB>requirement-type<TAB>requirement-key<TAB>requirement-value
+O	abyssal demon%7Cabyssal demons	Catacombs of Kourend	Multi-combat melee or burst/barrage	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	abyssal demon%7Cabyssal demons	Slayer Tower	Single-combat melee	Slayer ring to Slayer Tower	NOT_ALLOWED	QUEST	PRIEST_IN_PERIL	Priest in Peril
+O	bloodveld%7Cbloodvelds	Meiyerditch Laboratories	Cannon mutated bloodvelds in multi-combat	Drakan's medallion to Darkmeyer, then enter the laboratories	RECOMMENDED	QUEST	SINS_OF_THE_FATHER	Sins of the Father
+O	bloodveld%7Cbloodvelds	Buccaneers' Laboratory	Cannon mutated Bloodvelds in unobstructed multi-combat	Pirates' Cove, then the built rowboat to Buccaneers' Haven	RECOMMENDED	SKILL	SAILING	76
+O	bloodveld%7Cbloodvelds	Iorwerth Dungeon	Cannon mutated Bloodvelds in a single-combat crystal-shard area	Teleport crystal to Prifddinas, then enter Iorwerth Dungeon	OPTIONAL	QUEST	SONG_OF_THE_ELVES	Song of the Elves
+O	bloodveld%7Cbloodvelds	Stronghold Slayer Cave	Safespot regular Bloodvelds with a dwarf multicannon	Slayer ring to Stronghold Slayer Cave	RECOMMENDED			
+O	bloodveld%7Cbloodvelds	Catacombs of Kourend	Venator bow with goading potion or prayer melee in multi-combat	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	bloodveld%7Cbloodvelds	Slayer Tower (first floor)	Safespot regular Bloodvelds in single-combat	Slayer ring to Slayer Tower	NOT_ALLOWED	QUEST	PRIEST_IN_PERIL	Priest in Peril
+O	bloodveld%7Cbloodvelds	Slayer Tower basement	Safespot task-only regular Bloodvelds in single-combat	Slayer ring to Slayer Tower, then use the entrance ladder	NOT_ALLOWED	QUEST	PRIEST_IN_PERIL	Priest in Peril
+O	bloodveld%7Cbloodvelds	God Wars Dungeon	Safespot Zamorak Bloodvelds with Saradomin and Zamorak protection	Trollheim teleport, then enter God Wars Dungeon	NOT_ALLOWED	QUEST	DEATH_PLATEAU	Death Plateau
+O	dust devil%7Cdust devils	Catacombs of Kourend	Burst or barrage stacked dust devils	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	nechryael%7Cnechryaels	Catacombs of Kourend	Burst or barrage stacked nechryaels	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	nechryael%7Cnechryaels	Iorwerth Dungeon	Single-combat Greater Nechryaels with optional cannon support for crystal shard drops	Teleport crystal to Prifddinas, then enter Iorwerth Dungeon	OPTIONAL	QUEST	SONG_OF_THE_ELVES	Song of the Elves
+O	smoke devil%7Csmoke devils	Smoke Devil Dungeon	Cannon while bursting or barraging	Use the nearest unlocked teleport to the dungeon entrance	RECOMMENDED			
+O	gargoyle%7Cgargoyles	Slayer Tower	Melee with a rock hammer or automatic finisher	Slayer ring to Slayer Tower	NOT_ALLOWED	QUEST	PRIEST_IN_PERIL	Priest in Peril
+O	kurask%7Ckurasks	Iorwerth Dungeon	Leaf-bladed weapon, broad ammunition, or Magic Dart	Teleport crystal to Prifddinas, then enter Iorwerth Dungeon	NOT_ALLOWED	QUEST	SONG_OF_THE_ELVES	Song of the Elves
+O	kurask%7Ckurasks	Fremennik Slayer Dungeon	Leaf-bladed weapon, broad ammunition, or Magic Dart	Slayer ring to Fremennik Slayer Dungeon	NOT_ALLOWED			
+O	turoth%7Cturoths	Fremennik Slayer Dungeon	Leaf-bladed weapon, broad ammunition, or Magic Dart	Slayer ring to Fremennik Slayer Dungeon	NOT_ALLOWED			
+O	cave kraken%7Ckraken	Kraken Cove	Magic against cave kraken	Use the nearest unlocked teleport to Kraken Cove	NOT_ALLOWED			
+O	cave horror%7Ccave horrors	Mos Le'Harmless Cave	Fast ranged attacks with a witchwood icon and dwarf multicannon	Trouble Brewing minigame teleport, then run east	RECOMMENDED	QUEST	CABIN_FEVER	Cabin Fever
+O	dagannoth%7Cdagannoths	Lighthouse Dungeon	Cannon in multi-combat	Games necklace to Barbarian Outpost, then run north	RECOMMENDED	QUEST	HORROR_FROM_THE_DEEP	Horror from the Deep
+O	dagannoth%7Cdagannoths	Jormungand's Prison	Prayer melee against melee-only Dagannoth	Rellekka teleport, then travel to the prison	NOT_ALLOWED	QUEST	THE_FREMENNIK_EXILES	The Fremennik Exiles
+O	dagannoth%7Cdagannoths	Waterbirth Island Dungeon	Multi-combat ranged or melee	Waterbirth teleport or travel from Rellekka	NOT_ALLOWED			
+O	kalphite%7Ckalphites	Kalphite Slayer Cave	Cannon in the task-only cave	Use the nearest unlocked Desert teleport	RECOMMENDED			
+O	suqah%7Csuqahs	Lunar Isle	Cannon the clustered suqahs	Lunar Isle teleport	RECOMMENDED	QUEST	LUNAR_DIPLOMACY	Lunar Diplomacy
+O	troll%7Ctrolls	Death Plateau	Cannon the dense troll spawns	Games necklace to Burthorpe, then run north	RECOMMENDED	QUEST	DEATH_PLATEAU	Death Plateau
+O	wyrm%7Cwyrms	Karuulm Slayer Dungeon	Ranged or melee with boots of stone protection	Rada's blessing to Mount Karuulm	NOT_ALLOWED			
+O	drake%7Cdrakes	Karuulm Slayer Dungeon	Ranged or melee with boots of stone protection	Rada's blessing to Mount Karuulm	NOT_ALLOWED			
+O	hydra%7Chydras	Karuulm Slayer Dungeon	Ranged or melee in the hydra area	Rada's blessing to Mount Karuulm	NOT_ALLOWED			
+O	hellhound%7Chellhounds	Stronghold Slayer Cave	Cannon with Toxic blowpipe or Scorching bow from the safespot	Slayer ring to Stronghold Slayer Cave	RECOMMENDED			
+O	hellhound%7Chellhounds	Catacombs of Kourend	Venator bow in multi-combat; demonbane melee or Water spells if preferred	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	fire giant%7Cfire giants	Catacombs of Kourend	Melee or ranged in multi-combat	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	greater demon%7Cgreater demons	Chasm of Fire	Cannon or melee in the lower levels	Use the nearest unlocked Kourend teleport	RECOMMENDED			
+O	greater demon%7Cgreater demons	Catacombs of Kourend	Melee in multi-combat	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	black demon%7Cblack demons	Catacombs of Kourend	Melee or ranged in multi-combat	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	aberrant spectre%7Caberrant spectres	Stronghold Slayer Cave	Cannon with Protect from Magic and required face protection	Slayer ring to Stronghold Slayer Cave	RECOMMENDED			
+O	aberrant spectre%7Caberrant spectres	Catacombs of Kourend	Venator bow or prayer melee against Deviant spectres	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	aberrant spectre%7Caberrant spectres	Slayer Tower	Protect from Magic with a nose peg or Slayer helmet	Slayer ring to Slayer Tower	NOT_ALLOWED	QUEST	PRIEST_IN_PERIL	Priest in Peril
+O	ankou	Catacombs of Kourend	Use a Venator bow against the tightly packed 1x1 Ankous in multi-combat	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	ankou	Catacombs of Kourend	Burst or barrage stacked Ankous in multi-combat	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	ankou	Stronghold Slayer Cave	Cannon with a Toxic blowpipe in the single-combat room	Slayer ring to Stronghold Slayer Cave	RECOMMENDED			
+O	ankou	Stronghold of Security	Safespot with a Toxic blowpipe or another fast ranged weapon	Skull sceptre to the Stronghold of Security	NOT_ALLOWED			
+O	blue dragon%7Cblue dragons	Taverley Dungeon	Ranged with an anti-dragon shield or antifire protection	Falador teleport, then run northwest	OPTIONAL			
+O	bronze dragon%7Cbronze dragons%7Ciron dragon%7Ciron dragons%7Csteel dragon%7Csteel dragons	Brimhaven Dungeon	Use a dragonbane weapon or Earth Magic with complete dragonfire protection	Fairy ring CKR, then run north to Brimhaven Dungeon	OPTIONAL			
+O	mithril dragon%7Cmithril dragons	Ancient Cavern	Use a dragonbane weapon or Earth Magic with complete dragonfire protection	Barbarian teleport, then enter the whirlpool	NOT_ALLOWED	QUEST	BARBARIAN_TRAINING	Barbarian Training
+O	minions of scabaras%7Cscabarite%7Cscabarites	Sophanem Dungeon	Use the reviewed cannon or non-cannon Scabarite method	Pharaoh's sceptre to Sophanem, then enter the dungeon	OPTIONAL			
+O	skeletal wyvern%7Cskeletal wyverns	Asgarnian Ice Dungeon	Ranged with an elemental or dragonfire shield	Falador teleport, then run south	NOT_ALLOWED			
+O	waterfiend%7Cwaterfiends	Ancient Cavern	Crush attacks with prayer or food	Barbarian teleport, then enter the whirlpool	NOT_ALLOWED	QUEST	BARBARIAN_TRAINING	Barbarian Training
+O	waterfiend%7Cwaterfiends	Iorwerth Dungeon	Use Earth spells with optional cannon support for crystal shard drops	Teleport crystal to Prifddinas, then enter Iorwerth Dungeon	OPTIONAL	QUEST	SONG_OF_THE_ELVES	Song of the Elves
+O	spiritual creature%7Cspiritual creatures	God Wars Dungeon	Kill the highest unlocked spiritual creature	Trollheim teleport, then enter God Wars Dungeon	NOT_ALLOWED	QUEST	TROLL_STRONGHOLD	Troll Stronghold
+O	fossil island wyvern%7Cfossil island wyverns	Wyvern Cave on Fossil Island	Use an elemental or dragonfire shield	Digsite pendant to Fossil Island	NOT_ALLOWED	QUEST	BONE_VOYAGE	Bone Voyage
+O	vampyre%7Cvampyres	Darkmeyer	Use an Ivandis or blisterwood weapon	Drakan's medallion to Darkmeyer	NOT_ALLOWED	QUEST	SINS_OF_THE_FATHER	Sins of the Father
+O	basilisk%7Cbasilisks	Jormungand's Prison	Basilisk Knights for the higher-value option	Fremennik sea boots or Rellekka teleport, then run north	NOT_ALLOWED	QUEST	THE_FREMENNIK_EXILES	The Fremennik Exiles
+O	basilisk%7Cbasilisks	Fremennik Slayer Dungeon	Use a mirror shield against regular basilisks	Slayer ring to Fremennik Slayer Dungeon	NOT_ALLOWED			
+O	elf%7Celves	Iorwerth Dungeon	Melee or ranged against Iorwerth elves	Teleport crystal to Prifddinas	NOT_ALLOWED	QUEST	SONG_OF_THE_ELVES	Song of the Elves
+O	elf%7Celves	Lletya	Kill the elves around Lletya	Teleport crystal to Lletya	NOT_ALLOWED	QUEST	REGICIDE	Regicide
+O	dark beast%7Cdark beasts	Mourner Tunnels	Dense melee task with optional cannon support and a direct Slayer-ring route	Slayer ring to Dark Beasts	OPTIONAL	QUEST	MOURNINGS_END_PART_II	Mourning's End Part II
+O	dark beast%7Cdark beasts	Iorwerth Dungeon	Aggressive melee with optional cannon support and higher-value crystal shard drops	Teleport crystal to Prifddinas, then enter Iorwerth Dungeon	OPTIONAL	QUEST	SONG_OF_THE_ELVES	Song of the Elves
+O	mutated zygomite%7Cmutated zygomites	Zanaris	Use fungicide spray to finish each kill	Fairy ring to Zanaris	NOT_ALLOWED	QUEST	LOST_CITY	Lost City
+O	brine rat%7Cbrine rats	Brine Rat Cavern	Melee or ranged in the cavern	Rellekka teleport, then run northeast	NOT_ALLOWED	QUEST	OLAFS_QUEST	Olaf's Quest
+O	adamant dragon%7Cadamant dragons	Lithkren Vault	Ranged with strong dragonfire protection	Digsite pendant to Lithkren	NOT_ALLOWED	QUEST	DRAGON_SLAYER_II	Dragon Slayer II
+O	rune dragon%7Crune dragons	Lithkren Vault	Ranged or melee with strong dragonfire protection	Digsite pendant to Lithkren	NOT_ALLOWED	QUEST	DRAGON_SLAYER_II	Dragon Slayer II

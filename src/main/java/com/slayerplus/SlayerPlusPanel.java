@@ -17,16 +17,13 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -117,7 +114,6 @@ public class SlayerPlusPanel extends PluginPanel
 	private final Runnable bankTagAction;
 	private final Consumer<SlayerTaskVariant> bankVariantAction;
 	private final Runnable sessionToggleAction;
-	private final BiConsumer<String, SlayerTaskVariant> developmentTaskAction;
 
 	private final CardLayout viewLayout = new CardLayout();
 	private final JPanel viewCards = new JPanel(viewLayout);
@@ -182,16 +178,6 @@ public class SlayerPlusPanel extends PluginPanel
 	private JComboBox<SlayerPreference.Burst> burstSetting;
 	private JComboBox<SlayerPreference.Travel> travelSetting;
 	private JComboBox<SlayerPreference.Shard> shardSetting;
-	private JCheckBox developmentTaskEnabled;
-	private JComboBox<String> developmentTaskSetting;
-	private JComboBox<String> developmentVariantSetting;
-	private JPanel developmentTaskRow;
-	private JPanel developmentVariantRow;
-	private JPanel developmentTaskControls;
-	private final List<String> developmentTaskNames = new ArrayList<>();
-	private final List<SlayerTaskVariant> developmentTaskVariants =
-		new ArrayList<>();
-	private boolean updatingDevelopmentTask;
 	private boolean responsiveRewrapScheduled;
 
 	public SlayerPlusPanel()
@@ -225,15 +211,8 @@ public class SlayerPlusPanel extends PluginPanel
 		final Consumer<SlayerTaskVariant> bankVariantAction,
 		final Runnable sessionToggleAction)
 	{
-		this(
-			routeAction,
-			bankTagAction,
-			bankVariantAction,
-			sessionToggleAction,
-			null,
-			null,
-			null
-		);
+		this(routeAction, bankTagAction, bankVariantAction,
+			sessionToggleAction, null, null);
 	}
 
 	public SlayerPlusPanel(
@@ -244,33 +223,12 @@ public class SlayerPlusPanel extends PluginPanel
 		final SlayerPlusConfig config,
 		final ConfigManager configManager)
 	{
-		this(
-			routeAction,
-			bankTagAction,
-			bankVariantAction,
-			sessionToggleAction,
-			config,
-			configManager,
-			null
-		);
-	}
-
-	public SlayerPlusPanel(
-		final Runnable routeAction,
-		final Runnable bankTagAction,
-		final Consumer<SlayerTaskVariant> bankVariantAction,
-		final Runnable sessionToggleAction,
-		final SlayerPlusConfig config,
-		final ConfigManager configManager,
-		final BiConsumer<String, SlayerTaskVariant> developmentTaskAction)
-	{
 		this.routeAction = routeAction;
 		this.bankTagAction = bankTagAction;
 		this.bankVariantAction = bankVariantAction;
 		this.sessionToggleAction = sessionToggleAction;
 		this.config = config;
 		this.configManager = configManager;
-		this.developmentTaskAction = developmentTaskAction;
 
 		setLayout(new BorderLayout());
 		setBackground(BG);
@@ -698,21 +656,6 @@ public class SlayerPlusPanel extends PluginPanel
 		burstSetting = new JComboBox<>(SlayerPreference.Burst.values());
 		travelSetting = new JComboBox<>(SlayerPreference.Travel.values());
 		shardSetting = new JComboBox<>(SlayerPreference.Shard.values());
-		developmentTaskEnabled = settingCheckBox("Simulate selected task");
-		developmentTaskSetting = new JComboBox<>();
-		developmentVariantSetting = new JComboBox<>();
-		developmentTaskNames.addAll(
-			SlayerTaskResearchCatalog.getReviewedTaskNames()
-		);
-		Collections.sort(
-			developmentTaskNames,
-			String.CASE_INSENSITIVE_ORDER
-		);
-		for (final String taskName : developmentTaskNames)
-		{
-			developmentTaskSetting.addItem(taskName);
-		}
-
 		final JPanel modeSection = settingsSection(
 			"SLAYER MODE",
 			"Choose the assignment workflow independently from your loadout preferences."
@@ -756,17 +699,6 @@ public class SlayerPlusPanel extends PluginPanel
 		loadoutSection.add(fullWidth(settingRow("Travel priority", travelSetting)));
 		settings.add(fullWidth(loadoutSection));
 
-		developmentTaskRow = settingRow("Test task", developmentTaskSetting);
-		developmentVariantRow = settingRow("Encounter", developmentVariantSetting);
-		developmentTaskControls = new JPanel();
-		developmentTaskControls.setOpaque(false);
-		developmentTaskControls.setLayout(
-			new BoxLayout(developmentTaskControls, BoxLayout.Y_AXIS)
-		);
-		developmentTaskControls.add(Box.createVerticalStrut(CARD_GAP));
-		developmentTaskControls.add(fullWidth(developmentTaskRow));
-		developmentTaskControls.add(Box.createVerticalStrut(CARD_GAP));
-		developmentTaskControls.add(fullWidth(developmentVariantRow));
 		settings.add(Box.createVerticalGlue());
 
 		workflowSetting.addActionListener(event ->
@@ -782,23 +714,6 @@ public class SlayerPlusPanel extends PluginPanel
 		burstSetting.addActionListener(event -> saveSetting("burstPreference", burstSetting.getSelectedItem()));
 		travelSetting.addActionListener(event -> saveSetting("travelPreference", travelSetting.getSelectedItem()));
 		shardSetting.addActionListener(event -> saveSetting("shardPreference", shardSetting.getSelectedItem()));
-		developmentTaskEnabled.addActionListener(event ->
-		{
-			setDevelopmentTaskControlsEnabled(
-				developmentTaskEnabled.isSelected()
-			);
-			publishDevelopmentTaskSelection();
-		});
-		developmentTaskSetting.addActionListener(event ->
-		{
-			rebuildDevelopmentVariants();
-			publishDevelopmentTaskSelection();
-		});
-		developmentVariantSetting.addActionListener(
-			event -> publishDevelopmentTaskSelection()
-		);
-		rebuildDevelopmentVariants();
-		setDevelopmentTaskControlsEnabled(false);
 		refreshSettingsControls();
 		return settings;
 	}
@@ -822,86 +737,6 @@ public class SlayerPlusPanel extends PluginPanel
 			}
 			refreshLayout();
 		}
-	}
-
-	private void setDevelopmentTaskControlsEnabled(final boolean enabled)
-	{
-		if (developmentTaskSetting != null)
-		{
-			developmentTaskSetting.setEnabled(enabled);
-		}
-		if (developmentVariantSetting != null)
-		{
-			developmentVariantSetting.setEnabled(enabled);
-		}
-		if (developmentTaskControls != null)
-		{
-			developmentTaskControls.setVisible(enabled);
-			if (developmentTaskControls.getParent() != null)
-			{
-				developmentTaskControls.getParent().revalidate();
-				developmentTaskControls.getParent().repaint();
-			}
-			refreshLayout();
-		}
-	}
-
-	private void rebuildDevelopmentVariants()
-	{
-		if (developmentTaskSetting == null
-			|| developmentVariantSetting == null)
-		{
-			return;
-		}
-
-		updatingDevelopmentTask = true;
-		try
-		{
-			developmentTaskVariants.clear();
-			developmentVariantSetting.removeAllItems();
-			final String taskName = (String)
-				developmentTaskSetting.getSelectedItem();
-			if (taskName == null)
-			{
-				return;
-			}
-			developmentTaskVariants.addAll(
-				SlayerTaskVariantCatalog.getAvailableVariants(taskName)
-			);
-			for (final SlayerTaskVariant variant : developmentTaskVariants)
-			{
-				developmentVariantSetting.addItem(
-					SlayerTaskVariantCatalog.getOptionLabel(taskName, variant)
-				);
-			}
-		}
-		finally
-		{
-			updatingDevelopmentTask = false;
-		}
-	}
-
-	private void publishDevelopmentTaskSelection()
-	{
-		if (updatingDevelopmentTask || developmentTaskAction == null)
-		{
-			return;
-		}
-		if (developmentTaskEnabled == null
-			|| !developmentTaskEnabled.isSelected())
-		{
-			developmentTaskAction.accept("", SlayerTaskVariant.STANDARD_TASK);
-			return;
-		}
-
-		final String taskName = (String)
-			developmentTaskSetting.getSelectedItem();
-		final int variantIndex = developmentVariantSetting.getSelectedIndex();
-		final SlayerTaskVariant variant = variantIndex >= 0
-			&& variantIndex < developmentTaskVariants.size()
-				? developmentTaskVariants.get(variantIndex)
-				: SlayerTaskVariantCatalog.getDefaultVariant(taskName);
-		developmentTaskAction.accept(taskName, variant);
 	}
 
 	private JPanel settingRow(final String labelText, final JComboBox<?> selector)
@@ -944,16 +779,6 @@ public class SlayerPlusPanel extends PluginPanel
 			section.add(Box.createVerticalStrut(CARD_GAP));
 		}
 		return section;
-	}
-
-	private JCheckBox settingCheckBox(final String text)
-	{
-		final JCheckBox checkBox = new JCheckBox(text);
-		checkBox.setOpaque(false);
-		checkBox.setForeground(TEXT);
-		checkBox.setFocusPainted(false);
-		checkBox.setFont(new Font("SansSerif", Font.PLAIN, BODY_TEXT_SIZE));
-		return checkBox;
 	}
 
 	private void saveSetting(final String key, final Object value)

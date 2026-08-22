@@ -1,0 +1,624 @@
+# SlayerPlus exact route plans v1
+# K key, P plan, R retention, L leg, B branch
+K	king black dragon	king black dragon lair	true	king-black-dragon-lair
+K	artio	hunter s end	true	artio-hunters-end
+K	callisto	callisto s den	true	callisto-den
+K	venenatis	silk chasm	true	venenatis-silk-chasm
+K	vet ion	vet ion s rest	true	vetion-rest
+K	grotesque guardians	slayer tower	true	grotesque-guardians-slayer-tower
+K	obor	edgeville dungeon	true	obor-edgeville-dungeon
+K	shellbane gryphon	the great conch	true	shellbane-gryphon-great-conch
+K	duke sucellus	ghorrock dungeon	true	duke-sucellus-ghorrock
+K	phantom muspah	ghorrock dungeon	true	phantom-muspah-ghorrock
+K	leviathan	the scar	true	leviathan-scar
+K	vardorvis	stranglewood temple	true	vardorvis-stranglewood
+K	zulrah	zul andra	true	zulrah-zul-andra
+K	kree arra	god wars dungeon	true	kree-arra-gwd
+K	general graardor	god wars dungeon	true	general-graardor-gwd
+K	commander zilyana	god wars dungeon	true	commander-zilyana-gwd
+K	k ril tsutsaroth	god wars dungeon	true	kril-tsutsaroth-gwd
+K	sarachnis	forthos dungeon	true	sarachnis-forthos-dungeon
+K	skotizo	skotizo s lair	true	skotizo-lair
+K	thermonuclear smoke devil	smoke devil dungeon	true	thermonuclear-smoke-devil-dungeon
+K	demonic gorillas	crash site cavern	true	demonic-gorillas-crash-site
+K	giant mole	falador mole lair	true	giant-mole-falador-lair
+K	barrows brothers	barrows	true	barrows-brothers-dynamic
+K	dagannoth kings	waterbirth island dungeon	true	dagannoth-kings-waterbirth
+K	maggot king	maggot king s lair	true	maggot-king-vampyrium
+K	magic axes	wilderness	false	magic-axes-wilderness-hut
+K	revenants	wilderness	false	revenants-wilderness-cave
+K	fleshcrawlers	stronghold of security	false	fleshcrawlers-stronghold-security
+K	catablepon	stronghold of security	false	catablepon-stronghold-security
+K	ankou	stronghold of security	false	ankou-stronghold-security
+K	metal dragons	ancient cavern	false	metal-dragons-ancient-cavern
+K	aviansies	god wars dungeon	false	aviansies-gwd
+K	spiritual creatures	god wars dungeon	false	spiritual-creatures-gwd
+K	dagannoth	waterbirth island dungeon	false	dagannoth-waterbirth-assignment
+K	cave kraken	kraken cove	false	cave-kraken-kraken-cove
+K	araxytes	morytania spider cave	false	araxytes-morytania-spider-cave
+K	frost dragons	grimstone dungeon	false	frost-dragons-grimstone
+K	ghosts	catacombs of kourend	false	ghosts-catacombs
+K	scabarites	sophanem dungeon	false	scabarites-sophanem-dungeon
+K	shadow warriors	legends guild basement	false	shadow-warriors-legends-basement
+K	warped creatures	poison waste dungeon	false	warped-creatures-poison-waste
+K	lesser nagua	ruins of tapoyauik	false	frost-nagua-tapoyauik
+K	aquanites	ynysdail cavern	false	aquanites-ynysdail-cavern
+K	killerwatts	killerwatt plane	false	killerwatts-draynor-manor
+K	otherworldly beings	zanaris	false	otherworldly-beings-zanaris
+K	mutated zygomites	zanaris	false	mutated-zygomites-zanaris
+K	custodian stalkers	stalker den	false	custodian-stalkers-stalker-den
+P	king-black-dragon-lair	route-surface
+R	king-black-dragon-lair	W%2C2993%2C3041%2C3826%2C3874%2C0
+R	king-black-dragon-lair	W%2C3049%2C3089%2C10235%2C10275%2C0
+R	king-black-dragon-lair	W%2C2240%2C2303%2C4672%2C4735%2C0
+R	king-black-dragon-lair	T%2C2240%2C2303%2C4672%2C4735%2C0
+L	king-black-dragon-lair	route-surface	TRAVEL	Route to the reviewed King Black Dragon ladder.	King Black Dragon surface ladder	4	3017%2C3850%2C0			y%28w%28W%2C3012%2C3022%2C3845%2C3855%2C0%29%3Bw%28W%2C3063%2C3075%2C10249%2C10261%2C0%29%3By%28y%28w%28W%2C2240%2C2303%2C4672%2C4735%2C0%29%3Bt%28T%2C2240%2C2303%2C4672%2C4735%2C0%29%29%3Bl%28n%28king black dragon%29%3By%28w%28W%2C2240%2C2303%2C4672%2C4735%2C0%29%3Bt%28T%2C2240%2C2303%2C4672%2C4735%2C0%29%29%29%29%29		
+B	king-black-dragon-lair	route-surface	Continue to route-lever	route-lever	a
+L	king-black-dragon-lair	route-lever	TRAVEL	Descend the ladder and route to the lair lever.	King Black Dragon lair lever	4	3069%2C10255%2C0			y%28w%28W%2C3063%2C3075%2C10249%2C10261%2C0%29%3By%28y%28w%28W%2C2240%2C2303%2C4672%2C4735%2C0%29%3Bt%28T%2C2240%2C2303%2C4672%2C4735%2C0%29%29%3Bl%28n%28king black dragon%29%3By%28w%28W%2C2240%2C2303%2C4672%2C4735%2C0%29%3Bt%28T%2C2240%2C2303%2C4672%2C4735%2C0%29%29%29%29%29		
+B	king-black-dragon-lair	route-lever	Continue to route-lair	route-lair	a
+L	king-black-dragon-lair	route-lair	TRAVEL	Follow the reviewed ladder and lever graph to the lair.	King Black Dragon lair	4	2271%2C4680%2C0			y%28y%28w%28W%2C2240%2C2303%2C4672%2C4735%2C0%29%3Bt%28T%2C2240%2C2303%2C4672%2C4735%2C0%29%29%3Bl%28n%28king black dragon%29%3By%28w%28W%2C2240%2C2303%2C4672%2C4735%2C0%29%3Bt%28T%2C2240%2C2303%2C4672%2C4735%2C0%29%29%29%29		
+B	king-black-dragon-lair	route-lair	Continue to arrived	arrived	a
+L	king-black-dragon-lair	arrived	TERMINAL	Encounter arrival requires King Black Dragon lair evidence.		0					King Black Dragon lair	y%28y%28w%28W%2C2240%2C2303%2C4672%2C4735%2C0%29%3Bt%28T%2C2240%2C2303%2C4672%2C4735%2C0%29%29%3Bl%28n%28king black dragon%29%3By%28w%28W%2C2240%2C2303%2C4672%2C4735%2C0%29%3Bt%28T%2C2240%2C2303%2C4672%2C4735%2C0%29%29%29%29
+P	artio-hunters-end	route-checkpoint
+R	artio-hunters-end	W%2C3088%2C3136%2C3646%2C3694%2C0
+R	artio-hunters-end	W%2C1728%2C1791%2C11520%2C11583%2C0
+L	artio-hunters-end	route-checkpoint	TRAVEL	Route to Hunter's End entrance.	Hunter's End entrance	4	3112%2C3670%2C0			y%28w%28W%2C3107%2C3117%2C3665%2C3675%2C0%29%3By%28w%28W%2C1728%2C1791%2C11520%2C11583%2C0%29%3Bl%28n%28artio%29%3Bw%28W%2C1728%2C1791%2C11520%2C11583%2C0%29%29%29%29		
+B	artio-hunters-end	route-checkpoint	Continue to interact	interact	a
+L	artio-hunters-end	interact	MANUAL_INTERACTION	Enter Hunter's End.	Hunter's End entrance	0		Enter Hunter's End.	o%2847141%7C%7Center%29	y%28w%28W%2C1728%2C1791%2C11520%2C11583%2C0%29%3Bl%28n%28artio%29%3Bw%28W%2C1728%2C1791%2C11520%2C11583%2C0%29%29%29		
+B	artio-hunters-end	interact	Continue to arrived	arrived	a
+L	artio-hunters-end	arrived	TERMINAL	Encounter arrival requires Hunter's End entrance evidence.		0					Hunter's End entrance	y%28w%28W%2C1728%2C1791%2C11520%2C11583%2C0%29%3Bl%28n%28artio%29%3Bw%28W%2C1728%2C1791%2C11520%2C11583%2C0%29%29%29
+P	callisto-den	route-checkpoint
+R	callisto-den	W%2C3266%2C3314%2C3831%2C3879%2C0
+R	callisto-den	W%2C3328%2C3391%2C10304%2C10367%2C0
+L	callisto-den	route-checkpoint	TRAVEL	Route to Callisto's Den entrance.	Callisto's Den entrance	4	3290%2C3855%2C0			y%28w%28W%2C3285%2C3295%2C3850%2C3860%2C0%29%3By%28w%28W%2C3328%2C3391%2C10304%2C10367%2C0%29%3Bl%28n%28callisto%29%3Bw%28W%2C3328%2C3391%2C10304%2C10367%2C0%29%29%29%29		
+B	callisto-den	route-checkpoint	Continue to interact	interact	a
+L	callisto-den	interact	MANUAL_INTERACTION	Enter Callisto's Den.	Callisto's Den entrance	0		Enter Callisto's Den.	o%2847140%7C%7Center%29	y%28w%28W%2C3328%2C3391%2C10304%2C10367%2C0%29%3Bl%28n%28callisto%29%3Bw%28W%2C3328%2C3391%2C10304%2C10367%2C0%29%29%29		
+B	callisto-den	interact	Continue to arrived	arrived	a
+L	callisto-den	arrived	TERMINAL	Encounter arrival requires Callisto's Den entrance evidence.		0					Callisto's Den entrance	y%28w%28W%2C3328%2C3391%2C10304%2C10367%2C0%29%3Bl%28n%28callisto%29%3Bw%28W%2C3328%2C3391%2C10304%2C10367%2C0%29%29%29
+P	venenatis-silk-chasm	route-checkpoint
+R	venenatis-silk-chasm	W%2C3297%2C3345%2C3770%2C3818%2C0
+R	venenatis-silk-chasm	W%2C3392%2C3455%2C10176%2C10239%2C2
+L	venenatis-silk-chasm	route-checkpoint	TRAVEL	Route to Silk Chasm entrance.	Silk Chasm entrance	4	3321%2C3794%2C0			y%28w%28W%2C3316%2C3326%2C3789%2C3799%2C0%29%3By%28w%28W%2C3392%2C3455%2C10176%2C10239%2C2%29%3Bl%28n%28venenatis%29%3Bw%28W%2C3392%2C3455%2C10176%2C10239%2C2%29%29%29%29		
+B	venenatis-silk-chasm	route-checkpoint	Continue to interact	interact	a
+L	venenatis-silk-chasm	interact	MANUAL_INTERACTION	Enter the Silk Chasm.	Silk Chasm entrance	0		Enter the Silk Chasm.	o%2847077%7C%7Center%29	y%28w%28W%2C3392%2C3455%2C10176%2C10239%2C2%29%3Bl%28n%28venenatis%29%3Bw%28W%2C3392%2C3455%2C10176%2C10239%2C2%29%29%29		
+B	venenatis-silk-chasm	interact	Continue to arrived	arrived	a
+L	venenatis-silk-chasm	arrived	TERMINAL	Encounter arrival requires Silk Chasm entrance evidence.		0					Silk Chasm entrance	y%28w%28W%2C3392%2C3455%2C10176%2C10239%2C2%29%3Bl%28n%28venenatis%29%3Bw%28W%2C3392%2C3455%2C10176%2C10239%2C2%29%29%29
+P	vetion-rest	route-checkpoint
+R	vetion-rest	W%2C3195%2C3243%2C3764%2C3812%2C0
+R	vetion-rest	W%2C3264%2C3327%2C10176%2C10239%2C1
+L	vetion-rest	route-checkpoint	TRAVEL	Route to Vet'ion's Rest entrance.	Vet'ion's Rest entrance	4	3219%2C3788%2C0			y%28w%28W%2C3214%2C3224%2C3783%2C3793%2C0%29%3By%28w%28W%2C3264%2C3327%2C10176%2C10239%2C1%29%3Bl%28n%28vet ion%7Evet ion reborn%29%3Bw%28W%2C3264%2C3327%2C10176%2C10239%2C1%29%29%29%29		
+B	vetion-rest	route-checkpoint	Continue to interact	interact	a
+L	vetion-rest	interact	MANUAL_INTERACTION	Enter Vet'ion's Rest.	Vet'ion's Rest entrance	0		Enter Vet'ion's Rest.	o%2846995%7C%7Center%29	y%28w%28W%2C3264%2C3327%2C10176%2C10239%2C1%29%3Bl%28n%28vet ion%7Evet ion reborn%29%3Bw%28W%2C3264%2C3327%2C10176%2C10239%2C1%29%29%29		
+B	vetion-rest	interact	Continue to arrived	arrived	a
+L	vetion-rest	arrived	TERMINAL	Encounter arrival requires Vet'ion's Rest entrance evidence.		0					Vet'ion's Rest entrance	y%28w%28W%2C3264%2C3327%2C10176%2C10239%2C1%29%3Bl%28n%28vet ion%7Evet ion reborn%29%3Bw%28W%2C3264%2C3327%2C10176%2C10239%2C1%29%29%29
+P	grotesque-guardians-slayer-tower	route-tower-entry
+R	grotesque-guardians-slayer-tower	W%2C3404%2C3452%2C3512%2C3560%2C0
+R	grotesque-guardians-slayer-tower	W%2C3389%2C3445%2C3512%2C3568%2C2
+R	grotesque-guardians-slayer-tower	T%2C1664%2C1727%2C4544%2C4607%2C0
+L	grotesque-guardians-slayer-tower	route-tower-entry	TRAVEL	Route to the Slayer Tower entrance.	Slayer Tower entrance	4	3428%2C3536%2C0			y%28w%28W%2C3423%2C3433%2C3531%2C3541%2C0%29%3Bw%28W%2C3412%2C3422%2C3535%2C3545%2C2%29%3By%28t%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%3Bl%28n%28dusk%7Edawn%29%3Bt%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%29%29%29		
+B	grotesque-guardians-slayer-tower	route-tower-entry	Continue to route-roof	route-roof	a
+L	grotesque-guardians-slayer-tower	route-roof	TRAVEL	Route to the top of the Slayer Tower.	Slayer Tower roof access	4	3417%2C3540%2C2			y%28w%28W%2C3412%2C3422%2C3535%2C3545%2C2%29%3By%28t%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%3Bl%28n%28dusk%7Edawn%29%3Bt%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%29%29%29		
+B	grotesque-guardians-slayer-tower	route-roof	Continue to open-roof	open-roof	a
+L	grotesque-guardians-slayer-tower	open-roof	MANUAL_INTERACTION	Use the roof entrance.	Slayer Tower roof entrance	4	3417%2C3540%2C2	Open or enter the reviewed roof access object.	o%2831672%7E31673%7E31674%7E31681%7C%7Copen%7Eenter%7Eclimb up%7Eclimb down%29	y%28o%2831684%7E31685%7C%7Cring%29%3By%28t%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%3Bl%28n%28dusk%7Edawn%29%3Bt%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%29%29%29		
+B	grotesque-guardians-slayer-tower	open-roof	Continue to ring-bell	ring-bell	a
+L	grotesque-guardians-slayer-tower	ring-bell	MANUAL_INTERACTION	Start the Grotesque Guardians encounter.	Grotesque Guardians bell	0		Ring the rooftop bell.	o%2831684%7E31685%7C%7Cring%29	y%28t%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%3Bl%28n%28dusk%7Edawn%29%3Bt%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%29%29		
+B	grotesque-guardians-slayer-tower	ring-bell	Continue to arrived	arrived	a
+L	grotesque-guardians-slayer-tower	arrived	TERMINAL	Encounter arrival requires Grotesque Guardians rooftop evidence.		0					Grotesque Guardians rooftop	y%28t%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%3Bl%28n%28dusk%7Edawn%29%3Bt%28T%2C1664%2C1727%2C4544%2C4607%2C0%29%29%29
+P	obor-edgeville-dungeon	route-checkpoint
+R	obor-edgeville-dungeon	W%2C3068%2C3124%2C3440%2C3496%2C0
+R	obor-edgeville-dungeon	T%2C3072%2C3135%2C9792%2C9815%2C0
+L	obor-edgeville-dungeon	route-checkpoint	TRAVEL	Route to Obor's giant-key gate.	Obor's giant-key gate	4	3096%2C3468%2C0			y%28w%28W%2C3091%2C3101%2C3463%2C3473%2C0%29%3By%28t%28T%2C3072%2C3135%2C9792%2C9815%2C0%29%3Bl%28n%28obor%29%3Bt%28T%2C3072%2C3135%2C9792%2C9815%2C0%29%29%29%29		
+B	obor-edgeville-dungeon	route-checkpoint	Continue to interact	interact	a
+L	obor-edgeville-dungeon	interact	MANUAL_INTERACTION	Continue through Edgeville Dungeon and open Obor's giant-key gate.	Obor's giant-key gate	0		Continue through Edgeville Dungeon and open Obor's giant-key gate.	o%2829486%7E29487%7C%7Copen%29	y%28t%28T%2C3072%2C3135%2C9792%2C9815%2C0%29%3Bl%28n%28obor%29%3Bt%28T%2C3072%2C3135%2C9792%2C9815%2C0%29%29%29		
+B	obor-edgeville-dungeon	interact	Continue to arrived	arrived	a
+L	obor-edgeville-dungeon	arrived	TERMINAL	Encounter arrival requires Obor's giant-key gate evidence.		0					Obor's giant-key gate	y%28t%28T%2C3072%2C3135%2C9792%2C9815%2C0%29%3Bl%28n%28obor%29%3Bt%28T%2C3072%2C3135%2C9792%2C9815%2C0%29%29%29
+P	shellbane-gryphon-great-conch	route-checkpoint
+R	shellbane-gryphon-great-conch	W%2C3148%2C3204%2C2449%2C2505%2C0
+R	shellbane-gryphon-great-conch	T%2C3136%2C3199%2C8832%2C8895%2C0
+R	shellbane-gryphon-great-conch	T%2C3200%2C3263%2C8832%2C8895%2C0
+L	shellbane-gryphon-great-conch	route-checkpoint	TRAVEL	Route to Shellbane Gryphon lair entrance.	Shellbane Gryphon lair entrance	4	3176%2C2477%2C0			y%28w%28W%2C3171%2C3181%2C2472%2C2482%2C0%29%3By%28y%28t%28T%2C3136%2C3199%2C8832%2C8895%2C0%29%3Bt%28T%2C3200%2C3263%2C8832%2C8895%2C0%29%29%3Bl%28n%28shellbane gryphon%29%3By%28t%28T%2C3136%2C3199%2C8832%2C8895%2C0%29%3Bt%28T%2C3200%2C3263%2C8832%2C8895%2C0%29%29%29%29%29		
+B	shellbane-gryphon-great-conch	route-checkpoint	Continue to interact	interact	a
+L	shellbane-gryphon-great-conch	interact	MANUAL_INTERACTION	Enter the Shellbane Gryphon lair.	Shellbane Gryphon lair entrance	0		Enter the Shellbane Gryphon lair.	o%2858440%7E58441%7E57908%7E57915%7C%7Center%29	y%28y%28t%28T%2C3136%2C3199%2C8832%2C8895%2C0%29%3Bt%28T%2C3200%2C3263%2C8832%2C8895%2C0%29%29%3Bl%28n%28shellbane gryphon%29%3By%28t%28T%2C3136%2C3199%2C8832%2C8895%2C0%29%3Bt%28T%2C3200%2C3263%2C8832%2C8895%2C0%29%29%29%29		
+B	shellbane-gryphon-great-conch	interact	Continue to arrived	arrived	a
+L	shellbane-gryphon-great-conch	arrived	TERMINAL	Encounter arrival requires Shellbane Gryphon lair entrance evidence.		0					Shellbane Gryphon lair entrance	y%28y%28t%28T%2C3136%2C3199%2C8832%2C8895%2C0%29%3Bt%28T%2C3200%2C3263%2C8832%2C8895%2C0%29%29%3Bl%28n%28shellbane gryphon%29%3By%28t%28T%2C3136%2C3199%2C8832%2C8895%2C0%29%3Bt%28T%2C3200%2C3263%2C8832%2C8895%2C0%29%29%29%29
+P	duke-sucellus-ghorrock	route-outer-access
+R	duke-sucellus-ghorrock	W%2C2896%2C2944%2C3906%2C3954%2C0
+R	duke-sucellus-ghorrock	W%2C2876%2C2948%2C10300%2C10372%2C0
+R	duke-sucellus-ghorrock	T%2C3008%2C3071%2C6400%2C6463%2C0
+L	duke-sucellus-ghorrock	route-outer-access	TRAVEL	Route to the reviewed Ghorrock access point.	Ghorrock Dungeon outer access	4	2920%2C3930%2C0			y%28w%28W%2C2915%2C2925%2C3925%2C3935%2C0%29%3Bw%28W%2C2904%2C2920%2C10328%2C10344%2C0%29%3By%28t%28T%2C3008%2C3071%2C6400%2C6463%2C0%29%3Bl%28n%28duke sucellus%29%3Bt%28T%2C3008%2C3071%2C6400%2C6463%2C0%29%29%29%29		
+B	duke-sucellus-ghorrock	route-outer-access	Continue to route-checkpoint	route-checkpoint	a
+L	duke-sucellus-ghorrock	route-checkpoint	TRAVEL	Route from the ring landing to Duke Sucellus entry.	Duke Sucellus entry	4	2912%2C10336%2C0			y%28w%28W%2C2904%2C2920%2C10328%2C10344%2C0%29%3By%28t%28T%2C3008%2C3071%2C6400%2C6463%2C0%29%3Bl%28n%28duke sucellus%29%3Bt%28T%2C3008%2C3071%2C6400%2C6463%2C0%29%29%29%29		
+B	duke-sucellus-ghorrock	route-checkpoint	Continue to interact	interact	a
+L	duke-sucellus-ghorrock	interact	MANUAL_INTERACTION	Walk from the ring landing and enter Duke Sucellus's chamber.	Duke Sucellus entry	0		Walk from the ring landing and enter Duke Sucellus's chamber.	o%2849091%7E46673%7C%7Center%7Eopen%29	y%28t%28T%2C3008%2C3071%2C6400%2C6463%2C0%29%3Bl%28n%28duke sucellus%29%3Bt%28T%2C3008%2C3071%2C6400%2C6463%2C0%29%29%29		
+B	duke-sucellus-ghorrock	interact	Continue to arrived	arrived	a
+L	duke-sucellus-ghorrock	arrived	TERMINAL	Encounter arrival requires Duke Sucellus entry evidence.		0					Duke Sucellus entry	y%28t%28T%2C3008%2C3071%2C6400%2C6463%2C0%29%3Bl%28n%28duke sucellus%29%3Bt%28T%2C3008%2C3071%2C6400%2C6463%2C0%29%29%29
+P	phantom-muspah-ghorrock	route-outer-access
+R	phantom-muspah-ghorrock	W%2C2896%2C2944%2C3906%2C3954%2C0
+R	phantom-muspah-ghorrock	W%2C2876%2C2948%2C10300%2C10372%2C0
+R	phantom-muspah-ghorrock	T%2C2880%2C2943%2C10304%2C10367%2C0
+L	phantom-muspah-ghorrock	route-outer-access	TRAVEL	Route to the reviewed Ghorrock access point.	Ghorrock Dungeon outer access	4	2920%2C3930%2C0			y%28w%28W%2C2915%2C2925%2C3925%2C3935%2C0%29%3Bw%28W%2C2904%2C2920%2C10328%2C10344%2C0%29%3By%28t%28T%2C2880%2C2943%2C10304%2C10367%2C0%29%3Bl%28n%28phantom muspah%29%3Bt%28T%2C2880%2C2943%2C10304%2C10367%2C0%29%29%29%29		
+B	phantom-muspah-ghorrock	route-outer-access	Continue to route-checkpoint	route-checkpoint	a
+L	phantom-muspah-ghorrock	route-checkpoint	TRAVEL	Route from the ring landing to Phantom Muspah crevice.	Phantom Muspah crevice	4	2912%2C10336%2C0			y%28w%28W%2C2904%2C2920%2C10328%2C10344%2C0%29%3By%28t%28T%2C2880%2C2943%2C10304%2C10367%2C0%29%3Bl%28n%28phantom muspah%29%3Bt%28T%2C2880%2C2943%2C10304%2C10367%2C0%29%29%29%29		
+B	phantom-muspah-ghorrock	route-checkpoint	Continue to interact	interact	a
+L	phantom-muspah-ghorrock	interact	MANUAL_INTERACTION	Walk from the ring landing and enter the crevice.	Phantom Muspah crevice	0		Walk from the ring landing and enter the crevice.	o%2846597%7C%7Center%29	y%28t%28T%2C2880%2C2943%2C10304%2C10367%2C0%29%3Bl%28n%28phantom muspah%29%3Bt%28T%2C2880%2C2943%2C10304%2C10367%2C0%29%29%29		
+B	phantom-muspah-ghorrock	interact	Continue to arrived	arrived	a
+L	phantom-muspah-ghorrock	arrived	TERMINAL	Encounter arrival requires Phantom Muspah crevice evidence.		0					Phantom Muspah crevice	y%28t%28T%2C2880%2C2943%2C10304%2C10367%2C0%29%3Bl%28n%28phantom muspah%29%3Bt%28T%2C2880%2C2943%2C10304%2C10367%2C0%29%29%29
+P	leviathan-scar	route-checkpoint
+R	leviathan-scar	W%2C1995%2C2043%2C6410%2C6458%2C0
+R	leviathan-scar	W%2C2057%2C2105%2C6348%2C6396%2C0
+R	leviathan-scar	T%2C2048%2C2111%2C6400%2C6463%2C0
+L	leviathan-scar	route-checkpoint	TRAVEL	Route to Leviathan wall.	Leviathan wall	4	2081%2C6372%2C0			y%28w%28W%2C2076%2C2086%2C6367%2C6377%2C0%29%3By%28t%28T%2C2048%2C2111%2C6400%2C6463%2C0%29%3Bl%28n%28the leviathan%7Eleviathan%29%3Bt%28T%2C2048%2C2111%2C6400%2C6463%2C0%29%29%29%29		
+B	leviathan-scar	route-checkpoint	Continue to interact	interact	a
+L	leviathan-scar	interact	MANUAL_INTERACTION	Climb the wall into the Leviathan encounter.	Leviathan wall	0		Climb the wall into the Leviathan encounter.	o%2847592%7C%7Cclimb%29	y%28t%28T%2C2048%2C2111%2C6400%2C6463%2C0%29%3Bl%28n%28the leviathan%7Eleviathan%29%3Bt%28T%2C2048%2C2111%2C6400%2C6463%2C0%29%29%29		
+B	leviathan-scar	interact	Continue to arrived	arrived	a
+L	leviathan-scar	arrived	TERMINAL	Encounter arrival requires Leviathan wall evidence.		0					Leviathan wall	y%28t%28T%2C2048%2C2111%2C6400%2C6463%2C0%29%3Bl%28n%28the leviathan%7Eleviathan%29%3Bt%28T%2C2048%2C2111%2C6400%2C6463%2C0%29%29%29
+P	vardorvis-stranglewood	route-checkpoint
+R	vardorvis-stranglewood	W%2C1151%2C1199%2C3400%2C3448%2C0
+R	vardorvis-stranglewood	W%2C1105%2C1153%2C3394%2C3442%2C0
+R	vardorvis-stranglewood	T%2C1088%2C1151%2C3392%2C3455%2C0
+L	vardorvis-stranglewood	route-checkpoint	TRAVEL	Route to Vardorvis chamber rocks.	Vardorvis chamber rocks	4	1129%2C3418%2C0			y%28w%28W%2C1124%2C1134%2C3413%2C3423%2C0%29%3By%28t%28T%2C1088%2C1151%2C3392%2C3455%2C0%29%3Bl%28n%28vardorvis%29%3Bt%28T%2C1088%2C1151%2C3392%2C3455%2C0%29%29%29%29		
+B	vardorvis-stranglewood	route-checkpoint	Continue to interact	interact	a
+L	vardorvis-stranglewood	interact	MANUAL_INTERACTION	Enter the rocks at the Stranglewood Temple chamber.	Vardorvis chamber rocks	0		Enter the rocks at the Stranglewood Temple chamber.	o%2848740%7C%7Center%29	y%28t%28T%2C1088%2C1151%2C3392%2C3455%2C0%29%3Bl%28n%28vardorvis%29%3Bt%28T%2C1088%2C1151%2C3392%2C3455%2C0%29%29%29		
+B	vardorvis-stranglewood	interact	Continue to arrived	arrived	a
+L	vardorvis-stranglewood	arrived	TERMINAL	Encounter arrival requires Vardorvis chamber rocks evidence.		0					Vardorvis chamber rocks	y%28t%28T%2C1088%2C1151%2C3392%2C3455%2C0%29%3Bl%28n%28vardorvis%29%3Bt%28T%2C1088%2C1151%2C3392%2C3455%2C0%29%29%29
+P	zulrah-zul-andra	route-checkpoint
+R	zulrah-zul-andra	W%2C2183%2C2239%2C3029%2C3085%2C0
+R	zulrah-zul-andra	T%2C2258%2C2278%2C3064%2C3082%2C0
+L	zulrah-zul-andra	route-checkpoint	TRAVEL	Route to Zulrah boat.	Zulrah boat	4	2211%2C3057%2C0			y%28w%28W%2C2206%2C2216%2C3052%2C3062%2C0%29%3By%28t%28T%2C2258%2C2278%2C3064%2C3082%2C0%29%3Bl%28n%28zulrah%29%3Bt%28T%2C2258%2C2278%2C3064%2C3082%2C0%29%29%29%29		
+B	zulrah-zul-andra	route-checkpoint	Continue to interact	interact	a
+L	zulrah-zul-andra	interact	MANUAL_INTERACTION	Board or quick-board the boat to Zulrah.	Zulrah boat	0		Board or quick-board the boat to Zulrah.	o%2810068%7C%7Cboard%7Equick board%29	y%28t%28T%2C2258%2C2278%2C3064%2C3082%2C0%29%3Bl%28n%28zulrah%29%3Bt%28T%2C2258%2C2278%2C3064%2C3082%2C0%29%29%29		
+B	zulrah-zul-andra	interact	Continue to arrived	arrived	a
+L	zulrah-zul-andra	arrived	TERMINAL	Encounter arrival requires Zulrah boat evidence.		0					Zulrah boat	y%28t%28T%2C2258%2C2278%2C3064%2C3082%2C0%29%3Bl%28n%28zulrah%29%3Bt%28T%2C2258%2C2278%2C3064%2C3082%2C0%29%29%29
+P	kree-arra-gwd	route-surface
+R	kree-arra-gwd	W%2C2888%2C2944%2C3718%2C3774%2C0
+R	kree-arra-gwd	W%2C2846%2C2918%2C5275%2C5347%2C2
+R	kree-arra-gwd	W%2C2824%2C2842%2C5296%2C5308%2C2
+R	kree-arra-gwd	T%2C2824%2C2842%2C5296%2C5308%2C2
+L	kree-arra-gwd	route-surface	TRAVEL	Route to the God Wars Dungeon surface entrance.	God Wars Dungeon surface entrance	4	2916%2C3746%2C0			y%28w%28W%2C2911%2C2921%2C3741%2C3751%2C0%29%3Bw%28W%2C2874%2C2890%2C5303%2C5319%2C2%29%3By%28y%28w%28W%2C2824%2C2842%2C5296%2C5308%2C2%29%3Bt%28T%2C2824%2C2842%2C5296%2C5308%2C2%29%29%3Bl%28n%28kree arra%7Ewingman skree%7Eflockleader geerin%7Eflight kilisa%29%3By%28w%28W%2C2824%2C2842%2C5296%2C5308%2C2%29%3Bt%28T%2C2824%2C2842%2C5296%2C5308%2C2%29%29%29%29%29		
+B	kree-arra-gwd	route-surface	Continue to route-central	route-central	a
+L	kree-arra-gwd	route-central	TRAVEL	Descend into the God Wars Dungeon central chamber.	God Wars Dungeon central chamber	6	2882%2C5311%2C2			y%28w%28W%2C2874%2C2890%2C5303%2C5319%2C2%29%3By%28y%28w%28W%2C2824%2C2842%2C5296%2C5308%2C2%29%3Bt%28T%2C2824%2C2842%2C5296%2C5308%2C2%29%29%3Bl%28n%28kree arra%7Ewingman skree%7Eflockleader geerin%7Eflight kilisa%29%3By%28w%28W%2C2824%2C2842%2C5296%2C5308%2C2%29%3Bt%28T%2C2824%2C2842%2C5296%2C5308%2C2%29%29%29%29%29		
+B	kree-arra-gwd	route-central	Continue to boss-door	boss-door	a
+L	kree-arra-gwd	boss-door	MANUAL_INTERACTION	Complete the Armadyl boss-room handoff.	Armadyl boss-room door	0		Cross the Armadyl obstacle%2C satisfy the kill-count or key requirement%2C then open the Armadyl boss door.	o%2826502%7C%7Copen%29	y%28y%28w%28W%2C2824%2C2842%2C5296%2C5308%2C2%29%3Bt%28T%2C2824%2C2842%2C5296%2C5308%2C2%29%29%3Bl%28n%28kree arra%7Ewingman skree%7Eflockleader geerin%7Eflight kilisa%29%3By%28w%28W%2C2824%2C2842%2C5296%2C5308%2C2%29%3Bt%28T%2C2824%2C2842%2C5296%2C5308%2C2%29%29%29%29		
+B	kree-arra-gwd	boss-door	Continue to arrived	arrived	a
+L	kree-arra-gwd	arrived	TERMINAL	Encounter arrival requires Armadyl boss room evidence.		0					Armadyl boss room	y%28y%28w%28W%2C2824%2C2842%2C5296%2C5308%2C2%29%3Bt%28T%2C2824%2C2842%2C5296%2C5308%2C2%29%29%3Bl%28n%28kree arra%7Ewingman skree%7Eflockleader geerin%7Eflight kilisa%29%3By%28w%28W%2C2824%2C2842%2C5296%2C5308%2C2%29%3Bt%28T%2C2824%2C2842%2C5296%2C5308%2C2%29%29%29%29
+P	general-graardor-gwd	route-surface
+R	general-graardor-gwd	W%2C2888%2C2944%2C3718%2C3774%2C0
+R	general-graardor-gwd	W%2C2846%2C2918%2C5275%2C5347%2C2
+R	general-graardor-gwd	W%2C2864%2C2876%2C5351%2C5369%2C2
+R	general-graardor-gwd	T%2C2864%2C2876%2C5351%2C5369%2C2
+L	general-graardor-gwd	route-surface	TRAVEL	Route to the God Wars Dungeon surface entrance.	God Wars Dungeon surface entrance	4	2916%2C3746%2C0			y%28w%28W%2C2911%2C2921%2C3741%2C3751%2C0%29%3Bw%28W%2C2874%2C2890%2C5303%2C5319%2C2%29%3By%28y%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%3Bl%28n%28general graardor%7Esergeant strongstack%7Esergeant steelwill%7Esergeant grimspike%29%3By%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%29%29%29		
+B	general-graardor-gwd	route-surface	Continue to route-central	route-central	a
+L	general-graardor-gwd	route-central	TRAVEL	Descend into the God Wars Dungeon central chamber.	God Wars Dungeon central chamber	6	2882%2C5311%2C2			y%28w%28W%2C2874%2C2890%2C5303%2C5319%2C2%29%3By%28y%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%3Bl%28n%28general graardor%7Esergeant strongstack%7Esergeant steelwill%7Esergeant grimspike%29%3By%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%29%29%29		
+B	general-graardor-gwd	route-central	Continue to bandos-barrier	bandos-barrier	a
+L	general-graardor-gwd	bandos-barrier	MANUAL_INTERACTION	Pass the Bandos barrier or gong.	Bandos barrier or gong	0		Pass the Bandos barrier or gong.	o%2826384%7E26461%7C%7Copen%7Ebang%7Epass%29	y%28o%2826503%7C%7Copen%29%3By%28y%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%3Bl%28n%28general graardor%7Esergeant strongstack%7Esergeant steelwill%7Esergeant grimspike%29%3By%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%29%29%29		
+B	general-graardor-gwd	bandos-barrier	Continue to boss-door	boss-door	a
+L	general-graardor-gwd	boss-door	MANUAL_INTERACTION	Complete the Bandos boss-room handoff.	Bandos boss-room door	0		Satisfy the kill-count or key requirement%2C then open the Bandos boss door.	o%2826503%7C%7Copen%29	y%28y%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%3Bl%28n%28general graardor%7Esergeant strongstack%7Esergeant steelwill%7Esergeant grimspike%29%3By%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%29%29		
+B	general-graardor-gwd	boss-door	Continue to arrived	arrived	a
+L	general-graardor-gwd	arrived	TERMINAL	Encounter arrival requires Bandos boss room evidence.		0					Bandos boss room	y%28y%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%3Bl%28n%28general graardor%7Esergeant strongstack%7Esergeant steelwill%7Esergeant grimspike%29%3By%28w%28W%2C2864%2C2876%2C5351%2C5369%2C2%29%3Bt%28T%2C2864%2C2876%2C5351%2C5369%2C2%29%29%29%29
+P	commander-zilyana-gwd	route-surface
+R	commander-zilyana-gwd	W%2C2888%2C2944%2C3718%2C3774%2C0
+R	commander-zilyana-gwd	W%2C2846%2C2918%2C5275%2C5347%2C2
+R	commander-zilyana-gwd	W%2C2889%2C2907%2C5258%2C5275%2C0
+R	commander-zilyana-gwd	T%2C2889%2C2907%2C5258%2C5275%2C0
+L	commander-zilyana-gwd	route-surface	TRAVEL	Route to the God Wars Dungeon surface entrance.	God Wars Dungeon surface entrance	4	2916%2C3746%2C0			y%28w%28W%2C2911%2C2921%2C3741%2C3751%2C0%29%3Bw%28W%2C2874%2C2890%2C5303%2C5319%2C2%29%3By%28y%28w%28W%2C2889%2C2907%2C5258%2C5275%2C0%29%3Bt%28T%2C2889%2C2907%2C5258%2C5275%2C0%29%29%3Bl%28n%28commander zilyana%7Estarlight%7Egrowler%7Ebree%29%3By%28w%28W%2C2889%2C2907%2C5258%2C5275%2C0%29%3Bt%28T%2C2889%2C2907%2C5258%2C5275%2C0%29%29%29%29%29		
+B	commander-zilyana-gwd	route-surface	Continue to route-central	route-central	a
+L	commander-zilyana-gwd	route-central	TRAVEL	Descend into the God Wars Dungeon central chamber.	God Wars Dungeon central chamber	6	2882%2C5311%2C2			y%28w%28W%2C2874%2C2890%2C5303%2C5319%2C2%29%3By%28y%28w%28W%2C2889%2C2907%2C5258%2C5275%2C0%29%3Bt%28T%2C2889%2C2907%2C5258%2C5275%2C0%29%29%3Bl%28n%28commander zilyana%7Estarlight%7Egrowler%7Ebree%29%3By%28w%28W%2C2889%2C2907%2C5258%2C5275%2C0%29%3Bt%28T%2C2889%2C2907%2C5258%2C5275%2C0%29%29%29%29%29		
+B	commander-zilyana-gwd	route-central	Continue to boss-door	boss-door	a
+L	commander-zilyana-gwd	boss-door	MANUAL_INTERACTION	Complete the Saradomin boss-room handoff.	Saradomin boss-room door	0		Complete the Saradomin traversal%2C satisfy the kill-count or key requirement%2C then open the Saradomin boss door.	o%2826504%7C%7Copen%29	y%28y%28w%28W%2C2889%2C2907%2C5258%2C5275%2C0%29%3Bt%28T%2C2889%2C2907%2C5258%2C5275%2C0%29%29%3Bl%28n%28commander zilyana%7Estarlight%7Egrowler%7Ebree%29%3By%28w%28W%2C2889%2C2907%2C5258%2C5275%2C0%29%3Bt%28T%2C2889%2C2907%2C5258%2C5275%2C0%29%29%29%29		
+B	commander-zilyana-gwd	boss-door	Continue to arrived	arrived	a
+L	commander-zilyana-gwd	arrived	TERMINAL	Encounter arrival requires Saradomin boss room evidence.		0					Saradomin boss room	y%28y%28w%28W%2C2889%2C2907%2C5258%2C5275%2C0%29%3Bt%28T%2C2889%2C2907%2C5258%2C5275%2C0%29%29%3Bl%28n%28commander zilyana%7Estarlight%7Egrowler%7Ebree%29%3By%28w%28W%2C2889%2C2907%2C5258%2C5275%2C0%29%3Bt%28T%2C2889%2C2907%2C5258%2C5275%2C0%29%29%29%29
+P	kril-tsutsaroth-gwd	route-surface
+R	kril-tsutsaroth-gwd	W%2C2888%2C2944%2C3718%2C3774%2C0
+R	kril-tsutsaroth-gwd	W%2C2846%2C2918%2C5275%2C5347%2C2
+R	kril-tsutsaroth-gwd	W%2C2918%2C2936%2C5318%2C5331%2C2
+R	kril-tsutsaroth-gwd	T%2C2918%2C2936%2C5318%2C5331%2C2
+L	kril-tsutsaroth-gwd	route-surface	TRAVEL	Route to the God Wars Dungeon surface entrance.	God Wars Dungeon surface entrance	4	2916%2C3746%2C0			y%28w%28W%2C2911%2C2921%2C3741%2C3751%2C0%29%3Bw%28W%2C2874%2C2890%2C5303%2C5319%2C2%29%3By%28y%28w%28W%2C2918%2C2936%2C5318%2C5331%2C2%29%3Bt%28T%2C2918%2C2936%2C5318%2C5331%2C2%29%29%3Bl%28n%28k ril tsutsaroth%7Ebalfrug kreeyath%7Etstanon karlak%7Ezakl n gritch%29%3By%28w%28W%2C2918%2C2936%2C5318%2C5331%2C2%29%3Bt%28T%2C2918%2C2936%2C5318%2C5331%2C2%29%29%29%29%29		
+B	kril-tsutsaroth-gwd	route-surface	Continue to route-central	route-central	a
+L	kril-tsutsaroth-gwd	route-central	TRAVEL	Descend into the God Wars Dungeon central chamber.	God Wars Dungeon central chamber	6	2882%2C5311%2C2			y%28w%28W%2C2874%2C2890%2C5303%2C5319%2C2%29%3By%28y%28w%28W%2C2918%2C2936%2C5318%2C5331%2C2%29%3Bt%28T%2C2918%2C2936%2C5318%2C5331%2C2%29%29%3Bl%28n%28k ril tsutsaroth%7Ebalfrug kreeyath%7Etstanon karlak%7Ezakl n gritch%29%3By%28w%28W%2C2918%2C2936%2C5318%2C5331%2C2%29%3Bt%28T%2C2918%2C2936%2C5318%2C5331%2C2%29%29%29%29%29		
+B	kril-tsutsaroth-gwd	route-central	Continue to boss-door	boss-door	a
+L	kril-tsutsaroth-gwd	boss-door	MANUAL_INTERACTION	Complete the Zamorak boss-room handoff.	Zamorak boss-room door	0		Complete the Zamorak traversal%2C satisfy the kill-count or key requirement%2C then open the Zamorak boss door.	o%2826505%7C%7Copen%29	y%28y%28w%28W%2C2918%2C2936%2C5318%2C5331%2C2%29%3Bt%28T%2C2918%2C2936%2C5318%2C5331%2C2%29%29%3Bl%28n%28k ril tsutsaroth%7Ebalfrug kreeyath%7Etstanon karlak%7Ezakl n gritch%29%3By%28w%28W%2C2918%2C2936%2C5318%2C5331%2C2%29%3Bt%28T%2C2918%2C2936%2C5318%2C5331%2C2%29%29%29%29		
+B	kril-tsutsaroth-gwd	boss-door	Continue to arrived	arrived	a
+L	kril-tsutsaroth-gwd	arrived	TERMINAL	Encounter arrival requires Zamorak boss room evidence.		0					Zamorak boss room	y%28y%28w%28W%2C2918%2C2936%2C5318%2C5331%2C2%29%3Bt%28T%2C2918%2C2936%2C5318%2C5331%2C2%29%29%3Bl%28n%28k ril tsutsaroth%7Ebalfrug kreeyath%7Etstanon karlak%7Ezakl n gritch%29%3By%28w%28W%2C2918%2C2936%2C5318%2C5331%2C2%29%3Bt%28T%2C2918%2C2936%2C5318%2C5331%2C2%29%29%29%29
+P	sarachnis-forthos-dungeon	route-forthos-access
+R	sarachnis-forthos-dungeon	W%2C1643%2C1691%2C3546%2C3594%2C0
+R	sarachnis-forthos-dungeon	W%2C1445%2C1493%2C3629%2C3677%2C0
+R	sarachnis-forthos-dungeon	W%2C1813%2C1869%2C9884%2C9940%2C0
+R	sarachnis-forthos-dungeon	W%2C1829%2C1855%2C9890%2C9911%2C0
+R	sarachnis-forthos-dungeon	T%2C1829%2C1855%2C9890%2C9911%2C0
+L	sarachnis-forthos-dungeon	route-forthos-access	TRAVEL	Route to the reviewed Forthos Dungeon access.	Forthos Dungeon access	4	1667%2C3570%2C0			y%28w%28W%2C1662%2C1672%2C3565%2C3575%2C0%29%3Bw%28W%2C1464%2C1474%2C3648%2C3658%2C0%29%3Bw%28W%2C1835%2C1847%2C9906%2C9918%2C0%29%3By%28y%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%3Bl%28n%28sarachnis%29%3By%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%29%29%29		
+B	sarachnis-forthos-dungeon	route-forthos-access	Continue to route-dungeon-hole	route-dungeon-hole	a
+L	sarachnis-forthos-dungeon	route-dungeon-hole	TRAVEL	Route through Forthos Dungeon to the reviewed hole.	Forthos Dungeon hole	4	1469%2C3653%2C0			y%28w%28W%2C1464%2C1474%2C3648%2C3658%2C0%29%3Bw%28W%2C1835%2C1847%2C9906%2C9918%2C0%29%3By%28y%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%3Bl%28n%28sarachnis%29%3By%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%29%29%29		
+B	sarachnis-forthos-dungeon	route-dungeon-hole	Continue to route-web	route-web	a
+L	sarachnis-forthos-dungeon	route-web	TRAVEL	Use the reviewed hole edge and route to Sarachnis's web.	Sarachnis web	4	1841%2C9912%2C0			y%28w%28W%2C1835%2C1847%2C9906%2C9918%2C0%29%3By%28y%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%3Bl%28n%28sarachnis%29%3By%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%29%29%29		
+B	sarachnis-forthos-dungeon	route-web	Continue to pass-web	pass-web	a
+L	sarachnis-forthos-dungeon	pass-web	MANUAL_INTERACTION	Pass through Sarachnis's web.	Sarachnis web	4	1841%2C9912%2C0	Pass through or slash the reviewed web.	o%2834858%7C%7Cpass through%7Eslash%29	y%28y%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%3Bl%28n%28sarachnis%29%3By%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%29%29		
+B	sarachnis-forthos-dungeon	pass-web	Continue to arrived	arrived	a
+L	sarachnis-forthos-dungeon	arrived	TERMINAL	Encounter arrival requires Sarachnis room evidence.		0					Sarachnis room	y%28y%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%3Bl%28n%28sarachnis%29%3By%28w%28W%2C1829%2C1855%2C9890%2C9911%2C0%29%3Bt%28T%2C1829%2C1855%2C9890%2C9911%2C0%29%29%29%29
+P	skotizo-lair	route-surface-statue
+R	skotizo-lair	W%2C1611%2C1667%2C3645%2C3701%2C0
+R	skotizo-lair	W%2C1638%2C1694%2C10022%2C10078%2C0
+R	skotizo-lair	T%2C2240%2C2303%2C5632%2C5695%2C0
+L	skotizo-lair	route-surface-statue	TRAVEL	Route to King Rada I's Catacombs statue.	Catacombs surface statue	4	1639%2C3673%2C0			y%28w%28W%2C1634%2C1644%2C3668%2C3678%2C0%29%3Bw%28W%2C1660%2C1672%2C10044%2C10056%2C0%29%3By%28t%28T%2C2240%2C2303%2C5632%2C5695%2C0%29%3Bl%28n%28skotizo%29%3Bt%28T%2C2240%2C2303%2C5632%2C5695%2C0%29%29%29%29		
+B	skotizo-lair	route-surface-statue	Continue to route-catacombs-altar	route-catacombs-altar	a
+L	skotizo-lair	route-catacombs-altar	TRAVEL	Enter the Catacombs through the reviewed statue edge and route to the altar.	Skotizo altar	4	1666%2C10050%2C0			y%28w%28W%2C1660%2C1672%2C10044%2C10056%2C0%29%3By%28t%28T%2C2240%2C2303%2C5632%2C5695%2C0%29%3Bl%28n%28skotizo%29%3Bt%28T%2C2240%2C2303%2C5632%2C5695%2C0%29%29%29%29		
+B	skotizo-lair	route-catacombs-altar	Continue to use-totem	use-totem	a
+L	skotizo-lair	use-totem	MANUAL_INTERACTION	Use the completed dark totem on the altar.	Skotizo altar	4	1666%2C10050%2C0	Use the completed dark totem on the altar.	o%2828900%7C%7Cuse%29	y%28t%28T%2C2240%2C2303%2C5632%2C5695%2C0%29%3Bl%28n%28skotizo%29%3Bt%28T%2C2240%2C2303%2C5632%2C5695%2C0%29%29%29		
+B	skotizo-lair	use-totem	Continue to arrived	arrived	a
+L	skotizo-lair	arrived	TERMINAL	Encounter arrival requires Skotizo encounter evidence.		0					Skotizo encounter	y%28t%28T%2C2240%2C2303%2C5632%2C5695%2C0%29%3Bl%28n%28skotizo%29%3Bt%28T%2C2240%2C2303%2C5632%2C5695%2C0%29%29%29
+P	thermonuclear-smoke-devil-dungeon	route-cave
+R	thermonuclear-smoke-devil-dungeon	W%2C2383%2C2439%2C3030%2C3086%2C0
+R	thermonuclear-smoke-devil-dungeon	W%2C2304%2C2367%2C9408%2C9471%2C0
+R	thermonuclear-smoke-devil-dungeon	W%2C2368%2C2431%2C9408%2C9471%2C0
+R	thermonuclear-smoke-devil-dungeon	W%2C2338%2C2386%2C9432%2C9480%2C0
+L	thermonuclear-smoke-devil-dungeon	route-cave	TRAVEL	Route to the Smoke Devil Dungeon entrance.	Smoke Devil Dungeon entrance	4	2411%2C3058%2C0			y%28w%28W%2C2406%2C2416%2C3053%2C3063%2C0%29%3By%28w%28W%2C2304%2C2367%2C9408%2C9471%2C0%29%3Bw%28W%2C2368%2C2431%2C9408%2C9471%2C0%29%29%3By%28w%28W%2C2348%2C2376%2C9442%2C9470%2C0%29%3Bn%28thermonuclear smoke devil%29%29%29		
+B	thermonuclear-smoke-devil-dungeon	route-cave	Continue to enter-cave	enter-cave	a
+L	thermonuclear-smoke-devil-dungeon	enter-cave	MANUAL_INTERACTION	Enter the Smoke Devil Dungeon.	Smoke Devil Dungeon entrance	4	2411%2C3058%2C0	Enter the Smoke Devil Dungeon.	o%2830176%7C%7Center%29	y%28y%28w%28W%2C2304%2C2367%2C9408%2C9471%2C0%29%3Bw%28W%2C2368%2C2431%2C9408%2C9471%2C0%29%29%3By%28w%28W%2C2348%2C2376%2C9442%2C9470%2C0%29%3Bn%28thermonuclear smoke devil%29%29%29		
+B	thermonuclear-smoke-devil-dungeon	enter-cave	Continue to enter-boss-room	enter-boss-room	a
+L	thermonuclear-smoke-devil-dungeon	enter-boss-room	MANUAL_INTERACTION	Enter the Thermonuclear smoke devil room.	Boss-room crevice	0		Enter the boss-room crevice.	o%28535%7C%7Center%29	y%28w%28W%2C2348%2C2376%2C9442%2C9470%2C0%29%3Bn%28thermonuclear smoke devil%29%29		
+B	thermonuclear-smoke-devil-dungeon	enter-boss-room	Continue to arrived	arrived	a
+L	thermonuclear-smoke-devil-dungeon	arrived	TERMINAL	Encounter arrival requires Thermonuclear smoke devil room evidence.		0					Thermonuclear smoke devil room	y%28w%28W%2C2348%2C2376%2C9442%2C9470%2C0%29%3Bn%28thermonuclear smoke devil%29%29
+P	demonic-gorillas-crash-site	route-checkpoint
+R	demonic-gorillas-crash-site	W%2C2436%2C2492%2C3466%2C3522%2C0
+R	demonic-gorillas-crash-site	W%2C2064%2C2160%2C5636%2C5688%2C0
+L	demonic-gorillas-crash-site	route-checkpoint	TRAVEL	Route to Crash Site Cavern entrance.	Crash Site Cavern entrance	4	2464%2C3494%2C0			y%28w%28W%2C2459%2C2469%2C3489%2C3499%2C0%29%3By%28w%28W%2C2064%2C2160%2C5636%2C5688%2C0%29%3Bl%28n%28demonic gorilla%29%3Bw%28W%2C2064%2C2160%2C5636%2C5688%2C0%29%29%29%29		
+B	demonic-gorillas-crash-site	route-checkpoint	Continue to interact	interact	a
+L	demonic-gorillas-crash-site	interact	MANUAL_INTERACTION	Enter the Crash Site Cavern.	Crash Site Cavern entrance	0		Enter the Crash Site Cavern.	o%2828686%7C%7Center%29	y%28w%28W%2C2064%2C2160%2C5636%2C5688%2C0%29%3Bl%28n%28demonic gorilla%29%3Bw%28W%2C2064%2C2160%2C5636%2C5688%2C0%29%29%29		
+B	demonic-gorillas-crash-site	interact	Continue to arrived	arrived	a
+L	demonic-gorillas-crash-site	arrived	TERMINAL	Encounter arrival requires Crash Site Cavern entrance evidence.		0					Crash Site Cavern entrance	y%28w%28W%2C2064%2C2160%2C5636%2C5688%2C0%29%3Bl%28n%28demonic gorilla%29%3Bw%28W%2C2064%2C2160%2C5636%2C5688%2C0%29%29%29
+P	giant-mole-falador-lair	route-mound
+R	giant-mole-falador-lair	W%2C2972%2C3020%2C3353%2C3401%2C0
+R	giant-mole-falador-lair	W%2C1728%2C1791%2C5184%2C5247%2C0
+R	giant-mole-falador-lair	T%2C1728%2C1791%2C5184%2C5247%2C0
+L	giant-mole-falador-lair	route-mound	TRAVEL	Route to the Falador Park mole mound.	Giant Mole mound	3	2996%2C3377%2C0			w%28W%2C2992%2C3000%2C3373%2C3381%2C0%29		
+B	giant-mole-falador-lair	route-mound	Continue to dig	dig	a
+L	giant-mole-falador-lair	dig	MANUAL_INTERACTION	Dig into the Falador Mole Lair.	Giant Mole mound	3	2996%2C3377%2C0	Use a spade to dig at the mound.	o%2812202%7E29460%7C%7Cdig%29	y%28y%28w%28W%2C1728%2C1791%2C5184%2C5247%2C0%29%3Bt%28T%2C1728%2C1791%2C5184%2C5247%2C0%29%29%3Bl%28n%28giant mole%29%3By%28w%28W%2C1728%2C1791%2C5184%2C5247%2C0%29%3Bt%28T%2C1728%2C1791%2C5184%2C5247%2C0%29%29%29%29		
+B	giant-mole-falador-lair	dig	Continue to arrived	arrived	a
+L	giant-mole-falador-lair	arrived	TERMINAL	Encounter arrival requires Falador Mole Lair evidence.		0					Falador Mole Lair	y%28y%28w%28W%2C1728%2C1791%2C5184%2C5247%2C0%29%3Bt%28T%2C1728%2C1791%2C5184%2C5247%2C0%29%29%3Bl%28n%28giant mole%29%3By%28w%28W%2C1728%2C1791%2C5184%2C5247%2C0%29%3Bt%28T%2C1728%2C1791%2C5184%2C5247%2C0%29%29%29%29
+P	barrows-brothers-dynamic	route-mounds
+R	barrows-brothers-dynamic	W%2C3509%2C3621%2C3233%2C3345%2C0
+R	barrows-brothers-dynamic	W%2C3520%2C3583%2C9664%2C9727%2C0
+L	barrows-brothers-dynamic	route-mounds	TRAVEL	Route to the Barrows mounds.	Barrows mounds	10	3565%2C3289%2C0			w%28W%2C3553%2C3577%2C3277%2C3301%2C0%29		
+B	barrows-brothers-dynamic	route-mounds	Continue to enter-active-mound	enter-active-mound	a
+L	barrows-brothers-dynamic	enter-active-mound	MANUAL_INTERACTION	Enter the live Barrows crypt selected by game state.	Barrows mound area	12	3565%2C3289%2C0	Use the staircase for the live Barrows brother. The tunnel doors and chest remain a live-state manual handoff.	o%2820667%7E20668%7E20669%7E20670%7E20671%7E20672%7C%7Cclimb down%29	y%28w%28W%2C3520%2C3583%2C9664%2C9727%2C0%29%3Bn%28ahrim the blighted%7Edharok the wretched%7Eguthan the infested%7Ekaril the tainted%7Etorag the corrupted%7Everac the defiled%29%29		
+B	barrows-brothers-dynamic	enter-active-mound	Continue to arrived	arrived	a
+L	barrows-brothers-dynamic	arrived	TERMINAL	Encounter arrival requires Barrows live-state interior evidence.		0					Barrows live-state interior	y%28w%28W%2C3520%2C3583%2C9664%2C9727%2C0%29%3Bn%28ahrim the blighted%7Edharok the wretched%7Eguthan the infested%7Ekaril the tainted%7Etorag the corrupted%7Everac the defiled%29%29
+P	dagannoth-kings-waterbirth	route-manifest-access
+R	dagannoth-kings-waterbirth	W%2C2419%2C2467%2C3722%2C3770%2C0
+R	dagannoth-kings-waterbirth	W%2C2597%2C2645%2C3659%2C3707%2C0
+R	dagannoth-kings-waterbirth	W%2C2508%2C2580%2C3725%2C3797%2C0
+R	dagannoth-kings-waterbirth	W%2C2880%2C2943%2C4352%2C4479%2C0
+R	dagannoth-kings-waterbirth	T%2C2880%2C2943%2C4352%2C4479%2C0
+L	dagannoth-kings-waterbirth	route-manifest-access	TRAVEL	Route to the reviewed Waterbirth access point.	Waterbirth Island Dungeon access	5	2443%2C3746%2C0			y%28w%28W%2C2437%2C2449%2C3740%2C3752%2C0%29%3Bw%28W%2C2613%2C2629%2C3675%2C3691%2C0%29%3Bw%28W%2C2534%2C2554%2C3751%2C3771%2C0%29%3By%28y%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%3Bl%28n%28dagannoth prime%7Edagannoth rex%7Edagannoth supreme%29%3By%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%29%29%29		
+B	dagannoth-kings-waterbirth	route-manifest-access	Continue to route-rock	route-rock	a
+L	dagannoth-kings-waterbirth	route-rock	TRAVEL	Travel with Jarvald and route to the Waterbirth rock.	Waterbirth dungeon rock	8	2544%2C3761%2C0			y%28w%28W%2C2534%2C2554%2C3751%2C3771%2C0%29%3By%28y%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%3Bl%28n%28dagannoth prime%7Edagannoth rex%7Edagannoth supreme%29%3By%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%29%29%29		
+B	dagannoth-kings-waterbirth	route-rock	Continue to climb-rock	climb-rock	a
+L	dagannoth-kings-waterbirth	climb-rock	MANUAL_INTERACTION	Climb through the Waterbirth dungeon rock.	Waterbirth dungeon rock	0		Climb over the Waterbirth dungeon rock.	o%288929%7C%7Cclimb over%29	y%28o%2853252%7E53254%7C%7Cclimb%29%3Bo%288958%7E8959%7E8960%7E8963%7C%7Copen%29%3By%28y%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%3Bl%28n%28dagannoth prime%7Edagannoth rex%7Edagannoth supreme%29%3By%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%29%29%29		
+B	dagannoth-kings-waterbirth	climb-rock	Continue to choose-interior-route	choose-interior-route	a
+L	dagannoth-kings-waterbirth	choose-interior-route	DECISION	Choose the reviewed agility shortcut when it is available.		0				a		
+B	dagannoth-kings-waterbirth	choose-interior-route	85 Agility shortcut is available	use-shortcut	o%2853252%7E53254%7C%7Cclimb%29
+B	dagannoth-kings-waterbirth	choose-interior-route	Continue to manual-interior-route	manual-interior-route	a
+L	dagannoth-kings-waterbirth	use-shortcut	MANUAL_INTERACTION	Use the 85 Agility shortcut.	Waterbirth Agility shortcut	3	2547%2C3749%2C0%3B2547%2C3744%2C0	Climb the reviewed Waterbirth Agility shortcut.	o%2853252%7E53254%7C%7Cclimb%29	y%28o%288958%7E8959%7E8960%7E8963%7C%7Copen%29%3By%28y%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%3Bl%28n%28dagannoth prime%7Edagannoth rex%7Edagannoth supreme%29%3By%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%29%29%29		
+B	dagannoth-kings-waterbirth	use-shortcut	Continue to shortcut-interior-route	shortcut-interior-route	a
+L	dagannoth-kings-waterbirth	manual-interior-route	MANUAL_INTERACTION	Follow the manual pressure-door and thrownaxe route through the live dungeon.	Pressure-door and thrownaxe route to the Kings	0		Carry and use a pet rock for the pressure doors and a Rune thrownaxe for the barrier%3B follow Shortest Path's live Waterbirth route.	o%288958%7E8959%7E8960%7E8963%7C%7Copen%29	y%28y%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%3Bl%28n%28dagannoth prime%7Edagannoth rex%7Edagannoth supreme%29%3By%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%29%29		
+B	dagannoth-kings-waterbirth	manual-interior-route	Continue to arrived	arrived	a
+L	dagannoth-kings-waterbirth	shortcut-interior-route	MANUAL_INTERACTION	Continue through the live Waterbirth interior after the shortcut.	Waterbirth interior route to the Kings	0		Follow Shortest Path's live route through the remaining pressure doors until exact Dagannoth Kings arena evidence is present.	o%288958%7E8959%7E8960%7E8963%7C%7Copen%29	y%28y%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%3Bl%28n%28dagannoth prime%7Edagannoth rex%7Edagannoth supreme%29%3By%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%29%29		
+B	dagannoth-kings-waterbirth	shortcut-interior-route	Continue to arrived	arrived	a
+L	dagannoth-kings-waterbirth	arrived	TERMINAL	Encounter arrival requires Dagannoth Kings arena evidence.		0					Dagannoth Kings arena	y%28y%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%3Bl%28n%28dagannoth prime%7Edagannoth rex%7Edagannoth supreme%29%3By%28w%28W%2C2880%2C2943%2C4352%2C4479%2C0%29%3Bt%28T%2C2880%2C2943%2C4352%2C4479%2C0%29%29%29%29
+P	maggot-king-vampyrium	route-castle-portal
+R	maggot-king-vampyrium	W%2C3137%2C3185%2C7687%2C7735%2C0
+R	maggot-king-vampyrium	W%2C2496%2C2559%2C7808%2C7871%2C0
+R	maggot-king-vampyrium	W%2C2560%2C2623%2C7808%2C7871%2C0
+R	maggot-king-vampyrium	W%2C2624%2C2687%2C7808%2C7871%2C0
+R	maggot-king-vampyrium	T%2C2880%2C2943%2C8000%2C8063%2C0
+L	maggot-king-vampyrium	route-castle-portal	TRAVEL	Use Drakan's medallion to Castle Drakan%2C then route to its portal.	Castle Drakan portal	4	3161%2C7711%2C0			y%28w%28W%2C3156%2C3166%2C7706%2C7716%2C0%29%3By%28w%28W%2C2496%2C2559%2C7808%2C7871%2C0%29%3Bw%28W%2C2560%2C2623%2C7808%2C7871%2C0%29%3Bw%28W%2C2624%2C2687%2C7808%2C7871%2C0%29%3Bo%2840787%7C%7Ccrawl through%29%3Bo%2861048%7C%7Center%29%3By%28t%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%3Bl%28n%28maggot king%29%3Bt%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%29%29%29%29		
+B	maggot-king-vampyrium	route-castle-portal	Continue to enter-vampyrium	enter-vampyrium	a
+L	maggot-king-vampyrium	enter-vampyrium	MANUAL_INTERACTION	Enter the Castle Drakan portal.	Castle Drakan portal	4	3161%2C7711%2C0	Enter the Castle Drakan portal.	o%2861214%7E61216%7C%7Center%29	y%28w%28W%2C2496%2C2559%2C7808%2C7871%2C0%29%3Bw%28W%2C2560%2C2623%2C7808%2C7871%2C0%29%3Bw%28W%2C2624%2C2687%2C7808%2C7871%2C0%29%3Bo%2840787%7C%7Ccrawl through%29%3Bo%2861048%7C%7Center%29%3By%28t%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%3Bl%28n%28maggot king%29%3Bt%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%29%29%29		
+B	maggot-king-vampyrium	enter-vampyrium	Continue to traverse-vampyrium	traverse-vampyrium	a
+L	maggot-king-vampyrium	traverse-vampyrium	TRAVEL	Follow the west Aranei scout when unlocked%2C or continue on foot toward the northern 64 Agility shortcut.	Vampyrium traversal	5	2575%2C7818%2C0%3B2667%2C7837%2C0			y%28o%2840787%7C%7Ccrawl through%29%3Bo%2861048%7C%7Center%29%3Bw%28W%2C2661%2C2673%2C7831%2C7843%2C0%29%3Bw%28W%2C2670%2C2686%2C7843%2C7859%2C0%29%3By%28t%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%3Bl%28n%28maggot king%29%3Bt%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%29%29%29		
+B	maggot-king-vampyrium	traverse-vampyrium	Continue to choose-vampyrium-shortcut	choose-vampyrium-shortcut	a
+L	maggot-king-vampyrium	choose-vampyrium-shortcut	DECISION	Use the northern bush shortcut only when it is available.		0				a		
+B	maggot-king-vampyrium	choose-vampyrium-shortcut	64 Agility bush shortcut is available	use-shortcut	o%2840787%7C%7Ccrawl through%29
+B	maggot-king-vampyrium	choose-vampyrium-shortcut	Continue to route-lair	route-lair	a
+L	maggot-king-vampyrium	use-shortcut	MANUAL_INTERACTION	Use the northern Vampyrium bush shortcut.	Northern Vampyrium bush shortcut	3	2667%2C7837%2C0	Crawl through the northern bush shortcut.	o%2840787%7C%7Ccrawl through%29	y%28o%2861048%7C%7Center%29%3By%28t%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%3Bl%28n%28maggot king%29%3Bt%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%29%29%29		
+B	maggot-king-vampyrium	use-shortcut	Continue to route-lair	route-lair	a
+L	maggot-king-vampyrium	route-lair	TRAVEL	Route to the Maggot King's actual lair entrance.	Maggot King's lair entrance	4	2678%2C7851%2C0			y%28w%28W%2C2672%2C2684%2C7845%2C7857%2C0%29%3By%28t%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%3Bl%28n%28maggot king%29%3Bt%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%29%29%29		
+B	maggot-king-vampyrium	route-lair	Continue to enter-lair	enter-lair	a
+L	maggot-king-vampyrium	enter-lair	MANUAL_INTERACTION	Enter the darkwood doorway into the lair.	Maggot King's lair entrance	4	2678%2C7851%2C0	Enter the darkwood doorway.	o%2861048%7C%7Center%29	y%28t%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%3Bl%28n%28maggot king%29%3Bt%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%29%29		
+B	maggot-king-vampyrium	enter-lair	Continue to arrived	arrived	a
+L	maggot-king-vampyrium	arrived	TERMINAL	Encounter arrival requires Maggot King lair template evidence.		0					Maggot King lair template	y%28t%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%3Bl%28n%28maggot king%29%3Bt%28T%2C2880%2C2943%2C8000%2C8063%2C0%29%29%29
+P	magic-axes-wilderness-hut	route-checkpoint
+R	magic-axes-wilderness-hut	W%2C3166%2C3214%2C3933%2C3981%2C0
+R	magic-axes-wilderness-hut	W%2C3167%2C3215%2C3939%2C3987%2C0
+L	magic-axes-wilderness-hut	route-checkpoint	TRAVEL	Route to Magic axe hut doors.	Magic axe hut doors	4	3190%2C3957%2C0%3B3191%2C3963%2C0			y%28w%28W%2C3185%2C3195%2C3952%2C3962%2C0%29%3Bw%28W%2C3186%2C3196%2C3958%2C3968%2C0%29%3Bn%28magic axe%29%29		
+B	magic-axes-wilderness-hut	route-checkpoint	Continue to interact	interact	a
+L	magic-axes-wilderness-hut	interact	MANUAL_INTERACTION	Use a lockpick to pick the hut lock%2C or open the already unlocked door.	Magic axe hut doors	4	3190%2C3957%2C0%3B3191%2C3963%2C0	Use a lockpick to pick the hut lock%2C or open the already unlocked door.	o%2811726%7C%7Cpick lock%7Eopen%29	n%28magic axe%29		
+B	magic-axes-wilderness-hut	interact	Continue to arrived	arrived	a
+L	magic-axes-wilderness-hut	arrived	TERMINAL	Encounter arrival requires Magic axe hut doors evidence.		0					Magic axe hut doors	n%28magic axe%29
+P	revenants-wilderness-cave	route-checkpoint
+R	revenants-wilderness-cave	W%2C3041%2C3105%2C3622%2C3686%2C0
+R	revenants-wilderness-cave	W%2C3035%2C3099%2C3708%2C3772%2C0
+R	revenants-wilderness-cave	W%2C3092%2C3156%2C3799%2C3863%2C0
+L	revenants-wilderness-cave	route-checkpoint	TRAVEL	Route to Revenant Caves entrance.	Revenant Caves entrance	4	3073%2C3654%2C0%3B3067%2C3740%2C0%3B3124%2C3831%2C0			y%28w%28W%2C3068%2C3078%2C3649%2C3659%2C0%29%3Bw%28W%2C3062%2C3072%2C3735%2C3745%2C0%29%3Bw%28W%2C3119%2C3129%2C3826%2C3836%2C0%29%3By%28w%28W%2C3185%2C3209%2C10058%2C10082%2C0%29%3Bn%28revenant imp%7Erevenant goblin%7Erevenant icefiend%7Erevenant pyrefiend%7Erevenant hobgoblin%7Erevenant vampire%7Erevenant werewolf%7Erevenant cyclops%7Erevenant hellhound%7Erevenant demon%7Erevenant ork%7Erevenant dark beast%7Erevenant knight%7Erevenant dragon%7Erevenant maledictus%29%29%29		
+B	revenants-wilderness-cave	route-checkpoint	Continue to interact	interact	a
+L	revenants-wilderness-cave	interact	MANUAL_INTERACTION	Enter a reviewed Revenant Caves entrance and pay the live entrance fee when prompted.	Revenant Caves entrance	4	3073%2C3654%2C0%3B3067%2C3740%2C0%3B3124%2C3831%2C0	Enter a reviewed Revenant Caves entrance and pay the live entrance fee when prompted.	o%2831555%7E40386%7E31556%7C%7Center%7Ejump down%29	y%28w%28W%2C3185%2C3209%2C10058%2C10082%2C0%29%3Bn%28revenant imp%7Erevenant goblin%7Erevenant icefiend%7Erevenant pyrefiend%7Erevenant hobgoblin%7Erevenant vampire%7Erevenant werewolf%7Erevenant cyclops%7Erevenant hellhound%7Erevenant demon%7Erevenant ork%7Erevenant dark beast%7Erevenant knight%7Erevenant dragon%7Erevenant maledictus%29%29		
+B	revenants-wilderness-cave	interact	Continue to arrived	arrived	a
+L	revenants-wilderness-cave	arrived	TERMINAL	Encounter arrival requires Revenant Caves entrance evidence.		0					Revenant Caves entrance	y%28w%28W%2C3185%2C3209%2C10058%2C10082%2C0%29%3Bn%28revenant imp%7Erevenant goblin%7Erevenant icefiend%7Erevenant pyrefiend%7Erevenant hobgoblin%7Erevenant vampire%7Erevenant werewolf%7Erevenant cyclops%7Erevenant hellhound%7Erevenant demon%7Erevenant ork%7Erevenant dark beast%7Erevenant knight%7Erevenant dragon%7Erevenant maledictus%29%29
+P	fleshcrawlers-stronghold-security	route-0
+R	fleshcrawlers-stronghold-security	W%2C3057%2C3105%2C3396%2C3444%2C0
+R	fleshcrawlers-stronghold-security	W%2C1835%2C1883%2C5220%2C5268%2C0
+R	fleshcrawlers-stronghold-security	W%2C1878%2C1926%2C5198%2C5246%2C0
+R	fleshcrawlers-stronghold-security	W%2C2018%2C2066%2C5221%2C5269%2C0
+R	fleshcrawlers-stronghold-security	W%2C1917%2C1965%2C5073%2C5121%2C0
+L	fleshcrawlers-stronghold-security	route-0	TRAVEL	Route to Stronghold entrance.	Stronghold entrance	4	3081%2C3420%2C0			y%28w%28W%2C3076%2C3086%2C3415%2C3425%2C0%29%3By%28w%28W%2C1929%2C1953%2C5085%2C5109%2C0%29%3Bn%28flesh crawler%29%29%29		
+B	fleshcrawlers-stronghold-security	route-0	Continue to interact-0	interact-0	a
+L	fleshcrawlers-stronghold-security	interact-0	MANUAL_INTERACTION	Use Stronghold entrance.	Stronghold entrance	4	3081%2C3420%2C0	Use the reviewed Stronghold entrance.	o%2820790%7C%7Cclimb down%29	y%28w%28W%2C1849%2C1869%2C5234%2C5254%2C0%29%3By%28w%28W%2C1929%2C1953%2C5085%2C5109%2C0%29%3Bn%28flesh crawler%29%29%29		
+B	fleshcrawlers-stronghold-security	interact-0	Continue to route-1	route-1	a
+L	fleshcrawlers-stronghold-security	route-1	TRAVEL	Route to Vault of War ladder.	Vault of War ladder	4	1902%2C5222%2C0			y%28w%28W%2C1897%2C1907%2C5217%2C5227%2C0%29%3By%28w%28W%2C1929%2C1953%2C5085%2C5109%2C0%29%3Bn%28flesh crawler%29%29%29		
+B	fleshcrawlers-stronghold-security	route-1	Continue to interact-1	interact-1	a
+L	fleshcrawlers-stronghold-security	interact-1	MANUAL_INTERACTION	Use Vault of War ladder.	Vault of War ladder	4	1902%2C5222%2C0	Use the reviewed Vault of War ladder.	o%2820785%7C%7Cclimb down%29	y%28w%28W%2C2032%2C2052%2C5235%2C5255%2C0%29%3By%28w%28W%2C1929%2C1953%2C5085%2C5109%2C0%29%3Bn%28flesh crawler%29%29%29		
+B	fleshcrawlers-stronghold-security	interact-1	Continue to route-terminal	route-terminal	a
+L	fleshcrawlers-stronghold-security	route-terminal	TRAVEL	Route from the final Stronghold landing to the assignment pack.	Stronghold assignment pack	8	1941%2C5097%2C0			y%28w%28W%2C1929%2C1953%2C5085%2C5109%2C0%29%3Bn%28flesh crawler%29%29		
+B	fleshcrawlers-stronghold-security	route-terminal	Continue to arrived	arrived	a
+L	fleshcrawlers-stronghold-security	arrived	TERMINAL	Encounter arrival requires Stronghold assignment pack evidence.		0					Stronghold assignment pack	y%28w%28W%2C1929%2C1953%2C5085%2C5109%2C0%29%3Bn%28flesh crawler%29%29
+P	catablepon-stronghold-security	route-0
+R	catablepon-stronghold-security	W%2C3057%2C3105%2C3396%2C3444%2C0
+R	catablepon-stronghold-security	W%2C1835%2C1883%2C5220%2C5268%2C0
+R	catablepon-stronghold-security	W%2C1878%2C1926%2C5198%2C5246%2C0
+R	catablepon-stronghold-security	W%2C2018%2C2066%2C5221%2C5269%2C0
+R	catablepon-stronghold-security	W%2C2002%2C2050%2C5194%2C5242%2C0
+R	catablepon-stronghold-security	W%2C2099%2C2147%2C5228%2C5276%2C0
+R	catablepon-stronghold-security	W%2C1926%2C1974%2C4972%2C5020%2C0
+L	catablepon-stronghold-security	route-0	TRAVEL	Route to Stronghold entrance.	Stronghold entrance	4	3081%2C3420%2C0			y%28w%28W%2C3076%2C3086%2C3415%2C3425%2C0%29%3By%28w%28W%2C1938%2C1962%2C4984%2C5008%2C0%29%3Bn%28catablepon%29%29%29		
+B	catablepon-stronghold-security	route-0	Continue to interact-0	interact-0	a
+L	catablepon-stronghold-security	interact-0	MANUAL_INTERACTION	Use Stronghold entrance.	Stronghold entrance	4	3081%2C3420%2C0	Use the reviewed Stronghold entrance.	o%2820790%7C%7Cclimb down%29	y%28w%28W%2C1849%2C1869%2C5234%2C5254%2C0%29%3By%28w%28W%2C1938%2C1962%2C4984%2C5008%2C0%29%3Bn%28catablepon%29%29%29		
+B	catablepon-stronghold-security	interact-0	Continue to route-1	route-1	a
+L	catablepon-stronghold-security	route-1	TRAVEL	Route to Vault of War ladder.	Vault of War ladder	4	1902%2C5222%2C0			y%28w%28W%2C1897%2C1907%2C5217%2C5227%2C0%29%3By%28w%28W%2C1938%2C1962%2C4984%2C5008%2C0%29%3Bn%28catablepon%29%29%29		
+B	catablepon-stronghold-security	route-1	Continue to interact-1	interact-1	a
+L	catablepon-stronghold-security	interact-1	MANUAL_INTERACTION	Use Vault of War ladder.	Vault of War ladder	4	1902%2C5222%2C0	Use the reviewed Vault of War ladder.	o%2820785%7C%7Cclimb down%29	y%28w%28W%2C2032%2C2052%2C5235%2C5255%2C0%29%3By%28w%28W%2C1938%2C1962%2C4984%2C5008%2C0%29%3Bn%28catablepon%29%29%29		
+B	catablepon-stronghold-security	interact-1	Continue to route-2	route-2	a
+L	catablepon-stronghold-security	route-2	TRAVEL	Route to Catacomb of Famine ladder.	Catacomb of Famine ladder	4	2026%2C5218%2C0			y%28w%28W%2C2021%2C2031%2C5213%2C5223%2C0%29%3By%28w%28W%2C1938%2C1962%2C4984%2C5008%2C0%29%3Bn%28catablepon%29%29%29		
+B	catablepon-stronghold-security	route-2	Continue to interact-2	interact-2	a
+L	catablepon-stronghold-security	interact-2	MANUAL_INTERACTION	Use Catacomb of Famine ladder.	Catacomb of Famine ladder	4	2026%2C5218%2C0	Use the reviewed Catacomb of Famine ladder.	o%2819004%7C%7Cclimb down%29	y%28w%28W%2C2113%2C2133%2C5242%2C5262%2C0%29%3By%28w%28W%2C1938%2C1962%2C4984%2C5008%2C0%29%3Bn%28catablepon%29%29%29		
+B	catablepon-stronghold-security	interact-2	Continue to route-terminal	route-terminal	a
+L	catablepon-stronghold-security	route-terminal	TRAVEL	Route from the final Stronghold landing to the assignment pack.	Stronghold assignment pack	8	1950%2C4996%2C0			y%28w%28W%2C1938%2C1962%2C4984%2C5008%2C0%29%3Bn%28catablepon%29%29		
+B	catablepon-stronghold-security	route-terminal	Continue to arrived	arrived	a
+L	catablepon-stronghold-security	arrived	TERMINAL	Encounter arrival requires Stronghold assignment pack evidence.		0					Stronghold assignment pack	y%28w%28W%2C1938%2C1962%2C4984%2C5008%2C0%29%3Bn%28catablepon%29%29
+P	ankou-stronghold-security	route-0
+R	ankou-stronghold-security	W%2C3057%2C3105%2C3396%2C3444%2C0
+R	ankou-stronghold-security	W%2C1835%2C1883%2C5220%2C5268%2C0
+R	ankou-stronghold-security	W%2C1878%2C1926%2C5198%2C5246%2C0
+R	ankou-stronghold-security	W%2C2018%2C2066%2C5221%2C5269%2C0
+R	ankou-stronghold-security	W%2C2002%2C2050%2C5194%2C5242%2C0
+R	ankou-stronghold-security	W%2C2099%2C2147%2C5228%2C5276%2C0
+R	ankou-stronghold-security	W%2C2124%2C2172%2C5260%2C5308%2C0
+R	ankou-stronghold-security	W%2C2334%2C2382%2C5191%2C5239%2C0
+R	ankou-stronghold-security	W%2C1948%2C1996%2C4886%2C4934%2C0
+L	ankou-stronghold-security	route-0	TRAVEL	Route to Stronghold entrance.	Stronghold entrance	4	3081%2C3420%2C0			y%28w%28W%2C3076%2C3086%2C3415%2C3425%2C0%29%3By%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29%29		
+B	ankou-stronghold-security	route-0	Continue to interact-0	interact-0	a
+L	ankou-stronghold-security	interact-0	MANUAL_INTERACTION	Use Stronghold entrance.	Stronghold entrance	4	3081%2C3420%2C0	Use the reviewed Stronghold entrance.	o%2820790%7C%7Cclimb down%29	y%28w%28W%2C1849%2C1869%2C5234%2C5254%2C0%29%3By%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29%29		
+B	ankou-stronghold-security	interact-0	Continue to route-1	route-1	a
+L	ankou-stronghold-security	route-1	TRAVEL	Route to Vault of War ladder.	Vault of War ladder	4	1902%2C5222%2C0			y%28w%28W%2C1897%2C1907%2C5217%2C5227%2C0%29%3By%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29%29		
+B	ankou-stronghold-security	route-1	Continue to interact-1	interact-1	a
+L	ankou-stronghold-security	interact-1	MANUAL_INTERACTION	Use Vault of War ladder.	Vault of War ladder	4	1902%2C5222%2C0	Use the reviewed Vault of War ladder.	o%2820785%7C%7Cclimb down%29	y%28w%28W%2C2032%2C2052%2C5235%2C5255%2C0%29%3By%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29%29		
+B	ankou-stronghold-security	interact-1	Continue to route-2	route-2	a
+L	ankou-stronghold-security	route-2	TRAVEL	Route to Catacomb of Famine ladder.	Catacomb of Famine ladder	4	2026%2C5218%2C0			y%28w%28W%2C2021%2C2031%2C5213%2C5223%2C0%29%3By%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29%29		
+B	ankou-stronghold-security	route-2	Continue to interact-2	interact-2	a
+L	ankou-stronghold-security	interact-2	MANUAL_INTERACTION	Use Catacomb of Famine ladder.	Catacomb of Famine ladder	4	2026%2C5218%2C0	Use the reviewed Catacomb of Famine ladder.	o%2819004%7C%7Cclimb down%29	y%28w%28W%2C2113%2C2133%2C5242%2C5262%2C0%29%3By%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29%29		
+B	ankou-stronghold-security	interact-2	Continue to route-3	route-3	a
+L	ankou-stronghold-security	route-3	TRAVEL	Route to Pit of Pestilence vine.	Pit of Pestilence vine	4	2148%2C5284%2C0			y%28w%28W%2C2143%2C2153%2C5279%2C5289%2C0%29%3By%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29%29		
+B	ankou-stronghold-security	route-3	Continue to interact-3	interact-3	a
+L	ankou-stronghold-security	interact-3	MANUAL_INTERACTION	Use Pit of Pestilence vine.	Pit of Pestilence vine	4	2148%2C5284%2C0	Use the reviewed Pit of Pestilence vine.	o%2823706%7C%7Cclimb down%29	y%28w%28W%2C2348%2C2368%2C5205%2C5225%2C0%29%3By%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29%29		
+B	ankou-stronghold-security	interact-3	Continue to route-terminal	route-terminal	a
+L	ankou-stronghold-security	route-terminal	TRAVEL	Route from the final Stronghold landing to the assignment pack.	Stronghold assignment pack	8	1972%2C4910%2C0			y%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29		
+B	ankou-stronghold-security	route-terminal	Continue to arrived	arrived	a
+L	ankou-stronghold-security	arrived	TERMINAL	Encounter arrival requires Stronghold assignment pack evidence.		0					Stronghold assignment pack	y%28w%28W%2C1960%2C1984%2C4898%2C4922%2C0%29%3Bn%28ankou%29%29
+P	metal-dragons-ancient-cavern	route-0
+R	metal-dragons-ancient-cavern	W%2C2488%2C2536%2C3487%2C3535%2C0
+R	metal-dragons-ancient-cavern	W%2C1745%2C1793%2C5341%2C5389%2C1
+R	metal-dragons-ancient-cavern	W%2C1745%2C1793%2C5341%2C5389%2C1
+R	metal-dragons-ancient-cavern	W%2C1754%2C1802%2C5320%2C5368%2C0
+R	metal-dragons-ancient-cavern	W%2C1754%2C1802%2C5320%2C5368%2C0
+R	metal-dragons-ancient-cavern	W%2C1754%2C1802%2C5320%2C5368%2C1
+R	metal-dragons-ancient-cavern	W%2C1791%2C1847%2C5362%2C5418%2C1
+L	metal-dragons-ancient-cavern	route-0	TRAVEL	Route to Ancient Cavern whirlpool.	Ancient Cavern whirlpool	4	2512%2C3511%2C0			y%28w%28W%2C2507%2C2517%2C3506%2C3516%2C0%29%3By%28w%28W%2C1805%2C1833%2C5376%2C5404%2C1%29%3Bn%28mithril dragon%29%29%29		
+B	metal-dragons-ancient-cavern	route-0	Continue to interact-0	interact-0	a
+L	metal-dragons-ancient-cavern	interact-0	MANUAL_INTERACTION	Use Ancient Cavern whirlpool.	Ancient Cavern whirlpool	4	2512%2C3511%2C0	Use the reviewed Ancient Cavern whirlpool.	o%2825274%7C%7Cdive into%7Edive in%7Eenter%29	y%28w%28W%2C1761%2C1777%2C5357%2C5373%2C1%29%3By%28w%28W%2C1805%2C1833%2C5376%2C5404%2C1%29%3Bn%28mithril dragon%29%29%29		
+B	metal-dragons-ancient-cavern	interact-0	Continue to route-1	route-1	a
+L	metal-dragons-ancient-cavern	route-1	TRAVEL	Route to upper Ancient Cavern stairs.	upper Ancient Cavern stairs	4	1769%2C5365%2C1			y%28w%28W%2C1764%2C1774%2C5360%2C5370%2C1%29%3By%28w%28W%2C1805%2C1833%2C5376%2C5404%2C1%29%3Bn%28mithril dragon%29%29%29		
+B	metal-dragons-ancient-cavern	route-1	Continue to interact-1	interact-1	a
+L	metal-dragons-ancient-cavern	interact-1	MANUAL_INTERACTION	Use upper Ancient Cavern stairs.	upper Ancient Cavern stairs	4	1769%2C5365%2C1	Use the reviewed upper Ancient Cavern stairs.	o%2825338%7C%7Cclimb down%29	y%28w%28W%2C1770%2C1786%2C5336%2C5352%2C0%29%3By%28w%28W%2C1805%2C1833%2C5376%2C5404%2C1%29%3Bn%28mithril dragon%29%29%29		
+B	metal-dragons-ancient-cavern	interact-1	Continue to route-2	route-2	a
+L	metal-dragons-ancient-cavern	route-2	TRAVEL	Route to lower Ancient Cavern stairs.	lower Ancient Cavern stairs	4	1778%2C5344%2C0			y%28w%28W%2C1773%2C1783%2C5339%2C5349%2C0%29%3By%28w%28W%2C1805%2C1833%2C5376%2C5404%2C1%29%3Bn%28mithril dragon%29%29%29		
+B	metal-dragons-ancient-cavern	route-2	Continue to interact-2	interact-2	a
+L	metal-dragons-ancient-cavern	interact-2	MANUAL_INTERACTION	Use lower Ancient Cavern stairs.	lower Ancient Cavern stairs	4	1778%2C5344%2C0	Use the reviewed lower Ancient Cavern stairs.	o%2825339%7C%7Cclimb up%29	y%28w%28W%2C1770%2C1786%2C5336%2C5352%2C1%29%3By%28w%28W%2C1805%2C1833%2C5376%2C5404%2C1%29%3Bn%28mithril dragon%29%29%29		
+B	metal-dragons-ancient-cavern	interact-2	Continue to route-terminal	route-terminal	a
+L	metal-dragons-ancient-cavern	route-terminal	TRAVEL	Route from the final handoff to Ancient Cavern Mithril dragon pack.	Ancient Cavern Mithril dragon pack	8	1819%2C5390%2C1			y%28w%28W%2C1805%2C1833%2C5376%2C5404%2C1%29%3Bn%28mithril dragon%29%29		
+B	metal-dragons-ancient-cavern	route-terminal	Continue to arrived	arrived	a
+L	metal-dragons-ancient-cavern	arrived	TERMINAL	Encounter arrival requires Ancient Cavern Mithril dragon pack evidence.		0					Ancient Cavern Mithril dragon pack	y%28w%28W%2C1805%2C1833%2C5376%2C5404%2C1%29%3Bn%28mithril dragon%29%29
+P	aviansies-gwd	route-checkpoint
+R	aviansies-gwd	W%2C2876%2C2956%2C3706%2C3786%2C0
+L	aviansies-gwd	route-checkpoint	TRAVEL	Route to God Wars Dungeon entrance.	God Wars Dungeon entrance	4	2916%2C3746%2C0			y%28w%28W%2C2911%2C2921%2C3741%2C3751%2C0%29%3By%28w%28W%2C2815%2C2851%2C5271%2C5307%2C2%29%3Bn%28aviansie%29%29%29		
+B	aviansies-gwd	route-checkpoint	Continue to interact	interact	a
+L	aviansies-gwd	interact	MANUAL_INTERACTION	Attach a rope on first use%2C then descend into God Wars Dungeon.	God Wars Dungeon entrance	4	2916%2C3746%2C0	Attach a rope on first use%2C then descend into God Wars Dungeon.	o%2826417%7E26418%7E26419%7C%7Cclimb down%7Eenter%7Euse%7Eattach rope%29	y%28w%28W%2C2815%2C2851%2C5271%2C5307%2C2%29%3Bn%28aviansie%29%29		
+B	aviansies-gwd	interact	Continue to arrived	arrived	a
+L	aviansies-gwd	arrived	TERMINAL	Encounter arrival requires God Wars Dungeon entrance evidence.		0					God Wars Dungeon entrance	y%28w%28W%2C2815%2C2851%2C5271%2C5307%2C2%29%3Bn%28aviansie%29%29
+P	spiritual-creatures-gwd	route-checkpoint
+R	spiritual-creatures-gwd	W%2C2876%2C2956%2C3706%2C3786%2C0
+L	spiritual-creatures-gwd	route-checkpoint	TRAVEL	Route to God Wars Dungeon entrance.	God Wars Dungeon entrance	4	2916%2C3746%2C0			y%28w%28W%2C2911%2C2921%2C3741%2C3751%2C0%29%3By%28w%28W%2C2869%2C2905%2C5290%2C5326%2C2%29%3Bn%28spiritual warrior%7Espiritual ranger%7Espiritual mage%29%29%29		
+B	spiritual-creatures-gwd	route-checkpoint	Continue to interact	interact	a
+L	spiritual-creatures-gwd	interact	MANUAL_INTERACTION	Attach a rope on first use%2C then descend into God Wars Dungeon.	God Wars Dungeon entrance	4	2916%2C3746%2C0	Attach a rope on first use%2C then descend into God Wars Dungeon.	o%2826417%7E26418%7E26419%7C%7Cclimb down%7Eenter%7Euse%7Eattach rope%29	y%28w%28W%2C2869%2C2905%2C5290%2C5326%2C2%29%3Bn%28spiritual warrior%7Espiritual ranger%7Espiritual mage%29%29		
+B	spiritual-creatures-gwd	interact	Continue to arrived	arrived	a
+L	spiritual-creatures-gwd	arrived	TERMINAL	Encounter arrival requires God Wars Dungeon entrance evidence.		0					God Wars Dungeon entrance	y%28w%28W%2C2869%2C2905%2C5290%2C5326%2C2%29%3Bn%28spiritual warrior%7Espiritual ranger%7Espiritual mage%29%29
+P	dagannoth-waterbirth-assignment	route-rock
+R	dagannoth-waterbirth-assignment	W%2C2415%2C2471%2C3718%2C3774%2C0
+R	dagannoth-waterbirth-assignment	W%2C2519%2C2575%2C3721%2C3777%2C0
+R	dagannoth-waterbirth-assignment	W%2C2513%2C2577%2C10109%2C10173%2C0
+L	dagannoth-waterbirth-assignment	route-rock	TRAVEL	Route to the Waterbirth dungeon rock.	Waterbirth dungeon rock	5	2443%2C3746%2C0			y%28w%28W%2C2437%2C2449%2C3740%2C3752%2C0%29%3By%28w%28W%2C2533%2C2557%2C10129%2C10153%2C0%29%3Bl%28n%28dagannoth%29%3Bw%28W%2C2525%2C2565%2C10121%2C10161%2C0%29%29%29%29		
+B	dagannoth-waterbirth-assignment	route-rock	Continue to climb-rock	climb-rock	a
+L	dagannoth-waterbirth-assignment	climb-rock	MANUAL_INTERACTION	Climb through the Waterbirth dungeon rock.	Waterbirth dungeon rock	5	2443%2C3746%2C0	Climb over the Waterbirth dungeon rock.	o%288929%7C%7Cclimb over%29	y%28o%2853252%7E53254%7C%7Cclimb%29%3Bo%288958%7E8959%7E8960%7E8963%7C%7Copen%29%3By%28w%28W%2C2533%2C2557%2C10129%2C10153%2C0%29%3Bl%28n%28dagannoth%29%3Bw%28W%2C2525%2C2565%2C10121%2C10161%2C0%29%29%29%29		
+B	dagannoth-waterbirth-assignment	climb-rock	Continue to route-shortcut	route-shortcut	a
+L	dagannoth-waterbirth-assignment	route-shortcut	TRAVEL	Route toward the reviewed 85 Agility shortcut.	Waterbirth Agility shortcut	4	2547%2C3749%2C0%3B2547%2C3744%2C0			y%28o%2853252%7E53254%7C%7Cclimb%29%3By%28w%28W%2C2533%2C2557%2C10129%2C10153%2C0%29%3Bl%28n%28dagannoth%29%3Bw%28W%2C2525%2C2565%2C10121%2C10161%2C0%29%29%29%29		
+B	dagannoth-waterbirth-assignment	route-shortcut	Continue to choose-interior-route	choose-interior-route	a
+L	dagannoth-waterbirth-assignment	choose-interior-route	DECISION	Use the 85 Agility shortcut when available.		0				a		
+B	dagannoth-waterbirth-assignment	choose-interior-route	85 Agility shortcut is available	use-shortcut	o%2853252%7E53254%7C%7Cclimb%29
+B	dagannoth-waterbirth-assignment	choose-interior-route	Continue to manual-interior-route	manual-interior-route	a
+L	dagannoth-waterbirth-assignment	use-shortcut	MANUAL_INTERACTION	Use the Waterbirth Agility shortcut.	Waterbirth Agility shortcut	4	2547%2C3749%2C0%3B2547%2C3744%2C0	Climb the reviewed Waterbirth Agility shortcut.	o%2853252%7E53254%7C%7Cclimb%29	y%28o%288958%7E8959%7E8960%7E8963%7C%7Copen%29%3By%28w%28W%2C2533%2C2557%2C10129%2C10153%2C0%29%3Bl%28n%28dagannoth%29%3Bw%28W%2C2525%2C2565%2C10121%2C10161%2C0%29%29%29%29		
+B	dagannoth-waterbirth-assignment	use-shortcut	Continue to route-pack	route-pack	a
+L	dagannoth-waterbirth-assignment	manual-interior-route	MANUAL_INTERACTION	Follow the manual pressure-door%2C pet-rock%2C and thrownaxe route.	Pressure-door and thrownaxe route	0		Carry and use a pet rock for the pressure doors and a Rune thrownaxe for the barrier%3B follow Shortest Path's live Waterbirth route.	o%288958%7E8959%7E8960%7E8963%7C%7Copen%29	y%28w%28W%2C2533%2C2557%2C10129%2C10153%2C0%29%3Bl%28n%28dagannoth%29%3Bw%28W%2C2525%2C2565%2C10121%2C10161%2C0%29%29%29		
+B	dagannoth-waterbirth-assignment	manual-interior-route	Continue to arrived	arrived	a
+L	dagannoth-waterbirth-assignment	route-pack	TRAVEL	Continue from the shortcut to the Dagannoth pack.	Waterbirth Dagannoth pack	8	2545%2C10141%2C0			y%28w%28W%2C2533%2C2557%2C10129%2C10153%2C0%29%3Bl%28n%28dagannoth%29%3Bw%28W%2C2525%2C2565%2C10121%2C10161%2C0%29%29%29		
+B	dagannoth-waterbirth-assignment	route-pack	Continue to arrived	arrived	a
+L	dagannoth-waterbirth-assignment	arrived	TERMINAL	Encounter arrival requires Waterbirth Dagannoth pack evidence.		0					Waterbirth Dagannoth pack	y%28w%28W%2C2533%2C2557%2C10129%2C10153%2C0%29%3Bl%28n%28dagannoth%29%3Bw%28W%2C2525%2C2565%2C10121%2C10161%2C0%29%29%29
+P	cave-kraken-kraken-cove	route-checkpoint
+R	cave-kraken-kraken-cove	W%2C2245%2C2309%2C3579%2C3643%2C0
+L	cave-kraken-kraken-cove	route-checkpoint	TRAVEL	Route to Kraken Cove entrance.	Kraken Cove entrance	4	2277%2C3611%2C0			y%28w%28W%2C2272%2C2282%2C3606%2C3616%2C0%29%3Bn%28cave kraken%29%29		
+B	cave-kraken-kraken-cove	route-checkpoint	Continue to interact	interact	a
+L	cave-kraken-kraken-cove	interact	MANUAL_INTERACTION	Enter Kraken Cove%3B do not use the separate boss crevice.	Kraken Cove entrance	4	2277%2C3611%2C0	Enter Kraken Cove%3B do not use the separate boss crevice.	o%2830177%7C%7Center%29	n%28cave kraken%29		
+B	cave-kraken-kraken-cove	interact	Continue to arrived	arrived	a
+L	cave-kraken-kraken-cove	arrived	TERMINAL	Encounter arrival requires Kraken Cove entrance evidence.		0					Kraken Cove entrance	n%28cave kraken%29
+P	araxytes-morytania-spider-cave	route-checkpoint
+R	araxytes-morytania-spider-cave	W%2C3620%2C3692%2C3372%2C3444%2C0
+L	araxytes-morytania-spider-cave	route-checkpoint	TRAVEL	Route to Morytania Spider Cave entrance.	Morytania Spider Cave entrance	4	3656%2C3408%2C0			y%28w%28W%2C3651%2C3661%2C3403%2C3413%2C0%29%3Bn%28araxyte%29%29		
+B	araxytes-morytania-spider-cave	route-checkpoint	Continue to interact	interact	a
+L	araxytes-morytania-spider-cave	interact	MANUAL_INTERACTION	Enter the Morytania Spider Cave.	Morytania Spider Cave entrance	4	3656%2C3408%2C0	Enter the Morytania Spider Cave.	o%2842594%7C%7Center%29	n%28araxyte%29		
+B	araxytes-morytania-spider-cave	interact	Continue to arrived	arrived	a
+L	araxytes-morytania-spider-cave	arrived	TERMINAL	Encounter arrival requires Morytania Spider Cave entrance evidence.		0					Morytania Spider Cave entrance	n%28araxyte%29
+P	frost-dragons-grimstone	route-entrance
+R	frost-dragons-grimstone	W%2C2884%2C2940%2C4038%2C4094%2C0
+R	frost-dragons-grimstone	W%2C2862%2C2910%2C10456%2C10504%2C0
+R	frost-dragons-grimstone	W%2C2873%2C2929%2C10435%2C10491%2C0
+R	frost-dragons-grimstone	W%2C2816%2C2879%2C10432%2C10495%2C0
+R	frost-dragons-grimstone	W%2C2880%2C2943%2C10432%2C10495%2C0
+L	frost-dragons-grimstone	route-entrance	TRAVEL	Route to the Grimstone Dungeon entrance.	Grimstone Dungeon entrance	4	2912%2C4066%2C0			y%28w%28W%2C2907%2C2917%2C4061%2C4071%2C0%29%3By%28w%28W%2C2816%2C2879%2C10432%2C10495%2C0%29%3Bw%28W%2C2880%2C2943%2C10432%2C10495%2C0%29%29%3Bw%28W%2C2887%2C2915%2C10449%2C10477%2C0%29%29		
+B	frost-dragons-grimstone	route-entrance	Continue to enter-dungeon	enter-dungeon	a
+L	frost-dragons-grimstone	enter-dungeon	MANUAL_INTERACTION	Enter Grimstone Dungeon.	Grimstone Dungeon entrance	4	2912%2C4066%2C0	Enter the reviewed Grimstone Dungeon cave entrance.	o%2860117%7C%7Center%29	y%28y%28w%28W%2C2816%2C2879%2C10432%2C10495%2C0%29%3Bw%28W%2C2880%2C2943%2C10432%2C10495%2C0%29%29%3Bw%28W%2C2887%2C2915%2C10449%2C10477%2C0%29%29		
+B	frost-dragons-grimstone	enter-dungeon	Continue to route-pack	route-pack	a
+L	frost-dragons-grimstone	route-pack	TRAVEL	Continue from the cave landing to the main Frost dragon pack.	main Frost dragon pack	8	2901%2C10463%2C0			w%28W%2C2887%2C2915%2C10449%2C10477%2C0%29		
+B	frost-dragons-grimstone	route-pack	Continue to arrived	arrived	a
+L	frost-dragons-grimstone	arrived	TERMINAL	Encounter arrival requires main Frost dragon pack evidence.		0					main Frost dragon pack	w%28W%2C2887%2C2915%2C10449%2C10477%2C0%29
+P	ghosts-catacombs	route-surface-statue
+R	ghosts-catacombs	W%2C1611%2C1667%2C3645%2C3701%2C0
+R	ghosts-catacombs	W%2C1638%2C1694%2C10022%2C10078%2C0
+R	ghosts-catacombs	W%2C1661%2C1717%2C10035%2C10091%2C0
+R	ghosts-catacombs	W%2C1664%2C1727%2C10048%2C10111%2C0
+L	ghosts-catacombs	route-surface-statue	TRAVEL	Route to King Rada I's Catacombs statue.	Catacombs surface statue	4	1639%2C3673%2C0			y%28w%28W%2C1634%2C1644%2C3668%2C3678%2C0%29%3Bw%28W%2C1664%2C1727%2C10048%2C10111%2C0%29%3Bw%28W%2C1675%2C1703%2C10049%2C10077%2C0%29%29		
+B	ghosts-catacombs	route-surface-statue	Continue to enter-catacombs	enter-catacombs	a
+L	ghosts-catacombs	enter-catacombs	MANUAL_INTERACTION	Investigate King Rada I's statue.	Catacombs surface statue	4	1639%2C3673%2C0	Investigate King Rada I's statue to enter the Catacombs.	o%2827785%7C%7Cinvestigate%29	y%28w%28W%2C1664%2C1727%2C10048%2C10111%2C0%29%3Bw%28W%2C1675%2C1703%2C10049%2C10077%2C0%29%29		
+B	ghosts-catacombs	enter-catacombs	Continue to route-ghost-pack	route-ghost-pack	a
+L	ghosts-catacombs	route-ghost-pack	TRAVEL	Enter through the reviewed statue edge and continue east to the Ghost pack.	Catacombs Ghost pack	8	1689%2C10063%2C0			w%28W%2C1675%2C1703%2C10049%2C10077%2C0%29		
+B	ghosts-catacombs	route-ghost-pack	Continue to arrived	arrived	a
+L	ghosts-catacombs	arrived	TERMINAL	Encounter arrival requires Catacombs Ghost pack evidence.		0					Catacombs Ghost pack	w%28W%2C1675%2C1703%2C10049%2C10077%2C0%29
+P	scabarites-sophanem-dungeon	route-0
+R	scabarites-sophanem-dungeon	W%2C3291%2C3339%2C2772%2C2820%2C0
+R	scabarites-sophanem-dungeon	W%2C2776%2C2824%2C5135%2C5183%2C0
+R	scabarites-sophanem-dungeon	W%2C2776%2C2824%2C5135%2C5183%2C0
+R	scabarites-sophanem-dungeon	W%2C2142%2C2190%2C4385%2C4433%2C2
+R	scabarites-sophanem-dungeon	W%2C2112%2C2168%2C4364%2C4420%2C2
+L	scabarites-sophanem-dungeon	route-0	TRAVEL	Route to Sophanem temple ladder.	Sophanem temple ladder	4	3315%2C2796%2C0			y%28w%28W%2C3310%2C3320%2C2791%2C2801%2C0%29%3By%28w%28W%2C2120%2C2160%2C4372%2C4412%2C2%29%3Bn%28locust rider%7Escarab mage%29%29%29		
+B	scabarites-sophanem-dungeon	route-0	Continue to interact-0	interact-0	a
+L	scabarites-sophanem-dungeon	interact-0	MANUAL_INTERACTION	Use Sophanem temple ladder.	Sophanem temple ladder	4	3315%2C2796%2C0	Use the reviewed Sophanem temple ladder.	o%2820275%7C%7Cclimb down%29	y%28w%28W%2C2792%2C2808%2C5151%2C5167%2C0%29%3By%28w%28W%2C2120%2C2160%2C4372%2C4412%2C2%29%3Bn%28locust rider%7Escarab mage%29%29%29		
+B	scabarites-sophanem-dungeon	interact-0	Continue to route-1	route-1	a
+L	scabarites-sophanem-dungeon	route-1	TRAVEL	Route to lower Sophanem ladder.	lower Sophanem ladder	4	2800%2C5159%2C0			y%28w%28W%2C2795%2C2805%2C5154%2C5164%2C0%29%3By%28w%28W%2C2120%2C2160%2C4372%2C4412%2C2%29%3Bn%28locust rider%7Escarab mage%29%29%29		
+B	scabarites-sophanem-dungeon	route-1	Continue to interact-1	interact-1	a
+L	scabarites-sophanem-dungeon	interact-1	MANUAL_INTERACTION	Use lower Sophanem ladder.	lower Sophanem ladder	4	2800%2C5159%2C0	Use the reviewed lower Sophanem ladder.	o%2820278%7C%7Cclimb down%29	y%28w%28W%2C2158%2C2174%2C4401%2C4417%2C2%29%3By%28w%28W%2C2120%2C2160%2C4372%2C4412%2C2%29%3Bn%28locust rider%7Escarab mage%29%29%29		
+B	scabarites-sophanem-dungeon	interact-1	Continue to route-terminal	route-terminal	a
+L	scabarites-sophanem-dungeon	route-terminal	TRAVEL	Route from the final handoff to Scabarite pack.	Scabarite pack	8	2140%2C4392%2C2			y%28w%28W%2C2120%2C2160%2C4372%2C4412%2C2%29%3Bn%28locust rider%7Escarab mage%29%29		
+B	scabarites-sophanem-dungeon	route-terminal	Continue to arrived	arrived	a
+L	scabarites-sophanem-dungeon	arrived	TERMINAL	Encounter arrival requires Scabarite pack evidence.		0					Scabarite pack	y%28w%28W%2C2120%2C2160%2C4372%2C4412%2C2%29%3Bn%28locust rider%7Escarab mage%29%29
+P	shadow-warriors-legends-basement	route-checkpoint
+R	shadow-warriors-legends-basement	W%2C2700%2C2756%2C3320%2C3376%2C0
+L	shadow-warriors-legends-basement	route-checkpoint	TRAVEL	Route to Legends' Guild basement stairs.	Legends' Guild basement stairs	4	2728%2C3348%2C0			y%28w%28W%2C2723%2C2733%2C3343%2C3353%2C0%29%3Bn%28shadow warrior%29%29		
+B	shadow-warriors-legends-basement	route-checkpoint	Continue to interact	interact	a
+L	shadow-warriors-legends-basement	interact	MANUAL_INTERACTION	Climb down the Legends' Guild basement stairs.	Legends' Guild basement stairs	4	2728%2C3348%2C0	Climb down the Legends' Guild basement stairs.	o%2816664%7C%7Cclimb down%29	n%28shadow warrior%29		
+B	shadow-warriors-legends-basement	interact	Continue to arrived	arrived	a
+L	shadow-warriors-legends-basement	arrived	TERMINAL	Encounter arrival requires Legends' Guild basement stairs evidence.		0					Legends' Guild basement stairs	n%28shadow warrior%29
+P	warped-creatures-poison-waste	route-checkpoint
+R	warped-creatures-poison-waste	W%2C2286%2C2358%2C3063%2C3135%2C0
+L	warped-creatures-poison-waste	route-checkpoint	TRAVEL	Route to Poison Waste sewer entrance.	Poison Waste sewer entrance	4	2322%2C3099%2C0			y%28w%28W%2C2317%2C2327%2C3094%2C3104%2C0%29%3Bn%28warped terrorbird%7Ewarped tortoise%29%29		
+B	warped-creatures-poison-waste	route-checkpoint	Continue to interact	interact	a
+L	warped-creatures-poison-waste	interact	MANUAL_INTERACTION	Use the Poison Waste spirit tree route%2C then enter the sewer.	Poison Waste sewer entrance	4	2322%2C3099%2C0	Use the Poison Waste spirit tree route%2C then enter the sewer.	o%2849868%7C%7Center%7Eclimb down%29	n%28warped terrorbird%7Ewarped tortoise%29		
+B	warped-creatures-poison-waste	interact	Continue to arrived	arrived	a
+L	warped-creatures-poison-waste	arrived	TERMINAL	Encounter arrival requires Poison Waste sewer entrance evidence.		0					Poison Waste sewer entrance	n%28warped terrorbird%7Ewarped tortoise%29
+P	frost-nagua-tapoyauik	route-entrance
+R	frost-nagua-tapoyauik	W%2C1665%2C1721%2C3202%2C3258%2C0
+R	frost-nagua-tapoyauik	W%2C1665%2C1721%2C9602%2C9658%2C2
+R	frost-nagua-tapoyauik	W%2C1642%2C1698%2C9603%2C9659%2C2
+R	frost-nagua-tapoyauik	W%2C1642%2C1698%2C9603%2C9659%2C0
+R	frost-nagua-tapoyauik	W%2C1610%2C1666%2C9602%2C9658%2C0
+L	frost-nagua-tapoyauik	route-entrance	TRAVEL	Route to the Ruins of Tapoyauik entrance.	Ruins of Tapoyauik entrance	4	1693%2C3230%2C0			y%28w%28W%2C1688%2C1698%2C3225%2C3235%2C0%29%3By%28w%28W%2C1622%2C1654%2C9614%2C9646%2C0%29%3Bn%28frost nagua%29%29%29		
+B	frost-nagua-tapoyauik	route-entrance	Continue to enter-ruins	enter-ruins	a
+L	frost-nagua-tapoyauik	enter-ruins	MANUAL_INTERACTION	Enter the Ruins of Tapoyauik.	Ruins of Tapoyauik entrance	4	1693%2C3230%2C0	Enter the Ruins of Tapoyauik.	o%2854525%7C%7Center%7Eclimb down%29	y%28w%28W%2C1685%2C1701%2C9622%2C9638%2C2%29%3By%28w%28W%2C1622%2C1654%2C9614%2C9646%2C0%29%3Bn%28frost nagua%29%29%29		
+B	frost-nagua-tapoyauik	enter-ruins	Continue to route-upper-chain	route-upper-chain	a
+L	frost-nagua-tapoyauik	route-upper-chain	TRAVEL	Route to the upper post-quest chain.	Upper Tapoyauik chain	4	1670%2C9631%2C2			y%28w%28W%2C1665%2C1675%2C9626%2C9636%2C2%29%3By%28w%28W%2C1622%2C1654%2C9614%2C9646%2C0%29%3Bn%28frost nagua%29%29%29		
+B	frost-nagua-tapoyauik	route-upper-chain	Continue to use-upper-chain	use-upper-chain	a
+L	frost-nagua-tapoyauik	use-upper-chain	MANUAL_INTERACTION	Climb down the upper chain.	Upper Tapoyauik chain	4	1670%2C9631%2C2	Climb down the upper post-quest chain.	o%2854527%7C%7Cclimb down%29	y%28w%28W%2C1664%2C1676%2C9625%2C9637%2C0%29%3By%28w%28W%2C1622%2C1654%2C9614%2C9646%2C0%29%3Bn%28frost nagua%29%29%29		
+B	frost-nagua-tapoyauik	use-upper-chain	Continue to find-lower-chain	find-lower-chain	a
+L	frost-nagua-tapoyauik	find-lower-chain	TRAVEL	Locate the lower shortcut chain.	Lower Tapoyauik chain	4	1670%2C9631%2C0			y%28o%2854528%7C%7Cpull%29%3Bo%2854530%7C%7Cclimb down%7Eclimb%29%3By%28w%28W%2C1622%2C1654%2C9614%2C9646%2C0%29%3Bn%28frost nagua%29%29%29		
+B	frost-nagua-tapoyauik	find-lower-chain	Continue to choose-lower-chain	choose-lower-chain	a
+L	frost-nagua-tapoyauik	choose-lower-chain	DECISION	Unlock the lower chain when it is still blocked.		0				a		
+B	frost-nagua-tapoyauik	choose-lower-chain	Lower chain must be unlocked	pull-chain	o%2854528%7C%7Cpull%29
+B	frost-nagua-tapoyauik	choose-lower-chain	Continue to descend-chain	descend-chain	a
+L	frost-nagua-tapoyauik	pull-chain	MANUAL_INTERACTION	Pull the blocked lower chain.	Blocked lower Tapoyauik chain	0		Pull the lower chain to unlock it.	o%2854528%7C%7Cpull%29	y%28o%2854530%7C%7Cclimb down%7Eclimb%29%3By%28w%28W%2C1622%2C1654%2C9614%2C9646%2C0%29%3Bn%28frost nagua%29%29%29		
+B	frost-nagua-tapoyauik	pull-chain	Continue to descend-chain	descend-chain	a
+L	frost-nagua-tapoyauik	descend-chain	MANUAL_INTERACTION	Use the unlocked lower chain.	Unlocked lower Tapoyauik chain	0		Climb down the unlocked lower chain.	o%2854530%7C%7Cclimb down%7Eclimb%29	y%28w%28W%2C1622%2C1654%2C9614%2C9646%2C0%29%3Bn%28frost nagua%29%29		
+B	frost-nagua-tapoyauik	descend-chain	Continue to arrived	arrived	a
+L	frost-nagua-tapoyauik	arrived	TERMINAL	Encounter arrival requires Frost Nagua pack evidence.		0					Frost Nagua pack	y%28w%28W%2C1622%2C1654%2C9614%2C9646%2C0%29%3Bn%28frost nagua%29%29
+P	aquanites-ynysdail-cavern	travel-to-ynysdail
+R	aquanites-ynysdail-cavern	W%2C2190%2C2246%2C3396%2C3452%2C0
+R	aquanites-ynysdail-cavern	W%2C2199%2C2255%2C3441%2C3497%2C0
+R	aquanites-ynysdail-cavern	W%2C2186%2C2250%2C3446%2C3510%2C0
+R	aquanites-ynysdail-cavern	W%2C2265%2C2321%2C9885%2C9941%2C0
+R	aquanites-ynysdail-cavern	W%2C2243%2C2307%2C9848%2C9912%2C0
+L	aquanites-ynysdail-cavern	travel-to-ynysdail	TRAVEL	Use the built Ynysdail rowboat%2C or sail a player ship to Ynysdail.	Ynysdail rowboat or player ship	5	2218%2C3424%2C0			y%28w%28W%2C2203%2C2251%2C3445%2C3493%2C0%29%3Bo%2860169%7C%7Center%29%3By%28w%28W%2C2257%2C2293%2C9862%2C9898%2C0%29%3Bn%28aquanite%7Eelder aquanite%29%29%29		
+B	aquanites-ynysdail-cavern	travel-to-ynysdail	Continue to route-cave	route-cave	a
+L	aquanites-ynysdail-cavern	route-cave	TRAVEL	Route from the Ynysdail landing to the cavern.	Ynysdail Cavern entrance	4	2218%2C3478%2C0			y%28w%28W%2C2213%2C2223%2C3473%2C3483%2C0%29%3By%28w%28W%2C2257%2C2293%2C9862%2C9898%2C0%29%3Bn%28aquanite%7Eelder aquanite%29%29%29		
+B	aquanites-ynysdail-cavern	route-cave	Continue to enter-cave	enter-cave	a
+L	aquanites-ynysdail-cavern	enter-cave	MANUAL_INTERACTION	Enter Ynysdail Cavern.	Ynysdail Cavern entrance	4	2218%2C3478%2C0	Enter Ynysdail Cavern.	o%2860169%7C%7Center%29	y%28w%28W%2C2275%2C2311%2C9895%2C9931%2C0%29%3By%28w%28W%2C2257%2C2293%2C9862%2C9898%2C0%29%3Bn%28aquanite%7Eelder aquanite%29%29%29		
+B	aquanites-ynysdail-cavern	enter-cave	Continue to route-pack	route-pack	a
+L	aquanites-ynysdail-cavern	route-pack	TRAVEL	Route from the cavern entrance to the Aquanite pack.	Ynysdail Aquanite pack	8	2275%2C9880%2C0			y%28w%28W%2C2257%2C2293%2C9862%2C9898%2C0%29%3Bn%28aquanite%7Eelder aquanite%29%29		
+B	aquanites-ynysdail-cavern	route-pack	Continue to arrived	arrived	a
+L	aquanites-ynysdail-cavern	arrived	TERMINAL	Encounter arrival requires Ynysdail Aquanite pack evidence.		0					Ynysdail Aquanite pack	y%28w%28W%2C2257%2C2293%2C9862%2C9898%2C0%29%3Bn%28aquanite%7Eelder aquanite%29%29
+P	killerwatts-draynor-manor	route-0
+R	killerwatts-draynor-manor	W%2C3084%2C3132%2C3338%2C3386%2C0
+R	killerwatts-draynor-manor	W%2C3080%2C3128%2C3338%2C3386%2C1
+R	killerwatts-draynor-manor	W%2C3080%2C3128%2C3338%2C3386%2C1
+R	killerwatts-draynor-manor	W%2C3087%2C3135%2C3339%2C3387%2C2
+R	killerwatts-draynor-manor	W%2C3087%2C3135%2C3339%2C3387%2C2
+R	killerwatts-draynor-manor	W%2C2654%2C2702%2C5190%2C5238%2C2
+R	killerwatts-draynor-manor	W%2C2614%2C2670%2C5174%2C5230%2C2
+L	killerwatts-draynor-manor	route-0	TRAVEL	Route to Draynor Manor stairs.	Draynor Manor stairs	4	3108%2C3362%2C0			y%28w%28W%2C3103%2C3113%2C3357%2C3367%2C0%29%3Bn%28killerwatt%29%29		
+B	killerwatts-draynor-manor	route-0	Continue to interact-0	interact-0	a
+L	killerwatts-draynor-manor	interact-0	MANUAL_INTERACTION	Use Draynor Manor stairs.	Draynor Manor stairs	4	3108%2C3362%2C0	Use the reviewed Draynor Manor stairs.	o%2811498%7C%7Cclimb up%29	y%28w%28W%2C3096%2C3112%2C3354%2C3370%2C1%29%3Bn%28killerwatt%29%29		
+B	killerwatts-draynor-manor	interact-0	Continue to route-1	route-1	a
+L	killerwatts-draynor-manor	route-1	TRAVEL	Route to Draynor Manor spiral stairs.	Draynor Manor spiral stairs	4	3104%2C3362%2C1			y%28w%28W%2C3099%2C3109%2C3357%2C3367%2C1%29%3Bn%28killerwatt%29%29		
+B	killerwatts-draynor-manor	route-1	Continue to interact-1	interact-1	a
+L	killerwatts-draynor-manor	interact-1	MANUAL_INTERACTION	Use Draynor Manor spiral stairs.	Draynor Manor spiral stairs	4	3104%2C3362%2C1	Use the reviewed Draynor Manor spiral stairs.	o%2811511%7C%7Cclimb up%29	y%28w%28W%2C3103%2C3119%2C3355%2C3371%2C2%29%3Bn%28killerwatt%29%29		
+B	killerwatts-draynor-manor	interact-1	Continue to route-2	route-2	a
+L	killerwatts-draynor-manor	route-2	TRAVEL	Route to Killerwatt portal.	Killerwatt portal	4	3111%2C3363%2C2			y%28w%28W%2C3106%2C3116%2C3358%2C3368%2C2%29%3Bn%28killerwatt%29%29		
+B	killerwatts-draynor-manor	route-2	Continue to interact-2	interact-2	a
+L	killerwatts-draynor-manor	interact-2	MANUAL_INTERACTION	Use Killerwatt portal.	Killerwatt portal	4	3111%2C3363%2C2	Use the reviewed Killerwatt portal.	o%2811354%7C%7Center%29	y%28w%28W%2C2670%2C2686%2C5206%2C5222%2C2%29%3Bn%28killerwatt%29%29		
+B	killerwatts-draynor-manor	interact-2	Continue to route-terminal	route-terminal	a
+L	killerwatts-draynor-manor	route-terminal	TRAVEL	Route from the final handoff to Killerwatt plane.	Killerwatt plane	8	2642%2C5202%2C2			n%28killerwatt%29		
+B	killerwatts-draynor-manor	route-terminal	Continue to arrived	arrived	a
+L	killerwatts-draynor-manor	arrived	TERMINAL	Encounter arrival requires Killerwatt plane evidence.		0					Killerwatt plane	n%28killerwatt%29
+P	otherworldly-beings-zanaris	route-checkpoint
+R	otherworldly-beings-zanaris	W%2C3170%2C3234%2C3137%2C3201%2C0
+L	otherworldly-beings-zanaris	route-checkpoint	TRAVEL	Route to Lumbridge Swamp shed.	Lumbridge Swamp shed	4	3202%2C3169%2C0			y%28w%28W%2C3197%2C3207%2C3164%2C3174%2C0%29%3Bn%28otherworldly being%29%29		
+B	otherworldly-beings-zanaris	route-checkpoint	Continue to interact	interact	a
+L	otherworldly-beings-zanaris	interact	MANUAL_INTERACTION	Open the shed door while wielding a Dramen or Lunar staff.	Lumbridge Swamp shed	4	3202%2C3169%2C0	Open the shed door while wielding a Dramen or Lunar staff.	o%282406%7C%7Copen%29	n%28otherworldly being%29		
+B	otherworldly-beings-zanaris	interact	Continue to arrived	arrived	a
+L	otherworldly-beings-zanaris	arrived	TERMINAL	Encounter arrival requires Lumbridge Swamp shed evidence.		0					Lumbridge Swamp shed	n%28otherworldly being%29
+P	mutated-zygomites-zanaris	route-checkpoint
+R	mutated-zygomites-zanaris	W%2C3170%2C3234%2C3137%2C3201%2C0
+L	mutated-zygomites-zanaris	route-checkpoint	TRAVEL	Route to Lumbridge Swamp shed.	Lumbridge Swamp shed	4	3202%2C3169%2C0			y%28w%28W%2C3197%2C3207%2C3164%2C3174%2C0%29%3Bn%28mutated zygomite%29%29		
+B	mutated-zygomites-zanaris	route-checkpoint	Continue to interact	interact	a
+L	mutated-zygomites-zanaris	interact	MANUAL_INTERACTION	Open the shed door while wielding a Dramen or Lunar staff.	Lumbridge Swamp shed	4	3202%2C3169%2C0	Open the shed door while wielding a Dramen or Lunar staff.	o%282406%7C%7Copen%29	n%28mutated zygomite%29		
+B	mutated-zygomites-zanaris	interact	Continue to arrived	arrived	a
+L	mutated-zygomites-zanaris	arrived	TERMINAL	Encounter arrival requires Lumbridge Swamp shed evidence.		0					Lumbridge Swamp shed	n%28mutated zygomite%29
+P	custodian-stalkers-stalker-den	route-checkpoint
+R	custodian-stalkers-stalker-den	W%2C1288%2C1360%2C3328%2C3400%2C0
+L	custodian-stalkers-stalker-den	route-checkpoint	TRAVEL	Route to south Stalker Den entrance.	south Stalker Den entrance	4	1324%2C3364%2C0			y%28w%28W%2C1319%2C1329%2C3359%2C3369%2C0%29%3Bn%28juvenile custodian stalker%7Emature custodian stalker%7Eelder custodian stalker%29%29		
+B	custodian-stalkers-stalker-den	route-checkpoint	Continue to interact	interact	a
+L	custodian-stalkers-stalker-den	interact	MANUAL_INTERACTION	Squeeze through the reviewed south entrance.	south Stalker Den entrance	4	1324%2C3364%2C0	Squeeze through the reviewed south entrance.	o%2857279%7C%7Csqueeze through%29	n%28juvenile custodian stalker%7Emature custodian stalker%7Eelder custodian stalker%29		
+B	custodian-stalkers-stalker-den	interact	Continue to arrived	arrived	a
+L	custodian-stalkers-stalker-den	arrived	TERMINAL	Encounter arrival requires south Stalker Den entrance evidence.		0					south Stalker Den entrance	n%28juvenile custodian stalker%7Emature custodian stalker%7Eelder custodian stalker%29

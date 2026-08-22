@@ -1,9 +1,14 @@
 package com.slayerplus;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -16,6 +21,8 @@ import net.runelite.api.Skill;
 
 public final class SlayerRecommendationEngine
 {
+	private static final String TASK_LOCATIONS_RESOURCE =
+		"/com/slayerplus/slayer-task-locations.tsv";
 	private static final int KRYSTILIA_MASTER_ID = 7;
 	private static final int KONAR_MASTER_ID = 8;
 	private static final Map<String, List<LocationOption>> TASK_LOCATIONS =
@@ -1053,699 +1060,81 @@ public final class SlayerRecommendationEngine
 
 	private static Map<String, List<LocationOption>> createTaskLocations()
 	{
-		final Map<String, List<LocationOption>> map = new HashMap<>();
-
-		register(map,
-			aliases("abyssal demon", "abyssal demons"),
-			option(
-				"Catacombs of Kourend",
-				"Multi-combat melee or burst/barrage",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			),
-			option(
-				"Slayer Tower",
-				"Single-combat melee",
-				"Slayer ring to Slayer Tower",
-				CannonSupport.NOT_ALLOWED,
-				Quest.PRIEST_IN_PERIL,
-				"Priest in Peril"
-			)
-		);
-
-		register(map,
-			aliases("bloodveld", "bloodvelds"),
-			option(
-				"Meiyerditch Laboratories",
-				"Cannon mutated bloodvelds in multi-combat",
-				"Drakan's medallion to Darkmeyer, then enter the laboratories",
-				CannonSupport.RECOMMENDED,
-				Quest.SINS_OF_THE_FATHER,
-				"Sins of the Father"
-			),
-			option(
-				"Buccaneers' Laboratory",
-				"Cannon mutated Bloodvelds in unobstructed multi-combat",
-				"Pirates' Cove, then the built rowboat to Buccaneers' Haven",
-				CannonSupport.RECOMMENDED,
-				Skill.SAILING,
-				76
-			),
-			option(
-				"Iorwerth Dungeon",
-				"Cannon mutated Bloodvelds in a single-combat crystal-shard area",
-				"Teleport crystal to Prifddinas, then enter Iorwerth Dungeon",
-				CannonSupport.OPTIONAL,
-				Quest.SONG_OF_THE_ELVES,
-				"Song of the Elves"
-			),
-			option(
-				"Stronghold Slayer Cave",
-				"Safespot regular Bloodvelds with a dwarf multicannon",
-				"Slayer ring to Stronghold Slayer Cave",
-				CannonSupport.RECOMMENDED
-			),
-			option(
-				"Catacombs of Kourend",
-				"Venator bow with goading potion or prayer melee in multi-combat",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			),
-			option(
-				"Slayer Tower (first floor)",
-				"Safespot regular Bloodvelds in single-combat",
-				"Slayer ring to Slayer Tower",
-				CannonSupport.NOT_ALLOWED,
-				Quest.PRIEST_IN_PERIL,
-				"Priest in Peril"
-			),
-			option(
-				"Slayer Tower basement",
-				"Safespot task-only regular Bloodvelds in single-combat",
-				"Slayer ring to Slayer Tower, then use the entrance ladder",
-				CannonSupport.NOT_ALLOWED,
-				Quest.PRIEST_IN_PERIL,
-				"Priest in Peril"
-			),
-			option(
-				"God Wars Dungeon",
-				"Safespot Zamorak Bloodvelds with Saradomin and Zamorak protection",
-				"Trollheim teleport, then enter God Wars Dungeon",
-				CannonSupport.NOT_ALLOWED,
-				Quest.DEATH_PLATEAU,
-				"Death Plateau"
-			)
-		);
-
-		register(map,
-			aliases("dust devil", "dust devils"),
-			option(
-				"Catacombs of Kourend",
-				"Burst or barrage stacked dust devils",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("nechryael", "nechryaels"),
-			option(
-				"Catacombs of Kourend",
-				"Burst or barrage stacked nechryaels",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			),
-			option(
-				"Iorwerth Dungeon",
-				"Single-combat Greater Nechryaels with optional cannon support for crystal shard drops",
-				"Teleport crystal to Prifddinas, then enter Iorwerth Dungeon",
-				CannonSupport.OPTIONAL,
-				Quest.SONG_OF_THE_ELVES,
-				"Song of the Elves"
-			)
-		);
-
-		register(map,
-			aliases("smoke devil", "smoke devils"),
-			option(
-				"Smoke Devil Dungeon",
-				"Cannon while bursting or barraging",
-				"Use the nearest unlocked teleport to the dungeon entrance",
-				CannonSupport.RECOMMENDED
-			)
-		);
-
-		register(map,
-			aliases("gargoyle", "gargoyles"),
-			option(
-				"Slayer Tower",
-				"Melee with a rock hammer or automatic finisher",
-				"Slayer ring to Slayer Tower",
-				CannonSupport.NOT_ALLOWED,
-				Quest.PRIEST_IN_PERIL,
-				"Priest in Peril"
-			)
-		);
-
-		register(map,
-			aliases("kurask", "kurasks"),
-			option(
-				"Iorwerth Dungeon",
-				"Leaf-bladed weapon, broad ammunition, or Magic Dart",
-				"Teleport crystal to Prifddinas, then enter Iorwerth Dungeon",
-				CannonSupport.NOT_ALLOWED,
-				Quest.SONG_OF_THE_ELVES,
-				"Song of the Elves"
-			),
-			option(
-				"Fremennik Slayer Dungeon",
-				"Leaf-bladed weapon, broad ammunition, or Magic Dart",
-				"Slayer ring to Fremennik Slayer Dungeon",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("turoth", "turoths"),
-			option(
-				"Fremennik Slayer Dungeon",
-				"Leaf-bladed weapon, broad ammunition, or Magic Dart",
-				"Slayer ring to Fremennik Slayer Dungeon",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("cave kraken", "kraken"),
-			option(
-				"Kraken Cove",
-				"Magic against cave kraken",
-				"Use the nearest unlocked teleport to Kraken Cove",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("cave horror", "cave horrors"),
-			option(
-				"Mos Le'Harmless Cave",
-				"Fast ranged attacks with a witchwood icon and dwarf multicannon",
-				"Trouble Brewing minigame teleport, then run east",
-				CannonSupport.RECOMMENDED,
-				Quest.CABIN_FEVER,
-				"Cabin Fever"
-			)
-		);
-
-		register(map,
-			aliases("dagannoth", "dagannoths"),
-			option(
-				"Lighthouse Dungeon",
-				"Cannon in multi-combat",
-				"Games necklace to Barbarian Outpost, then run north",
-				CannonSupport.RECOMMENDED,
-				Quest.HORROR_FROM_THE_DEEP,
-				"Horror from the Deep"
-			),
-			option(
-				"Jormungand's Prison",
-				"Prayer melee against melee-only Dagannoth",
-				"Rellekka teleport, then travel to the prison",
-				CannonSupport.NOT_ALLOWED,
-				Quest.THE_FREMENNIK_EXILES,
-				"The Fremennik Exiles"
-			),
-			option(
-				"Waterbirth Island Dungeon",
-				"Multi-combat ranged or melee",
-				"Waterbirth teleport or travel from Rellekka",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("kalphite", "kalphites"),
-			option(
-				"Kalphite Slayer Cave",
-				"Cannon in the task-only cave",
-				"Use the nearest unlocked Desert teleport",
-				CannonSupport.RECOMMENDED
-			)
-		);
-
-		register(map,
-			aliases("suqah", "suqahs"),
-			option(
-				"Lunar Isle",
-				"Cannon the clustered suqahs",
-				"Lunar Isle teleport",
-				CannonSupport.RECOMMENDED,
-				Quest.LUNAR_DIPLOMACY,
-				"Lunar Diplomacy"
-			)
-		);
-
-		register(map,
-			aliases("troll", "trolls"),
-			option(
-				"Death Plateau",
-				"Cannon the dense troll spawns",
-				"Games necklace to Burthorpe, then run north",
-				CannonSupport.RECOMMENDED,
-				Quest.DEATH_PLATEAU,
-				"Death Plateau"
-			)
-		);
-
-		register(map,
-			aliases("wyrm", "wyrms"),
-			option(
-				"Karuulm Slayer Dungeon",
-				"Ranged or melee with boots of stone protection",
-				"Rada's blessing to Mount Karuulm",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("drake", "drakes"),
-			option(
-				"Karuulm Slayer Dungeon",
-				"Ranged or melee with boots of stone protection",
-				"Rada's blessing to Mount Karuulm",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("hydra", "hydras"),
-			option(
-				"Karuulm Slayer Dungeon",
-				"Ranged or melee in the hydra area",
-				"Rada's blessing to Mount Karuulm",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("hellhound", "hellhounds"),
-			option(
-				"Stronghold Slayer Cave",
-				"Cannon with Toxic blowpipe or Scorching bow from the safespot",
-				"Slayer ring to Stronghold Slayer Cave",
-				CannonSupport.RECOMMENDED
-			),
-			option(
-				"Catacombs of Kourend",
-				"Venator bow in multi-combat; demonbane melee or Water spells if preferred",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("fire giant", "fire giants"),
-			option(
-				"Catacombs of Kourend",
-				"Melee or ranged in multi-combat",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("greater demon", "greater demons"),
-			option(
-				"Chasm of Fire",
-				"Cannon or melee in the lower levels",
-				"Use the nearest unlocked Kourend teleport",
-				CannonSupport.RECOMMENDED
-			),
-			option(
-				"Catacombs of Kourend",
-				"Melee in multi-combat",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("black demon", "black demons"),
-			option(
-				"Catacombs of Kourend",
-				"Melee or ranged in multi-combat",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("aberrant spectre", "aberrant spectres"),
-			option(
-				"Stronghold Slayer Cave",
-				"Cannon with Protect from Magic and required face protection",
-				"Slayer ring to Stronghold Slayer Cave",
-				CannonSupport.RECOMMENDED
-			),
-			option(
-				"Catacombs of Kourend",
-				"Venator bow or prayer melee against Deviant spectres",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			),
-			option(
-				"Slayer Tower",
-				"Protect from Magic with a nose peg or Slayer helmet",
-				"Slayer ring to Slayer Tower",
-				CannonSupport.NOT_ALLOWED,
-				Quest.PRIEST_IN_PERIL,
-				"Priest in Peril"
-			)
-		);
-
-		register(map,
-			aliases("ankou"),
-			option(
-				"Catacombs of Kourend",
-				"Use a Venator bow against the tightly packed 1x1 Ankous in multi-combat",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			),
-			option(
-				"Catacombs of Kourend",
-				"Burst or barrage stacked Ankous in multi-combat",
-				"Xeric's talisman to Xeric's Heart",
-				CannonSupport.NOT_ALLOWED
-			),
-			option(
-				"Stronghold Slayer Cave",
-				"Cannon with a Toxic blowpipe in the single-combat room",
-				"Slayer ring to Stronghold Slayer Cave",
-				CannonSupport.RECOMMENDED
-			),
-			option(
-				"Stronghold of Security",
-				"Safespot with a Toxic blowpipe or another fast ranged weapon",
-				"Skull sceptre to the Stronghold of Security",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("blue dragon", "blue dragons"),
-			option(
-				"Taverley Dungeon",
-				"Ranged with an anti-dragon shield or antifire protection",
-				"Falador teleport, then run northwest",
-				CannonSupport.OPTIONAL
-			)
-		);
-
-		register(map,
-			aliases(
-				"bronze dragon", "bronze dragons",
-				"iron dragon", "iron dragons",
-				"steel dragon", "steel dragons"
-			),
-			option(
-				"Brimhaven Dungeon",
-				"Use a dragonbane weapon or Earth Magic with complete dragonfire protection",
-				"Fairy ring CKR, then run north to Brimhaven Dungeon",
-				CannonSupport.OPTIONAL
-			)
-		);
-
-		register(map,
-			aliases("mithril dragon", "mithril dragons"),
-			option(
-				"Ancient Cavern",
-				"Use a dragonbane weapon or Earth Magic with complete dragonfire protection",
-				"Barbarian teleport, then enter the whirlpool",
-				CannonSupport.NOT_ALLOWED,
-				Quest.BARBARIAN_TRAINING,
-				"Barbarian Training"
-			)
-		);
-
-		register(map,
-			aliases("minions of scabaras", "scabarite", "scabarites"),
-			option(
-				"Sophanem Dungeon",
-				"Use the reviewed cannon or non-cannon Scabarite method",
-				"Pharaoh's sceptre to Sophanem, then enter the dungeon",
-				CannonSupport.OPTIONAL
-			)
-		);
-
-		register(map,
-			aliases("skeletal wyvern", "skeletal wyverns"),
-			option(
-				"Asgarnian Ice Dungeon",
-				"Ranged with an elemental or dragonfire shield",
-				"Falador teleport, then run south",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("waterfiend", "waterfiends"),
-			option(
-				"Ancient Cavern",
-				"Crush attacks with prayer or food",
-				"Barbarian teleport, then enter the whirlpool",
-				CannonSupport.NOT_ALLOWED,
-				Quest.BARBARIAN_TRAINING,
-				"Barbarian Training"
-			),
-			option(
-				"Iorwerth Dungeon",
-				"Use Earth spells with optional cannon support for crystal shard drops",
-				"Teleport crystal to Prifddinas, then enter Iorwerth Dungeon",
-				CannonSupport.OPTIONAL,
-				Quest.SONG_OF_THE_ELVES,
-				"Song of the Elves"
-			)
-		);
-
-		register(map,
-			aliases("spiritual creature", "spiritual creatures"),
-			option(
-				"God Wars Dungeon",
-				"Kill the highest unlocked spiritual creature",
-				"Trollheim teleport, then enter God Wars Dungeon",
-				CannonSupport.NOT_ALLOWED,
-				Quest.TROLL_STRONGHOLD,
-				"Troll Stronghold"
-			)
-		);
-
-		register(map,
-			aliases("fossil island wyvern", "fossil island wyverns"),
-			option(
-				"Wyvern Cave on Fossil Island",
-				"Use an elemental or dragonfire shield",
-				"Digsite pendant to Fossil Island",
-				CannonSupport.NOT_ALLOWED,
-				Quest.BONE_VOYAGE,
-				"Bone Voyage"
-			)
-		);
-
-		register(map,
-			aliases("vampyre", "vampyres"),
-			option(
-				"Darkmeyer",
-				"Use an Ivandis or blisterwood weapon",
-				"Drakan's medallion to Darkmeyer",
-				CannonSupport.NOT_ALLOWED,
-				Quest.SINS_OF_THE_FATHER,
-				"Sins of the Father"
-			)
-		);
-
-		register(map,
-			aliases("basilisk", "basilisks"),
-			option(
-				"Jormungand's Prison",
-				"Basilisk Knights for the higher-value option",
-				"Fremennik sea boots or Rellekka teleport, then run north",
-				CannonSupport.NOT_ALLOWED,
-				Quest.THE_FREMENNIK_EXILES,
-				"The Fremennik Exiles"
-			),
-			option(
-				"Fremennik Slayer Dungeon",
-				"Use a mirror shield against regular basilisks",
-				"Slayer ring to Fremennik Slayer Dungeon",
-				CannonSupport.NOT_ALLOWED
-			)
-		);
-
-		register(map,
-			aliases("elf", "elves"),
-			option(
-				"Iorwerth Dungeon",
-				"Melee or ranged against Iorwerth elves",
-				"Teleport crystal to Prifddinas",
-				CannonSupport.NOT_ALLOWED,
-				Quest.SONG_OF_THE_ELVES,
-				"Song of the Elves"
-			),
-			option(
-				"Lletya",
-				"Kill the elves around Lletya",
-				"Teleport crystal to Lletya",
-				CannonSupport.NOT_ALLOWED,
-				Quest.REGICIDE,
-				"Regicide"
-			)
-		);
-
-		register(map,
-			aliases("dark beast", "dark beasts"),
-			option(
-				"Mourner Tunnels",
-				"Dense melee task with optional cannon support and a direct Slayer-ring route",
-				"Slayer ring to Dark Beasts",
-				CannonSupport.OPTIONAL,
-				Quest.MOURNINGS_END_PART_II,
-				"Mourning's End Part II"
-			),
-			option(
-				"Iorwerth Dungeon",
-				"Aggressive melee with optional cannon support and higher-value crystal shard drops",
-				"Teleport crystal to Prifddinas, then enter Iorwerth Dungeon",
-				CannonSupport.OPTIONAL,
-				Quest.SONG_OF_THE_ELVES,
-				"Song of the Elves"
-			)
-		);
-
-		register(map,
-			aliases("mutated zygomite", "mutated zygomites"),
-			option(
-				"Zanaris",
-				"Use fungicide spray to finish each kill",
-				"Fairy ring to Zanaris",
-				CannonSupport.NOT_ALLOWED,
-				Quest.LOST_CITY,
-				"Lost City"
-			)
-		);
-
-		register(map,
-			aliases("brine rat", "brine rats"),
-			option(
-				"Brine Rat Cavern",
-				"Melee or ranged in the cavern",
-				"Rellekka teleport, then run northeast",
-				CannonSupport.NOT_ALLOWED,
-				Quest.OLAFS_QUEST,
-				"Olaf's Quest"
-			)
-		);
-
-		register(map,
-			aliases("adamant dragon", "adamant dragons"),
-			option(
-				"Lithkren Vault",
-				"Ranged with strong dragonfire protection",
-				"Digsite pendant to Lithkren",
-				CannonSupport.NOT_ALLOWED,
-				Quest.DRAGON_SLAYER_II,
-				"Dragon Slayer II"
-			)
-		);
-
-		register(map,
-			aliases("rune dragon", "rune dragons"),
-			option(
-				"Lithkren Vault",
-				"Ranged or melee with strong dragonfire protection",
-				"Digsite pendant to Lithkren",
-				CannonSupport.NOT_ALLOWED,
-				Quest.DRAGON_SLAYER_II,
-				"Dragon Slayer II"
-			)
-		);
-
-		final Map<String, List<LocationOption>> immutable =
-			new HashMap<>();
-		for (final Map.Entry<String, List<LocationOption>> entry
-			: map.entrySet())
+		final Map<String, List<LocationOption>> groups = new LinkedHashMap<>();
+		try (InputStream stream = SlayerRecommendationEngine.class
+			.getResourceAsStream(TASK_LOCATIONS_RESOURCE))
 		{
-			immutable.put(
-				entry.getKey(),
-				Collections.unmodifiableList(
-					new ArrayList<>(entry.getValue())
-				)
-			);
+			if (stream == null)
+			{
+				throw new IllegalStateException(
+					"Missing task-location resource " + TASK_LOCATIONS_RESOURCE);
+			}
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+				stream, StandardCharsets.UTF_8)))
+			{
+				String line;
+				int lineNumber = 0;
+				while ((line = reader.readLine()) != null)
+				{
+					lineNumber++;
+					if (line.isEmpty() || line.charAt(0) == '#')
+					{
+						continue;
+					}
+					final String[] fields = line.split("\\t", -1);
+					if (fields.length != 9 || !fields[0].equals("O"))
+					{
+						throw new IllegalStateException(
+							"Invalid task-location resource line " + lineNumber);
+					}
+					final String aliasKey = decode(fields[1]);
+					final String requirementType = decode(fields[6]);
+					final Quest quest = requirementType.equals("QUEST")
+						? Quest.valueOf(decode(fields[7])) : null;
+					final Skill skill = requirementType.equals("SKILL")
+						? Skill.valueOf(decode(fields[7])) : null;
+					final int skillLevel = skill == null || fields[8].isEmpty()
+						? 0 : Integer.parseInt(decode(fields[8]));
+					groups.computeIfAbsent(aliasKey, unused -> new ArrayList<>()).add(
+						new LocationOption(
+							decode(fields[2]), decode(fields[3]), decode(fields[4]),
+							CannonSupport.valueOf(decode(fields[5])), quest,
+							quest == null ? "" : decode(fields[8]), skill,
+							skillLevel, false));
+				}
+			}
+		}
+		catch (final IOException | RuntimeException ex)
+		{
+			throw new IllegalStateException("Unable to load task locations", ex);
 		}
 
-		return Collections.unmodifiableMap(immutable);
-	}
-
-	private static void register(
-		final Map<String, List<LocationOption>> map,
-		final List<String> aliases,
-		final LocationOption... options)
-	{
-		final List<LocationOption> values =
-			Arrays.asList(options);
-
-		for (final String alias : aliases)
+		final Map<String, List<LocationOption>> result = new HashMap<>();
+		for (final Map.Entry<String, List<LocationOption>> group : groups.entrySet())
 		{
-			map.put(normalize(alias), values);
+			final List<LocationOption> options = Collections.unmodifiableList(
+				new ArrayList<>(group.getValue()));
+			for (final String alias : group.getKey().split("\\|", -1))
+			{
+				if (result.put(normalize(alias), options) != null)
+				{
+					throw new IllegalStateException(
+						"Duplicate task-location alias " + alias);
+				}
+			}
 		}
+		if (result.isEmpty())
+		{
+			throw new IllegalStateException("Task-location resource is empty");
+		}
+		return Collections.unmodifiableMap(result);
 	}
 
-	private static List<String> aliases(
-		final String... values)
+	private static String decode(final String value)
 	{
-		return Arrays.asList(values);
+		return value.replace("%7C", "|").replace("%0A", "\n")
+			.replace("%09", "\t").replace("%25", "%");
 	}
-
-	private static LocationOption option(
-		final String location,
-		final String method,
-		final String travel,
-		final CannonSupport cannonSupport)
-	{
-		return new LocationOption(
-			location,
-			method,
-			travel,
-			cannonSupport,
-			null,
-			"",
-			null,
-			0,
-			false
-		);
-	}
-
-	private static LocationOption option(
-		final String location,
-		final String method,
-		final String travel,
-		final CannonSupport cannonSupport,
-		final Quest quest,
-		final String questName)
-	{
-		return new LocationOption(
-			location,
-			method,
-			travel,
-			cannonSupport,
-			quest,
-			questName,
-			null,
-			0,
-			false
-		);
-	}
-
-	private static LocationOption option(
-		final String location,
-		final String method,
-		final String travel,
-		final CannonSupport cannonSupport,
-		final Skill skill,
-		final int skillLevel)
-	{
-		return new LocationOption(
-			location,
-			method,
-			travel,
-			cannonSupport,
-			null,
-			"",
-			skill,
-			skillLevel,
-			false
-		);
-	}
-
 	private static String normalize(final String value)
 	{
 		if (value == null)
@@ -1803,3 +1192,4 @@ public final class SlayerRecommendationEngine
 		}
 	}
 }
+

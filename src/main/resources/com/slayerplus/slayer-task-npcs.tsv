@@ -1,0 +1,200 @@
+# SlayerPlus task NPC aliases v1
+# A or X<TAB>task<TAB>NPC aliases(|)
+A	Aberrant spectres	Aberrant spectre|Deviant spectre|Spectre
+A	Abyssal demons	Abyssal demon|Abyssal Sire
+A	The Abyssal Sire	Abyssal Sire
+A	The Alchemical Hydra	Alchemical Hydra
+A	Alchemical Hydra	Alchemical Hydra
+A	Amoxliatl	Amoxliatl
+A	Artio	Artio
+A	Ankou	Ankou
+A	Aquanites	Aquanite
+A	Araxxor	Araxxor
+A	Araxytes	Araxyte|Araxxor
+A	Aviansies	Aviansie|Kree'arra|Flight Kilisa|Flockleader Geerin|Wingman Skree
+A	Bandits	Bandit|Black Heather|Donny the Lad|Speedy Keith
+A	Banshees	Banshee
+A	Barrows Brothers	Ahrim the Blighted|Dharok the Wretched|Guthan the Infested|Karil the Tainted|Torag the Corrupted|Verac the Defiled
+A	Basilisks	Basilisk|Basilisk knight
+A	Bats	Bat|Death wing
+A	Bears	Bear|Callisto|Artio
+A	Birds	Chicken|Rooster|Terrorbird|Seagull|Vulture|Duck|Penguin|Baby Roc
+A	Black demons	Black demon|Demonic gorilla|Balfrug Kreeyath|Skotizo|Porazdir
+A	Black dragons	Black dragon|King Black Dragon|Baby black dragon
+A	Black Knights	Black Knight
+A	Bloodveld	Bloodveld|Mutated bloodveld
+A	Bloodvelds	Bloodveld|Mutated bloodveld
+A	Blue dragons	Blue dragon|Baby blue dragon|Vorkath
+A	Brine rats	Brine rat
+A	Callisto	Callisto
+A	Calvar'ion	Calvar'ion
+A	Catablepon	Catablepon
+A	Cave bugs	Cave bug
+A	Cave crawlers	Cave crawler|Chasm crawler
+A	Cave horrors	Cave horror|Cave abomination
+A	Cave kraken	Cave kraken|Kraken
+A	Cave slimes	Cave slime
+A	Cerberus	Cerberus
+A	Chaos druids	Chaos druid|Elder Chaos druid
+A	The Chaos Elemental	Chaos Elemental
+A	The Chaos Fanatic	Chaos Fanatic
+A	Cockatrice	Cockatrice|Cockathrice
+A	Cows	Cow|Buffalo|Brutus
+A	Brutus	Brutus
+A	Crabs	Ammonite Crab|Frost Crab|King Sand Crab|Rock Crab|Giant Rock Crab|Sand Crab|Swamp Crab
+A	Crawling hands	Crawling hand|Crushing hand
+A	Crazy Archaeologists	Crazy archaeologist
+A	Crocodiles	Crocodile
+A	Custodian Stalkers	Custodian stalker|Ancient Custodian
+A	Dagannoth	Dagannoth
+A	Dagannoths	Dagannoth
+A	Dagannoth Kings	Dagannoth Prime|Dagannoth Rex|Dagannoth Supreme
+A	Demonic gorillas	Demonic gorilla
+A	Dark beasts	Dark beast|Night beast
+A	Dark warriors	Dark warrior
+A	Deranged Archaeologist	Deranged archaeologist
+A	Dogs	Dog|Jackal|Temple Guardian
+A	Drakes	Drake
+A	Duke Sucellus	Duke Sucellus
+A	Dust devils	Dust devil|Choke devil
+A	Dwarves	Dwarf|Black Guard
+A	Earth warriors	Earth warrior
+A	Elves	Elf|Elf warrior|Elf archer|Iorwerth Warrior|Iorwerth Archer
+A	Ents	Ent
+A	Fever spiders	Fever spider
+A	Fire giants	Fire giant|Branda the Fire Queen
+A	Fleshcrawlers	Flesh crawler
+A	Fossil island wyverns	Ancient wyvern|Long-tailed wyvern|Spitting wyvern|Taloned wyvern
+A	Frost dragons	Frost dragon
+A	Gargoyles	Gargoyle|Dusk|Dawn
+A	General Graardor	General Graardor
+A	Ghosts	Ghost|Death wing|Tortured soul|Forgotten Soul|Revenant
+A	Ghouls	Ghoul
+A	The Giant Mole	Giant Mole
+A	Goblins	Goblin|Sergeant Strongstack|Sergeant Grimspike|Sergeant Steelwill
+A	Greater demons	Greater demon|K'ril Tsutsaroth|Tstanon Karlak|Skotizo|Tormented Demon
+A	Green dragons	Green dragon|Baby green dragon|Elvarg
+A	The Grotesque Guardians	Dusk|Dawn
+A	Gryphons	Gryphon|Shellbane Gryphon
+A	Harpie bug swarms	Harpie Bug Swarm
+A	Hellhounds	Hellhound|Cerberus
+A	Hill giants	Hill giant|Cyclops|Reanimated giant|Obor
+A	Hobgoblins	Hobgoblin
+A	Hydras	Hydra|Alchemical Hydra
+A	Icefiends	Icefiend
+A	Ice giants	Ice giant|Eldric the Ice King
+A	Ice warriors	Ice warrior|Icelord
+A	Infernal mages	Infernal mage|Malevolent mage
+A	TzTok-Jad	TzTok-Jad
+A	Jellies	Jelly
+A	Jungle horrors	Jungle horror
+A	Kalphites	Kalphite worker|Kalphite soldier|Kalphite guardian|Kalphite Queen
+A	The Kalphite Queen	Kalphite Queen
+A	Killerwatts	Killerwatt
+A	The King Black Dragon	King Black Dragon
+A	The Cave Kraken Boss	Kraken
+A	Kree'arra	Kree'arra
+A	K'ril Tsutsaroth	K'ril Tsutsaroth
+A	Kurask	Kurask
+A	Kurasks	Kurask
+A	Lava Dragons	Lava dragon
+A	Lesser demons	Lesser demon|Zakl'n Gritch
+A	Lesser Nagua	Lesser Nagua|Sulphur Nagua|Frost Nagua|Amoxliatl
+A	Lizardmen	Lizardman
+A	Lizards	Lizard|Desert lizard|Small lizard
+A	The Maggot King	Maggot King
+A	Magic axes	Magic axe
+A	Mammoths	Mammoth
+A	Metal dragons	Bronze dragon|Iron Dragon|Steel dragon|Mithril dragon|Adamant dragon|Rune dragon
+A	Minotaurs	Minotaur
+A	Mogres	Mogre
+A	Molanisks	Molanisk
+A	Monkeys	Monkey|Tortured gorilla|Demonic gorilla|Padulah
+A	Moss giants	Moss giant|Bryophyta
+A	Mutated zygomites	Mutated zygomite|Zygomite|Fungi
+A	Nechryael	Nechryael|Nechryarch
+A	Nechryaels	Nechryael|Nechryarch
+A	Ogres	Ogre|Enclave guard|Mogre|Ogress|Skogre|Zogre
+A	Otherworldly beings	Otherworldly being
+A	The Phantom Muspah	Phantom Muspah
+A	Pirates	Pirate
+A	Pyrefiends	Pyrefiend|Flaming pyrelord
+A	Rats	Rat
+A	Red dragons	Red dragon|Baby red dragon
+A	Revenants	Revenant
+A	Rockslugs	Rockslug
+A	Rogues	Rogue
+A	Sarachnis	Sarachnis
+A	Scabarites	Scarab swarm|Locust rider|Scarab mage|Small Scarab
+A	Scorpia	Scorpia
+A	Scurrius	Scurrius
+A	Skotizo	Skotizo
+A	Spindel	Spindel
+A	Scorpions	Scorpion|Scorpia|Lobstrosity
+A	Sea snakes	Sea snake young|Sea snake hatchling
+A	Shades	Shade|Loar|Phrin|Riyl|Asyn|Fiyr|Urium
+A	Shadow warriors	Shadow warrior
+A	The Shellbane Gryphon	Shellbane Gryphon
+A	Royal Titans	Branda the Fire Queen|Eldric the Ice King
+A	Obor	Obor
+A	Bryophyta	Bryophyta
+A	Shellbane Gryphon	Shellbane Gryphon
+A	Skeletal wyverns	Skeletal wyvern
+A	Skeletons	Skeleton|Vet'ion|Calvar'ion|Skeletal Mystic
+A	Smoke devils	Smoke devil
+A	Sourhogs	Sourhog
+A	Spiders	Spider|Kalrag|Sarachnis|Venenatis|Spindel|Araxxor|Araxyte
+A	Spiritual creatures	Spiritual ranger|Spiritual mage|Spiritual warrior
+A	Suqahs	Suqah
+A	Terror dogs	Terror dog
+A	The Leviathan	The Leviathan|Leviathan
+A	The Whisperer	The Whisperer|Whisperer
+A	The Thermonuclear Smoke Devil	Thermonuclear smoke devil
+A	Thermonuclear smoke devil	Thermonuclear smoke devil
+A	Trolls	Troll|Mountain troll|Troll general|Thrower troll|Dad|Arrg|Stick|Kraka|Pee Hat|Rock|Twig|Berry
+A	Tormented demons	Tormented demon
+A	Turoth	Turoth
+A	Turoths	Turoth
+A	Tzhaar	TzHaar|TzTok-Jad|TzKal-Zuk
+A	Vampyres	Vampyre|Vyrewatch|Vyrewatch sentinel
+A	Vardorvis	Vardorvis
+A	Venators	Venator
+A	Venenatis	Venenatis
+A	Vet'ion	Vet'ion
+A	Vorkath	Vorkath
+A	Wall beasts	Wall beast
+A	Warped Creatures	Warped terrorbird|Warped tortoise|Mutated terrorbird|Mutated tortoise
+A	Waterfiends	Waterfiend
+A	Werewolves	Werewolf
+A	Wolves	Wolf
+A	Wyrms	Wyrm|Wyrmling|Strykewyrm
+A	Commander Zilyana	Commander Zilyana
+A	Zombies	Zombie|Undead|Vorkath|Zogre
+A	TzKal-Zuk	TzKal-Zuk
+A	Zulrah	Zulrah
+X	Abyssal demons	Abyssal Sire
+X	Araxytes	Araxxor
+X	Aviansies	Kree'arra|Flight Kilisa|Flockleader Geerin|Wingman Skree
+X	Bears	Callisto|Artio
+X	Black demons	Skotizo|Demonic gorilla
+X	Black dragons	King Black Dragon
+X	Blue dragons	Vorkath
+X	Cave kraken	Kraken
+X	Gargoyles	Dusk|Dawn
+X	Gryphons	Shellbane Gryphon
+X	Greater demons	K'ril Tsutsaroth|Skotizo|Tormented Demon
+X	Hellhounds	Cerberus
+X	Hill giants	Obor
+X	Hydras	Alchemical Hydra
+X	Tzhaar	TzTok-Jad|TzKal-Zuk
+X	Ice giants	Eldric the Ice King
+X	Kalphites	Kalphite Queen
+X	Lesser Nagua	Amoxliatl
+X	Moss giants	Bryophyta
+X	Cows	Brutus
+X	Monkeys	Demonic gorilla
+X	Fire giants	Branda the Fire Queen
+X	Scorpions	Scorpia
+X	Skeletons	Vet'ion|Calvar'ion
+X	Spiders	Sarachnis|Venenatis|Spindel|Araxxor
+X	Zombies	Vorkath

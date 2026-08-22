@@ -1891,16 +1891,13 @@ public class SlayerRegressionTest
 	public void routingUsesResolvedTaskSnapshotAcrossLoginAndCompletionBoundaries()
 	{
 		assertEquals(57, SlayerPlusPlugin.effectiveTaskRemainingForRegression(
-			false, "", 57, 0
+			57, 0
 		));
 		assertEquals(0, SlayerPlusPlugin.effectiveTaskRemainingForRegression(
-			false, "", 0, 57
+			0, 57
 		));
 		assertEquals(57, SlayerPlusPlugin.effectiveTaskRemainingForRegression(
-			false, "", -1, 57
-		));
-		assertEquals(100, SlayerPlusPlugin.effectiveTaskRemainingForRegression(
-			true, "Ankou", 0, 0
+			-1, 57
 		));
 		assertTrue(SlayerPlusPlugin.shouldInvalidateTaskObservationForGameState(
 			GameState.HOPPING
@@ -3217,29 +3214,6 @@ public class SlayerRegressionTest
 			.contains(SlayerTaskVariant.TORMENTED_DEMONS));
 		assertTrue(SlayerTaskVariantCatalog.getAvailableVariants("Crazy Archaeologist")
 			.contains(SlayerTaskVariant.DERANGED_ARCHAEOLOGIST));
-	}
-
-	@Test
-	public void developmentTaskSelectorCoversEveryReviewedTaskAndEncounter()
-	{
-		assertFalse(SlayerTaskResearchCatalog.getReviewedTaskNames().isEmpty());
-		for (final String taskName :
-			SlayerTaskResearchCatalog.getReviewedTaskNames())
-		{
-			final List<SlayerTaskVariant> variants =
-				SlayerTaskVariantCatalog.getAvailableVariants(taskName);
-			assertFalse(taskName, variants.isEmpty());
-			for (final SlayerTaskVariant variant : variants)
-			{
-				assertTrue(
-					taskName + " / " + variant,
-					!SlayerTaskVariantCatalog.getOptionLabel(
-						taskName,
-						variant
-					).trim().isEmpty()
-				);
-			}
-		}
 	}
 
 	@Test

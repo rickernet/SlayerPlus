@@ -1,0 +1,53 @@
+# SlayerPlus encounter variants v1
+# B<TAB>variant<TAB>encounter<TAB>location<TAB>travel<TAB>cannon<TAB>restriction<TAB>assignments(|)
+# D<TAB>encounter<TAB>location
+B	ABYSSAL_SIRE	Abyssal Sire	Abyssal Nexus	Fairy ring DIP lands inside the Abyssal Nexus	Not allowed	Requires 85 Slayer and an Abyssal demon task	Abyssal demons
+B	ALCHEMICAL_HYDRA	Alchemical Hydra	Karuulm Slayer Dungeon	Rada's blessing to Mount Karuulm, then descend to the Hydra level	Not allowed	Requires 95 Slayer and a Hydra task	Hydras
+B	AMOXLIATL	Amoxliatl	Ruins of Tapoyauik	Travel to the Ruins of Tapoyauik and use the unlocked route to Amoxliatl	Not allowed	Lesser Nagua boss alternative	Lesser Nagua
+B	ARAXXOR	Araxxor	Morytania Spider Cave	Travel to the Morytania Spider Cave and enter Araxxor's lair	Not allowed	Requires an eligible Araxyte or Spider task	Araxytes|Spiders
+B	ARTIO	Artio	Hunter's End	Travel through the Wilderness to Hunter's End	Not allowed	Wilderness boss alternative for Bears	Bears
+B	CALLISTO	Callisto	Callisto's Den	Travel through the Wilderness to Callisto's Den	Not allowed	Wilderness boss alternative for Bears	Bears
+B	CERBERUS	Cerberus	Cerberus' Lair	Key master teleport, Taverley house portal, or Falador west shortcut	Not allowed	Requires 91 Slayer and an active Hellhound or Cerberus task	Hellhounds
+B	DAGANNOTH_KINGS	Dagannoth Kings	Waterbirth Island Dungeon	Waterbirth teleport or travel from Rellekka, then descend to the Kings	Not allowed	Boss alternative for Dagannoth tasks	Dagannoth|Dagannoths
+B	DERANGED_ARCHAEOLOGIST	Deranged Archaeologist	Fossil Island	Use a digsite pendant to Fossil Island, then travel south-east to the ruins	Not allowed	Non-Wilderness alternative for a directly assigned Crazy archaeologist task	Crazy Archaeologist|Crazy Archaeologists
+B	GROTESQUE_GUARDIANS	Grotesque Guardians	Slayer Tower	Slayer ring to Slayer Tower, then climb to the rooftop	Not allowed	Requires a Gargoyle task and access to the rooftop	Gargoyles
+B	KRIL_TSUTSAROTH	K'ril Tsutsaroth	God Wars Dungeon	Trollheim teleport, then enter the Zamorak encampment	Not allowed	Boss alternative for Greater demon tasks	Greater demons
+B	KALPHITE_QUEEN	Kalphite Queen	Kalphite Lair	Use fairy ring BIQ or Desert amulet 4, then take both rope descents	Not allowed	Boss alternative for Kalphite tasks	Kalphites
+B	KING_BLACK_DRAGON	King Black Dragon	King Black Dragon Lair	Use a Wilderness KBD entrance, then enter the lair	Not allowed	Boss alternative for Black dragon tasks	Black dragons
+B	KRAKEN_BOSS	Kraken	Kraken Cove	Travel to Kraken Cove and enter the boss instance	Not allowed	Requires a Cave kraken task	Cave kraken
+B	KREEARRA	Kree'arra	God Wars Dungeon	Trollheim teleport, then enter the Armadyl encampment	Not allowed	Boss alternative for Aviansie tasks	Aviansies
+B	SARACHNIS	Sarachnis	Forthos Dungeon	Travel to the Forthos Ruin and descend to Sarachnis	Not allowed	Boss alternative for Spider tasks	Spiders
+B	SCORPIA	Scorpia	Scorpia's Cave	Travel through the deep Wilderness to Scorpia's Cave	Not allowed	Wilderness boss alternative for Scorpion tasks	Scorpions
+B	SKOTIZO	Skotizo	Skotizo's Lair	Use a dark totem at the Catacombs altar	Not allowed	Boss alternative for Black demon or Greater demon tasks where the assignment location permits it	Black demons|Greater demons
+B	THERMONUCLEAR_SMOKE_DEVIL	Thermonuclear smoke devil	Smoke Devil Dungeon	Fairy ring BKP or Castle Wars, then enter the Smoke Devil Dungeon and use the boss-room crevice	Not allowed	Requires 93 Slayer and an active Smoke Devil task	Smoke devils
+B	TZTOK_JAD	TzTok-Jad	TzHaar Fight Cave	Travel to Mor Ul Rek and enter the Fight Cave	Not allowed	TzHaar boss alternative	Tzhaar
+B	TZKAL_ZUK	TzKal-Zuk	Inferno	Travel to Mor Ul Rek and enter the Inferno	Not allowed	TzHaar boss alternative requiring Inferno access	Tzhaar
+B	SPINDEL	Spindel	Web Chasm	Travel through the Wilderness to the Web Chasm	Not allowed	Wilderness Spider boss alternative	Spiders
+B	VENENATIS	Venenatis	Silk Chasm	Travel through the Wilderness to the Silk Chasm	Not allowed	Wilderness Spider boss alternative	Spiders
+B	CALVARION	Calvar'ion	Skeletal Tomb	Travel through the Wilderness to the Skeletal Tomb	Not allowed	Wilderness Skeleton boss alternative	Skeletons
+B	VETION	Vet'ion	Vet'ion's Rest	Travel through the Wilderness to Vet'ion's Rest	Not allowed	Wilderness Skeleton boss alternative	Skeletons
+B	VORKATH	Vorkath	Ungael	Use the Fremennik route to Ungael	Not allowed	Boss alternative for eligible Blue dragon or Zombie tasks	Blue dragons|Zombies
+B	SCURRIUS	Scurrius	Varrock Sewers	Varrock teleport, then enter the sewers and Scurrius' lair	Not allowed	Boss alternative for Rat tasks	Rats
+B	OBOR	Obor	Edgeville Dungeon	Edgeville teleport, then enter the giant-key lair	Not allowed	Boss alternative for Hill giant tasks	Hill giants
+B	BRYOPHYTA	Bryophyta	Varrock Sewers	Varrock teleport, then enter Bryophyta's mossy-key lair	Not allowed	Boss alternative for Moss giant tasks	Moss giants
+B	BRUTUS	Brutus	Lumbridge cow field	Use a cowbell amulet or Lumbridge teleport, then enter Brutus' cow-field instance	Not allowed	Requires completion of The Ides of Milk; boss alternative for Cow tasks	Cows
+B	DEMONIC_GORILLAS	Demonic gorillas	Crash Site Cavern	Use a royal seed pod or spirit tree to the Gnome Stronghold, then enter the Crash Site Cavern	Not allowed	Requires completion of Monkey Madness II; demi-boss alternative for Black demon or Monkey tasks	Black demons|Monkeys
+B	TORMENTED_DEMONS	Tormented demons	Ancient Guthixian Temple	Use a Guthixian temple teleport; games necklace to Tears of Guthix is the fallback	Not allowed	Requires completion of While Guthix Sleeps; demi-boss alternative for Greater demon tasks	Greater demons
+B	ROYAL_TITANS	Royal Titans	Asgarnian Ice Dungeon	Use a giantsoul amulet; fairy ring AIQ is the fallback to the Asgarnian Ice Dungeon	Not allowed	Boss alternative for Fire giant or Ice giant tasks	Fire giants|Ice giants
+B	SHELLBANE_GRYPHON	Shellbane Gryphon	The Great Conch	Fairy ring CJQ to the Great Conch, then run north to the boss cave	Not allowed	Requires an eligible Gryphon task	Gryphons
+D	Barrows Brothers	Barrows
+D	Chaos Elemental	Wilderness
+D	Chaos Fanatic	Wilderness
+D	Crazy Archaeologist	Wilderness
+D	Crazy Archaeologists	Wilderness
+D	Deranged Archaeologist	Fossil Island
+D	Duke Sucellus	Ghorrock Dungeon
+D	General Graardor	God Wars Dungeon
+D	Giant Mole	Falador Mole Lair
+D	Maggot King	Maggot King's lair
+D	Phantom Muspah	Ghorrock Dungeon
+D	Leviathan	The Scar
+D	The Whisperer	Lassar Undercity
+D	Vardorvis	Stranglewood Temple
+D	Commander Zilyana	God Wars Dungeon
+D	Zulrah	Zul-Andra

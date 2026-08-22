@@ -556,12 +556,6 @@ public class SlayerPlusPlugin extends Plugin
 	private String currentTaskName = "";
 	private SlayerTaskVariant currentTaskVariant =
 		SlayerTaskVariant.STANDARD_TASK;
-	/* Temporary, non-persistent QA assignment. This only feeds SlayerPlus state;
-	 * it never writes game varps or changes the player's real Slayer task. */
-	private boolean developmentTaskSimulationActive;
-	private String developmentSimulatedTaskName = "";
-	private SlayerTaskVariant developmentSimulatedTaskVariant =
-		SlayerTaskVariant.STANDARD_TASK;
 	/* Avoid rebuilding immutable encounter/catalog state on every game tick. */
 	private SlayerRecommendation cachedGuidedTargetRecommendation;
 	private String cachedGuidedTargetTaskName = "";
@@ -793,8 +787,6 @@ public class SlayerPlusPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		SlayerCatalogRegressionValidator.validateStartupOrThrow();
-		SlayerArchitectureRegressionGuard.validateOrThrow();
 		migrateRemovedPlaystyle();
 
 		portraitRenderer = new PlayerPortraitRenderer(client);
@@ -830,10 +822,7 @@ public class SlayerPlusPlugin extends Plugin
 			),
 			() -> clientThread.invokeLater(this::toggleGuidedSession),
 			config,
-			configManager,
-			(taskName, variant) -> clientThread.invokeLater(
-				() -> selectDevelopmentTask(taskName, variant)
-			)
+			configManager
 		);
 
 		final BufferedImage icon = loadPluginIcon();
@@ -961,10 +950,6 @@ public class SlayerPlusPlugin extends Plugin
 		currentMasterId = 0;
 		currentTaskName = "";
 		currentTaskVariant = SlayerTaskVariant.STANDARD_TASK;
-		developmentTaskSimulationActive = false;
-		developmentSimulatedTaskName = "";
-		developmentSimulatedTaskVariant =
-			SlayerTaskVariant.STANDARD_TASK;
 		lastResolvedRoutingProfileIdentity = "";
 		cachedBankItems.clear();
 		cachedRawBankContainerState = new int[0];
@@ -2945,8 +2930,6 @@ public class SlayerPlusPlugin extends Plugin
 		/* Quest.getState executes a client script and must stay on this thread. */
 		final boolean whileGuthixSleepsFinished =
 			Quest.WHILE_GUTHIX_SLEEPS.getState(client) == QuestState.FINISHED;
-		final boolean simulated = developmentTaskSimulationActive
-			&& !developmentSimulatedTaskName.isEmpty();
 		final int serviceRemaining = slayerPluginService == null
 			? 0 : slayerPluginService.getRemainingAmount();
 		final int serviceInitialAmount = slayerPluginService == null
@@ -2965,9 +2948,7 @@ public class SlayerPlusPlugin extends Plugin
 			gameTickSequence <= pendingChatTaskExpiresAfterTick;
 		final boolean chatAssignmentPending =
 			pendingChatTaskRemaining > 0 && chatUpdatePending;
-		final int remaining = simulated
-			? 100
-			: resolveTaskRemainingForRegression(
+		final int remaining = resolveTaskRemainingForRegression(
 				observedTaskRemaining,
 				serviceRemaining,
 				liveRemaining,
@@ -2980,9 +2961,7 @@ public class SlayerPlusPlugin extends Plugin
 		final int profileInitialAmount = readRuneLiteSlayerProfileInt(
 			RUNELITE_SLAYER_INITIAL_AMOUNT_KEY
 		);
-		final int initialAmount = simulated
-			? 100
-			: Math.max(
+		final int initialAmount = Math.max(
 				remaining,
 				firstPositive(
 					serviceInitialAmount,
@@ -2998,9 +2977,9 @@ public class SlayerPlusPlugin extends Plugin
 		final int storedMasterId = readSlayerPlusProfileInt(
 			LAST_SLAYER_MASTER_SNAPSHOT_KEY
 		);
-		final int masterId = simulated && liveMasterId <= 0
-			? 5
-			: firstPositive(liveMasterId, inferredMasterId, storedMasterId);
+		final int masterId = firstPositive(
+			liveMasterId, inferredMasterId, storedMasterId
+		);
 		final int livePoints = client.getVarbitValue(VarbitID.SLAYER_POINTS);
 		final int points = preferLiveOrProfileValue(
 			livePoints,
@@ -3087,9 +3066,7 @@ public class SlayerPlusPlugin extends Plugin
 		final String profileTaskName = readRuneLiteSlayerProfileString(
 			RUNELITE_SLAYER_TASK_NAME_KEY
 		);
-		final String taskName = simulated
-			? developmentSimulatedTaskName
-			: serviceRemaining > 0 && !serviceTaskName.isEmpty()
+		final String taskName = serviceRemaining > 0 && !serviceTaskName.isEmpty()
 				? formatName(serviceTaskName)
 				: liveRemaining > 0
 				? readTaskName()
@@ -3098,11 +3075,7 @@ public class SlayerPlusPlugin extends Plugin
 					: chatAssignmentPending
 						? pendingChatTaskName
 						: "Unknown task";
-		if (simulated)
-		{
-			currentTaskVariant = developmentSimulatedTaskVariant;
-		}
-		else if (isPointBoosting()
+		if (isPointBoosting()
 			&& masterId == SlayerPointBoostCoordinator.TURAEL_AYA_MASTER_ID
 			&& SlayerTuraelBoostCatalog.find(taskName) != null)
 		{
@@ -3126,8 +3099,7 @@ public class SlayerPlusPlugin extends Plugin
 				SlayerTaskVariantCatalog.getDefaultVariant(taskName);
 		}
 
-		final boolean konarAssignment = !simulated
-			&& masterId == KONAR_MASTER_ID;
+		final boolean konarAssignment = masterId == KONAR_MASTER_ID;
 		final String assignedLocation = konarAssignment
 			? !serviceTaskLocation.isEmpty()
 				? serviceTaskLocation
@@ -3312,9 +3284,7 @@ public class SlayerPlusPlugin extends Plugin
 			|| displayTarget.profile == null
 				? ""
 				: displayTarget.profile.getPositioningNote();
-		final String displayedTaskName = simulated
-			? "TEST: " + taskName
-			: taskName;
+		final String displayedTaskName = taskName;
 		final boolean sessionActive = guidedSessionActive;
 		final boolean sessionAvailable = isGuidedSessionAvailable();
 		final String sessionStatus = getGuidedSessionDisplayStatus();
@@ -3381,11 +3351,6 @@ public class SlayerPlusPlugin extends Plugin
 		{
 			currentTaskVariant = requested;
 		}
-		if (developmentTaskSimulationActive)
-		{
-			developmentSimulatedTaskVariant = currentTaskVariant;
-		}
-
 		refreshSlayerData();
 		if (refreshOpenBankTag)
 		{
@@ -3394,53 +3359,6 @@ public class SlayerPlusPlugin extends Plugin
 			 * same persistent layout immediately so changing between the regular
 			 * monster and boss variant never requires a second button press.
 			 */
-			createRecommendedBankTag();
-		}
-	}
-
-	private void selectDevelopmentTask(
-		final String taskName,
-		final SlayerTaskVariant variant)
-	{
-		final boolean refreshOpenBankTag = isSlayerPlusBankTagOpen();
-		clearGuidedTaskDetourSnapshot();
-		final String requestedTask = taskName == null
-			? ""
-			: taskName.trim();
-		final boolean enable = !requestedTask.isEmpty()
-			&& SlayerTaskResearchCatalog.find(requestedTask) != null;
-
-		developmentTaskSimulationActive = enable;
-		developmentSimulatedTaskName = enable ? requestedTask : "";
-		if (enable)
-		{
-			final List<SlayerTaskVariant> available =
-				SlayerTaskVariantCatalog.getAvailableVariants(requestedTask);
-			developmentSimulatedTaskVariant = available.contains(variant)
-				? variant
-				: SlayerTaskVariantCatalog.getDefaultVariant(requestedTask);
-			currentTaskVariant = developmentSimulatedTaskVariant;
-		}
-		else
-		{
-			developmentSimulatedTaskVariant =
-				SlayerTaskVariant.STANDARD_TASK;
-		}
-
-		if (shortestPathBridge != null)
-		{
-			shortestPathBridge.clear();
-		}
-		resetGuidedSessionState();
-		travelCoordinator.clearAll();
-		clearCachedGuidedTaskTarget();
-		lastResolvedRoutingProfileIdentity = "";
-		observedTaskRemaining = -1;
-		observedTaskName = "";
-		currentTaskName = "";
-		refreshSlayerData();
-		if (refreshOpenBankTag)
-		{
 			createRecommendedBankTag();
 		}
 	}
@@ -6098,9 +6016,8 @@ public class SlayerPlusPlugin extends Plugin
 	{
 		if (plan == null
 			|| !isPointBoosting()
-			|| (currentMasterId
+			|| currentMasterId
 				!= SlayerPointBoostCoordinator.TURAEL_AYA_MASTER_ID
-				&& !developmentTaskSimulationActive)
 			|| SlayerTuraelBoostCatalog.find(currentTaskName) == null)
 		{
 			return plan;
@@ -9125,8 +9042,7 @@ public class SlayerPlusPlugin extends Plugin
 
 		final WorldPoint destination = stage.destination;
 		final Set<WorldPoint> routeTargets = stage.targets;
-		final boolean avoidWilderness = !developmentTaskSimulationActive
-			&& currentMasterId != KRYSTILIA_MASTER_ID;
+		final boolean avoidWilderness = currentMasterId != KRYSTILIA_MASTER_ID;
 		if (stage.exactNpc)
 		{
 			guidedDynamicTaskDestination = destination;
@@ -12856,25 +12772,15 @@ public class SlayerPlusPlugin extends Plugin
 	private int effectiveTaskRemaining()
 	{
 		return effectiveTaskRemainingForRegression(
-			developmentTaskSimulationActive,
-			developmentSimulatedTaskName,
 			observedTaskRemaining,
 			client.getVarpValue(VarPlayerID.SLAYER_COUNT)
 		);
 	}
 
 	static int effectiveTaskRemainingForRegression(
-		final boolean simulationActive,
-		final String simulatedTaskName,
 		final int resolvedRemaining,
 		final int liveRemaining)
 	{
-		if (simulationActive
-			&& simulatedTaskName != null
-			&& !simulatedTaskName.isEmpty())
-		{
-			return 100;
-		}
 		return resolvedRemaining >= 0
 			? resolvedRemaining
 			: Math.max(0, liveRemaining);

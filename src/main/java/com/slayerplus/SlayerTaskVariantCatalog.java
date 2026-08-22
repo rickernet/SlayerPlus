@@ -1,5 +1,10 @@
 package com.slayerplus;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,8 +29,11 @@ public final class SlayerTaskVariantCatalog
 	private static final List<SlayerTaskVariant> STANDARD_ONLY =
 		Collections.singletonList(SlayerTaskVariant.STANDARD_TASK);
 
+	private static final String VARIANT_RESOURCE =
+		"/com/slayerplus/slayer-task-variants.tsv";
+	private static final VariantResourceData VARIANT_DATA = loadVariantData();
 	private static final List<BossDefinition> BOSS_DEFINITIONS =
-		createBossDefinitions();
+		VARIANT_DATA.bosses;
 	private static final Map<String, List<BossDefinition>> BOSSES_BY_ASSIGNMENT =
 		indexBossesByAssignment();
 	private static final Map<SlayerTaskVariant, BossDefinition> BOSSES_BY_VARIANT =
@@ -33,7 +41,7 @@ public final class SlayerTaskVariantCatalog
 	private static final Map<String, BossDefinition> BOSSES_BY_ENCOUNTER =
 		indexBossesByEncounter();
 	private static final Map<String, DirectBossDefinition> DIRECT_BOSSES =
-		createDirectBosses();
+		VARIANT_DATA.directBosses;
 
 	private SlayerTaskVariantCatalog()
 	{
@@ -223,205 +231,74 @@ public final class SlayerTaskVariantCatalog
 		return null;
 	}
 
-	private static List<BossDefinition> createBossDefinitions()
+	private static VariantResourceData loadVariantData()
 	{
 		final List<BossDefinition> bosses = new ArrayList<>();
-
-		bosses.add(boss(SlayerTaskVariant.ABYSSAL_SIRE,
-			"Abyssal Sire", "Abyssal Nexus",
-			"Fairy ring DIP lands inside the Abyssal Nexus", "Not allowed",
-			"Requires 85 Slayer and an Abyssal demon task",
-			"Abyssal demons"));
-		bosses.add(boss(SlayerTaskVariant.ALCHEMICAL_HYDRA,
-			"Alchemical Hydra", "Karuulm Slayer Dungeon",
-			"Rada's blessing to Mount Karuulm, then descend to the Hydra level", "Not allowed",
-			"Requires 95 Slayer and a Hydra task",
-			"Hydras"));
-		bosses.add(boss(SlayerTaskVariant.AMOXLIATL,
-			"Amoxliatl", "Ruins of Tapoyauik",
-			"Travel to the Ruins of Tapoyauik and use the unlocked route to Amoxliatl", "Not allowed",
-			"Lesser Nagua boss alternative",
-			"Lesser Nagua"));
-		bosses.add(boss(SlayerTaskVariant.ARAXXOR,
-			"Araxxor", "Morytania Spider Cave",
-			"Travel to the Morytania Spider Cave and enter Araxxor's lair", "Not allowed",
-			"Requires an eligible Araxyte or Spider task",
-			"Araxytes", "Spiders"));
-		bosses.add(boss(SlayerTaskVariant.ARTIO,
-			"Artio", "Hunter's End",
-			"Travel through the Wilderness to Hunter's End", "Not allowed",
-			"Wilderness boss alternative for Bears",
-			"Bears"));
-		bosses.add(boss(SlayerTaskVariant.CALLISTO,
-			"Callisto", "Callisto's Den",
-			"Travel through the Wilderness to Callisto's Den", "Not allowed",
-			"Wilderness boss alternative for Bears",
-			"Bears"));
-		bosses.add(boss(SlayerTaskVariant.CERBERUS,
-			"Cerberus", "Cerberus' Lair",
-			"Key master teleport, Taverley house portal, or Falador west shortcut", "Not allowed",
-			"Requires 91 Slayer and an active Hellhound or Cerberus task",
-			"Hellhounds"));
-		bosses.add(boss(SlayerTaskVariant.DAGANNOTH_KINGS,
-			"Dagannoth Kings", "Waterbirth Island Dungeon",
-			"Waterbirth teleport or travel from Rellekka, then descend to the Kings", "Not allowed",
-			"Boss alternative for Dagannoth tasks",
-			"Dagannoth", "Dagannoths"));
-		bosses.add(boss(SlayerTaskVariant.DERANGED_ARCHAEOLOGIST,
-			"Deranged Archaeologist", "Fossil Island",
-			"Use a digsite pendant to Fossil Island, then travel south-east to the ruins", "Not allowed",
-			"Non-Wilderness alternative for a directly assigned Crazy archaeologist task",
-			"Crazy Archaeologist", "Crazy Archaeologists"));
-		bosses.add(boss(SlayerTaskVariant.GROTESQUE_GUARDIANS,
-			"Grotesque Guardians", "Slayer Tower",
-			"Slayer ring to Slayer Tower, then climb to the rooftop", "Not allowed",
-			"Requires a Gargoyle task and access to the rooftop",
-			"Gargoyles"));
-		bosses.add(boss(SlayerTaskVariant.KRIL_TSUTSAROTH,
-			"K'ril Tsutsaroth", "God Wars Dungeon",
-			"Trollheim teleport, then enter the Zamorak encampment", "Not allowed",
-			"Boss alternative for Greater demon tasks",
-			"Greater demons"));
-		bosses.add(boss(SlayerTaskVariant.KALPHITE_QUEEN,
-			"Kalphite Queen", "Kalphite Lair",
-			"Use fairy ring BIQ or Desert amulet 4, then take both rope descents", "Not allowed",
-			"Boss alternative for Kalphite tasks",
-			"Kalphites"));
-		bosses.add(boss(SlayerTaskVariant.KING_BLACK_DRAGON,
-			"King Black Dragon", "King Black Dragon Lair",
-			"Use a Wilderness KBD entrance, then enter the lair", "Not allowed",
-			"Boss alternative for Black dragon tasks",
-			"Black dragons"));
-		bosses.add(boss(SlayerTaskVariant.KRAKEN_BOSS,
-			"Kraken", "Kraken Cove",
-			"Travel to Kraken Cove and enter the boss instance", "Not allowed",
-			"Requires a Cave kraken task",
-			"Cave kraken"));
-		bosses.add(boss(SlayerTaskVariant.KREEARRA,
-			"Kree'arra", "God Wars Dungeon",
-			"Trollheim teleport, then enter the Armadyl encampment", "Not allowed",
-			"Boss alternative for Aviansie tasks",
-			"Aviansies"));
-		bosses.add(boss(SlayerTaskVariant.SARACHNIS,
-			"Sarachnis", "Forthos Dungeon",
-			"Travel to the Forthos Ruin and descend to Sarachnis", "Not allowed",
-			"Boss alternative for Spider tasks",
-			"Spiders"));
-		bosses.add(boss(SlayerTaskVariant.SCORPIA,
-			"Scorpia", "Scorpia's Cave",
-			"Travel through the deep Wilderness to Scorpia's Cave", "Not allowed",
-			"Wilderness boss alternative for Scorpion tasks",
-			"Scorpions"));
-		bosses.add(boss(SlayerTaskVariant.SKOTIZO,
-			"Skotizo", "Skotizo's Lair",
-			"Use a dark totem at the Catacombs altar", "Not allowed",
-			"Boss alternative for Black demon or Greater demon tasks where the assignment location permits it",
-			"Black demons", "Greater demons"));
-		bosses.add(boss(SlayerTaskVariant.THERMONUCLEAR_SMOKE_DEVIL,
-			"Thermonuclear smoke devil", "Smoke Devil Dungeon",
-			"Fairy ring BKP or Castle Wars, then enter the Smoke Devil Dungeon and use the boss-room crevice", "Not allowed",
-			"Requires 93 Slayer and an active Smoke Devil task",
-			"Smoke devils"));
-		bosses.add(boss(SlayerTaskVariant.TZTOK_JAD,
-			"TzTok-Jad", "TzHaar Fight Cave",
-			"Travel to Mor Ul Rek and enter the Fight Cave", "Not allowed",
-			"TzHaar boss alternative",
-			"Tzhaar"));
-		bosses.add(boss(SlayerTaskVariant.TZKAL_ZUK,
-			"TzKal-Zuk", "Inferno",
-			"Travel to Mor Ul Rek and enter the Inferno", "Not allowed",
-			"TzHaar boss alternative requiring Inferno access",
-			"Tzhaar"));
-		bosses.add(boss(SlayerTaskVariant.SPINDEL,
-			"Spindel", "Web Chasm",
-			"Travel through the Wilderness to the Web Chasm", "Not allowed",
-			"Wilderness Spider boss alternative",
-			"Spiders"));
-		bosses.add(boss(SlayerTaskVariant.VENENATIS,
-			"Venenatis", "Silk Chasm",
-			"Travel through the Wilderness to the Silk Chasm", "Not allowed",
-			"Wilderness Spider boss alternative",
-			"Spiders"));
-		bosses.add(boss(SlayerTaskVariant.CALVARION,
-			"Calvar'ion", "Skeletal Tomb",
-			"Travel through the Wilderness to the Skeletal Tomb", "Not allowed",
-			"Wilderness Skeleton boss alternative",
-			"Skeletons"));
-		bosses.add(boss(SlayerTaskVariant.VETION,
-			"Vet'ion", "Vet'ion's Rest",
-			"Travel through the Wilderness to Vet'ion's Rest", "Not allowed",
-			"Wilderness Skeleton boss alternative",
-			"Skeletons"));
-		bosses.add(boss(SlayerTaskVariant.VORKATH,
-			"Vorkath", "Ungael",
-			"Use the Fremennik route to Ungael", "Not allowed",
-			"Boss alternative for eligible Blue dragon or Zombie tasks",
-			"Blue dragons", "Zombies"));
-		bosses.add(boss(SlayerTaskVariant.SCURRIUS,
-			"Scurrius", "Varrock Sewers",
-			"Varrock teleport, then enter the sewers and Scurrius' lair", "Not allowed",
-			"Boss alternative for Rat tasks",
-			"Rats"));
-		bosses.add(boss(SlayerTaskVariant.OBOR,
-			"Obor", "Edgeville Dungeon",
-			"Edgeville teleport, then enter the giant-key lair", "Not allowed",
-			"Boss alternative for Hill giant tasks",
-			"Hill giants"));
-		bosses.add(boss(SlayerTaskVariant.BRYOPHYTA,
-			"Bryophyta", "Varrock Sewers",
-			"Varrock teleport, then enter Bryophyta's mossy-key lair", "Not allowed",
-			"Boss alternative for Moss giant tasks",
-			"Moss giants"));
-		bosses.add(boss(SlayerTaskVariant.BRUTUS,
-			"Brutus", "Lumbridge cow field",
-			"Use a cowbell amulet or Lumbridge teleport, then enter Brutus' cow-field instance", "Not allowed",
-			"Requires completion of The Ides of Milk; boss alternative for Cow tasks",
-			"Cows"));
-		bosses.add(boss(SlayerTaskVariant.DEMONIC_GORILLAS,
-			"Demonic gorillas", "Crash Site Cavern",
-			"Use a royal seed pod or spirit tree to the Gnome Stronghold, then enter the Crash Site Cavern", "Not allowed",
-			"Requires completion of Monkey Madness II; demi-boss alternative for Black demon or Monkey tasks",
-			"Black demons", "Monkeys"));
-		bosses.add(boss(SlayerTaskVariant.TORMENTED_DEMONS,
-			"Tormented demons", "Ancient Guthixian Temple",
-			"Use a Guthixian temple teleport; games necklace to Tears of Guthix is the fallback", "Not allowed",
-			"Requires completion of While Guthix Sleeps; demi-boss alternative for Greater demon tasks",
-			"Greater demons"));
-		bosses.add(boss(SlayerTaskVariant.ROYAL_TITANS,
-			"Royal Titans", "Asgarnian Ice Dungeon",
-			"Use a giantsoul amulet; fairy ring AIQ is the fallback to the Asgarnian Ice Dungeon", "Not allowed",
-			"Boss alternative for Fire giant or Ice giant tasks",
-			"Fire giants", "Ice giants"));
-		bosses.add(boss(SlayerTaskVariant.SHELLBANE_GRYPHON,
-			"Shellbane Gryphon", "The Great Conch",
-			"Fairy ring CJQ to the Great Conch, then run north to the boss cave", "Not allowed",
-			"Requires an eligible Gryphon task",
-			"Gryphons"));
-
-		return Collections.unmodifiableList(bosses);
+		final Map<String, DirectBossDefinition> directBosses = new LinkedHashMap<>();
+		try (InputStream stream = SlayerTaskVariantCatalog.class
+			.getResourceAsStream(VARIANT_RESOURCE))
+		{
+			if (stream == null)
+			{
+				throw new IllegalStateException(
+					"Missing task-variant resource " + VARIANT_RESOURCE);
+			}
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+				stream, StandardCharsets.UTF_8)))
+			{
+				String line;
+				int lineNumber = 0;
+				while ((line = reader.readLine()) != null)
+				{
+					lineNumber++;
+					if (line.isEmpty() || line.charAt(0) == '#')
+					{
+						continue;
+					}
+					final String[] fields = line.split("\\t", -1);
+					if (fields.length == 8 && fields[0].equals("B"))
+					{
+						final String[] assignments = decode(fields[7]).isEmpty()
+							? new String[0] : decode(fields[7]).split("\\|", -1);
+						bosses.add(new BossDefinition(
+							SlayerTaskVariant.valueOf(fields[1]),
+							decode(fields[2]),
+							SlayerEncounterStandards.cleanEncounterLabel(decode(fields[2])),
+							decode(fields[3]), decode(fields[4]), decode(fields[5]),
+							decode(fields[6]), assignments));
+					}
+					else if (fields.length == 3 && fields[0].equals("D"))
+					{
+						final String encounter = decode(fields[1]);
+						directBosses.put(normalize(encounter),
+							new DirectBossDefinition(encounter, decode(fields[2])));
+					}
+					else
+					{
+						throw new IllegalStateException(
+							"Invalid task-variant resource line " + lineNumber);
+					}
+				}
+			}
+		}
+		catch (final IOException | RuntimeException ex)
+		{
+			throw new IllegalStateException("Unable to load task variants", ex);
+		}
+		if (bosses.isEmpty() || directBosses.isEmpty())
+		{
+			throw new IllegalStateException("Task-variant resource is empty");
+		}
+		return new VariantResourceData(
+			Collections.unmodifiableList(bosses),
+			Collections.unmodifiableMap(directBosses));
 	}
 
-	private static BossDefinition boss(
-		final SlayerTaskVariant variant,
-		final String encounterName,
-		final String location,
-		final String travel,
-		final String cannon,
-		final String restriction,
-		final String... assignments)
+	private static String decode(final String value)
 	{
-		return new BossDefinition(
-			variant,
-			encounterName,
-			SlayerEncounterStandards.cleanEncounterLabel(encounterName),
-			location,
-			travel,
-			cannon,
-			restriction,
-			assignments
-		);
+		return value.replace("%0A", "\n").replace("%09", "\t")
+			.replace("%25", "%");
 	}
-
 	private static Map<String, List<BossDefinition>> indexBossesByAssignment()
 	{
 		final Map<String, List<BossDefinition>> index = new LinkedHashMap<>();
@@ -493,39 +370,6 @@ public final class SlayerTaskVariantCatalog
 				return;
 			}
 		}
-	}
-
-	private static Map<String, DirectBossDefinition> createDirectBosses()
-	{
-		final Map<String, DirectBossDefinition> bosses = new LinkedHashMap<>();
-		putDirect(bosses, "Barrows Brothers", "Barrows");
-		putDirect(bosses, "Chaos Elemental", "Wilderness");
-		putDirect(bosses, "Chaos Fanatic", "Wilderness");
-		putDirect(bosses, "Crazy Archaeologist", "Wilderness");
-		putDirect(bosses, "Crazy Archaeologists", "Wilderness");
-		putDirect(bosses, "Deranged Archaeologist", "Fossil Island");
-		putDirect(bosses, "Duke Sucellus", "Ghorrock Dungeon");
-		putDirect(bosses, "General Graardor", "God Wars Dungeon");
-		putDirect(bosses, "Giant Mole", "Falador Mole Lair");
-		putDirect(bosses, "Maggot King", "Maggot King's lair");
-		putDirect(bosses, "Phantom Muspah", "Ghorrock Dungeon");
-		putDirect(bosses, "Leviathan", "The Scar");
-		putDirect(bosses, "The Whisperer", "Lassar Undercity");
-		putDirect(bosses, "Vardorvis", "Stranglewood Temple");
-		putDirect(bosses, "Commander Zilyana", "God Wars Dungeon");
-		putDirect(bosses, "Zulrah", "Zul-Andra");
-		return Collections.unmodifiableMap(bosses);
-	}
-
-	private static void putDirect(
-		final Map<String, DirectBossDefinition> bosses,
-		final String encounterName,
-		final String location)
-	{
-		bosses.put(
-			normalize(encounterName),
-			new DirectBossDefinition(encounterName, location)
-		);
 	}
 
 	public static List<EncounterDefinition> getBossDefinitions()
@@ -607,6 +451,20 @@ public final class SlayerTaskVariantCatalog
 			.replaceAll("[^a-z0-9]+", " ")
 			.trim()
 			.replaceFirst("^the\\s+", "");
+	}
+
+	private static final class VariantResourceData
+	{
+		private final List<BossDefinition> bosses;
+		private final Map<String, DirectBossDefinition> directBosses;
+
+		private VariantResourceData(
+			final List<BossDefinition> bosses,
+			final Map<String, DirectBossDefinition> directBosses)
+		{
+			this.bosses = bosses;
+			this.directBosses = directBosses;
+		}
 	}
 
 	private static final class BossDefinition
@@ -836,3 +694,4 @@ public final class SlayerTaskVariantCatalog
 		}
 	}
 }
+
