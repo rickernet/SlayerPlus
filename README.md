@@ -37,6 +37,10 @@ The project targets Java 11.
 `releaseRouteCheck` is the strict pre-release routing matrix and must pass
 before publishing.
 
+The exhaustive audit suite lives in `verification/java`; Gradle includes that
+directory in the normal `test` source set, so the commands above still compile
+and run the complete verification suite.
+
 ## Support
 
 Report a bug in the [SlayerPlus Discord](https://discord.gg/WZCCPsTU67).

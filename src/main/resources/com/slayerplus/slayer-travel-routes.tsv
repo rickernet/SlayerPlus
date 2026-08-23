@@ -1,0 +1,353 @@
+# type<TAB>location/friendly alias<TAB>item family/canonical location<TAB>destination
+A	Fossil Island Wyvern Cave	Wyvern Cave on Fossil Island	-
+A	Gnome Stronghold Slayer Cave	Stronghold Slayer Cave	-
+A	Nieve's Slayer Cave	Stronghold Slayer Cave	-
+A	Steve's Slayer Cave	Stronghold Slayer Cave	-
+A	Kalphite Cave	Kalphite Slayer Cave	-
+A	Key Master	Cerberus' Lair	-
+A	Lighthouse	Lighthouse Dungeon	-
+A	Mount Karuulm	Karuulm Slayer Dungeon	-
+A	Slayer Tower (first floor)	Slayer Tower	-
+A	Slayer Tower basement	Slayer Tower	-
+A	The Great Conch	Shellbane Gryphon Cave	-
+A	TzHaar Fight Cave	Fight Caves	-
+A	Scorpia's Cave	Deep Wilderness	-
+A	Silk Chasm	Wilderness boss cave	-
+A	Skeletal Tomb	Wilderness boss cave	-
+A	Vet'ion's Rest	Wilderness boss cave	-
+A	Web Chasm	Wilderness boss cave	-
+A	Wilderness Slayer Cave	Wilderness	-
+F	Catacombs of Kourend	xeric s talisman	Xeric's Heart
+F	Catacombs of Kourend	kourend castle teleport	Kourend Castle
+F	Catacombs of Kourend	achievement diary cape	Elise
+F	Catacombs of Kourend	max cape	Teleport to house
+F	Catacombs of Kourend	construct cape	Teleport to house
+F	Catacombs of Kourend	rada s blessing	Kourend Woodland
+F	Catacombs of Kourend	skills necklace	Farming Guild
+F	Catacombs of Kourend	games necklace	Wintertodt Camp
+F	Mourner Tunnels	eternal slayer ring	ME2 Caves
+F	Mourner Tunnels	slayer ring	ME2 Caves
+F	Iorwerth Dungeon	eternal teleport crystal	Prifddinas
+F	Iorwerth Dungeon	teleport crystal	Prifddinas
+F	Iorwerth Dungeon	prifddinas tablet	Prifddinas
+F	Taverley Dungeon	taverley teleport	Taverley
+F	Taverley Dungeon	falador teleport	Falador
+F	Taverley Dungeon	explorer s ring 4	Cabbage patch
+F	Taverley Dungeon	explorer s ring 3	Cabbage patch
+F	Taverley Dungeon	explorer s ring 2	Cabbage patch
+F	Taverley Dungeon	skills necklace	Crafting Guild
+F	Taverley Dungeon	games necklace	Burthorpe
+F	Ancient Cavern	games necklace	Barbarian Assault
+F	Ancient Cavern	barbarian teleport	Barbarian Outpost
+F	Asgarnian Ice Dungeon	explorer s ring 4	Cabbage patch
+F	Asgarnian Ice Dungeon	explorer s ring 3	Cabbage patch
+F	Asgarnian Ice Dungeon	explorer s ring 2	Cabbage patch
+F	Asgarnian Ice Dungeon	falador teleport	Falador
+F	Asgarnian Ice Dungeon	skills necklace	Crafting Guild
+F	Brimhaven Dungeon	brimhaven teleport	Brimhaven
+F	Brimhaven Dungeon	achievement diary cape	Pirate Jackie the Fruit
+F	Brimhaven Dungeon	tai bwo wannai teleport	Tai Bwo Wannai
+F	Brimhaven Dungeon	amulet of glory	Karamja
+F	Brine Rat Cavern	fremennik sea boots 4	Rellekka
+F	Brine Rat Cavern	enchanted lyre i	Rellekka
+F	Brine Rat Cavern	enchanted lyre	Rellekka
+F	Brine Rat Cavern	rellekka teleport	Rellekka
+F	Chasm of Fire	xeric s talisman	Xeric's Glade
+F	Chasm of Fire	skills necklace	Woodcutting Guild
+F	Darkmeyer	drakan s medallion	Darkmeyer
+F	Death Plateau	games necklace	Burthorpe
+F	Death Plateau	combat bracelet	Warriors' Guild
+F	Fremennik Slayer Dungeon	eternal slayer ring	Fremennik Slayer Dungeon
+F	Fremennik Slayer Dungeon	slayer ring	Fremennik Slayer Dungeon
+F	God Wars Dungeon	ghommal s hilt 6	God Wars Dungeon
+F	God Wars Dungeon	ghommal s avernic defender 6	God Wars Dungeon
+F	God Wars Dungeon	ghommal s hilt 5	God Wars Dungeon
+F	God Wars Dungeon	ghommal s avernic defender 5	God Wars Dungeon
+F	God Wars Dungeon	ghommal s hilt 4	God Wars Dungeon
+F	God Wars Dungeon	ghommal s hilt 3	God Wars Dungeon
+F	God Wars Dungeon	trollheim teleport	Trollheim
+F	Jormungand's Prison	fremennik sea boots 4	Rellekka
+F	Jormungand's Prison	enchanted lyre i	Rellekka
+F	Jormungand's Prison	enchanted lyre	Rellekka
+F	Jormungand's Prison	rellekka teleport	Rellekka
+F	Kalphite Slayer Cave	desert amulet 4	Kalphite Cave
+F	Kalphite Slayer Cave	pharaoh s sceptre	Jaldraocht
+F	Kalphite Slayer Cave	ring of dueling	Emir's Arena
+F	Karuulm Slayer Dungeon	rada s blessing 4	Mount Karuulm
+F	Karuulm Slayer Dungeon	rada s blessing 3	Mount Karuulm
+F	Karuulm Slayer Dungeon	rada s blessing 2	Kourend Woodland
+F	Karuulm Slayer Dungeon	rada s blessing 1	Kourend Woodland
+F	Kraken Cove	piscatoris teleport	Piscatoris
+F	Kraken Cove	western banner 4	Piscatoris
+F	Kraken Cove	slayer ring	Fremennik Slayer Dungeon
+F	Lighthouse Dungeon	games necklace	Barbarian Outpost
+F	Lithkren Vault	digsite pendant	Lithkren
+F	Lletya	eternal teleport crystal	Lletya
+F	Lletya	teleport crystal	Lletya
+F	Lunar Isle	lunar isle teleport	Lunar Isle
+F	Lunar Isle	fremennik sea boots 4	Rellekka
+F	Lunar Isle	enchanted lyre i	Rellekka
+F	Meiyerditch Laboratories	drakan s medallion	Darkmeyer
+F	Meiyerditch Laboratories	drakan s medallion	Ver Sinhaza
+F	Mos Le'Harmless Cave	ectophial	Port Phasmatys
+F	Mos Le'Harmless Cave	mos le harmless teleport	Mos Le'Harmless
+F	Slayer Tower	eternal slayer ring	Slayer Tower
+F	Slayer Tower	slayer ring	Slayer Tower
+F	Slayer Tower	morytania legs 4	Burgh de Rott
+F	Slayer Tower	morytania legs 3	Burgh de Rott
+F	Slayer Tower	achievement diary cape	Le-sabre
+F	Slayer Tower	ectophial	Port Phasmatys
+F	Smoke Devil Dungeon	ring of dueling	Emir's Arena
+F	Smoke Devil Dungeon	desert amulet 4	Nardah
+F	Sophanem Dungeon	pharaoh s sceptre	Jalsavrah
+F	Sophanem Dungeon	pharaoh s sceptre	Jaleustrophos
+F	Stronghold of Security	skull sceptre	Stronghold of Security
+F	Stronghold of Security	chronicle	Champions' Guild
+F	Stronghold Slayer Cave	eternal slayer ring	Stronghold Slayer Cave
+F	Stronghold Slayer Cave	slayer ring	Stronghold Slayer Cave
+F	Waterbirth Island Dungeon	waterbirth teleport	Waterbirth Island
+F	Waterbirth Island Dungeon	fremennik sea boots 4	Rellekka
+F	Waterbirth Island Dungeon	enchanted lyre i	Rellekka
+F	Wyvern Cave on Fossil Island	digsite pendant	Fossil Island
+F	Zanaris	lunar staff	Fairy ring
+F	Zanaris	dramen staff	Fairy ring
+F	Ungael	fremennik sea boots 4	Rellekka
+F	Ungael	fremennik sea boots 3	Rellekka
+F	Ungael	fremennik sea boots 2	Rellekka
+F	Ungael	fremennik sea boots 1	Rellekka
+F	Ungael	enchanted lyre i	Rellekka
+F	Ungael	enchanted lyre	Rellekka
+F	Ungael	rellekka teleport	Rellekka
+F	Hunter's End	ring of dueling	Ferox Enclave
+F	Hunter's End	carrallanger teleport	Carrallanger
+F	Hunter's End	games necklace	Corporeal Beast
+F	Callisto's Den	wilderness sword 4	Fountain of Rune
+F	Callisto's Den	wilderness sword 3	Fountain of Rune
+F	Callisto's Den	annakarl teleport	Demonic Ruins
+F	Callisto's Den	annakarl teleport tablet	Demonic Ruins
+F	Callisto's Den	games necklace	Corporeal Beast
+F	Ghorrock Dungeon	ring of shadows	Ghorrock Dungeon
+F	Ghorrock Dungeon	icy basalt	Weiss
+F	Ghorrock Dungeon	games necklace	Wintertodt Camp
+F	The Scar	ring of shadows	The Scar
+F	The Scar	amulet of the eye	Temple of the Eye
+F	The Scar	necklace of passage	Wizards' Tower
+F	Lassar Undercity	ring of shadows	Lassar Undercity
+F	Lassar Undercity	mind altar teleport	Mind Altar
+F	Lassar Undercity	lassar teleport	Ice Mountain
+F	Stranglewood Temple	ring of shadows	Stranglewood Temple
+F	Stranglewood Temple	xeric s talisman	Xeric's Honour
+F	Stranglewood Temple	rada s blessing	Kourend Woodland
+F	Falador Mole Lair	ring of wealth	Falador Park
+F	Falador Mole Lair	explorer s ring 4	Cabbage patch
+F	Falador Mole Lair	explorer s ring 3	Cabbage patch
+F	Falador Mole Lair	explorer s ring 2	Cabbage patch
+F	Falador Mole Lair	falador teleport	Falador
+F	Kalphite Lair	desert amulet 4	Kalphite Cave
+F	Kalphite Lair	pharaoh s sceptre	Jaldraocht
+F	Kalphite Lair	ring of dueling	Emir's Arena
+F	Ruins of Tapoyauik	pendant of ates	Tapoyauik
+F	Morytania Spider Cave	spider cave teleport	Morytania Spider Cave
+F	Morytania Spider Cave	drakan s medallion	Darkmeyer
+F	Morytania Spider Cave	morytania legs 4	Ectofuntus
+F	Morytania Spider Cave	lunar staff	Fairy ring ALQ
+F	Morytania Spider Cave	dramen staff	Fairy ring ALQ
+F	Morytania Spider Cave	ectophial	Port Phasmatys
+F	Ynysdail Cavern	eternal teleport crystal	Prifddinas
+F	Ynysdail Cavern	teleport crystal	Prifddinas
+F	Ynysdail Cavern	prifddinas tablet	Prifddinas
+F	Ynysdail Cavern	piscatoris teleport	Piscatoris
+F	Ynysdail Cavern	sailor s amulet	Port Roberts
+F	Stalker Den	pendant of ates	Nemus Retreat
+F	Stalker Den	lunar staff	Fairy ring AIS
+F	Stalker Den	dramen staff	Fairy ring AIS
+F	Stalker Den	lunar staff	Fairy ring BLS
+F	Stalker Den	dramen staff	Fairy ring BLS
+F	Shellbane Gryphon Cave	lunar staff	Fairy ring CJQ
+F	Shellbane Gryphon Cave	dramen staff	Fairy ring CJQ
+F	Maggot King's lair	drakan s medallion	Castle Drakan
+F	Abyssal Nexus	lunar staff	Fairy ring DIP
+F	Abyssal Nexus	dramen staff	Fairy ring DIP
+F	Al Kharid mine	ring of dueling	Emir's Arena
+F	Al Kharid mine	amulet of glory	Al Kharid
+F	Ancient Guthixian Temple	guthixian temple teleport	Ancient Guthixian Temple
+F	Ancient Guthixian Temple	games necklace	Tears of Guthix
+F	Ancient Guthixian Temple	max cape	POH jewellery box -> Tears of Guthix
+F	Ancient Guthixian Temple	construct cape	POH jewellery box -> Tears of Guthix
+F	Ancient Guthixian Temple	teleport to house	POH jewellery box -> Tears of Guthix
+F	Skotizo's Lair	xeric s talisman	Xeric's Heart
+F	Skotizo's Lair	kourend castle teleport	Kourend Castle
+F	Skotizo's Lair	max cape	Teleport to house
+F	Skotizo's Lair	construct cape	Teleport to house
+F	Skotizo's Lair	rada s blessing	Kourend Woodland
+F	Skotizo's Lair	skills necklace	Farming Guild
+F	Skotizo's Lair	games necklace	Wintertodt Camp
+F	Ardougne area	ardougne cloak 4	Ardougne farm
+F	Ardougne area	ardougne cloak 3	Ardougne farm
+F	Ardougne area	ardougne cloak 2	Ardougne farm
+F	Ardougne area	ardougne cloak 1	Ardougne Monastery
+F	Ardougne area	achievement diary cape	Two-pints
+F	Ardougne area	ardougne teleport	Ardougne
+F	Ardougne area	skills necklace	Fishing Guild
+F	Bandit Camp	pollnivneach teleport	Pollnivneach
+F	Bandit Camp	desert amulet 4	Nardah
+F	Barrows	barrows teleport	Barrows
+F	Barrows	morytania legs 4	Burgh de Rott
+F	Barrows	mort ton teleport	Mort'ton
+F	Black Knights' Fortress	combat bracelet	Monastery
+F	Black Knights' Fortress	falador teleport	Falador
+F	Braindeath Island	ectophial	Port Phasmatys
+F	Cerberus' Lair	key master teleport	Cerberus' Lair
+F	Cerberus' Lair	taverley teleport	Taverley
+F	Cerberus' Lair	falador teleport	Falador
+F	Crash Site Cavern	royal seed pod	Grand Tree
+F	Crash Site Cavern	spirit tree	Grand Tree
+F	Deep Wilderness	wilderness sword 4	Fountain of Rune
+F	Deep Wilderness	wilderness sword 3	Fountain of Rune
+F	Deep Wilderness	burning amulet	Lava Maze
+F	Deep Wilderness	annakarl teleport	Demonic Ruins
+F	Deep Wilderness	games necklace	Corporeal Beast
+F	Desert quarry	desert amulet 4	Nardah
+F	Desert quarry	pollnivneach teleport	Pollnivneach
+F	Desert quarry	ring of dueling	Emir's Arena
+F	Dorgesh-Kaan South Dungeon	lunar staff	Fairy ring AJQ
+F	Dorgesh-Kaan South Dungeon	dramen staff	Fairy ring AJQ
+F	Dorgesh-Kaan South Dungeon	dorgesh kaan sphere	Dorgesh-Kaan
+F	Dwarven Mine	skills necklace	Mining Guild
+F	Dwarven Mine	falador teleport	Falador
+F	Edgeville Dungeon	amulet of glory	Edgeville
+F	Edgeville Dungeon	ring of wealth	Grand Exchange
+F	Feldip Hills	feldip hills teleport	Feldip Hills
+F	Feldip Hills	ring of dueling	Castle Wars
+F	Fight Caves	ghommal s hilt 6	Mor Ul Rek
+F	Fight Caves	ghommal s avernic defender 6	Mor Ul Rek
+F	Fight Caves	ghommal s hilt 5	Mor Ul Rek
+F	Fight Caves	ghommal s avernic defender 5	Mor Ul Rek
+F	Fight Caves	ghommal s hilt 4	Mor Ul Rek
+F	Fight Caves	lunar staff	Fairy ring BLP
+F	Fight Caves	dramen staff	Fairy ring BLP
+F	Forthos Dungeon	xeric s talisman	Xeric's Glade
+F	Forthos Dungeon	rada s blessing	Kourend Woodland
+F	Fossil Island	digsite pendant	Fossil Island
+F	Haunted Woods	eternal slayer ring	Slayer Tower
+F	Haunted Woods	slayer ring	Slayer Tower
+F	Haunted Woods	ectophial	Port Phasmatys
+F	Ice Mountain	combat bracelet	Monastery
+F	Ice Mountain	falador teleport	Falador
+F	Icy seas	sailor s amulet	Port Roberts
+F	Icy seas	piscatoris teleport	Piscatoris
+F	Grimstone Dungeon	lunar staff	Fairy ring DLP
+F	Grimstone Dungeon	dramen staff	Fairy ring DLP
+F	Grimstone Dungeon	icy basalt	Weiss
+F	Isle of Souls	games necklace	Soul Wars
+F	Karamja	karamja gloves 4	Duradel
+F	Karamja	karamja gloves 3	Shilo Village gem mine
+F	Karamja	achievement diary cape	Pirate Jackie the Fruit
+F	Karamja	amulet of glory	Karamja
+F	Karamja Volcano	karamja gloves 4	Duradel
+F	Karamja Volcano	karamja gloves 3	Shilo Village gem mine
+F	Karamja Volcano	amulet of glory	Karamja
+F	Karamja Volcano	lunar staff	Fairy ring BLP
+F	Karamja Volcano	dramen staff	Fairy ring BLP
+F	Kebos Lowlands	skills necklace	Farming Guild
+F	Kebos Lowlands	rada s blessing	Kourend Woodland
+F	Killerwatt plane	draynor manor teleport	Draynor Manor
+F	Killerwatt plane	amulet of glory	Draynor Village
+F	King Black Dragon Lair	burning amulet	Lava Maze
+F	King Black Dragon Lair	annakarl teleport	Demonic Ruins
+F	Kourend Woodland	rada s blessing	Kourend Woodland
+F	Kourend Woodland	skills necklace	Farming Guild
+F	Legends' Guild basement	quest point cape	Legends' Guild
+F	Legends' Guild basement	lunar staff	Fairy ring BLR
+F	Legends' Guild basement	dramen staff	Fairy ring BLR
+F	Lumbridge area	lumbridge teleport	Lumbridge
+F	Lumbridge cow field	cowbell amulet	Cow field
+F	Lumbridge cow field	lumbridge teleport	Lumbridge
+F	Lumbridge Swamp Caves	lumbridge teleport	Lumbridge
+F	Lumbridge Swamp Caves	lumbridge graveyard teleport	Lumbridge Graveyard
+F	Mort'ton	mort ton teleport	Mort'ton
+F	Mort'ton	morytania legs 4	Burgh de Rott
+F	Mogre beach	lunar staff	Fairy ring AIQ
+F	Mogre beach	dramen staff	Fairy ring AIQ
+F	Mogre beach	ring of dueling	Emir's Arena
+F	Nardah desert	desert amulet 4	Nardah
+F	Nardah desert	nardah teleport	Nardah
+F	Piscatoris area	piscatoris teleport	Piscatoris
+F	Piscatoris area	western banner 4	Piscatoris
+F	Poison Waste Dungeon	eternal teleport crystal	Prifddinas
+F	Poison Waste Dungeon	teleport crystal	Prifddinas
+F	Royal Titans arena	giantsoul amulet	Royal Titans
+F	Royal Titans arena	lunar staff	Fairy ring AIQ
+F	Royal Titans arena	dramen staff	Fairy ring AIQ
+F	Slayer Tower rooftop	eternal slayer ring	Slayer Tower
+F	Slayer Tower rooftop	slayer ring	Slayer Tower
+F	Varrock Sewers	varrock teleport	Varrock
+F	Varrock Sewers	chronicle	Champions' Guild
+F	Waterbirth Island	waterbirth teleport	Waterbirth Island
+F	Waterbirth Island	fremennik sea boots 4	Rellekka
+F	Waterbirth Island	enchanted lyre	Rellekka
+F	Wilderness	ring of dueling	Ferox Enclave
+F	Wilderness	games necklace	Corporeal Beast
+F	Wilderness	burning amulet	Bandit Camp
+F	Ferox Enclave	ring of dueling	Ferox Enclave
+F	Ferox Enclave	games necklace	Corporeal Beast
+F	Wilderness God Wars Dungeon	ghorrock teleport	Frozen Waste Plateau
+F	Wilderness God Wars Dungeon	games necklace	Wintertodt Camp
+F	Wilderness God Wars Dungeon	burning amulet	Lava Maze
+F	Buccaneers' Laboratory	max cape	POH fairy ring CIS
+F	Buccaneers' Laboratory	construct cape	POH fairy ring CIS
+F	Buccaneers' Laboratory	teleport to house	POH fairy ring CIS
+F	Wilderness boss cave	burning amulet	Lava Maze
+F	Wilderness boss cave	games necklace	Corporeal Beast
+F	Wilderness boss cave	ring of dueling	Ferox Enclave
+F	Wilderness green dragon area	burning amulet	Chaos Temple
+F	Wilderness green dragon area	games necklace	Corporeal Beast
+F	Wilderness green dragon area	ring of dueling	Ferox Enclave
+F	Zul-Andra	zul andra teleport	Zul-Andra
+F	Zul-Andra	lunar staff	Fairy ring BJS
+F	Zul-Andra	dramen staff	Fairy ring BJS
+F	Silvarea limestone mine	digsite pendant	Digsite
+F	Silvarea limestone mine	ring of the elements	Earth Altar
+F	Silvarea limestone mine	varrock teleport	Varrock
+F	South-west of Legends' Guild	lunar staff	Fairy ring BLR
+F	South-west of Legends' Guild	dramen staff	Fairy ring BLR
+F	South-west of Legends' Guild	quest point cape	Legends' Guild
+F	South-west of Legends' Guild	ardougne teleport	Ardougne
+F	West of Champions' Guild	combat bracelet	Champions' Guild
+F	West of Champions' Guild	chronicle	Champions' Guild
+F	West of Champions' Guild	varrock teleport	Varrock
+F	North of Nardah	desert amulet 4	Nardah
+F	North of Nardah	nardah teleport	Nardah
+F	North of Nardah	lunar staff	Fairy ring DLQ
+F	North of Nardah	dramen staff	Fairy ring DLQ
+F	East of Sophanem	pharaoh s sceptre	Jaleustrophos
+F	East of Sophanem	lunar staff	Fairy ring DLQ
+F	East of Sophanem	dramen staff	Fairy ring DLQ
+F	White Wolf Mountain tunnel	games necklace	Burthorpe
+F	White Wolf Mountain tunnel	taverley teleport	Taverley
+F	White Wolf Mountain tunnel	camelot teleport	Camelot
+F	White Wolf Tunnel pub	games necklace	Burthorpe
+F	White Wolf Tunnel pub	taverley teleport	Taverley
+F	White Wolf Tunnel pub	camelot teleport	Camelot
+F	East of Lumbridge	lumbridge teleport	Lumbridge
+F	Karamja glider clearing	lunar staff	Fairy ring CKR
+F	Karamja glider clearing	dramen staff	Fairy ring CKR
+F	Karamja glider clearing	royal seed pod	Grand Tree
+F	Karamja glider clearing	spirit tree	Grand Tree
+F	Karamja glider clearing	amulet of glory	Karamja
+F	Digsite Dungeon	digsite pendant	Digsite
+F	Digsite Dungeon	varrock teleport	Varrock
+F	Outside H.A.M. Hideout	amulet of glory	Draynor Village
+F	Outside H.A.M. Hideout	explorer s ring 4	Cabbage patch
+F	Outside H.A.M. Hideout	lumbridge teleport	Lumbridge
+F	White Wolf Mountain	games necklace	Burthorpe
+F	White Wolf Mountain	camelot teleport	Camelot
+F	White Wolf Mountain	taverley teleport	Taverley
+F	Alice's farm	ectophial	Ectofuntus
+F	Alice's farm	morytania legs 4	Ectofuntus
+F	Alice's farm	morytania legs 3	Burgh de Rott
+F	Mor Ul Rek east bank	ghommal s hilt 6	Mor Ul Rek
+F	Mor Ul Rek east bank	ghommal s avernic defender 6	Mor Ul Rek
+F	Mor Ul Rek east bank	ghommal s hilt 5	Mor Ul Rek
+F	Mor Ul Rek east bank	ghommal s avernic defender 5	Mor Ul Rek
+F	Mor Ul Rek east bank	ghommal s hilt 4	Mor Ul Rek

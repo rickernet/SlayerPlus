@@ -1,0 +1,1167 @@
+package com.slayerplus;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.Menu;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOpened;
+import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.util.ColorUtil;
+import net.runelite.client.util.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class TeleportHighlighter {
+  private static final Logger log = LoggerFactory.getLogger(TeleportHighlighter.class);
+  private static final int TELEPORT_HIGHLIGHT_RGB = 0x00ff00;
+  private static final java.awt.Color TELEPORT_HIGHLIGHT_COLOR =
+      new java.awt.Color(TELEPORT_HIGHLIGHT_RGB);
+  private static final String EASY_TELEPORTS_CONFIG_GROUP = "easypharaohsceptre";
+  private static final int FIELD_TEXT = 1;
+  private static final int FIELD_NAME = 2;
+  private final Client client;
+  private final ClientThread clientThread;
+  private final ConfigManager configManager;
+  private final Supplier<TravelChoice> selectionSupplier;
+  private final Set<MenuEntry> selectedItemEntries =
+      Collections.newSetFromMap(new IdentityHashMap<>());
+  private final Set<MenuEntry> selectedDestinationEntries =
+      Collections.newSetFromMap(new IdentityHashMap<>());
+  private final Map<Widget, Integer> capturedWidgetFields = new IdentityHashMap<>();
+  private final Map<Widget, WidgetState> highlightedWidgetStates = new IdentityHashMap<>();
+  private final Set<Integer> activeWidgetGroups = new LinkedHashSet<>();
+  private final Set<Integer> pendingWidgetGroups = new LinkedHashSet<>();
+  private boolean menuRefreshQueued;
+  private boolean widgetRefreshQueued;
+  private volatile boolean closed;
+  private boolean selectedItemMenuContext;
+  private String lastSelectionIdentity = "";
+  private int ghommalWidgetDiscoveryTicksRemaining;
+  private int lastLoggedGhommalDestinationWidgetId = -1;
+  private Set<String> cachedNormalizedDestinationAliases = Collections.emptySet();
+  private String cachedAliasSelectionIdentity = "";
+  private String cachedSelectedItemFamily = "";
+  private boolean destinationAliasCacheDirty = true;
+  private String routeGuidanceItemName = "";
+  private Set<String> routeGuidanceDestinations = Collections.emptySet();
+
+  public TeleportHighlighter(
+      Client client,
+      ClientThread clientThread,
+      ConfigManager configManager,
+      Supplier<TravelChoice> selectionSupplier) {
+    this.client = client;
+    this.clientThread = clientThread;
+    this.configManager = configManager;
+    this.selectionSupplier = selectionSupplier;
+  }
+
+  public void onMenuEntryAdded(MenuEntryAdded event) {
+    if (!isActive() || event == null || event.getMenuEntry() == null) {
+      return;
+    }
+    synchronizeSelectionIdentity();
+    MenuEntry entry = event.getMenuEntry();
+    boolean relevant = false;
+    if (isSelectedTravelItemEntry(entry)) {
+      selectedItemEntries.add(entry);
+      selectedItemMenuContext = true;
+      relevant = true;
+    }
+    if (isDestinationEntryByVisibleText(entry)) {
+      selectedDestinationEntries.add(entry);
+      relevant = true;
+    }
+    if (relevant) {
+      queueMenuRefresh();
+    }
+  }
+
+  public void onPostMenuSort() {
+    if (!isActive()) {
+      return;
+    }
+    synchronizeSelectionIdentity();
+    if (hasRelevantLiveMenuPath()) {
+      highlightLiveMenuPath();
+    }
+  }
+
+  public void onMenuOpened(MenuOpened event) {
+    if (!isActive() || event == null || event.getMenuEntries() == null) {
+      return;
+    }
+    synchronizeSelectionIdentity();
+    highlightMenuEntries(event.getMenuEntries());
+  }
+
+  public void onMenuStructureChanged() {
+    if (!isActive()) {
+      return;
+    }
+    synchronizeSelectionIdentity();
+    if (hasRelevantLiveMenuPath()) {
+      queueMenuRefresh();
+    }
+  }
+
+  public void onWidgetLoaded(WidgetLoaded event) {
+    if (!isActive() || event == null) {
+      return;
+    }
+    synchronizeSelectionIdentity();
+    int groupId = event.getGroupId();
+    if (!shouldInspectWidgetGroupForRegression(groupId)) {
+      discardCapturedWidgetGroup(groupId);
+      return;
+    }
+    discardCapturedWidgetGroup(groupId);
+    if (groupId == InterfaceID.GRAPHICAL_MULTI && isGhommalItemName(selection().getItemName())) {
+      ghommalWidgetDiscoveryTicksRemaining = 8;
+    }
+    int capturedBefore = capturedWidgetFields.size();
+    if (groupId == InterfaceID.CHATMENU) {
+      captureWidgetTree(client.getWidget(InterfaceID.Chatmenu.OPTIONS), groupId);
+    } else {
+      captureLoadedGroup(groupId);
+    }
+    boolean deferredGhommalDestinationInterface =
+        shouldDeferGhommalDestinationInterface(groupId, selection().getItemName());
+    if (capturedWidgetFields.size() == capturedBefore && !deferredGhommalDestinationInterface) {
+      return;
+    }
+    pendingWidgetGroups.add(groupId);
+    queueWidgetRefresh();
+  }
+
+  static boolean shouldInspectWidgetGroupForRegression(int groupId) {
+    return groupId != InterfaceID.BANKMAIN;
+  }
+
+  static boolean shouldRefreshOpenMenuOnTick(
+      boolean menuOpen, boolean selectedItemContext, boolean relevantLivePath) {
+    return menuOpen && (selectedItemContext || relevantLivePath);
+  }
+
+  static boolean shouldDeferGhommalDestinationInterface(int groupId, String itemName) {
+    return groupId == InterfaceID.GRAPHICAL_MULTI && isGhommalItemName(itemName);
+  }
+
+  public void onEasyTeleportsConfigChanged() {
+    destinationAliasCacheDirty = true;
+    if (!isActive()) {
+      return;
+    }
+    queueMenuRefresh();
+    queueWidgetRefresh();
+  }
+
+  public void refreshNow() {
+    if (!isActive()) {
+      restoreWidgetHighlights();
+      return;
+    }
+    synchronizeSelectionIdentity();
+    highlightLiveMenuPath();
+    refreshVisibleWidgetGroups();
+  }
+
+  public void setRouteGuidance(String itemName, String... destinations) {
+    String nextItem = clean(itemName);
+    Set<String> nextDestinations = new LinkedHashSet<>();
+    if (destinations != null) {
+      for (String destination : destinations) {
+        String next = clean(destination);
+        if (!next.isEmpty()) {
+          nextDestinations.add(next);
+        }
+      }
+    }
+    if (nextItem.equals(routeGuidanceItemName)
+        && nextDestinations.equals(routeGuidanceDestinations)) {
+      return;
+    }
+    restoreWidgetHighlights();
+    selectedItemEntries.clear();
+    selectedDestinationEntries.clear();
+    selectedItemMenuContext = false;
+    routeGuidanceItemName = nextItem;
+    routeGuidanceDestinations = Collections.unmodifiableSet(nextDestinations);
+    cachedAliasSelectionIdentity = "";
+    cachedNormalizedDestinationAliases = Collections.emptySet();
+    cachedSelectedItemFamily = itemFamily(effectiveSelectedItemName());
+    destinationAliasCacheDirty = true;
+  }
+
+  public void onGameTick() {
+    if (!isActive()) {
+      selectedItemMenuContext = false;
+      return;
+    }
+    boolean menuOpen = client.isMenuOpen();
+    if (!menuOpen) {
+      selectedItemMenuContext = false;
+    } else {
+      boolean relevantLivePath = selectedItemMenuContext || hasRelevantLiveMenuPath();
+      if (shouldRefreshOpenMenuOnTick(menuOpen, selectedItemMenuContext, relevantLivePath)) {
+        highlightLiveMenuPath();
+      }
+    }
+    if (!isGhommalItemName(selection().getItemName())) {
+      return;
+    }
+    highlightGhommalGraphicalDestination();
+    if (ghommalWidgetDiscoveryTicksRemaining > 0) {
+      ghommalWidgetDiscoveryTicksRemaining--;
+      highlightVisibleGhommalDestination();
+    }
+  }
+
+  public void restoreWidgetHighlights() {
+    for (Map.Entry<Widget, WidgetState> entry : highlightedWidgetStates.entrySet()) {
+      Widget widget = entry.getKey();
+      WidgetState state = entry.getValue();
+      if (widget == null || state == null) {
+        continue;
+      }
+      try {
+        widget.setText(state.text);
+        widget.setName(state.name);
+        widget.setTextColor(state.textColor);
+        widget.revalidate();
+      } catch (RuntimeException ignored) {
+      }
+    }
+    highlightedWidgetStates.clear();
+  }
+
+  public void clearCaptures() {
+    restoreWidgetHighlights();
+    discardCaptures();
+  }
+
+  public void discardForWorldTransition() {
+    highlightedWidgetStates.clear();
+    discardCaptures();
+  }
+
+  private void discardCaptures() {
+    selectedItemEntries.clear();
+    selectedDestinationEntries.clear();
+    capturedWidgetFields.clear();
+    activeWidgetGroups.clear();
+    pendingWidgetGroups.clear();
+    menuRefreshQueued = false;
+    widgetRefreshQueued = false;
+    selectedItemMenuContext = false;
+    ghommalWidgetDiscoveryTicksRemaining = 0;
+    lastLoggedGhommalDestinationWidgetId = -1;
+    lastSelectionIdentity = selectionIdentity();
+    cachedSelectedItemFamily = itemFamily(selection().getItemName());
+  }
+
+  public void shutDown() {
+    closed = true;
+    clearCaptures();
+    routeGuidanceItemName = "";
+    routeGuidanceDestinations = Collections.emptySet();
+    lastSelectionIdentity = "";
+    cachedAliasSelectionIdentity = "";
+    cachedNormalizedDestinationAliases = Collections.emptySet();
+    destinationAliasCacheDirty = true;
+  }
+
+  private boolean hasRelevantLiveMenuPath() {
+    Menu menu = client == null ? null : client.getMenu();
+    MenuEntry[] roots = menu == null ? null : menu.getMenuEntries();
+    if (roots == null || roots.length == 0) {
+      return false;
+    }
+    Set<String> aliases = normalizedDestinationAliases();
+    for (MenuEntry root : roots) {
+      if (root == null) {
+        continue;
+      }
+      if (isSelectedTravelItemEntry(root)
+          || matchesDestination(root.getOption(), aliases)
+          || matchesDestination(root.getTarget(), aliases)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void queueMenuRefresh() {
+    if (menuRefreshQueued || !isActive()) {
+      return;
+    }
+    menuRefreshQueued = true;
+    clientThread.invokeLater(
+        () -> {
+          if (closed) {
+            menuRefreshQueued = false;
+            return;
+          }
+          clientThread.invokeLater(
+              () -> {
+                menuRefreshQueued = false;
+                if (!closed) {
+                  highlightLiveMenuPath();
+                }
+              });
+        });
+  }
+
+  private void queueWidgetRefresh() {
+    if (widgetRefreshQueued || !isActive()) {
+      return;
+    }
+    widgetRefreshQueued = true;
+    clientThread.invokeLater(
+        () -> {
+          if (closed) {
+            widgetRefreshQueued = false;
+            return;
+          }
+          clientThread.invokeLater(
+              () -> {
+                widgetRefreshQueued = false;
+                if (!closed) {
+                  refreshVisibleWidgetGroups();
+                }
+              });
+        });
+  }
+
+  private void highlightLiveMenuPath() {
+    if (!isActive()) {
+      return;
+    }
+    synchronizeSelectionIdentity();
+    Menu menu = client.getMenu();
+    highlightMenuEntries(menu == null ? null : menu.getMenuEntries());
+  }
+
+  private void highlightMenuEntries(MenuEntry[] roots) {
+    if (roots == null || roots.length == 0) {
+      selectedItemEntries.clear();
+      selectedDestinationEntries.clear();
+      return;
+    }
+    Set<String> aliases = normalizedDestinationAliases();
+    Menu rootMenu = client == null ? null : client.getMenu();
+    MenuPath best = null;
+    for (MenuEntry root : roots) {
+      if (root == null || !isSelectedTravelItemEntry(root)) {
+        continue;
+      }
+      selectedItemEntries.add(root);
+      selectedItemMenuContext = true;
+      MenuPath candidate = findDestinationPath(root, aliases);
+      if (candidate == null) {
+        continue;
+      }
+      if (best == null || candidate.score > best.score) {
+        best = candidate;
+      }
+    }
+    if (best == null) {
+      if ((menuContainsSelectedItemContext(roots)
+              || selectedItemMenuContext
+              || isContextlessSelectedDestinationMenu(roots, aliases))
+          && highlightVisibleDestinationEntries(roots, aliases)) {
+        if (rootMenu != null) {
+          rootMenu.setMenuEntries(roots);
+        }
+      } else {
+        MenuEntry fallback = selectBestFirstStageOnly(roots);
+        if (fallback != null) {
+          highlightEntryOption(fallback);
+          if (rootMenu != null) {
+            rootMenu.setMenuEntries(roots);
+          }
+        }
+      }
+      selectedItemEntries.clear();
+      selectedDestinationEntries.clear();
+      return;
+    }
+    for (MenuEntry entry : best.entries) {
+      highlightRouteEntry(entry, aliases);
+      Menu subMenu = entry == null ? null : entry.getSubMenu();
+      if (subMenu != null && subMenu.getMenuEntries() != null) {
+        subMenu.setMenuEntries(subMenu.getMenuEntries());
+      }
+    }
+    if (rootMenu != null) {
+      rootMenu.setMenuEntries(roots);
+    }
+    selectedItemEntries.clear();
+    selectedDestinationEntries.clear();
+  }
+
+  private boolean isContextlessSelectedDestinationMenu(MenuEntry[] entries, Set<String> aliases) {
+    if (entries == null) {
+      return false;
+    }
+    for (MenuEntry entry : entries) {
+      if (entry != null
+          && isContextlessSelectedDestinationChoice(
+              effectiveSelectedItemName(), entry.getOption(), aliases)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean menuContainsSelectedItemContext(MenuEntry[] entries) {
+    if (entries == null) {
+      return false;
+    }
+    for (MenuEntry entry : entries) {
+      if (entry == null) {
+        continue;
+      }
+      if (isSelectedTravelItemEntry(entry) || selectedDestinationEntries.contains(entry)) {
+        return true;
+      }
+      Menu subMenu = entry.getSubMenu();
+      if (subMenu != null && menuContainsSelectedItemContext(subMenu.getMenuEntries())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean highlightVisibleDestinationEntries(MenuEntry[] entries, Set<String> aliases) {
+    if (entries == null) {
+      return false;
+    }
+    boolean highlighted = false;
+    for (MenuEntry entry : entries) {
+      if (entry == null) {
+        continue;
+      }
+      if (matchesDestination(entry.getOption(), aliases)
+          || selectedDestinationEntries.contains(entry)) {
+        highlightEntryOption(entry);
+        highlighted = true;
+      } else if (matchesDestination(entry.getTarget(), aliases)) {
+        entry.setTarget(highlight(entry.getTarget()));
+        highlighted = true;
+      }
+      Menu subMenu = entry.getSubMenu();
+      if (subMenu != null) {
+        MenuEntry[] children = subMenu.getMenuEntries();
+        if (highlightVisibleDestinationEntries(children, aliases)) {
+          highlighted = true;
+          subMenu.setMenuEntries(children);
+        }
+      }
+    }
+    return highlighted;
+  }
+
+  private MenuPath findDestinationPath(MenuEntry root, Set<String> aliases) {
+    List<MenuEntry> entries = new ArrayList<>();
+    if (!appendPathToDestination(root, aliases, entries)) {
+      return null;
+    }
+    return new MenuPath(entries, firstStageScore(root, true));
+  }
+
+  private boolean appendPathToDestination(
+      MenuEntry entry, Set<String> aliases, List<MenuEntry> output) {
+    if (entry == null) {
+      return false;
+    }
+    if (isExactDestinationEntry(entry, aliases)) {
+      output.add(entry);
+      return true;
+    }
+    Menu subMenu = entry.getSubMenu();
+    MenuEntry[] children = subMenu == null ? null : subMenu.getMenuEntries();
+    if (children == null || children.length == 0) {
+      return false;
+    }
+    for (MenuEntry child : children) {
+      List<MenuEntry> childPath = new ArrayList<>();
+      if (appendPathToDestination(child, aliases, childPath)) {
+        output.add(entry);
+        output.addAll(childPath);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private MenuEntry selectBestFirstStageOnly(MenuEntry[] roots) {
+    MenuEntry best = null;
+    int bestScore = Integer.MIN_VALUE;
+    for (MenuEntry entry : roots) {
+      if (entry == null || !isSelectedTravelItemEntry(entry)) {
+        continue;
+      }
+      int score = firstStageScore(entry, false);
+      if (best == null || score > bestScore) {
+        best = entry;
+        bestScore = score;
+      }
+    }
+    return bestScore > 0 ? best : null;
+  }
+
+  private int firstStageScore(MenuEntry entry, boolean ownsDestination) {
+    return (ownsDestination ? 100 : 0)
+        + firstStageActionPreference(
+            entry == null ? "" : entry.getOption(), effectiveSelectedItemName());
+  }
+
+  static int firstStageActionPreference(String option, String itemName) {
+    String action = normalize(clean(option));
+    boolean ghommal = isGhommalItemName(itemName);
+    if (ghommal) {
+      if (action.equals("destinations") || action.equals("destination")) {
+        return 3000;
+      }
+      if (action.equals("teleport")
+          || action.equals("teleports")
+          || action.startsWith("teleport ")) {
+        return 2000;
+      }
+      return -3000;
+    }
+    if (action.equals("teleport") || action.equals("teleports") || action.startsWith("teleport ")) {
+      return 1000;
+    }
+    if (action.equals("drop")
+        || action.equals("destroy")
+        || action.equals("dismantle")
+        || action.equals("discard")
+        || action.equals("release")
+        || action.equals("examine")
+        || action.equals("cancel")
+        || action.isEmpty()) {
+      return -1000;
+    }
+    if (action.equals("rub")
+        || action.equals("operate")
+        || action.equals("destinations")
+        || action.equals("destination")
+        || action.equals("invoke")
+        || action.equals("commune")) {
+      return 500;
+    }
+    return 100;
+  }
+
+  static boolean isGhommalItemName(String itemName) {
+    String family = normalize(clean(itemName));
+    return family.contains("ghommal s hilt") || family.contains("ghommal s avernic defender");
+  }
+
+  static boolean isContextlessGhommalDestinationChoice(
+      String itemName, String option, Set<String> normalizedAliases) {
+    return isGhommalItemName(itemName) && matchesDestination(option, normalizedAliases);
+  }
+
+  static boolean isContextlessSelectedDestinationChoice(
+      String itemName, String option, Set<String> normalizedAliases) {
+    if (!matchesDestination(option, normalizedAliases)) {
+      return false;
+    }
+    if (isGhommalItemName(itemName)) {
+      return true;
+    }
+    String family = normalize(clean(itemName));
+    if (family.contains("achievement diary cape") || family.contains("achievement cape")) {
+      return true;
+    }
+    return family.contains("digsite pendant") && normalizeChoice(option).equals("fossil island");
+  }
+
+  private void highlightRouteEntry(MenuEntry entry, Set<String> aliases) {
+    if (entry == null) {
+      return;
+    }
+    if (isExactDestinationEntry(entry, aliases)) {
+      if (matchesDestination(entry.getOption(), aliases)
+          || selectedDestinationEntries.contains(entry)) {
+        highlightEntryOption(entry);
+      } else if (matchesDestination(entry.getTarget(), aliases)) {
+        entry.setTarget(highlight(entry.getTarget()));
+      } else {
+        highlightEntryOption(entry);
+      }
+      return;
+    }
+    highlightEntryOption(entry);
+  }
+
+  private static void highlightEntryOption(MenuEntry entry) {
+    if (entry == null) {
+      return;
+    }
+    String option = clean(entry.getOption());
+    if (!option.isEmpty()) {
+      entry.setOption(highlight(option));
+    }
+  }
+
+  private boolean isExactDestinationEntry(MenuEntry entry, Set<String> aliases) {
+    return entry != null
+        && (selectedDestinationEntries.contains(entry)
+            || matchesDestination(entry.getOption(), aliases)
+            || matchesDestination(entry.getTarget(), aliases));
+  }
+
+  private boolean isDestinationEntryByVisibleText(MenuEntry entry) {
+    Set<String> aliases = normalizedDestinationAliases();
+    return entry != null
+        && (matchesDestination(entry.getOption(), aliases)
+            || matchesDestination(entry.getTarget(), aliases));
+  }
+
+  private boolean isSelectedTravelItemEntry(MenuEntry entry) {
+    TravelChoice selection = selection();
+    boolean hasPhysicalSelection = selection.hasPhysicalItem();
+    boolean hasRouteGuidance = !routeGuidanceItemName.isEmpty();
+    if (entry == null || (!hasPhysicalSelection && !hasRouteGuidance)) {
+      return false;
+    }
+    if (selectedItemEntries.contains(entry)) {
+      return true;
+    }
+    try {
+      if (!hasRouteGuidance && hasPhysicalSelection && entry.getItemId() == selection.getItemId()) {
+        return true;
+      }
+      Widget widget = entry.getWidget();
+      if (!hasRouteGuidance
+          && hasPhysicalSelection
+          && widget != null
+          && widget.getItemId() == selection.getItemId()) {
+        return true;
+      }
+    } catch (RuntimeException ignored) {
+    }
+    String family = cachedSelectedItemFamily;
+    String target = normalize(clean(entry.getTarget()));
+    return !family.isEmpty() && !target.isEmpty() && target.contains(family);
+  }
+
+  private void captureLoadedGroup(int groupId) {
+    Widget[] roots = client.getWidgetRoots();
+    if (roots == null) {
+      return;
+    }
+    for (Widget root : roots) {
+      if (root == null) {
+        continue;
+      }
+      if (groupId == InterfaceID.MENU || widgetGroup(root) == groupId) {
+        captureWidgetTree(root, groupId);
+      }
+    }
+  }
+
+  private void discardCapturedWidgetGroup(int groupId) {
+    for (Iterator<Map.Entry<Widget, WidgetState>> iterator =
+            highlightedWidgetStates.entrySet().iterator();
+        iterator.hasNext(); ) {
+      Map.Entry<Widget, WidgetState> entry = iterator.next();
+      Widget widget = entry.getKey();
+      if (widget == null || widgetGroup(widget) != groupId) {
+        continue;
+      }
+      WidgetState state = entry.getValue();
+      try {
+        widget.setText(state.text);
+        widget.setName(state.name);
+        widget.setTextColor(state.textColor);
+        widget.revalidate();
+      } catch (RuntimeException ignored) {
+      }
+      iterator.remove();
+    }
+    for (Iterator<Widget> iterator = capturedWidgetFields.keySet().iterator();
+        iterator.hasNext(); ) {
+      Widget widget = iterator.next();
+      if (widget != null && widgetGroup(widget) == groupId) {
+        iterator.remove();
+      }
+    }
+    activeWidgetGroups.remove(groupId);
+    pendingWidgetGroups.remove(groupId);
+  }
+
+  private void captureWidgetTree(Widget root, int groupId) {
+    if (root == null) {
+      return;
+    }
+    Map<Widget, Boolean> visited = new IdentityHashMap<>();
+    captureWidgetTree(root, groupId, visited);
+  }
+
+  private void captureWidgetTree(Widget widget, int groupId, Map<Widget, Boolean> visited) {
+    if (widget == null || visited.put(widget, Boolean.TRUE) != null) {
+      return;
+    }
+    try {
+      if (widgetGroup(widget) == groupId && !widget.isHidden()) {
+        int fields = 0;
+        Set<String> aliases = normalizedDestinationAliases();
+        if (matchesDestination(widget.getText(), aliases)) {
+          fields |= FIELD_TEXT;
+        }
+        if (matchesDestination(widget.getName(), aliases)) {
+          fields |= FIELD_NAME;
+        }
+        if (fields != 0) {
+          capturedWidgetFields.put(widget, fields);
+        }
+      }
+    } catch (RuntimeException ignored) {
+      return;
+    }
+    captureWidgetChildren(widget.getChildren(), groupId, visited);
+    captureWidgetChildren(widget.getDynamicChildren(), groupId, visited);
+    captureWidgetChildren(widget.getStaticChildren(), groupId, visited);
+    captureWidgetChildren(widget.getNestedChildren(), groupId, visited);
+  }
+
+  private void captureWidgetChildren(Widget[] children, int groupId, Map<Widget, Boolean> visited) {
+    if (children == null) {
+      return;
+    }
+    for (Widget child : children) {
+      captureWidgetTree(child, groupId, visited);
+    }
+  }
+
+  private void refreshVisibleWidgetGroups() {
+    restoreWidgetHighlights();
+    if (!isActive()) {
+      return;
+    }
+    Set<Integer> groups = new LinkedHashSet<>(activeWidgetGroups);
+    groups.addAll(pendingWidgetGroups);
+    pendingWidgetGroups.clear();
+    for (int groupId : groups) {
+      boolean matched = false;
+      if (groupId == InterfaceID.GRAPHICAL_MULTI && isGhommalItemName(selection().getItemName())) {
+        matched = highlightGhommalGraphicalDestination();
+      } else if (groupId == InterfaceID.CHATMENU) {
+        Widget root = client.getWidget(InterfaceID.Chatmenu.OPTIONS);
+        matched = root != null && highlightWidgetTree(root, groupId);
+      } else {
+        Widget[] roots = client.getWidgetRoots();
+        if (roots != null) {
+          for (Widget root : roots) {
+            if (root != null && (groupId == InterfaceID.MENU || widgetGroup(root) == groupId)) {
+              matched |= highlightWidgetTree(root, groupId);
+            }
+          }
+        }
+      }
+      if (matched) {
+        activeWidgetGroups.add(groupId);
+      } else {
+        activeWidgetGroups.remove(groupId);
+      }
+    }
+  }
+
+  private boolean highlightGhommalGraphicalDestination() {
+    int[] optionComponentIds = {
+      InterfaceID.GraphicalMulti.GRAPHICAL_MULTI_2A, InterfaceID.GraphicalMulti.GRAPHICAL_MULTI_2B
+    };
+    Set<String> aliases = normalizedDestinationAliases();
+    Map<Widget, Boolean> visited = new IdentityHashMap<>();
+    boolean matched = false;
+    for (int componentId : optionComponentIds) {
+      Widget widget = client.getWidget(componentId);
+      matched |= highlightGhommalOptionSubtree(widget, aliases, visited);
+    }
+    return matched;
+  }
+
+  private boolean highlightVisibleGhommalDestination() {
+    Widget[] roots = client.getWidgetRoots();
+    if (roots == null) {
+      return false;
+    }
+    Set<String> aliases = normalizedDestinationAliases();
+    Map<Widget, Boolean> visited = new IdentityHashMap<>();
+    boolean matched = false;
+    for (Widget root : roots) {
+      matched |= highlightVisibleGhommalDestination(root, aliases, visited);
+    }
+    return matched;
+  }
+
+  private boolean highlightVisibleGhommalDestination(
+      Widget widget, Set<String> aliases, Map<Widget, Boolean> visited) {
+    if (widget == null || visited.put(widget, Boolean.TRUE) != null) {
+      return false;
+    }
+    boolean matched = false;
+    try {
+      if (!widget.isHidden()) {
+        int fields = 0;
+        if (matchesDestination(widget.getText(), aliases)) {
+          fields |= FIELD_TEXT;
+        }
+        if (matchesDestination(widget.getName(), aliases)) {
+          fields |= FIELD_NAME;
+        }
+        if (fields != 0) {
+          highlightWidget(widget, fields);
+          matched = true;
+          if (widget.getId() != lastLoggedGhommalDestinationWidgetId) {
+            lastLoggedGhommalDestinationWidgetId = widget.getId();
+            log.debug(
+                "Highlighted live Ghommal destination widget {} (group {})",
+                widget.getId(),
+                widgetGroup(widget));
+          }
+        }
+      }
+    } catch (RuntimeException ignored) {
+      return matched;
+    }
+    matched |= highlightVisibleGhommalDestinationChildren(widget.getChildren(), aliases, visited);
+    matched |=
+        highlightVisibleGhommalDestinationChildren(widget.getDynamicChildren(), aliases, visited);
+    matched |=
+        highlightVisibleGhommalDestinationChildren(widget.getStaticChildren(), aliases, visited);
+    matched |=
+        highlightVisibleGhommalDestinationChildren(widget.getNestedChildren(), aliases, visited);
+    return matched;
+  }
+
+  private boolean highlightVisibleGhommalDestinationChildren(
+      Widget[] children, Set<String> aliases, Map<Widget, Boolean> visited) {
+    if (children == null) {
+      return false;
+    }
+    boolean matched = false;
+    for (Widget child : children) {
+      matched |= highlightVisibleGhommalDestination(child, aliases, visited);
+    }
+    return matched;
+  }
+
+  private boolean highlightGhommalOptionSubtree(
+      Widget widget, Set<String> aliases, Map<Widget, Boolean> visited) {
+    if (widget == null || visited.put(widget, Boolean.TRUE) != null) {
+      return false;
+    }
+    boolean matched = false;
+    try {
+      if (!widget.isHidden()) {
+        int fields = 0;
+        if (matchesDestination(widget.getText(), aliases)) {
+          fields |= FIELD_TEXT;
+        }
+        if (matchesDestination(widget.getName(), aliases)) {
+          fields |= FIELD_NAME;
+        }
+        if (fields != 0) {
+          highlightWidget(widget, fields);
+          matched = true;
+        }
+      }
+    } catch (RuntimeException ignored) {
+      return matched;
+    }
+    matched |= highlightGhommalOptionChildren(widget.getChildren(), aliases, visited);
+    matched |= highlightGhommalOptionChildren(widget.getDynamicChildren(), aliases, visited);
+    matched |= highlightGhommalOptionChildren(widget.getStaticChildren(), aliases, visited);
+    matched |= highlightGhommalOptionChildren(widget.getNestedChildren(), aliases, visited);
+    return matched;
+  }
+
+  private boolean highlightGhommalOptionChildren(
+      Widget[] children, Set<String> aliases, Map<Widget, Boolean> visited) {
+    if (children == null) {
+      return false;
+    }
+    boolean matched = false;
+    for (Widget child : children) {
+      matched |= highlightGhommalOptionSubtree(child, aliases, visited);
+    }
+    return matched;
+  }
+
+  private boolean highlightWidgetTree(Widget root, int groupId) {
+    Map<Widget, Boolean> visited = new IdentityHashMap<>();
+    return highlightWidgetTree(root, groupId, visited);
+  }
+
+  private boolean highlightWidgetTree(Widget widget, int groupId, Map<Widget, Boolean> visited) {
+    if (widget == null || visited.put(widget, Boolean.TRUE) != null) {
+      return false;
+    }
+    boolean matched = false;
+    try {
+      if (widgetGroup(widget) == groupId && !widget.isHidden()) {
+        Set<String> aliases = normalizedDestinationAliases();
+        int fields = capturedWidgetFields.getOrDefault(widget, 0);
+        if (matchesDestination(widget.getText(), aliases)) {
+          fields |= FIELD_TEXT;
+        }
+        if (matchesDestination(widget.getName(), aliases)) {
+          fields |= FIELD_NAME;
+        }
+        if (fields != 0) {
+          highlightWidget(widget, fields);
+          matched = true;
+        }
+      }
+    } catch (RuntimeException ignored) {
+      return matched;
+    }
+    matched |= highlightWidgetChildren(widget.getChildren(), groupId, visited);
+    matched |= highlightWidgetChildren(widget.getDynamicChildren(), groupId, visited);
+    matched |= highlightWidgetChildren(widget.getStaticChildren(), groupId, visited);
+    matched |= highlightWidgetChildren(widget.getNestedChildren(), groupId, visited);
+    return matched;
+  }
+
+  private boolean highlightWidgetChildren(
+      Widget[] children, int groupId, Map<Widget, Boolean> visited) {
+    if (children == null) {
+      return false;
+    }
+    boolean matched = false;
+    for (Widget child : children) {
+      matched |= highlightWidgetTree(child, groupId, visited);
+    }
+    return matched;
+  }
+
+  private void highlightWidget(Widget widget, int fields) {
+    if (widget == null) {
+      return;
+    }
+    try {
+      highlightedWidgetStates.putIfAbsent(
+          widget, new WidgetState(widget.getText(), widget.getName(), widget.getTextColor()));
+      if ((fields & FIELD_TEXT) != 0) {
+        widget.setTextColor(TELEPORT_HIGHLIGHT_RGB);
+      }
+      if ((fields & FIELD_NAME) != 0) {
+        widget.setName(highlight(widget.getName()));
+      }
+    } catch (RuntimeException ignored) {
+    }
+  }
+
+  private Set<String> normalizedDestinationAliases() {
+    if (!destinationAliasCacheDirty && lastSelectionIdentity.equals(cachedAliasSelectionIdentity)) {
+      return cachedNormalizedDestinationAliases;
+    }
+    TravelChoice selection = selection();
+    Set<String> raw = new LinkedHashSet<>();
+    if (routeGuidanceItemName.isEmpty()) {
+      raw.addAll(
+          SlayerTeleportRouteRegistry.destinationAliases(
+              selection.getItemName(), selection.getDestination()));
+      String menuDestination =
+          SlayerTeleportRouteRegistry.menuDestination(
+              selection.getItemName(), selection.getDestination());
+      if (!clean(menuDestination).isEmpty()) {
+        raw.add(menuDestination);
+      }
+      addEasyTeleportsAliases(raw, selection);
+    }
+    for (String routeDestination : routeGuidanceDestinations) {
+      raw.add(routeDestination);
+    }
+    Set<String> normalized = new LinkedHashSet<>();
+    for (String value : raw) {
+      String candidate = normalizeChoice(value);
+      if (!candidate.isEmpty()) {
+        normalized.add(candidate);
+      }
+    }
+    cachedNormalizedDestinationAliases = Collections.unmodifiableSet(normalized);
+    cachedAliasSelectionIdentity = lastSelectionIdentity;
+    destinationAliasCacheDirty = false;
+    return cachedNormalizedDestinationAliases;
+  }
+
+  private void addEasyTeleportsAliases(Set<String> aliases, TravelChoice selection) {
+    if (configManager == null || aliases == null || aliases.isEmpty()) {
+      return;
+    }
+    List<String> keys;
+    try {
+      keys = configManager.getConfigurationKeys(EASY_TELEPORTS_CONFIG_GROUP + ".");
+    } catch (RuntimeException ignored) {
+      return;
+    }
+    if (keys == null || keys.isEmpty()) {
+      return;
+    }
+    String prefix = EASY_TELEPORTS_CONFIG_GROUP + ".";
+    for (String wholeKey : keys) {
+      if (wholeKey == null || !wholeKey.startsWith(prefix)) {
+        continue;
+      }
+      String key = wholeKey.substring(prefix.length());
+      if (!key.startsWith("replacement")) {
+        continue;
+      }
+      if (!SlayerTeleportRouteRegistry.matchesEasyTeleportsConfigKey(
+          selection.getItemName(), selection.getDestination(), key)) {
+        continue;
+      }
+      try {
+        String replacement =
+            clean(configManager.getConfiguration(EASY_TELEPORTS_CONFIG_GROUP, key));
+        if (!replacement.isEmpty()) {
+          aliases.add(replacement);
+        }
+      } catch (RuntimeException ignored) {
+      }
+    }
+  }
+
+  private boolean isActive() {
+    if (closed) {
+      return false;
+    }
+    TravelChoice selection = selection();
+    String itemName = selection.getItemName();
+    return client != null
+        && client.getGameState() == GameState.LOGGED_IN
+        && ((selection.hasPhysicalItem() && itemName != null && !itemName.trim().isEmpty())
+            || (!routeGuidanceItemName.isEmpty() && !routeGuidanceDestinations.isEmpty()));
+  }
+
+  private String effectiveSelectedItemName() {
+    return routeGuidanceItemName.isEmpty() ? selection().getItemName() : routeGuidanceItemName;
+  }
+
+  private TravelChoice selection() {
+    TravelChoice value = selectionSupplier == null ? null : selectionSupplier.get();
+    return value == null ? TravelChoice.unresolved("", -1L) : value;
+  }
+
+  private void synchronizeSelectionIdentity() {
+    String current = selectionIdentity();
+    if (current.equals(lastSelectionIdentity)) {
+      return;
+    }
+    restoreWidgetHighlights();
+    selectedItemEntries.clear();
+    selectedDestinationEntries.clear();
+    selectedItemMenuContext = false;
+    capturedWidgetFields.clear();
+    activeWidgetGroups.clear();
+    pendingWidgetGroups.clear();
+    ghommalWidgetDiscoveryTicksRemaining = 0;
+    lastLoggedGhommalDestinationWidgetId = -1;
+    lastSelectionIdentity = current;
+    cachedAliasSelectionIdentity = "";
+    cachedNormalizedDestinationAliases = Collections.emptySet();
+    cachedSelectedItemFamily = itemFamily(effectiveSelectedItemName());
+    destinationAliasCacheDirty = true;
+  }
+
+  private String selectionIdentity() {
+    TravelChoice selection = selection();
+    return selection.getGeneration()
+        + "|"
+        + String.valueOf(selection.getRouteIdentity())
+        + "|"
+        + selection.getItemId()
+        + "|"
+        + String.valueOf(selection.getItemName())
+        + "|"
+        + String.valueOf(selection.getDestination())
+        + "|"
+        + String.valueOf(selection.getStatus());
+  }
+
+  private static boolean matchesDestination(String value, Set<String> normalizedAliases) {
+    if (normalizedAliases == null || normalizedAliases.isEmpty()) {
+      return false;
+    }
+    String actual = normalizeChoice(value);
+    return !actual.isEmpty() && normalizedAliases.contains(actual);
+  }
+
+  private static int widgetGroup(Widget widget) {
+    if (widget == null || widget.getId() < 0) {
+      return -1;
+    }
+    return widget.getId() >>> 16;
+  }
+
+  private static String itemFamily(String value) {
+    return normalize(value).replaceFirst("\\s+[a-z]?\\d+$", "").trim();
+  }
+
+  private static String normalizeChoice(String value) {
+    return normalize(clean(value)).replaceFirst("^\\d+\\s+", "").trim();
+  }
+
+  private static String normalize(String value) {
+    return clean(value)
+        .toLowerCase(Locale.ROOT)
+        .replaceAll("[^a-z0-9]+", " ")
+        .replaceAll("\\s+", " ")
+        .trim();
+  }
+
+  private static String clean(String value) {
+    if (value == null) {
+      return "";
+    }
+    return Text.removeTags(value.replaceAll("(?i)<br\\s*/?>", " ")).replaceAll("\\s+", " ").trim();
+  }
+
+  private static String highlight(String value) {
+    return ColorUtil.wrapWithColorTag(clean(value), TELEPORT_HIGHLIGHT_COLOR);
+  }
+
+  private static final class MenuPath {
+    private final List<MenuEntry> entries;
+    private final int score;
+
+    private MenuPath(List<MenuEntry> entries, int score) {
+      this.entries = entries;
+      this.score = score;
+    }
+  }
+
+  private static final class WidgetState {
+    private final String text;
+    private final String name;
+    private final int textColor;
+
+    private WidgetState(String text, String name, int textColor) {
+      this.text = text == null ? "" : text;
+      this.name = name == null ? "" : name;
+      this.textColor = textColor;
+    }
+  }
+}

@@ -1,0 +1,129 @@
+package com.slayerplus;
+
+import java.util.Locale;
+import java.util.Objects;
+
+class GuideLifecycle {
+  private GuideLifecycle() {}
+
+  enum BankEndpointKind {
+    BOOTH,
+    CHEST,
+    BANKER
+  }
+
+  enum MasterReturnPlan {
+    CARRIED_TELEPORT,
+    BANK_OWNED_TELEPORT,
+    PHYSICAL_PATH
+  }
+
+  static TaskRouteKey taskRouteKey(
+      String assignmentName, TaskVariant variant, String encounterName, String location) {
+    return new TaskRouteKey(assignmentName, variant, encounterName, location);
+  }
+
+  static TaskRouteKey resumeTaskAfterBank(
+      TaskRouteKey beforeDetour, int remaining, BankEndpointKind endpointKind) {
+    if (endpointKind == null || !canResumeTaskAfterBank(beforeDetour, remaining)) {
+      return null;
+    }
+    return beforeDetour;
+  }
+
+  static boolean canResumeTaskAfterBank(TaskRouteKey beforeDetour, int remaining) {
+    return beforeDetour != null && beforeDetour.isComplete() && remaining > 0;
+  }
+
+  static MasterReturnPlan masterReturnPlan(
+      boolean carriedTeleportAvailable,
+      boolean bankSnapshotAvailable,
+      boolean bankOwnedTeleportAvailable) {
+    if (carriedTeleportAvailable) {
+      return MasterReturnPlan.CARRIED_TELEPORT;
+    }
+    if (bankSnapshotAvailable && bankOwnedTeleportAvailable) {
+      return MasterReturnPlan.BANK_OWNED_TELEPORT;
+    }
+    return MasterReturnPlan.PHYSICAL_PATH;
+  }
+
+  static final class TaskRouteKey {
+    private final String assignmentName;
+    private final TaskVariant variant;
+    private final String encounterName;
+    private final String location;
+
+    private TaskRouteKey(
+        String assignmentName, TaskVariant variant, String encounterName, String location) {
+      this.assignmentName = clean(assignmentName);
+      this.variant = variant == null ? TaskVariant.STANDARD_TASK : variant;
+      this.encounterName = clean(encounterName);
+      this.location = clean(location);
+    }
+
+    String getAssignmentName() {
+      return assignmentName;
+    }
+
+    TaskVariant getVariant() {
+      return variant;
+    }
+
+    String getEncounterName() {
+      return encounterName;
+    }
+
+    String getLocation() {
+      return location;
+    }
+
+    boolean belongsToAssignment(String currentAssignmentName) {
+      return normalize(assignmentName).equals(normalize(currentAssignmentName));
+    }
+
+    boolean isComplete() {
+      return !assignmentName.isEmpty() && !encounterName.isEmpty() && !location.isEmpty();
+    }
+
+    String routeIdentity() {
+      return "assignment="
+          + normalize(assignmentName)
+          + "|encounter="
+          + normalize(encounterName)
+          + "|location="
+          + normalize(location)
+          + "|variant="
+          + String.valueOf(variant);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      if (this == other) {
+        return true;
+      }
+      if (!(other instanceof TaskRouteKey)) {
+        return false;
+      }
+      TaskRouteKey that = (TaskRouteKey) other;
+      return normalize(assignmentName).equals(normalize(that.assignmentName))
+          && variant == that.variant
+          && normalize(encounterName).equals(normalize(that.encounterName))
+          && normalize(location).equals(normalize(that.location));
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(
+          normalize(assignmentName), variant, normalize(encounterName), normalize(location));
+    }
+
+    private static String clean(String value) {
+      return value == null ? "" : value.trim();
+    }
+
+    private static String normalize(String value) {
+      return clean(value).toLowerCase(Locale.ENGLISH);
+    }
+  }
+}

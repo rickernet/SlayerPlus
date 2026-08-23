@@ -1,0 +1,332 @@
+# A<TAB>location<TAB>x<TAB>y<TAB>plane
+# S/B<TAB>helper<TAB>task<TAB>location<TAB>access xyz<TAB>destination xyz<TAB>transition<TAB>positioning<TAB>npc aliases
+A	Slayer Tower	3428	3536	0
+A	Catacombs of Kourend	1639	3673	0
+A	Fremennik Slayer Dungeon	2796	3615	0
+A	Kraken Cove	2280	3616	0
+A	Lighthouse Dungeon	2518	3630	0
+A	Lighthouse	2518	3630	0
+A	Jormungand's Prison	2445	3747	0
+A	Waterbirth Island Dungeon	2443	3746	0
+A	Death Plateau	2847	3635	0
+A	Taverley Dungeon	2885	3397	0
+A	Cerberus' Lair	2885	3397	0
+A	Key Master	2885	3397	0
+A	Stronghold of Security	3081	3421	0
+A	Stronghold Slayer Cave	2432	3423	0
+A	Gnome Stronghold Slayer Cave	2432	3423	0
+A	Nieve's Slayer Cave	2432	3423	0
+A	Steve's Slayer Cave	2432	3423	0
+A	Asgarnian Ice Dungeon	3009	3150	0
+A	God Wars Dungeon	2916	3746	0
+A	Wilderness God Wars Dungeon	3017	3740	0
+A	Chasm of Fire	1435	3670	0
+A	Darkmeyer	3604	3364	0
+A	Morytania Spider Cave	3657	3407	0
+A	Meiyerditch Laboratories	3638	3304	0
+A	Buccaneers' Laboratory	2075	3688	0
+A	Slayer Tower (first floor)	3428	3536	0
+A	Slayer Tower basement	3428	3536	0
+A	Lunar Isle	2112	3915	0
+A	Zanaris	3202	3169	0
+A	Brine Rat Cavern	2730	3714	0
+A	Karuulm Slayer Dungeon	1311	3783	0
+A	Mount Karuulm	1311	3783	0
+A	Smoke Devil Dungeon	2411	3058	0
+A	Wyvern Cave on Fossil Island	3680	3854	0
+A	Fossil Island Wyvern Cave	3680	3854	0
+A	Ancient Cavern	2512	3511	0
+A	Lletya	2355	3172	0
+A	Iorwerth Dungeon	3225	6045	0
+A	Mourner Tunnels	2028	4636	0
+A	Mos Le'Harmless Cave	3748	2974	0
+A	Kalphite Slayer Cave	3321	3122	0
+A	Kalphite Cave	3321	3122	0
+A	Lithkren Vault	1568	5088	0
+A	Wilderness Slayer Cave	3056	3765	0
+A	Ferox Enclave	3130	3630	0
+A	Abyssal Nexus	3107	4791	0
+A	Al Kharid mine	3298	3293	0
+A	Ancient Guthixian Temple	4097	4419	0
+A	Ardougne area	2570	3300	0
+A	Bandit Camp	3171	2979	0
+A	Barrows	3567	3291	0
+A	Black Knights' Fortress	3015	3514	0
+A	Braindeath Island	3680	3536	0
+A	Brimhaven Dungeon	2745	3152	0
+A	Callisto's Den	3290	3855	0
+A	Crash Site Cavern	2464	3494	0
+A	Deep Wilderness	3045	3925	0
+A	Desert quarry	3172	2912	0
+A	Dorgesh-Kaan South Dungeon	3169	3173	0
+A	Dwarven Mine	3018	3450	0
+A	Edgeville Dungeon	3096	3468	0
+A	Falador Mole Lair	2996	3377	0
+A	Feldip Hills	2515	2954	0
+A	Fight Caves	2439	5172	0
+A	TzHaar Fight Cave	2439	5172	0
+A	Forthos Dungeon	1667	3570	0
+A	Fossil Island	3683	3706	0
+A	Ghorrock Dungeon	2920	3930	0
+A	Grimstone Dungeon	2912	4066	0
+A	Haunted Woods	3584	3492	0
+A	Hunter's End	3112	3670	0
+A	Ice Mountain	3010	3486	0
+A	Isle of Souls	2210	2900	0
+A	Kalphite Lair	3228	3109	0
+A	Karamja	2843	3070	0
+A	Karamja Volcano	2855	3168	0
+A	Inferno	2496	5115	0
+A	Kebos Lowlands	1248	3726	0
+A	Killerwatt plane	3108	3362	0
+A	King Black Dragon Lair	3017	3850	0
+A	Kourend Woodland	1540	3464	0
+A	Lassar Undercity	3000	3494	0
+A	Legends' Guild basement	2728	3348	0
+A	Lumbridge area	3188	3220	0
+A	Lumbridge cow field	3253	3266	0
+A	Lumbridge Swamp Caves	3169	3173	0
+A	Maggot King's lair	3161	7711	0
+A	Mogre beach	2996	3106	0
+A	Mor Ul Rek east bank	2496	5115	0
+A	Mort'ton	3488	3288	0
+A	Nardah desert	3427	2911	0
+A	Piscatoris area	2332	3683	0
+A	Poison Waste Dungeon	2322	3099	0
+A	Royal Titans arena	2982	3113	0
+A	Ruins of Tapoyauik	1641	3221	0
+A	Scorpia's Cave	3232	3950	0
+A	Web Chasm	3294	3749	0
+A	Skeletal Tomb	3152	3644	0
+A	Silk Chasm	3321	3794	0
+A	Vet'ion's Rest	3219	3788	0
+A	The Great Conch	3176	2477	0
+A	Shellbane Gryphon Cave	3176	2477	0
+A	Slayer Tower rooftop	3428	3536	0
+A	Sophanem Dungeon	3315	2796	0
+A	Skotizo's Lair	1639	3673	0
+A	Stalker Den	1325	3364	0
+A	Stranglewood Temple	1128	3417	0
+A	The Scar	2081	6372	0
+A	Ungael	2640	3696	0
+A	Varrock Sewers	3237	3458	0
+A	Silvarea limestone mine	3371	3493	0
+A	South-west of Legends' Guild	2699	3318	0
+A	West of Champions' Guild	3179	3345	0
+A	North of Nardah	3422	2945	0
+A	White Wolf Mountain tunnel	2876	3481	0
+A	White Wolf Tunnel pub	2876	3481	0
+A	East of Sophanem	3354	2783	0
+A	East of Lumbridge	3259	3236	0
+A	Karamja glider clearing	2970	2972	0
+A	Digsite Dungeon	3369	3426	0
+A	Outside H.A.M. Hideout	3166	3251	0
+A	White Wolf Mountain	2868	3492	0
+A	Alice's farm	3620	3528	0
+A	Waterbirth Island	2525	3743	0
+A	Wilderness	3130	3630	0
+A	Wilderness boss cave	3130	3630	0
+A	Wilderness green dragon area	3331	3672	0
+A	Ynysdail Cavern	2218	3424	0
+A	Zul-Andra	2211	3057	0
+S	putStagedInterior	Abyssal demons	Catacombs of Kourend	1639	3673	0	1670	10091	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the selected Slayer monster.		Abyssal demon
+S	putStagedInterior	Bloodvelds	Catacombs of Kourend	1639	3673	0	1681	10073	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the selected Slayer monster.		Mutated bloodveld
+S	putStagedInterior	Dust devils	Catacombs of Kourend	1639	3673	0	1715	10025	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the Dust devil room.		Dust devil
+S	putStagedInterior	Nechryaels	Catacombs of Kourend	1639	3673	0	1700	10083	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the selected Slayer monster.		Nechryael
+S	putStagedInterior	Hellhounds	Catacombs of Kourend	1639	3673	0	1650	10065	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the selected Slayer monster.		Hellhound
+S	putStagedInterior	Fire giants	Catacombs of Kourend	1639	3673	0	1634	10068	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the selected Slayer monster.		Fire giant
+S	putStagedInterior	Greater demons	Catacombs of Kourend	1639	3673	0	1701	10102	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the selected Slayer monster.		Greater demon
+S	putStagedInterior	Black demons	Catacombs of Kourend	1639	3673	0	1722	10087	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the selected Slayer monster.		Black demon
+S	putStagedInterior	Aberrant spectres	Catacombs of Kourend	1639	3673	0	1613	10010	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue inside to the selected Slayer monster.		Deviant spectre
+S	putStagedInterior	Ankou	Catacombs of Kourend	1639	3673	0	1637	9991	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue southwest to the Ankou pack in Reeking Cove.		Ankou
+S	putStagedInterior	Ghosts	Catacombs of Kourend	1639	3673	0	1689	10063	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue east to the reviewed Ghost pack.		Ghost
+S	putStagedInterior	Skeletons	Catacombs of Kourend	1639	3673	0	1642	9996	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue southwest to the reviewed Skeleton pack.		Skeleton
+S	putStagedInterior	Zombies	Catacombs of Kourend	1639	3673	0	1642	10075	0	Investigate the King Rada I statue to enter the Catacombs of Kourend; SlayerPlus will continue west to the reviewed Zombie pack.		Zombie
+S	putStagedInteriorFromAccessWithPositioning	Hellhounds	Stronghold Slayer Cave				2424	9793	0		Range from the side safespot so you are not in direct combat; this lets the dwarf multicannon keep engaging nearby Hellhounds in the single-combat room.	Hellhound
+S	putStagedInteriorFromAccessWithPositioning	Hellhounds	Gnome Stronghold Slayer Cave				2424	9793	0		Range from the side safespot so you are not in direct combat; this lets the dwarf multicannon keep engaging nearby Hellhounds in the single-combat room.	Hellhound
+S	putStagedInteriorFromAccess	Bloodvelds	Stronghold Slayer Cave				2465	9833	0			Bloodveld
+S	putStagedInteriorFromAccess	Ankou	Stronghold Slayer Cave				2479	9806	0			Ankou
+S	putStagedInteriorFromAccess	Aberrant spectres	Stronghold Slayer Cave				2457	9788	0			Aberrant spectre
+S	putStagedInteriorFromAccess	Fire giants	Stronghold Slayer Cave				2401	9779	0			Fire giant
+S	putStagedInteriorFromAccess	Abyssal demons	Slayer Tower				3447	9970	3			Abyssal demon
+S	putTraversableInterior	Bloodvelds	Slayer Tower				3417	3567	1			Bloodveld
+S	putTraversableInterior	Bloodvelds	Slayer Tower (first floor)				3417	3567	1			Bloodveld
+S	putStagedInteriorFromAccess	Bloodvelds	Slayer Tower basement				3403	9947	3			Bloodveld
+S	putStagedInteriorFromAccess	Nechryaels	Slayer Tower				3397	9980	3			Nechryael
+S	putStagedInteriorFromAccess	Gargoyles	Slayer Tower				3452	9935	3			Gargoyle
+S	putStagedInteriorFromAccess	Aberrant spectres	Slayer Tower				3422	3549	1			Aberrant spectre
+S	putStagedInteriorFromAccess	Infernal mages	Slayer Tower				3438	3559	1			Infernal mage
+S	putTraversableInterior	Banshees	Slayer Tower				3441	3540	0			Banshee
+S	putTraversableInterior	Crawling hands	Slayer Tower				3414	3536	0			Crawling hand
+S	putStagedInteriorFromAccess	Basilisks	Fremennik Slayer Dungeon				2744	10004	0			Basilisk
+S	putStagedInteriorFromAccess	Turoths	Fremennik Slayer Dungeon				2716	10011	0			Turoth
+S	putStagedInteriorFromAccess	Kurasks	Fremennik Slayer Dungeon				2701	10001	0			Kurask
+S	putStagedInteriorFromAccess	Cave crawlers	Fremennik Slayer Dungeon				2792	9996	0			Cave crawler
+S	putStagedInteriorFromAccess	Cockatrice	Fremennik Slayer Dungeon				2789	10031	0			Cockatrice
+S	putStagedInteriorFromAccess	Jellies	Fremennik Slayer Dungeon				2705	10019	0			Jelly
+S	putStagedInteriorFromAccess	Pyrefiends	Fremennik Slayer Dungeon				2764	10003	0			Pyrefiend
+S	putStagedInteriorFromAccess	Rockslugs	Fremennik Slayer Dungeon				2794	10017	0			Rockslug
+S	putStagedInteriorFromAccess	Basilisks	Jormungand's Prison				2455	10388	0			Basilisk knight
+S	putStagedInteriorFromAccess	Dagannoths	Jormungand's Prison				2420	10422	0			Dagannoth
+S	putStagedInteriorFromAccess	Kurasks	Iorwerth Dungeon				3219	12369	0			Kurask
+S	putStagedInteriorWide	Dark beasts	Iorwerth Dungeon	3225	6045	0	3227	12397	0	Enter the Iorwerth Dungeon at the reviewed entrance; SlayerPlus will continue inside to the Dark beasts.		Dark beast|Night beast
+S	putStagedInteriorFromAccess	Waterfiends	Iorwerth Dungeon				3183	12456	0			Waterfiend
+S	putStagedInteriorFromAccess	Nechryaels	Iorwerth Dungeon				3228	12459	0			Nechryael
+S	putStagedInteriorFromAccess	Bloodvelds	Iorwerth Dungeon				3236	12438	0			Mutated bloodveld
+S	putStagedInteriorFromAccess	Elves	Iorwerth Dungeon				3184	12405	0			Iorwerth warrior|Iorwerth archer
+S	putStagedInteriorFromAccess	Wyrms	Karuulm Slayer Dungeon				1273	10189	0			Wyrm
+S	putStagedInteriorFromAccess	Drakes	Karuulm Slayer Dungeon				1312	10242	1			Drake
+S	putStagedInteriorFromAccess	Hydras	Karuulm Slayer Dungeon				1311	10241	0			Hydra
+S	putStagedInteriorFromAccessWithPositioning	Greater demons	Chasm of Fire				1280	10208	1		For the cannon method, attack with Ranged from behind the middle-floor rocks or narrow pillars and remain untargetable. Melee engagement makes the single-combat cannon fire at only that one demon.	Greater demon
+S	putStagedInteriorFromAccess	Fire giants	Chasm of Fire				1282	10212	2			Fire giant
+S	putStagedInteriorFromAccess	Hellhounds	Chasm of Fire				1342	10201	2			Hellhound
+S	putStagedInteriorWide	Smoke devils	Smoke Devil Dungeon	2411	3058	0	2408	9438	0	Enter the Smoke Devil Dungeon; SlayerPlus will continue to the reviewed Smoke Devil barrage room.	Place the dwarf multicannon near the room centre, then stack the Smoke devils around the western skeleton pile before using Ice Barrage or Ice Burst.	Smoke devil
+S	putStagedInteriorFromAccessWithPositioning	Cave horrors	Mos Le'Harmless Cave				3775	9407	0		With cannon enabled, follow the interior route to the reviewed open setup tile before placing the dwarf multicannon.	Cave horror
+S	putStagedInteriorFromAccess	Skeletal wyverns	Asgarnian Ice Dungeon				3057	9547	0			Skeletal wyvern
+S	putStagedInteriorFromAccess	Waterfiends	Ancient Cavern				1738	5356	0			Waterfiend
+S	putStagedInterior	Fossil Island wyverns	Wyvern Cave on Fossil Island	3680	3854	0	3616	10272	0	Use the Magic Mushtree to Mushroom Meadow, run south, then climb down the task-only Wyvern Cave trapdoor; SlayerPlus will resume inside.		Ancient wyvern|Long-tailed wyvern|Spitting wyvern|Taloned wyvern
+S	putTraversableInterior	Bloodvelds	Meiyerditch Laboratories				3594	9743	0			Bloodveld|Mutated bloodveld
+S	putStagedInteriorFromAccess	Bloodvelds	Buccaneers' Laboratory				2096	10099	0			Mutated bloodveld
+S	putStagedInteriorFromAccess	Bloodvelds	God Wars Dungeon				2888	5324	2			Bloodveld
+S	putAccessProfile	Bloodvelds	Wilderness God Wars Dungeon									Bloodveld
+S	putAccessProfileAt	Cave kraken	Kraken Cove	2277	3611	0						Cave kraken|Whirlpool
+S	putStagedInteriorFromAccess	Dagannoths	Lighthouse Dungeon				2523	10023	0			Dagannoth
+S	putAccessProfile	Dagannoths	Waterbirth Island Dungeon									Dagannoth
+S	putStagedInteriorFromAccess	Kalphites	Kalphite Slayer Cave				3305	9497	0			Kalphite worker|Kalphite soldier|Kalphite guardian
+S	putStagedInteriorFromAccess	Cave bugs	Dorgesh-Kaan South Dungeon				2735	5221	0			Cave bug
+S	putStagedInteriorFromAccess	Cave slimes	Dorgesh-Kaan South Dungeon				2735	5221	0			Cave slime
+S	putStagedInteriorFromAccess	Molanisks	Dorgesh-Kaan South Dungeon				2698	5222	0			Molanisk
+S	putTraversableInterior	Minotaurs	Stronghold of Security				1880	5205	0			Minotaur
+S	putTraversableInterior	Rats	Varrock Sewers				3239	9865	0			Giant rat|Rat
+S	putTraversableInterior	Dwarves	White Wolf Tunnel pub				2876	9872	0			Dwarf
+S	putStagedInterior	Skeletons	Digsite Dungeon	3369	3426	0	3368	9828	0	Use a rope on the north-west Digsite winch, then operate the winch; SlayerPlus will continue to the nearby level-22 Skeletons.		Skeleton
+S	putOpenWorld	Suqahs	Lunar Isle				2112	3915	0			Suqah
+S	putOpenWorld	Trolls	Death Plateau				2847	3635	0			Mountain troll|Troll general|Thrower troll
+S	putAccessProfile	Ankou	Stronghold of Security									Ankou
+S	putStagedInteriorFromAccess	Blue dragons	Taverley Dungeon				2892	9799	0			Blue dragon|Baby blue dragon
+S	putStagedInteriorFromAccess	Chaos druids	Edgeville Dungeon				3110	9933	0			Chaos druid
+S	putStagedInteriorFromAccess	Earth warriors	Edgeville Dungeon				3120	9970	0			Earth warrior
+S	putStagedInteriorFromAccess	Hill giants	Edgeville Dungeon				3105	9839	0			Hill giant
+S	putStagedInteriorFromAccess	Hobgoblins	Edgeville Dungeon				3127	9873	0			Hobgoblin
+S	putStagedInteriorFromAccess	Moss giants	Brimhaven Dungeon				2647	9497	0			Moss giant
+S	putStagedInteriorFromAccess	Red dragons	Brimhaven Dungeon				2699	9509	0			Red dragon|Baby red dragon
+S	putTraversableInterior	Black dragons	Taverley Dungeon				2903	9813	1			Black dragon|Baby black dragon
+S	putAccessProfile	Spiritual creatures	God Wars Dungeon									Spiritual ranger|Spiritual mage|Spiritual warrior
+S	putOpenWorld	Vampyres	Darkmeyer				3604	3364	0			Vyrewatch|Vyrewatch sentinel
+S	putOpenWorld	Elves	Lletya				2355	3172	0			Elf warrior|Elf archer
+S	putTraversableInterior	Dark beasts	Mourner Tunnels				1992	4655	0			Dark beast|Night beast
+S	putAccessProfile	Mutated zygomites	Zanaris									Mutated zygomite
+S	putStagedInteriorFromAccess	Brine rats	Brine Rat Cavern				2772	10155	0			Brine rat
+S	putAccessProfile	Adamant dragons	Lithkren Vault									Adamant dragon
+S	putAccessProfile	Rune dragons	Lithkren Vault									Rune dragon
+S	putStagedInterior	Aquanites	Ynysdail Cavern	2218	3424	0	2275	9880	0	Use the Gwenith rowboat only if it has been built. Otherwise SlayerPlus routes to Port Roberts so you can sail your player-owned boat to Ynysdail; on the island it continues to the cavern.		Aquanite|Elder aquanite
+S	putAccessProfile	Catablepon	Stronghold of Security									Catablepon
+S	putAccessProfile	Fleshcrawlers	Stronghold of Security									Flesh crawler
+S	putAccessProfile	Metal dragons	Ancient Cavern									Mithril dragon
+S	putAccessProfile	Aviansies	God Wars Dungeon									Aviansie
+S	putAccessProfile	Araxytes	Morytania Spider Cave									Araxyte
+S	putStagedInterior	Frost dragons	Grimstone Dungeon	2912	4066	0	2901	10463	0	Enter Grimstone Dungeon; SlayerPlus will rebase from the reviewed cave landing and continue to the main Frost dragon pack.		Frost dragon
+S	putAccessProfile	Scabarites	Sophanem Dungeon									Scarab mage|Locust rider
+S	putAccessProfile	Shadow warriors	Legends' Guild basement									Shadow warrior
+S	putAccessProfile	Warped creatures	Poison Waste Dungeon									Warped terrorbird|Warped tortoise
+S	putAccessProfileAt	Lesser nagua	Ruins of Tapoyauik	1693	3230	0						Frost nagua
+S	putAccessProfile	Killerwatts	Killerwatt plane									Killerwatt
+S	putAccessProfile	Otherworldly beings	Zanaris									Otherworldly being
+S	putAccessProfile	Custodian Stalkers	Stalker Den									Juvenile custodian stalker|Mature custodian stalker|Elder custodian stalker
+S	putStagedInterior	Ice giants	Asgarnian Ice Dungeon	3009	3150	0	3055	9568	0	Enter the Asgarnian Ice Dungeon; SlayerPlus will continue to the reviewed Ice giant pack.		Ice giant
+S	putStagedInterior	Fever spiders	Braindeath Island	3680	3536	0	2150	5099	0	Complete the Braindeath Island travel handoff; SlayerPlus will continue to the Fever spider room after the island layer loads.		Fever spider
+S	putStagedInterior	Wall beasts	Lumbridge Swamp Caves	3169	3173	0	3200	9560	0	Enter Lumbridge Swamp Caves; SlayerPlus will continue to the reviewed Wall beast corridor.		Wall beast
+S	putStagedInterior	Dwarves	Dwarven Mine	3018	3450	0	3020	9820	0	Enter the Dwarven Mine; SlayerPlus will continue to the reviewed Dwarf area.		Dwarf
+S	putStagedInteriorFromAccess	TzHaar	Karamja Volcano				2444	5138	0			TzHaar
+S	putOpenWorld	Bats	Lumbridge area				3188	3220	0			Bat
+S	putOpenWorld	Birds	Lumbridge area				3188	3220	0			Bird|Chicken
+S	putOpenWorld	Cows	Lumbridge area				3188	3220	0			Cow
+S	putOpenWorld	Crabs	Lumbridge area				3188	3220	0			Crab
+S	putOpenWorld	Goblins	Lumbridge area				3188	3220	0			Goblin
+S	putOpenWorld	Rats	Lumbridge area				3188	3220	0			Rat|Giant rat
+S	putOpenWorld	Spiders	Lumbridge area				3188	3220	0			Spider|Giant spider
+S	putOpenWorld	Bears	Ardougne area				2570	3300	0			Bear
+S	putOpenWorld	Bandits	Bandit Camp				3171	2979	0			Bandit
+S	putOpenWorld	Black Knights	Black Knights' Fortress				3015	3514	0			Black Knight
+S	putOpenWorld	Venators	Darkmeyer				3604	3364	0			Venator
+S	putOpenWorld	Lizards	Desert quarry				3172	2912	0			Lizard
+S	putOpenWorld	Jungle horrors	Feldip Hills				2515	2954	0			Jungle horror
+S	putOpenWorld	Wolves	Feldip Hills				2515	2954	0			Wolf
+S	putOpenWorld	Ghouls	Haunted Woods				3584	3492	0			Ghoul
+S	putOpenWorld	Werewolves	Haunted Woods				3584	3492	0			Werewolf
+S	putOpenWorld	Icefiends	Ice Mountain				3010	3486	0			Icefiend
+S	putOpenWorld	Ice warriors	Ice Mountain				3010	3486	0			Ice warrior
+S	putOpenWorld	Dogs	Isle of Souls				2210	2900	0			Dog
+S	putOpenWorld	Sourhogs	Isle of Souls				2210	2900	0			Sourhog
+S	putOpenWorld	Harpie bug swarms	Karamja				2843	3070	0			Harpie Bug Swarm
+S	putOpenWorld	Lesser demons	Karamja				2843	3070	0			Lesser demon
+S	putOpenWorld	Monkeys	Karamja				2843	3070	0			Monkey
+S	putOpenWorld	Gryphons	Kebos Lowlands				1248	3726	0			Gryphon
+S	putOpenWorld	Lizardmen	Kourend Woodland				1540	3464	0			Lizardman
+S	putOpenWorld	Ogres	Kourend Woodland				1540	3464	0			Ogre
+S	putOpenWorld	Mogres	Mogre beach				2996	3106	0			Mogre
+S	putOpenWorld	Shades	Mort'ton				3488	3288	0			Shade
+S	putOpenWorld	Crocodiles	Nardah desert				3427	2911	0			Crocodile
+S	putOpenWorld	Terror dogs	Piscatoris area				2332	3683	0			Terror dog
+S	putOpenWorld	Sea snakes	Waterbirth Island				2525	3743	0			Sea snake
+S	putOpenWorld	Green dragons	Wilderness green dragon area				3331	3672	0			Green dragon
+S	putOpenWorld	Scorpions	Al Kharid mine				3298	3293	0			Scorpion
+S	putOpenWorld	Dark warriors	Wilderness				3029	3632	0			Dark warrior
+S	putOpenWorld	Ents	Wilderness				3202	3669	0			Ent
+S	putOpenWorld	Lava dragons	Wilderness				3201	3814	0			Lava dragon
+S	putOpenWorld	Mammoths	Wilderness				3169	3594	0			Mammoth
+S	putOpenWorld	Pirates	Wilderness				3240	3601	0			Zombie pirate|Pirate
+S	putOpenWorld	Rogues	Wilderness				3285	3933	0			Rogue
+S	putAccessProfileAt	Magic axes	Wilderness	3190	3957	0						Magic axe
+S	putAccessProfileAt	Revenants	Wilderness	3073	3654	0						Revenant imp|Revenant goblin|Revenant icefiend|Revenant pyrefiend|Revenant hobgoblin|Revenant vampire|Revenant werewolf|Revenant cyclops|Revenant hellhound|Revenant demon|Revenant ork|Revenant dark beast|Revenant knight|Revenant dragon|Revenant maledictus
+B	putBossInterior	Abyssal Sire	Abyssal Nexus				3037	4763	0			Abyssal Sire
+B	putBossInterior	The Abyssal Sire	Abyssal Nexus				3037	4763	0			Abyssal Sire
+B	putBossInterior	Tormented demons	Ancient Guthixian Temple				4097	4419	0			Tormented demon
+B	putBossStagedInteriorWide	Skotizo	Skotizo's Lair	1639	3673	0	1693	9886	0	Use a Dark totem on the altar in the centre of the Catacombs; SlayerPlus will continue locally after the lair loads.		Skotizo
+B	putBossStagedInteriorWide	Vorkath	Ungael	2640	3696	0	2273	4065	0	Talk to Torfinn on Rellekka's third dock to travel to Ungael; SlayerPlus will continue to Vorkath after landing.		Vorkath
+B	putBossStagedInteriorWide	Whisperer	Lassar Undercity	3000	3494	0	2656	6370	0	Enter Camdozaal west of Ice Mountain; inside, follow SlayerPlus to the sinkhole, descend, then continue to the Cathedral.		The Whisperer|Whisperer|Odd Figure
+B	putBossStagedInteriorWide	The Whisperer	Lassar Undercity	3000	3494	0	2656	6370	0	Enter Camdozaal west of Ice Mountain; inside, follow SlayerPlus to the sinkhole, descend, then continue to the Cathedral.		The Whisperer|Whisperer|Odd Figure
+B	putBossStagedInteriorWide	Kalphite Queen	Kalphite Lair	3228	3109	0	3508	9493	0	Use the two rope descents unless they are permanently unlocked; SlayerPlus will route through both lair levels to the Queen chamber.		Kalphite Queen
+B	putBossStagedInteriorWide	The Kalphite Queen	Kalphite Lair	3228	3109	0	3508	9493	0	Use the two rope descents unless they are permanently unlocked; SlayerPlus will route through both lair levels to the Queen chamber.		Kalphite Queen
+B	putBossStagedInteriorWide	Cerberus	Cerberus' Lair	2885	3397	0	1310	1253	0	Enter Taverley Dungeon and continue to the Key Master/Cerberus route.		Cerberus
+B	putBossStagedInteriorWide	Thermonuclear smoke devil	Smoke Devil Dungeon	2411	3058	0	2362	9456	0	Enter the Smoke Devil Dungeon and use the boss-room crevice; SlayerPlus will continue only to Thermonuclear smoke devil.		Thermonuclear smoke devil
+B	putBossStagedInteriorWide	Alchemical Hydra	Karuulm Slayer Dungeon	1311	3783	0	1368	10270	0	Enter Karuulm Slayer Dungeon and continue to the lower-level Alchemical Hydra lair.		Alchemical Hydra
+B	putBossStagedInteriorWide	Araxxor	Morytania Spider Cave	3657	3407	0	3632	9815	0	Enter Morytania Spider Cave and continue through the web tunnel to Araxxor's lair.		Araxxor
+B	putBossStagedInteriorWide	Amoxliatl	Ruins of Tapoyauik	1641	3221	0	1362	4511	0	Use the Lift Platform in the Tower of Ascension; SlayerPlus will continue west to Amoxliatl after the lower Ruins load.		Amoxliatl
+B	putBossStagedInteractionCheckpoint	Kraken	Kraken Cove				2280	10016	0			Kraken
+B	putBossStagedInteractionCheckpoint	The Cave Kraken Boss	Kraken Cove				2280	10016	0			Kraken
+B	putBossOpenWorld	Deranged Archaeologist	Fossil Island				3683	3706	0			Deranged archaeologist
+B	putBossStagedInteriorWide	Scorpia	Scorpia's Cave	3232	3950	0	3232	10346	0	Enter Scorpia's Cave; SlayerPlus will continue to Scorpia after the cave layer loads.		Scorpia
+B	putBossStagedInteriorWide	Scurrius	Varrock Sewers	3237	3458	0	3299	9867	0	Enter Varrock Sewers and use the Scurrius lair entrance; SlayerPlus stops routing when the boss region loads.		Scurrius
+B	putBossStagedInteriorWide	Bryophyta	Varrock Sewers	3237	3458	0	3220	9933	0	Enter Varrock Sewers and use the mossy-key boss door; SlayerPlus stops routing when Bryophyta's region loads.		Bryophyta
+B	putBossTraversableInterior	Brutus	Lumbridge cow field				3263	3297	0			Brutus
+B	putBossOpenWorld	Chaos Elemental	Wilderness				3261	3927	0			Chaos Elemental
+B	putBossOpenWorld	Chaos Fanatic	Wilderness				2979	3846	0			Chaos Fanatic
+B	putBossOpenWorld	Crazy Archaeologist	Wilderness				2977	3702	0			Crazy archaeologist
+B	putBossInterior	TzKal-Zuk	Inferno				2496	5115	0			TzKal-Zuk
+B	putBossStagedInteriorWide	Spindel	Web Chasm	3294	3749	0	3406	10145	0	Enter the Web Chasm; SlayerPlus will continue to the reviewed Spindel chamber after the cave layer loads.		Spindel
+B	putBossStagedInteriorWide	Calvar'ion	Skeletal Tomb	3152	3644	0	3164	10043	0	Enter the Skeletal Tomb; SlayerPlus will continue to the reviewed Calvar'ion chamber after the cave layer loads.		Calvar'ion
+B	putBossStagedInteriorWide	Royal Titans	Asgarnian Ice Dungeon	3009	3150	0	2953	9569	0	Enter the Asgarnian Ice Dungeon and use the Royal Titans encounter entrance; SlayerPlus stops routing when the encounter region loads.		Brandr|Eldric|Royal Titan
+B	putBossAccessProfile	Artio	Hunter's End									Artio
+B	putBossAccessProfile	Callisto	Callisto's Den									Callisto
+B	putBossAccessProfile	Dagannoth Kings	Waterbirth Island Dungeon									Dagannoth Rex|Dagannoth Prime|Dagannoth Supreme
+B	putBossAccessProfile	Grotesque Guardians	Slayer Tower									Dusk|Dawn
+B	putBossAccessProfile	K'ril Tsutsaroth	God Wars Dungeon									K'ril Tsutsaroth|Balfrug Kreeyath|Tstanon Karlak|Zakl'n Gritch
+B	putBossAccessProfile	King Black Dragon	King Black Dragon Lair									King Black Dragon
+B	putBossAccessProfile	Kree'arra	God Wars Dungeon									Kree'arra|Wingman Skree|Flockleader Geerin|Flight Kilisa
+B	putBossAccessProfile	Sarachnis	Forthos Dungeon									Sarachnis
+B	putBossAccessProfile	Venenatis	Silk Chasm									Venenatis
+B	putBossAccessProfile	Vet'ion	Vet'ion's Rest									Vet'ion|Vet'ion Reborn
+B	putBossAccessProfile	Obor	Edgeville Dungeon									Obor
+B	putBossAccessProfile	Demonic gorillas	Crash Site Cavern									Demonic gorilla
+B	putBossAccessProfile	Shellbane Gryphon	The Great Conch									Shellbane Gryphon
+B	putBossAccessProfile	Barrows Brothers	Barrows									Ahrim the Blighted|Dharok the Wretched|Guthan the Infested|Karil the Tainted|Torag the Corrupted|Verac the Defiled
+B	putBossAccessProfile	Duke Sucellus	Ghorrock Dungeon									Duke Sucellus
+B	putBossAccessProfile	General Graardor	God Wars Dungeon									General Graardor|Sergeant Strongstack|Sergeant Steelwill|Sergeant Grimspike
+B	putBossAccessProfile	Giant Mole	Falador Mole Lair									Giant Mole
+B	putBossAccessProfile	Maggot King	Maggot King's lair									Maggot King
+B	putBossAccessProfile	Phantom Muspah	Ghorrock Dungeon									Phantom Muspah
+B	putBossAccessProfile	Leviathan	The Scar									The Leviathan|Leviathan
+B	putBossAccessProfile	Vardorvis	Stranglewood Temple									Vardorvis
+B	putBossAccessProfile	Commander Zilyana	God Wars Dungeon									Commander Zilyana|Starlight|Growler|Bree
+B	putBossAccessProfile	Zulrah	Zul-Andra									Zulrah

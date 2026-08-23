@@ -1,0 +1,24 @@
+# profile	CAPE	AMULET	BODY	SHIELD	LEGS	GLOVES	BOOTS	RING	AMMO
+melee	e001	e002	e003	e009	e004	e005	e006	e007	-
+melee-prayer			e010		e011			e008	-
+melee-magic-defence			e030		e031				-
+ranged	e012	e013	e014	e019	e015	e016	e017	e018	-
+ranged-prayer			e020		e021			e121	-
+magic	e022	e023	e024	e029	e025	e026	e027	e028	-
+magic-prayer			e010		e011			e122	-
+magic-defence			e030		e031				-
+hybrid	e123	e124	e125	e126	e127	e128	e129	e130	-
+barrows	e022	e023	e049	e029	e050	e026	e027	e051	-
+kril-ranged	e012	e052	e054	e019	e056	e057	e058	e059	-
+kril-melee	e060	e061	e062	e064	e063	e065	e066	e067	e068
+grotesque	e069	e070	e071	e073	e072	e074	e075	e076	-
+tormented	e001	e002	e077	e009	e078	e079	e080	e081	-
+whisperer	e022	e023	e082	e088	e083	e084	e085	e087	e089
+kalphite-magic	e022	e090	e091	e093	e092	e094	e095	e096	e089
+kalphite-melee	e001	e002	e003	e097	e004	e079	e098	e099	e089
+maggot	e022	e023	e024	e109	e025	e026	e107	e108	-
+royal-titans	e060	e131	e132	e097	e133	e074	e134	e135	e136
+araxxor	e137	e138	e140	e143	e142	e074	e075	e145	e144
+wilderness-ranged	e032	e033	e034	e146	e035	e036	e037	e038	-
+wilderness-magic	e147	e148	e149	e153	e150	e151	e152	e038	-
+wilderness-melee	e154	e155	e156	e159	e157	e158	e037	e038	-

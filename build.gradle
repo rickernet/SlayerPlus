@@ -30,6 +30,17 @@ dependencies {
 
 group = 'com.slayerplus'
 
+/*
+ * Keep the exhaustive release/audit suite separate from the Plugin Hub's
+ * runtime-source review payload. It remains part of Gradle's test source set
+ * and is compiled and executed by both test and releaseRouteCheck.
+ */
+sourceSets {
+	test {
+		java.srcDir 'verification/java'
+	}
+}
+
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
 	options.release.set(11)
@@ -59,11 +70,11 @@ tasks.register('run', JavaExec) {
 
 	doFirst {
 		def requiredClass = isolatedRunClasses.file(
-			'com/slayerplus/SlayerBankRouteCatalog.class'
+			'com/slayerplus/BankRoutes.class'
 		).asFile
 		if (!requiredClass.isFile() || requiredClass.length() <= 0) {
 			throw new GradleException(
-				'Missing SlayerBankRouteCatalog from isolated RuneLite run classpath'
+				'Missing BankRoutes from isolated RuneLite run classpath'
 			)
 		}
 	}

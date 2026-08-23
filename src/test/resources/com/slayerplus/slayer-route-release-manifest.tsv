@@ -1,0 +1,355 @@
+# type	kind	assignment/encounter data
+N	ASSIGNMENT	Aberrant spectres
+N	ASSIGNMENT	Abyssal demons
+N	ASSIGNMENT	Ankou
+N	ASSIGNMENT	Aquanites
+N	ASSIGNMENT	Araxytes
+N	ASSIGNMENT	Aviansies
+N	ASSIGNMENT	Bandits
+N	ASSIGNMENT	Banshees
+N	ASSIGNMENT	Basilisks
+N	ASSIGNMENT	Bats
+N	ASSIGNMENT	Bears
+N	ASSIGNMENT	Birds
+N	ASSIGNMENT	Black demons
+N	ASSIGNMENT	Black dragons
+N	ASSIGNMENT	Black Knights
+N	ASSIGNMENT	Bloodveld
+N	ASSIGNMENT	Blue dragons
+N	ASSIGNMENT	Brine rats
+N	ASSIGNMENT	Catablepon
+N	ASSIGNMENT	Cave bugs
+N	ASSIGNMENT	Cave crawlers
+N	ASSIGNMENT	Cave horrors
+N	ASSIGNMENT	Cave kraken
+N	ASSIGNMENT	Cave slimes
+N	ASSIGNMENT	Chaos druids
+N	ASSIGNMENT	Cockatrice
+N	ASSIGNMENT	Cows
+N	ASSIGNMENT	Crabs
+N	ASSIGNMENT	Crawling hands
+N	ASSIGNMENT	Crocodiles
+N	ASSIGNMENT	Custodian Stalkers
+N	ASSIGNMENT	Dagannoth
+N	ASSIGNMENT	Dark beasts
+N	ASSIGNMENT	Dark warriors
+N	ASSIGNMENT	Dogs
+N	ASSIGNMENT	Drakes
+N	ASSIGNMENT	Dust devils
+N	ASSIGNMENT	Dwarves
+N	ASSIGNMENT	Earth warriors
+N	ASSIGNMENT	Elves
+N	ASSIGNMENT	Ents
+N	ASSIGNMENT	Fever spiders
+N	ASSIGNMENT	Fire giants
+N	ASSIGNMENT	Fleshcrawlers
+N	ASSIGNMENT	Fossil Island wyverns
+N	ASSIGNMENT	Frost dragons
+N	ASSIGNMENT	Gargoyles
+N	ASSIGNMENT	Ghosts
+N	ASSIGNMENT	Ghouls
+N	ASSIGNMENT	Goblins
+N	ASSIGNMENT	Greater demons
+N	ASSIGNMENT	Green dragons
+N	ASSIGNMENT	Gryphons
+N	ASSIGNMENT	Harpie bug swarms
+N	ASSIGNMENT	Hellhounds
+N	ASSIGNMENT	Hill giants
+N	ASSIGNMENT	Hobgoblins
+N	ASSIGNMENT	Hydras
+N	ASSIGNMENT	Ice giants
+N	ASSIGNMENT	Ice warriors
+N	ASSIGNMENT	Icefiends
+N	ASSIGNMENT	Infernal mages
+N	ASSIGNMENT	Jellies
+N	ASSIGNMENT	Jungle horrors
+N	ASSIGNMENT	Kalphites
+N	ASSIGNMENT	Killerwatts
+N	ASSIGNMENT	Kurask
+N	ASSIGNMENT	Lava dragons
+N	ASSIGNMENT	Lesser demons
+N	ASSIGNMENT	Lesser nagua
+N	ASSIGNMENT	Lizardmen
+N	ASSIGNMENT	Lizards
+N	ASSIGNMENT	Magic axes
+N	ASSIGNMENT	Mammoths
+N	ASSIGNMENT	Metal dragons
+N	ASSIGNMENT	Minotaurs
+N	ASSIGNMENT	Mogres
+N	ASSIGNMENT	Molanisks
+N	ASSIGNMENT	Monkeys
+N	ASSIGNMENT	Moss giants
+N	ASSIGNMENT	Mutated zygomites
+N	ASSIGNMENT	Nechryael
+N	ASSIGNMENT	Ogres
+N	ASSIGNMENT	Otherworldly beings
+N	ASSIGNMENT	Pirates
+N	ASSIGNMENT	Pyrefiends
+N	ASSIGNMENT	Rats
+N	ASSIGNMENT	Red dragons
+N	ASSIGNMENT	Revenants
+N	ASSIGNMENT	Rockslugs
+N	ASSIGNMENT	Rogues
+N	ASSIGNMENT	Scabarites
+N	ASSIGNMENT	Scorpions
+N	ASSIGNMENT	Sea snakes
+N	ASSIGNMENT	Shades
+N	ASSIGNMENT	Shadow warriors
+N	ASSIGNMENT	Skeletal wyverns
+N	ASSIGNMENT	Skeletons
+N	ASSIGNMENT	Smoke devils
+N	ASSIGNMENT	Sourhogs
+N	ASSIGNMENT	Spiders
+N	ASSIGNMENT	Spiritual creatures
+N	ASSIGNMENT	Suqahs
+N	ASSIGNMENT	Terror dogs
+N	ASSIGNMENT	Trolls
+N	ASSIGNMENT	Turoth
+N	ASSIGNMENT	TzHaar
+N	ASSIGNMENT	Vampyres
+N	ASSIGNMENT	Venators
+N	ASSIGNMENT	Wall beasts
+N	ASSIGNMENT	Warped creatures
+N	ASSIGNMENT	Waterfiends
+N	ASSIGNMENT	Werewolves
+N	ASSIGNMENT	Wolves
+N	ASSIGNMENT	Wyrms
+N	ASSIGNMENT	Zombies
+N	SELECTABLE_BOSS	Abyssal Sire
+N	SELECTABLE_BOSS	Alchemical Hydra
+N	SELECTABLE_BOSS	Amoxliatl
+N	SELECTABLE_BOSS	Araxxor
+N	SELECTABLE_BOSS	Artio
+N	SELECTABLE_BOSS	Callisto
+N	SELECTABLE_BOSS	Cerberus
+N	SELECTABLE_BOSS	Dagannoth Kings
+N	SELECTABLE_BOSS	Deranged Archaeologist
+N	SELECTABLE_BOSS	Grotesque Guardians
+N	SELECTABLE_BOSS	K'ril Tsutsaroth
+N	SELECTABLE_BOSS	Kalphite Queen
+N	SELECTABLE_BOSS	King Black Dragon
+N	SELECTABLE_BOSS	Kraken
+N	SELECTABLE_BOSS	Kree'arra
+N	SELECTABLE_BOSS	Sarachnis
+N	SELECTABLE_BOSS	Scorpia
+N	SELECTABLE_BOSS	Skotizo
+N	SELECTABLE_BOSS	Thermonuclear smoke devil
+N	SELECTABLE_BOSS	TzTok-Jad
+N	SELECTABLE_BOSS	TzKal-Zuk
+N	SELECTABLE_BOSS	Spindel
+N	SELECTABLE_BOSS	Venenatis
+N	SELECTABLE_BOSS	Calvar'ion
+N	SELECTABLE_BOSS	Vet'ion
+N	SELECTABLE_BOSS	Vorkath
+N	SELECTABLE_BOSS	Scurrius
+N	SELECTABLE_BOSS	Obor
+N	SELECTABLE_BOSS	Bryophyta
+N	SELECTABLE_BOSS	Brutus
+N	SELECTABLE_BOSS	Demonic gorillas
+N	SELECTABLE_BOSS	Tormented demons
+N	SELECTABLE_BOSS	Royal Titans
+N	SELECTABLE_BOSS	Shellbane Gryphon
+N	DIRECT_BOSS	Barrows Brothers
+N	DIRECT_BOSS	Chaos Elemental
+N	DIRECT_BOSS	Chaos Fanatic
+N	DIRECT_BOSS	Crazy Archaeologist
+N	DIRECT_BOSS	Crazy Archaeologists
+N	DIRECT_BOSS	Deranged Archaeologist
+N	DIRECT_BOSS	Duke Sucellus
+N	DIRECT_BOSS	General Graardor
+N	DIRECT_BOSS	Giant Mole
+N	DIRECT_BOSS	Maggot King
+N	DIRECT_BOSS	Phantom Muspah
+N	DIRECT_BOSS	Leviathan
+N	DIRECT_BOSS	The Whisperer
+N	DIRECT_BOSS	Vardorvis
+N	DIRECT_BOSS	Commander Zilyana
+N	DIRECT_BOSS	Zulrah
+E	ASSIGNMENT	Aberrant spectres	Aberrant spectres	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1613	10010	0	Aberrant spectres	Aberrant spectres
+E	ASSIGNMENT	Abyssal demons	Abyssal demons	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1670	10091	0	Abyssal demons	Abyssal demons
+E	ASSIGNMENT	Ankou	Ankou	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1637	9991	0	Ankou	Ankou
+E	ASSIGNMENT	Black demons	Black demons	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1722	10087	0	Black demons	Black demons
+E	ASSIGNMENT	Bloodveld	Bloodveld	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1681	10073	0	Bloodveld	Bloodveld
+E	ASSIGNMENT	Dust devils	Dust devils	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1715	10025	0	Dust devils	Dust devils
+E	ASSIGNMENT	Fire giants	Fire giants	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1634	10068	0	Fire giants	Fire giants
+E	ASSIGNMENT	Ghosts	Ghosts	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1689	10063	0	Ghosts	Ghosts
+E	ASSIGNMENT	Greater demons	Greater demons	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1701	10102	0	Greater demons	Greater demons
+E	ASSIGNMENT	Hellhounds	Hellhounds	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1650	10065	0	Hellhounds	Hellhounds
+E	ASSIGNMENT	Nechryael	Nechryael	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1700	10083	0	Nechryael	Nechryael
+E	ASSIGNMENT	Skeletons	Skeletons	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1642	9996	0	Skeletons	Skeletons
+E	ASSIGNMENT	Zombies	Zombies	Catacombs of Kourend	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1639	3673	0	1642	10075	0	Zombies	Zombies
+E	ASSIGNMENT	Aberrant spectres	Aberrant spectres	Slayer Tower	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3428	3536	0	3422	3549	1	Aberrant spectres	Aberrant spectres
+E	ASSIGNMENT	Infernal mages	Infernal mages	Slayer Tower	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3428	3536	0	3438	3559	1	Infernal mages	Infernal mages
+E	ASSIGNMENT	Abyssal demons	Abyssal demons	Slayer Tower	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3428	3536	0	3447	9970	3	Abyssal demons	Abyssal demons
+E	ASSIGNMENT	Banshees	Banshees	Slayer Tower	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3428	3536	0	3441	3540	0	Banshees	Banshees
+E	ASSIGNMENT	Crawling hands	Crawling hands	Slayer Tower	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3428	3536	0	3414	3536	0	Crawling hands	Crawling hands
+E	ASSIGNMENT	Gargoyles	Gargoyles	Slayer Tower	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3428	3536	0	3452	9935	3	Gargoyles	Gargoyles
+E	ASSIGNMENT	Bloodveld	Bloodveld	Slayer Tower (first floor)	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3428	3536	0	3417	3567	1	Bloodveld	Bloodveld
+E	ASSIGNMENT	Bloodveld	Bloodveld	Slayer Tower basement	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3428	3536	0	3403	9947	3	Bloodveld	Bloodveld
+E	ASSIGNMENT	Aberrant spectres	Aberrant spectres	Stronghold Slayer Cave	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2432	3423	0	2457	9788	0	Aberrant spectres	Aberrant spectres
+E	ASSIGNMENT	Ankou	Ankou	Stronghold Slayer Cave	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2432	3423	0	2479	9806	0	Ankou	Ankou
+E	ASSIGNMENT	Bloodveld	Bloodveld	Stronghold Slayer Cave	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2432	3423	0	2465	9833	0	Bloodveld	Bloodveld
+E	ASSIGNMENT	Hellhounds	Hellhounds	Stronghold Slayer Cave	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2432	3423	0	2424	9793	0	Hellhounds	Hellhounds
+E	ASSIGNMENT	Ankou	Ankou	Stronghold of Security	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3081	3421	0				Ankou	Ankou
+E	ASSIGNMENT	Catablepon	Catablepon	Stronghold of Security	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3081	3421	0				Catablepon	Catablepon
+E	ASSIGNMENT	Fleshcrawlers	Fleshcrawlers	Stronghold of Security	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3081	3421	0				Fleshcrawlers	Fleshcrawlers
+E	ASSIGNMENT	Minotaurs	Minotaurs	Stronghold of Security	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3081	3421	0	1880	5205	0	Minotaurs	Minotaurs
+E	ASSIGNMENT	Cockatrice	Cockatrice	Fremennik Slayer Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2796	3615	0	2789	10031	0	Cockatrice	Cockatrice
+E	ASSIGNMENT	Jellies	Jellies	Fremennik Slayer Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2796	3615	0	2705	10019	0	Jellies	Jellies
+E	ASSIGNMENT	Pyrefiends	Pyrefiends	Fremennik Slayer Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2796	3615	0	2764	10003	0	Pyrefiends	Pyrefiends
+E	ASSIGNMENT	Rockslugs	Rockslugs	Fremennik Slayer Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2796	3615	0	2794	10017	0	Rockslugs	Rockslugs
+E	ASSIGNMENT	Basilisks	Basilisks	Fremennik Slayer Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2796	3615	0	2744	10004	0	Basilisks	Basilisks
+E	ASSIGNMENT	Cave crawlers	Cave crawlers	Fremennik Slayer Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2796	3615	0	2792	9996	0	Cave crawlers	Cave crawlers
+E	ASSIGNMENT	Kurask	Kurask	Fremennik Slayer Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2796	3615	0	2701	10001	0	Kurask	Kurask
+E	ASSIGNMENT	Turoth	Turoth	Fremennik Slayer Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2796	3615	0	2716	10011	0	Turoth	Turoth
+E	ASSIGNMENT	Basilisks	Basilisks	Jormungand's Prison	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2445	3747	0	2455	10388	0	Basilisks	Basilisks
+E	ASSIGNMENT	Dagannoth	Dagannoth	Jormungand's Prison	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2445	3747	0	2420	10422	0	Dagannoth	Dagannoth
+E	ASSIGNMENT	Bloodveld	Bloodveld	Iorwerth Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3225	6045	0	3236	12438	0	Bloodveld	Bloodveld
+E	ASSIGNMENT	Dark beasts	Dark beasts	Iorwerth Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3225	6045	0	3227	12397	0	Dark beasts	Dark beasts
+E	ASSIGNMENT	Elves	Elves	Iorwerth Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3225	6045	0	3184	12405	0	Elves	Elves
+E	ASSIGNMENT	Kurask	Kurask	Iorwerth Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3225	6045	0	3219	12369	0	Kurask	Kurask
+E	ASSIGNMENT	Nechryael	Nechryael	Iorwerth Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3225	6045	0	3228	12459	0	Nechryael	Nechryael
+E	ASSIGNMENT	Waterfiends	Waterfiends	Iorwerth Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3225	6045	0	3183	12456	0	Waterfiends	Waterfiends
+E	ASSIGNMENT	Drakes	Drakes	Karuulm Slayer Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1311	3783	0	1312	10242	1	Drakes	Drakes
+E	ASSIGNMENT	Hydras	Hydras	Karuulm Slayer Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1311	3783	0	1311	10241	0	Hydras	Hydras
+E	ASSIGNMENT	Wyrms	Wyrms	Karuulm Slayer Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1311	3783	0	1273	10189	0	Wyrms	Wyrms
+E	ASSIGNMENT	Greater demons	Greater demons	Chasm of Fire	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1435	3670	0	1280	10208	1	Greater demons	Greater demons
+E	ASSIGNMENT	Black dragons	Black dragons	Taverley Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2885	3397	0	2903	9813	1	Black dragons	Black dragons
+E	ASSIGNMENT	Blue dragons	Blue dragons	Taverley Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2885	3397	0	2892	9799	0	Blue dragons	Blue dragons
+E	ASSIGNMENT	Chaos druids	Chaos druids	Edgeville Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3096	3468	0	3110	9933	0	Chaos druids	Chaos druids
+E	ASSIGNMENT	Earth warriors	Earth warriors	Edgeville Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3096	3468	0	3120	9970	0	Earth warriors	Earth warriors
+E	ASSIGNMENT	Hill giants	Hill giants	Edgeville Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3096	3468	0	3105	9839	0	Hill giants	Hill giants
+E	ASSIGNMENT	Hobgoblins	Hobgoblins	Edgeville Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3096	3468	0	3127	9873	0	Hobgoblins	Hobgoblins
+E	ASSIGNMENT	Moss giants	Moss giants	Brimhaven Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2745	3152	0	2647	9497	0	Moss giants	Moss giants
+E	ASSIGNMENT	Red dragons	Red dragons	Brimhaven Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2745	3152	0	2699	9509	0	Red dragons	Red dragons
+E	ASSIGNMENT	Metal dragons	Metal dragons	Ancient Cavern	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2512	3511	0				Metal dragons	Metal dragons
+E	ASSIGNMENT	Waterfiends	Waterfiends	Ancient Cavern	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2512	3511	0	1738	5356	0	Waterfiends	Waterfiends
+E	ASSIGNMENT	Ice giants	Ice giants	Asgarnian Ice Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3009	3150	0	3055	9568	0	Ice giants	Ice giants
+E	ASSIGNMENT	Skeletal wyverns	Skeletal wyverns	Asgarnian Ice Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3009	3150	0	3057	9547	0	Skeletal wyverns	Skeletal wyverns
+E	ASSIGNMENT	Aviansies	Aviansies	God Wars Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2916	3746	0				Aviansies	Aviansies
+E	ASSIGNMENT	Spiritual creatures	Spiritual creatures	God Wars Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2916	3746	0				Spiritual creatures	Spiritual creatures
+E	ASSIGNMENT	Bloodveld	Bloodveld	God Wars Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2916	3746	0	2888	5324	2	Bloodveld	Bloodveld
+E	ASSIGNMENT	Cave bugs	Cave bugs	Dorgesh-Kaan South Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3169	3173	0	2735	5221	0	Cave bugs	Cave bugs
+E	ASSIGNMENT	Cave slimes	Cave slimes	Dorgesh-Kaan South Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3169	3173	0	2735	5221	0	Cave slimes	Cave slimes
+E	ASSIGNMENT	Molanisks	Molanisks	Dorgesh-Kaan South Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3169	3173	0	2698	5222	0	Molanisks	Molanisks
+E	ASSIGNMENT	Dagannoth	Dagannoth	Lighthouse Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2518	3630	0	2523	10023	0	Dagannoth	Dagannoth
+E	ASSIGNMENT	Dagannoth	Dagannoth	Waterbirth Island Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2443	3746	0				Dagannoth	Dagannoth
+E	ASSIGNMENT	Kalphites	Kalphites	Kalphite Slayer Cave	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3321	3122	0	3305	9497	0	Kalphites	Kalphites
+E	ASSIGNMENT	Cave kraken	Cave kraken	Kraken Cove	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2277	3611	0				Cave kraken	Cave kraken
+E	ASSIGNMENT	Araxytes	Araxytes	Morytania Spider Cave	CAVE	MANUAL_STAGE_EXACT_CHECKPOINT	3657	3407	0				Araxytes	Araxytes
+E	ASSIGNMENT	Cave horrors	Cave horrors	Mos Le'Harmless Cave	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3748	2974	0	3775	9407	0	Cave horrors	Cave horrors
+E	ASSIGNMENT	Smoke devils	Smoke devils	Smoke Devil Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2411	3058	0	2408	9438	0	Smoke devils	Smoke devils
+E	ASSIGNMENT	Fossil Island wyverns	Fossil Island wyverns	Wyvern Cave on Fossil Island	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3680	3854	0	3616	10272	0	Fossil Island wyverns	Fossil Island wyverns
+E	ASSIGNMENT	Bloodveld	Bloodveld	Meiyerditch Laboratories	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3638	3304	0	3594	9743	0	Bloodveld	Bloodveld
+E	ASSIGNMENT	Bloodveld	Bloodveld	Buccaneers' Laboratory	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2075	3688	0	2096	10099	0	Bloodveld	Bloodveld
+E	ASSIGNMENT	Dark beasts	Dark beasts	Mourner Tunnels	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2028	4636	0	1992	4655	0	Dark beasts	Dark beasts
+E	ASSIGNMENT	Brine rats	Brine rats	Brine Rat Cavern	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2730	3714	0	2772	10155	0	Brine rats	Brine rats
+E	ASSIGNMENT	Fever spiders	Fever spiders	Braindeath Island	SPECIAL	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3680	3536	0	2150	5099	0	Fever spiders	Fever spiders
+E	ASSIGNMENT	Frost dragons	Frost dragons	Grimstone Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2912	4066	0	2901	10463	0	Frost dragons	Frost dragons
+E	ASSIGNMENT	Scabarites	Scabarites	Sophanem Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3315	2796	0				Scabarites	Scabarites
+E	ASSIGNMENT	Shadow warriors	Shadow warriors	Legends' Guild basement	DUNGEON	MANUAL_STAGE_EXACT_CHECKPOINT	2728	3348	0				Shadow warriors	Shadow warriors
+E	ASSIGNMENT	Wall beasts	Wall beasts	Lumbridge Swamp Caves	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3169	3173	0	3200	9560	0	Wall beasts	Wall beasts
+E	ASSIGNMENT	Warped creatures	Warped creatures	Poison Waste Dungeon	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2322	3099	0				Warped creatures	Warped creatures
+E	ASSIGNMENT	Lesser nagua	Lesser nagua	Ruins of Tapoyauik	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1693	3230	0				Lesser nagua	Lesser nagua
+E	ASSIGNMENT	Aquanites	Aquanites	Ynysdail Cavern	SPECIAL	MANUAL_STAGE_EXACT_CHECKPOINT	2218	3424	0				Aquanites	Aquanites
+E	ASSIGNMENT	Killerwatts	Killerwatts	Killerwatt plane	SPECIAL	MANUAL_STAGE_EXACT_CHECKPOINT	3108	3362	0				Killerwatts	Killerwatts
+E	ASSIGNMENT	Otherworldly beings	Otherworldly beings	Zanaris	SPECIAL	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3202	3169	0				Otherworldly beings	Otherworldly beings
+E	ASSIGNMENT	Mutated zygomites	Mutated zygomites	Zanaris	SPECIAL	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3202	3169	0				Mutated zygomites	Mutated zygomites
+E	ASSIGNMENT	Bats	Bats	Lumbridge area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3188	3220	0	3188	3220	0	Bats	Bats
+E	ASSIGNMENT	Birds	Birds	Lumbridge area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3188	3220	0	3188	3220	0	Birds	Birds
+E	ASSIGNMENT	Cows	Cows	Lumbridge area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3188	3220	0	3188	3220	0	Cows	Cows
+E	ASSIGNMENT	Crabs	Crabs	Lumbridge area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3188	3220	0	3188	3220	0	Crabs	Crabs
+E	ASSIGNMENT	Goblins	Goblins	Lumbridge area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3188	3220	0	3188	3220	0	Goblins	Goblins
+E	ASSIGNMENT	Rats	Rats	Lumbridge area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3188	3220	0	3188	3220	0	Rats	Rats
+E	ASSIGNMENT	Spiders	Spiders	Lumbridge area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3188	3220	0	3188	3220	0	Spiders	Spiders
+E	ASSIGNMENT	Bears	Bears	Ardougne area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2570	3300	0	2570	3300	0	Bears	Bears
+E	ASSIGNMENT	Bandits	Bandits	Bandit Camp	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3171	2979	0	3171	2979	0	Bandits	Bandits
+E	ASSIGNMENT	Black Knights	Black Knights	Black Knights' Fortress	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3015	3514	0	3015	3514	0	Black Knights	Black Knights
+E	ASSIGNMENT	Vampyres	Vampyres	Darkmeyer	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3604	3364	0	3604	3364	0	Vampyres	Vampyres
+E	ASSIGNMENT	Venators	Venators	Darkmeyer	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3604	3364	0	3604	3364	0	Venators	Venators
+E	ASSIGNMENT	Trolls	Trolls	Death Plateau	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2847	3635	0	2847	3635	0	Trolls	Trolls
+E	ASSIGNMENT	Lizards	Lizards	Desert quarry	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3172	2912	0	3172	2912	0	Lizards	Lizards
+E	ASSIGNMENT	Dwarves	Dwarves	Dwarven Mine	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3018	3450	0	3020	9820	0	Dwarves	Dwarves
+E	ASSIGNMENT	Jungle horrors	Jungle horrors	Feldip Hills	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2515	2954	0	2515	2954	0	Jungle horrors	Jungle horrors
+E	ASSIGNMENT	Wolves	Wolves	Feldip Hills	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2515	2954	0	2515	2954	0	Wolves	Wolves
+E	ASSIGNMENT	Ghouls	Ghouls	Haunted Woods	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3584	3492	0	3584	3492	0	Ghouls	Ghouls
+E	ASSIGNMENT	Werewolves	Werewolves	Haunted Woods	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3584	3492	0	3584	3492	0	Werewolves	Werewolves
+E	ASSIGNMENT	Icefiends	Icefiends	Ice Mountain	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3010	3486	0	3010	3486	0	Icefiends	Icefiends
+E	ASSIGNMENT	Ice warriors	Ice warriors	Ice Mountain	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3010	3486	0	3010	3486	0	Ice warriors	Ice warriors
+E	ASSIGNMENT	Dogs	Dogs	Isle of Souls	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2210	2900	0	2210	2900	0	Dogs	Dogs
+E	ASSIGNMENT	Sourhogs	Sourhogs	Isle of Souls	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2210	2900	0	2210	2900	0	Sourhogs	Sourhogs
+E	ASSIGNMENT	Harpie bug swarms	Harpie bug swarms	Karamja	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2843	3070	0	2843	3070	0	Harpie bug swarms	Harpie bug swarms
+E	ASSIGNMENT	Lesser demons	Lesser demons	Karamja	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2843	3070	0	2843	3070	0	Lesser demons	Lesser demons
+E	ASSIGNMENT	Monkeys	Monkeys	Karamja	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2843	3070	0	2843	3070	0	Monkeys	Monkeys
+E	ASSIGNMENT	TzHaar	TzHaar	Karamja Volcano	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2855	3168	0	2444	5138	0	TzHaar	TzHaar
+E	ASSIGNMENT	Gryphons	Gryphons	Kebos Lowlands	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	1248	3726	0	1248	3726	0	Gryphons	Gryphons
+E	ASSIGNMENT	Lizardmen	Lizardmen	Kourend Woodland	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	1540	3464	0	1540	3464	0	Lizardmen	Lizardmen
+E	ASSIGNMENT	Ogres	Ogres	Kourend Woodland	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	1540	3464	0	1540	3464	0	Ogres	Ogres
+E	ASSIGNMENT	Elves	Elves	Lletya	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2355	3172	0	2355	3172	0	Elves	Elves
+E	ASSIGNMENT	Suqahs	Suqahs	Lunar Isle	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2112	3915	0	2112	3915	0	Suqahs	Suqahs
+E	ASSIGNMENT	Mogres	Mogres	Mogre beach	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2996	3106	0	2996	3106	0	Mogres	Mogres
+E	ASSIGNMENT	Shades	Shades	Mort'ton	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3488	3288	0	3488	3288	0	Shades	Shades
+E	ASSIGNMENT	Crocodiles	Crocodiles	Nardah desert	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3427	2911	0	3427	2911	0	Crocodiles	Crocodiles
+E	ASSIGNMENT	Terror dogs	Terror dogs	Piscatoris area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2332	3683	0	2332	3683	0	Terror dogs	Terror dogs
+E	ASSIGNMENT	Custodian Stalkers	Custodian Stalkers	Stalker Den	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	1325	3364	0				Custodian Stalkers	Custodian Stalkers
+E	ASSIGNMENT	Sea snakes	Sea snakes	Waterbirth Island	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2525	3743	0	2525	3743	0	Sea snakes	Sea snakes
+E	ASSIGNMENT	Dark warriors	Dark warriors	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3029	3632	0	3029	3632	0	Dark warriors	Dark warriors
+E	ASSIGNMENT	Ents	Ents	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3202	3669	0	3202	3669	0	Ents	Ents
+E	ASSIGNMENT	Lava dragons	Lava dragons	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3201	3814	0	3201	3814	0	Lava dragons	Lava dragons
+E	ASSIGNMENT	Magic axes	Magic axes	Wilderness	SPECIAL	MANUAL_STAGE_EXACT_CHECKPOINT	3190	3957	0				Magic axes	Magic axes
+E	ASSIGNMENT	Mammoths	Mammoths	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3169	3594	0	3169	3594	0	Mammoths	Mammoths
+E	ASSIGNMENT	Pirates	Pirates	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3240	3601	0	3240	3601	0	Pirates	Pirates
+E	ASSIGNMENT	Revenants	Revenants	Wilderness	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3073	3654	0	3197	10070	0	Revenants	Revenants
+E	ASSIGNMENT	Rogues	Rogues	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3285	3933	0	3285	3933	0	Rogues	Rogues
+E	ASSIGNMENT	Green dragons	Green dragons	Wilderness green dragon area	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3331	3672	0	3331	3672	0	Green dragons	Green dragons
+E	ASSIGNMENT	Scorpions	Scorpions	Al Kharid mine	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3298	3293	0	3298	3293	0	Scorpions	Scorpions
+E	SELECTABLE_BOSS		Abyssal Sire	Abyssal Nexus	SPECIAL	INSTANCE_REGION_STOP	3107	4791	0	3037	4763	0	Abyssal Sire	Abyssal demons
+E	SELECTABLE_BOSS		Alchemical Hydra	Karuulm Slayer Dungeon	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	1311	3783	0	1368	10270	0	Alchemical Hydra	Hydras
+E	SELECTABLE_BOSS		Amoxliatl	Ruins of Tapoyauik	INSTANCE	INSTANCE_REGION_STOP	1641	3221	0	1362	4511	0	Amoxliatl	Lesser Nagua
+E	SELECTABLE_BOSS		Araxxor	Morytania Spider Cave	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3657	3407	0	3632	9815	0	Araxxor	Araxytes%7CSpiders
+E	SELECTABLE_BOSS		Artio	Hunter's End	CAVE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3112	3670	0				Artio	Bears
+E	SELECTABLE_BOSS		Callisto	Callisto's Den	CAVE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3290	3855	0				Callisto	Bears
+E	SELECTABLE_BOSS		Cerberus	Cerberus' Lair	DUNGEON	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2885	3397	0	1310	1253	0	Cerberus	Hellhounds
+E	SELECTABLE_BOSS		Dagannoth Kings	Waterbirth Island Dungeon	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	2443	3746	0				Dagannoth Kings	Dagannoth%7CDagannoths
+E	SELECTABLE_BOSS		Deranged Archaeologist	Fossil Island	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3683	3706	0	3683	3706	0	Deranged archaeologist	Crazy Archaeologist%7CCrazy Archaeologists
+E	SELECTABLE_BOSS		Grotesque Guardians	Slayer Tower	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3428	3536	0				Grotesque Guardians	Gargoyles
+E	SELECTABLE_BOSS		K'ril Tsutsaroth	God Wars Dungeon	MULTI_FLOOR	MANUAL_STAGE_EXACT_CHECKPOINT	2916	3746	0				K'ril Tsutsaroth	Greater demons
+E	SELECTABLE_BOSS		Kalphite Queen	Kalphite Lair	MULTI_FLOOR	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3228	3109	0	3508	9493	0	Kalphite Queen	Kalphites
+E	SELECTABLE_BOSS		King Black Dragon	King Black Dragon Lair	DUNGEON	MANUAL_STAGE_EXACT_CHECKPOINT	3017	3850	0				King Black Dragon	Black dragons
+E	SELECTABLE_BOSS		Kraken	Kraken Cove	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	2280	3616	0	2280	10016	0	Kraken	Cave kraken
+E	SELECTABLE_BOSS		Kree'arra	God Wars Dungeon	MULTI_FLOOR	MANUAL_STAGE_EXACT_CHECKPOINT	2916	3746	0				Kree'arra	Aviansies
+E	SELECTABLE_BOSS		Sarachnis	Forthos Dungeon	DUNGEON	MANUAL_STAGE_EXACT_CHECKPOINT	1667	3570	0				Sarachnis	Spiders
+E	SELECTABLE_BOSS		Scorpia	Scorpia's Cave	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3232	3950	0	3232	10346	0	Scorpia	Scorpions
+E	SELECTABLE_BOSS		Skotizo	Skotizo's Lair	INSTANCE	MANUAL_STAGE_EXACT_CHECKPOINT	1639	3673	0				Skotizo	Black demons%7CGreater demons
+E	SELECTABLE_BOSS		Thermonuclear smoke devil	Smoke Devil Dungeon	DUNGEON	MANUAL_STAGE_EXACT_CHECKPOINT	2411	3058	0				Thermonuclear smoke devil	Smoke devils
+E	SELECTABLE_BOSS		TzTok-Jad	TzHaar Fight Cave	WAVE	WAVE_ENTRANCE_OR_WIDGET_STOP	2439	5172	0	2439	5172	0	TzTok-Jad	TzHaar
+E	SELECTABLE_BOSS		TzKal-Zuk	Inferno	WAVE	WAVE_ENTRANCE_OR_WIDGET_STOP	2496	5115	0	2496	5115	0	TzKal-Zuk	TzHaar
+E	SELECTABLE_BOSS		Spindel	Web Chasm	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3294	3749	0	3406	10145	0	Spindel	Spiders
+E	SELECTABLE_BOSS		Venenatis	Silk Chasm	CAVE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3321	3794	0				Venenatis	Spiders
+E	SELECTABLE_BOSS		Calvar'ion	Skeletal Tomb	CAVE	FULL_TRANSPORT_CHAIN_EXACT_INTERIOR	3152	3644	0	3164	10043	0	Calvar'ion	Skeletons
+E	SELECTABLE_BOSS		Vet'ion	Vet'ion's Rest	CAVE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3219	3788	0				Vet'ion	Skeletons
+E	SELECTABLE_BOSS		Vorkath	Ungael	INSTANCE	INSTANCE_REGION_STOP	2640	3696	0	2273	4065	0	Vorkath	Blue dragons%7CZombies
+E	SELECTABLE_BOSS		Scurrius	Varrock Sewers	INSTANCE	INSTANCE_REGION_STOP	3237	3458	0	3299	9867	0	Scurrius	Rats
+E	SELECTABLE_BOSS		Obor	Edgeville Dungeon	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3096	3468	0				Obor	Hill giants
+E	SELECTABLE_BOSS		Bryophyta	Varrock Sewers	INSTANCE	INSTANCE_REGION_STOP	3237	3458	0	3220	9933	0	Bryophyta	Moss giants
+E	SELECTABLE_BOSS		Brutus	Lumbridge cow field	INSTANCE	INSTANCE_REGION_STOP	3253	3266	0	3263	3297	0	Brutus	Cows
+E	SELECTABLE_BOSS		Demonic gorillas	Crash Site Cavern	CAVE	MANUAL_STAGE_EXACT_CHECKPOINT	2464	3494	0				Demonic gorilla	Black demons%7CMonkeys
+E	SELECTABLE_BOSS		Tormented demons	Ancient Guthixian Temple	SPECIAL	INSTANCE_REGION_STOP	4097	4419	0	4097	4419	0	Tormented demon	Greater demons
+E	SELECTABLE_BOSS		Royal Titans	Asgarnian Ice Dungeon	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3009	3150	0	2953	9569	0	Royal Titans	Fire giants%7CIce giants
+E	SELECTABLE_BOSS		Shellbane Gryphon	The Great Conch	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3176	2477	0				Shellbane Gryphon	Gryphons
+E	DIRECT_BOSS	Barrows Brothers	Barrows Brothers	Barrows	SPECIAL	MANUAL_STAGE_EXACT_CHECKPOINT	3567	3291	0				Barrows	Barrows Brothers
+E	DIRECT_BOSS	Chaos Elemental	Chaos Elemental	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3261	3927	0	3261	3927	0	Chaos Elemental	Chaos Elemental
+E	DIRECT_BOSS	Chaos Fanatic	Chaos Fanatic	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2979	3846	0	2979	3846	0	Chaos Fanatic	Chaos Fanatic
+E	DIRECT_BOSS	Crazy Archaeologist	Crazy Archaeologist	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2977	3702	0	2977	3702	0	Crazy archaeologist	Crazy Archaeologist
+E	DIRECT_BOSS	Crazy Archaeologists	Crazy Archaeologists	Wilderness	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	2977	3702	0	2977	3702	0	Crazy archaeologist	Crazy Archaeologists
+E	DIRECT_BOSS	Deranged Archaeologist	Deranged Archaeologist	Fossil Island	OPEN_WORLD	OPEN_WORLD_EXACT_TARGET	3683	3706	0	3683	3706	0	Deranged archaeologist	Deranged Archaeologist
+E	DIRECT_BOSS	Duke Sucellus	Duke Sucellus	Ghorrock Dungeon	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	2920	3930	0				Duke Sucellus	Duke Sucellus
+E	DIRECT_BOSS	General Graardor	General Graardor	God Wars Dungeon	MULTI_FLOOR	MANUAL_STAGE_EXACT_CHECKPOINT	2916	3746	0				General Graardor	General Graardor
+E	DIRECT_BOSS	Giant Mole	Giant Mole	Falador Mole Lair	DUNGEON	MANUAL_STAGE_EXACT_CHECKPOINT	2996	3377	0				Giant Mole	Giant Mole
+E	DIRECT_BOSS	Maggot King	Maggot King	Maggot King's lair	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	3161	7711	0				Maggot King	Maggot King
+E	DIRECT_BOSS	Phantom Muspah	Phantom Muspah	Ghorrock Dungeon	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	2920	3930	0				Phantom Muspah	Phantom Muspah
+E	DIRECT_BOSS	Leviathan	Leviathan	The Scar	INSTANCE	INSTANCE_REGION_STOP	2081	6372	0				The Leviathan	Leviathan
+E	DIRECT_BOSS	The Whisperer	The Whisperer	Lassar Undercity	INSTANCE	INSTANCE_REGION_STOP	3000	3494	0	2656	6370	0	The Whisperer	The Whisperer
+E	DIRECT_BOSS	Vardorvis	Vardorvis	Stranglewood Temple	INSTANCE	INSTANCE_REGION_STOP	1128	3417	0				Vardorvis	Vardorvis
+E	DIRECT_BOSS	Commander Zilyana	Commander Zilyana	God Wars Dungeon	MULTI_FLOOR	MANUAL_STAGE_EXACT_CHECKPOINT	2916	3746	0				Commander Zilyana	Commander Zilyana
+E	DIRECT_BOSS	Zulrah	Zulrah	Zul-Andra	INSTANCE	INSTANCE_ENTRANCE_OR_WIDGET_STOP	2211	3057	0				Zulrah	Zulrah
