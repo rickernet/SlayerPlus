@@ -28,12 +28,12 @@ public class SlayerRouteReleaseValidatorTest
 	@Test
 	public void everyUnresolvedManifestTerminalIsReportedIndividually()
 	{
-		final List<String> failures = SlayerRouteReleaseValidator.validateForRegression(
+		final List<String> failures = SlayerRouteReleaseValidator.validateForTest(
 			SlayerRouteReleaseManifest.entries(),
 			SlayerTaskStrategyCatalog.getCurrentTaskNames(),
 			VariantCatalog.getBossDefinitions(),
 			VariantCatalog.getDirectBossDefinitions(),
-			SlayerRouteReleaseValidator.catalogLookupForRegression(),
+			SlayerRouteReleaseValidator.catalogLookupForTest(),
 			noPlanLookup()
 		);
 		for (final SlayerRouteReleaseManifest.Entry entry
@@ -172,27 +172,27 @@ public class SlayerRouteReleaseValidatorTest
 			"Artio", "Hunter's End"
 		);
 		final SlayerRouteReleaseValidator.ProfileLookup catalog =
-			SlayerRouteReleaseValidator.catalogLookupForRegression();
+			SlayerRouteReleaseValidator.catalogLookupForTest();
 		final SlayerRouteReleaseValidator.ProfileLookup noExactProfile =
 			new SlayerRouteReleaseValidator.ProfileLookup()
 			{
 				@Override
 				public boolean hasExplicitProfile(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
-					return !matches(artio, taskName, location, boss)
-						&& catalog.hasExplicitProfile(taskName, location, boss);
+					return !matches(artio, assignment, location, boss)
+						&& catalog.hasExplicitProfile(assignment, location, boss);
 				}
 
 				@Override
 				public RouteCatalog.RouteProfile resolve(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
-					return catalog.resolve(taskName, location, boss);
+					return catalog.resolve(assignment, location, boss);
 				}
 
 				@Override
@@ -202,13 +202,13 @@ public class SlayerRouteReleaseValidatorTest
 				}
 			};
 
-		final List<String> failures = SlayerRouteReleaseValidator.validateForRegression(
+		final List<String> failures = SlayerRouteReleaseValidator.validateForTest(
 			SlayerRouteReleaseManifest.entries(),
 			SlayerTaskStrategyCatalog.getCurrentTaskNames(),
 			VariantCatalog.getBossDefinitions(),
 			VariantCatalog.getDirectBossDefinitions(),
 			noExactProfile,
-			SlayerRouteReleaseValidator.planLookupForRegression()
+			SlayerRouteReleaseValidator.planLookupForTest()
 		);
 		final String identity = routeIdentity(artio);
 		assertNotContains(
@@ -567,12 +567,12 @@ public class SlayerRouteReleaseValidatorTest
 			"A complete exact plan was forced into an access-only legacy profile"
 		);
 		assertContains(
-			SlayerRouteReleaseValidator.validateForRegression(
+			SlayerRouteReleaseValidator.validateForTest(
 				SlayerRouteReleaseManifest.entries(),
 				SlayerTaskStrategyCatalog.getCurrentTaskNames(),
 				VariantCatalog.getBossDefinitions(),
 				VariantCatalog.getDirectBossDefinitions(),
-				SlayerRouteReleaseValidator.catalogLookupForRegression(),
+				SlayerRouteReleaseValidator.catalogLookupForTest(),
 				noPlanLookup()
 			),
 			mismatch,
@@ -587,27 +587,27 @@ public class SlayerRouteReleaseValidatorTest
 			"Artio", "Hunter's End"
 		);
 		final SlayerRouteReleaseValidator.PlanLookup catalog =
-			SlayerRouteReleaseValidator.planLookupForRegression();
+			SlayerRouteReleaseValidator.planLookupForTest();
 		final SlayerRouteReleaseValidator.PlanLookup fallback =
 			new SlayerRouteReleaseValidator.PlanLookup()
 			{
 				@Override
 				public boolean hasExplicitPlan(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
-					return !matches(denied, taskName, location, boss)
-						&& catalog.hasExplicitPlan(taskName, location, boss);
+					return !matches(denied, assignment, location, boss)
+						&& catalog.hasExplicitPlan(assignment, location, boss);
 				}
 
 				@Override
 				public RoutePlan resolve(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
-					return catalog.resolve(taskName, location, boss);
+					return catalog.resolve(assignment, location, boss);
 				}
 			};
 
@@ -639,20 +639,20 @@ public class SlayerRouteReleaseValidatorTest
 			{
 				@Override
 				public boolean hasExplicitPlan(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
-					return matches(denied, taskName, location, boss);
+					return matches(denied, assignment, location, boss);
 				}
 
 				@Override
 				public RoutePlan resolve(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
-					return matches(denied, taskName, location, boss)
+					return matches(denied, assignment, location, boss)
 						? callisto : null;
 				}
 			};
@@ -726,7 +726,7 @@ public class SlayerRouteReleaseValidatorTest
 			{
 				@Override
 				public boolean hasExplicitPlan(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
@@ -735,7 +735,7 @@ public class SlayerRouteReleaseValidatorTest
 
 				@Override
 				public RoutePlan resolve(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
@@ -780,12 +780,12 @@ public class SlayerRouteReleaseValidatorTest
 		assertTrue("Manifest has no selectable boss row to mutate", removed != null);
 		mutated.remove(removed);
 
-		final List<String> failures = SlayerRouteReleaseValidator.validateForRegression(
+		final List<String> failures = SlayerRouteReleaseValidator.validateForTest(
 			mutated,
 			SlayerTaskStrategyCatalog.getCurrentTaskNames(),
 			VariantCatalog.getBossDefinitions(),
 			VariantCatalog.getDirectBossDefinitions(),
-			SlayerRouteReleaseValidator.catalogLookupForRegression()
+			SlayerRouteReleaseValidator.catalogLookupForTest()
 		);
 		assertContains(
 			failures,
@@ -804,30 +804,30 @@ public class SlayerRouteReleaseValidatorTest
 	{
 		final SlayerRouteReleaseManifest.Entry denied = firstEstablishedEntry();
 		final SlayerRouteReleaseValidator.ProfileLookup catalog =
-			SlayerRouteReleaseValidator.catalogLookupForRegression();
+			SlayerRouteReleaseValidator.catalogLookupForTest();
 		final SlayerRouteReleaseValidator.ProfileLookup missingExact =
 			new SlayerRouteReleaseValidator.ProfileLookup()
 			{
 				@Override
 				public boolean hasExplicitProfile(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
-					if (matches(denied, taskName, location, boss))
+					if (matches(denied, assignment, location, boss))
 					{
 						return false;
 					}
-					return catalog.hasExplicitProfile(taskName, location, boss);
+					return catalog.hasExplicitProfile(assignment, location, boss);
 				}
 
 				@Override
 				public RouteCatalog.RouteProfile resolve(
-					final String taskName,
+					final String assignment,
 					final String location,
 					final boolean boss)
 				{
-					return catalog.resolve(taskName, location, boss);
+					return catalog.resolve(assignment, location, boss);
 				}
 
 				@Override
@@ -837,7 +837,7 @@ public class SlayerRouteReleaseValidatorTest
 				}
 			};
 
-		final List<String> failures = SlayerRouteReleaseValidator.validateForRegression(
+		final List<String> failures = SlayerRouteReleaseValidator.validateForTest(
 			SlayerRouteReleaseManifest.entries(),
 			SlayerTaskStrategyCatalog.getCurrentTaskNames(),
 			VariantCatalog.getBossDefinitions(),
@@ -913,12 +913,12 @@ public class SlayerRouteReleaseValidatorTest
 	private static List<String> validateWithPlans(
 		final SlayerRouteReleaseValidator.PlanLookup plans)
 	{
-		return SlayerRouteReleaseValidator.validateForRegression(
+		return SlayerRouteReleaseValidator.validateForTest(
 			SlayerRouteReleaseManifest.entries(),
 			SlayerTaskStrategyCatalog.getCurrentTaskNames(),
 			VariantCatalog.getBossDefinitions(),
 			VariantCatalog.getDirectBossDefinitions(),
-			SlayerRouteReleaseValidator.catalogLookupForRegression(),
+			SlayerRouteReleaseValidator.catalogLookupForTest(),
 			plans
 		);
 	}
@@ -929,7 +929,7 @@ public class SlayerRouteReleaseValidatorTest
 		{
 			@Override
 			public boolean hasExplicitPlan(
-				final String taskName,
+				final String assignment,
 				final String location,
 				final boolean boss)
 			{
@@ -938,7 +938,7 @@ public class SlayerRouteReleaseValidatorTest
 
 			@Override
 			public RoutePlan resolve(
-				final String taskName,
+				final String assignment,
 				final String location,
 				final boolean boss)
 			{
@@ -955,34 +955,34 @@ public class SlayerRouteReleaseValidatorTest
 		{
 			@Override
 			public boolean hasExplicitPlan(
-				final String taskName,
+				final String assignment,
 				final String location,
 				final boolean boss)
 			{
-				return matches(entry, taskName, location, boss);
+				return matches(entry, assignment, location, boss);
 			}
 
 			@Override
 			public RoutePlan resolve(
-				final String taskName,
+				final String assignment,
 				final String location,
 				final boolean boss)
 			{
-				return matches(entry, taskName, location, boss) ? plan : null;
+				return matches(entry, assignment, location, boss) ? plan : null;
 			}
 		};
 	}
 
 	private static boolean matches(
 		final SlayerRouteReleaseManifest.Entry entry,
-		final String taskName,
+		final String assignment,
 		final String location,
 		final boolean boss)
 	{
 		final String expectedTask = entry.getKind()
 			== SlayerRouteReleaseManifest.EntryKind.ASSIGNMENT
 				? entry.getAssignmentName() : entry.getEncounterName();
-		return expectedTask.equals(taskName)
+		return expectedTask.equals(assignment)
 			&& entry.getLocation().equals(location)
 			&& boss == (entry.getKind()
 				!= SlayerRouteReleaseManifest.EntryKind.ASSIGNMENT);

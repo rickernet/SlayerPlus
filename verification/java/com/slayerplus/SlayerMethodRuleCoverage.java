@@ -13,11 +13,11 @@ public final class SlayerMethodRuleCoverage
 	{
 		final List<String> failures = new ArrayList<>();
 		final Set<String> validated = new LinkedHashSet<>();
-		for (final String taskName : SlayerTaskStrategyCatalog.getCurrentTaskNames())
+		for (final String assignment : SlayerTaskStrategyCatalog.getCurrentTaskNames())
 		{
-			if (!SlayerTaskStrategyCatalog.hasExplicitStrategy(taskName))
+			if (!SlayerTaskStrategyCatalog.hasExplicitStrategy(assignment))
 			{
-				failures.add(taskName + ": no individually reviewed strategy");
+				failures.add(assignment + ": no individually reviewed strategy");
 				continue;
 			}
 			for (final Preference.Playstyle playstyle : Preference.Playstyle.values())
@@ -28,7 +28,7 @@ public final class SlayerMethodRuleCoverage
 					{
 						for (final Preference.CombatStyle combat : Preference.CombatStyle.values())
 						{
-							validateSelection(taskName, playstyle, cannon, burst, combat, validated, failures);
+							validateSelection(assignment, playstyle, cannon, burst, combat, validated, failures);
 						}
 					}
 				}
@@ -42,7 +42,7 @@ public final class SlayerMethodRuleCoverage
 	}
 
 	private static void validateSelection(
-		final String taskName,
+		final String assignment,
 		final Preference.Playstyle playstyle,
 		final Preference.Cannon cannon,
 		final Preference.Burst burst,
@@ -53,35 +53,35 @@ public final class SlayerMethodRuleCoverage
 		try
 		{
 			final TaskStrategy strategy = SlayerTaskStrategyCatalog.resolve(
-				taskName, playstyle, cannon, burst, combat, "Not restricted", false);
+				assignment, playstyle, cannon, burst, combat, "Not restricted", false);
 			if (strategy == null || !strategy.isReviewed())
 			{
-				failures.add(taskName + ": preference resolved to an unreviewed method");
+				failures.add(assignment + ": preference resolved to an unreviewed method");
 				return;
 			}
 			final MethodRules rules = SlayerMethodRuleCatalog.resolve(
-				taskName, "Not restricted", strategy);
+				assignment, "Not restricted", strategy);
 			if (SlayerMethodRuleCatalog.selectedMethodRequiresStandardSpellbook(strategy)
 				&& rules.getSpellbook() != MethodRules.Spellbook.STANDARD)
 			{
-				failures.add(taskName + ": explicit Standard-spell method did not resolve to the Standard spellbook");
+				failures.add(assignment + ": explicit Standard-spell method did not resolve to the Standard spellbook");
 				return;
 			}
 			if (rules.getSpellbook() != MethodRules.Spellbook.NONE
 				&& rules.getSpellbook() != MethodRules.Spellbook.STRATEGY_DEFINED
 				&& (rules.getPrimarySpell() == null || rules.getPrimarySpell().trim().isEmpty()))
 			{
-				failures.add(taskName + ": concrete spellbook method has no primary spell");
+				failures.add(assignment + ": concrete spellbook method has no primary spell");
 				return;
 			}
 			if (validated.add(rules.getCoverageKey()))
 			{
-				rules.validateFor(taskName, strategy);
+				rules.validateFor(assignment, strategy);
 			}
 		}
 		catch (RuntimeException ex)
 		{
-			failures.add(taskName + ": " + safeMessage(ex));
+			failures.add(assignment + ": " + safeMessage(ex));
 		}
 	}
 

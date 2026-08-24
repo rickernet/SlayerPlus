@@ -15,11 +15,11 @@ public class SlayerRouteLifecycleRegressionTest
 	public void exactPlansKeepExactLegacyProfileIdentity()
 	{
 		for (final SlayerRoutePlanCatalog.RouteKey key
-			: SlayerRoutePlanCatalog.keysForRegression())
+			: SlayerRoutePlanCatalog.keysForTest())
 		{
 			assertTrue(
 				"Exact plan lost its exact RouteProfile: " + key,
-				RouteCatalog.hasExplicitProfileForRegression(
+				RouteCatalog.hasExplicitProfileForTest(
 					key.getTaskName(), key.getLocation(), key.isBoss()
 				)
 			);
@@ -36,7 +36,7 @@ public class SlayerRouteLifecycleRegressionTest
 		assertTrue(route.isStaged());
 
 		final WorldPoint intermediateLayer = new WorldPoint(2000, 6500, 0);
-		assertFalse(route.isInsideEncounterArea(intermediateLayer));
+		assertFalse(route.insideArea(intermediateLayer));
 		assertFalse(route.shouldRouteToSurfaceAccess(intermediateLayer));
 
 		final SlayerRouteCoordinator.Stage stage = resolveWithoutLiveTargets(
@@ -57,7 +57,7 @@ public class SlayerRouteLifecycleRegressionTest
 		assertTrue(route.isStaged());
 
 		final WorldPoint sameLayerOutsideDestination = new WorldPoint(2500, 3900, 0);
-		assertFalse(route.isInsideEncounterArea(sameLayerOutsideDestination));
+		assertFalse(route.insideArea(sameLayerOutsideDestination));
 		assertTrue(route.shouldRouteToSurfaceAccess(sameLayerOutsideDestination));
 
 		final SlayerRouteCoordinator.Stage beforeDestination =
@@ -70,7 +70,7 @@ public class SlayerRouteLifecycleRegressionTest
 		assertEquals(route.getSurfaceAccess(), beforeDestination.getDestination());
 
 		final WorldPoint ungaelLanding = new WorldPoint(2277, 4034, 0);
-		assertTrue(route.isInsideEncounterArea(ungaelLanding));
+		assertTrue(route.insideArea(ungaelLanding));
 		final SlayerRouteCoordinator.Stage afterDestination =
 			resolveWithoutLiveTargets(route, ungaelLanding);
 		assertTrue(afterDestination.isValid());
@@ -124,29 +124,29 @@ public class SlayerRouteLifecycleRegressionTest
 	private static void assertExactNpcDiscoveryAfterTransition(
 		final RouteCatalog.RouteProfile route,
 		final RouteCatalog.RouteMode expectedMode,
-		final WorldPoint playerLocation)
+		final WorldPoint here)
 	{
 		assertNotNull(route);
 		assertEquals(expectedMode, route.getMode());
 
 		final SlayerRouteCoordinator.Stage waiting = resolveWithoutLiveTargets(
-			route, playerLocation
+			route, here
 		);
 		assertFalse(waiting.isValid());
 		assertEquals(SlayerRouteCoordinator.StageKind.WAIT_FOR_NPC, waiting.getKind());
 
-		assertTrue(SlayerPlusPlugin.shouldAttemptExactNpcDiscoveryForRegression(
-			route, playerLocation, 64
+		assertTrue(SlayerPlusPlugin.shouldAttemptExactNpcDiscoveryForTest(
+			route, here, 64
 		));
 
 		final WorldPoint exactNpc = new WorldPoint(
-			playerLocation.getX() + 2,
-			playerLocation.getY() + 1,
-			playerLocation.getPlane()
+			here.getX() + 2,
+			here.getY() + 1,
+			here.getPlane()
 		);
 		final SlayerRouteCoordinator.Stage discovered = SlayerRouteCoordinator.resolve(
 			route,
-			playerLocation,
+			here,
 			null, Collections.emptySet(),
 			null, Collections.emptySet(),
 			exactNpc, Collections.singleton(exactNpc),
@@ -159,11 +159,11 @@ public class SlayerRouteLifecycleRegressionTest
 
 	private static SlayerRouteCoordinator.Stage resolveWithoutLiveTargets(
 		final RouteCatalog.RouteProfile route,
-		final WorldPoint playerLocation)
+		final WorldPoint here)
 	{
 		return SlayerRouteCoordinator.resolve(
 			route,
-			playerLocation,
+			here,
 			null, Collections.emptySet(),
 			null, Collections.emptySet(),
 			null, Collections.emptySet(),

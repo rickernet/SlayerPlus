@@ -16,10 +16,10 @@ public class SlayerRoutePlanRuntimeRegressionTest
 		final RoutePlan.RouteTarget target =
 			RoutePlan.RouteTarget.point("Reviewed cave entrance", entrance, 4);
 
-		assertFalse(SlayerPlusPlugin.shouldPauseForRoutePlanForRegression(
+		assertFalse(SlayerPlusPlugin.shouldPauseForRoutePlanForTest(
 			RoutePlan.ProgressStatus.WAITING_FOR_INTERACTION,
 			new WorldPoint(3080, 3670, 0), target));
-		assertTrue(SlayerPlusPlugin.shouldPauseForRoutePlanForRegression(
+		assertTrue(SlayerPlusPlugin.shouldPauseForRoutePlanForTest(
 			RoutePlan.ProgressStatus.WAITING_FOR_INTERACTION,
 			new WorldPoint(3109, 3670, 0), target));
 	}
@@ -31,7 +31,7 @@ public class SlayerRoutePlanRuntimeRegressionTest
 		final RoutePlan.RouteTarget target =
 			RoutePlan.RouteTarget.point("Reviewed cave entrance", entrance, 4);
 
-		assertFalse(SlayerPlusPlugin.shouldPauseForRoutePlanForRegression(
+		assertFalse(SlayerPlusPlugin.shouldPauseForRoutePlanForTest(
 			RoutePlan.ProgressStatus.WAITING_FOR_INTERACTION,
 			new WorldPoint(3112, 3670, 1), target));
 	}
@@ -48,10 +48,10 @@ public class SlayerRoutePlanRuntimeRegressionTest
 					new WorldPoint(3124, 3831, 0)),
 				5);
 
-		assertTrue(SlayerPlusPlugin.shouldPauseForRoutePlanForRegression(
+		assertTrue(SlayerPlusPlugin.shouldPauseForRoutePlanForTest(
 			RoutePlan.ProgressStatus.WAITING_FOR_INTERACTION,
 			new WorldPoint(3120, 3831, 0), target));
-		assertFalse(SlayerPlusPlugin.shouldPauseForRoutePlanForRegression(
+		assertFalse(SlayerPlusPlugin.shouldPauseForRoutePlanForTest(
 			RoutePlan.ProgressStatus.WAITING_FOR_INTERACTION,
 			new WorldPoint(3200, 3831, 0), target));
 	}
@@ -62,10 +62,10 @@ public class SlayerRoutePlanRuntimeRegressionTest
 		final RoutePlan.RouteTarget instruction =
 			RoutePlan.RouteTarget.instruction("Live-state dungeon handoff");
 
-		assertTrue(SlayerPlusPlugin.shouldPauseForRoutePlanForRegression(
+		assertTrue(SlayerPlusPlugin.shouldPauseForRoutePlanForTest(
 			RoutePlan.ProgressStatus.WAITING_FOR_INTERACTION,
 			new WorldPoint(3200, 3200, 0), instruction));
-		assertFalse(SlayerPlusPlugin.shouldPauseForRoutePlanForRegression(
+		assertFalse(SlayerPlusPlugin.shouldPauseForRoutePlanForTest(
 			RoutePlan.ProgressStatus.ROUTING,
 			new WorldPoint(3200, 3200, 0), instruction));
 	}

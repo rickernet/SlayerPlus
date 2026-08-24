@@ -469,7 +469,7 @@ public class SlayerQuiverRegressionTest
 		{
 			assertEquals(
 				expectedBaseItemId,
-				QuiverAmmo.normalizeSeekingArrowItemId(displayItemId)
+				QuiverAmmo.arrow(displayItemId)
 			);
 			assertTrue(QuiverAmmo.isSeekingArrow(displayItemId));
 			assertFalse(

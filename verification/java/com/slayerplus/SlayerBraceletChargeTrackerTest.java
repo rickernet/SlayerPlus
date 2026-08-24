@@ -64,8 +64,8 @@ public class SlayerBraceletChargeTrackerTest
 	public void depletedIndicatorSlowlyPulsesBetweenGreyAndRed()
 	{
 		assertNotEquals(
-			SlayerBraceletChargeInfoBox.depletedTextColorForRegression(600L),
-			SlayerBraceletChargeInfoBox.depletedTextColorForRegression(1800L)
+			SlayerBraceletChargeInfoBox.depletedTextColorForTest(600L),
+			SlayerBraceletChargeInfoBox.depletedTextColorForTest(1800L)
 		);
 	}
 }

@@ -29,22 +29,22 @@ public final class SlayerRouteReleaseValidator
 	{
 		@Override
 		public boolean hasExplicitProfile(
-			final String taskName,
+			final String assignment,
 			final String location,
 			final boolean boss)
 		{
-			return RouteCatalog.hasExplicitProfileForRegression(
-				taskName, location, boss
+			return RouteCatalog.hasExplicitProfileForTest(
+				assignment, location, boss
 			);
 		}
 
 		@Override
 		public RouteCatalog.RouteProfile resolve(
-			final String taskName,
+			final String assignment,
 			final String location,
 			final boolean boss)
 		{
-			return RouteCatalog.resolve(taskName, location, boss);
+			return RouteCatalog.resolve(assignment, location, boss);
 		}
 
 		@Override
@@ -57,20 +57,20 @@ public final class SlayerRouteReleaseValidator
 	{
 		@Override
 		public boolean hasExplicitPlan(
-			final String taskName,
+			final String assignment,
 			final String location,
 			final boolean boss)
 		{
-			return SlayerRoutePlanCatalog.hasExactPlan(taskName, location, boss);
+			return SlayerRoutePlanCatalog.hasExactPlan(assignment, location, boss);
 		}
 
 		@Override
 		public RoutePlan resolve(
-			final String taskName,
+			final String assignment,
 			final String location,
 			final boolean boss)
 		{
-			return SlayerRoutePlanCatalog.resolve(taskName, location, boss);
+			return SlayerRoutePlanCatalog.resolve(assignment, location, boss);
 		}
 
 		@Override
@@ -78,7 +78,7 @@ public final class SlayerRouteReleaseValidator
 		{
 			final List<PlanKey> keys = new ArrayList<>();
 			for (final SlayerRoutePlanCatalog.RouteKey key
-				: SlayerRoutePlanCatalog.keysForRegression())
+				: SlayerRoutePlanCatalog.keysForTest())
 			{
 				keys.add(new PlanKey(
 					key.getTaskName(), key.getLocation(), key.isBoss()
@@ -95,7 +95,7 @@ public final class SlayerRouteReleaseValidator
 	/** Return every release failure instead of hiding later rows behind the first. */
 	public static List<String> validate()
 	{
-		return validateForRegression(
+		return validateForTest(
 			SlayerRouteReleaseManifest.entries(),
 			SlayerTaskStrategyCatalog.getCurrentTaskNames(),
 			VariantCatalog.getBossDefinitions(),
@@ -121,14 +121,14 @@ public final class SlayerRouteReleaseValidator
 	 * Injectable seam used only by regression tests.  It permits mutation-style
 	 * tests (missing rows/profiles) without mutating production static maps.
 	 */
-	static List<String> validateForRegression(
+	static List<String> validateForTest(
 		final List<SlayerRouteReleaseManifest.Entry> manifestEntries,
 		final Collection<String> strategyNames,
 		final List<VariantCatalog.EncounterDefinition> selectableBosses,
 		final List<VariantCatalog.EncounterDefinition> directBosses,
 		final ProfileLookup profileLookup)
 	{
-		return validateForRegression(
+		return validateForTest(
 			manifestEntries,
 			strategyNames,
 			selectableBosses,
@@ -138,7 +138,7 @@ public final class SlayerRouteReleaseValidator
 		);
 	}
 
-	static List<String> validateForRegression(
+	static List<String> validateForTest(
 		final List<SlayerRouteReleaseManifest.Entry> manifestEntries,
 		final Collection<String> strategyNames,
 		final List<VariantCatalog.EncounterDefinition> selectableBosses,
@@ -177,17 +177,17 @@ public final class SlayerRouteReleaseValidator
 
 	interface ProfileLookup
 	{
-		boolean hasExplicitProfile(String taskName, String location, boolean boss);
+		boolean hasExplicitProfile(String assignment, String location, boolean boss);
 		RouteCatalog.RouteProfile resolve(
-			String taskName, String location, boolean boss
+			String assignment, String location, boolean boss
 		);
 		WorldPoint findAccess(String location);
 	}
 
 	interface PlanLookup
 	{
-		boolean hasExplicitPlan(String taskName, String location, boolean boss);
-		RoutePlan resolve(String taskName, String location, boolean boss);
+		boolean hasExplicitPlan(String assignment, String location, boolean boss);
+		RoutePlan resolve(String assignment, String location, boolean boss);
 
 		default Collection<PlanKey> keys()
 		{
@@ -197,20 +197,20 @@ public final class SlayerRouteReleaseValidator
 
 	static final class PlanKey
 	{
-		private final String taskName;
+		private final String assignment;
 		private final String location;
 		private final boolean boss;
 
-		PlanKey(final String taskName, final String location, final boolean boss)
+		PlanKey(final String assignment, final String location, final boolean boss)
 		{
-			this.taskName = normalize(taskName);
+			this.assignment = normalize(assignment);
 			this.location = normalize(location);
 			this.boss = boss;
 		}
 
 		String getTaskName()
 		{
-			return taskName;
+			return assignment;
 		}
 
 		String getLocation()
@@ -236,30 +236,30 @@ public final class SlayerRouteReleaseValidator
 			}
 			final PlanKey that = (PlanKey) other;
 			return boss == that.boss
-				&& taskName.equals(that.taskName)
+				&& assignment.equals(that.assignment)
 				&& location.equals(that.location);
 		}
 
 		@Override
 		public int hashCode()
 		{
-			return Objects.hash(taskName, location, boss);
+			return Objects.hash(assignment, location, boss);
 		}
 
 		@Override
 		public String toString()
 		{
 			return (boss ? "boss" : "assignment") + "|"
-				+ taskName + "|" + location;
+				+ assignment + "|" + location;
 		}
 	}
 
-	static ProfileLookup catalogLookupForRegression()
+	static ProfileLookup catalogLookupForTest()
 	{
 		return CATALOG_LOOKUP;
 	}
 
-	static PlanLookup planLookupForRegression()
+	static PlanLookup planLookupForTest()
 	{
 		return PLAN_CATALOG_LOOKUP;
 	}
@@ -576,10 +576,10 @@ public final class SlayerRouteReleaseValidator
 			}
 			final boolean boss = entry.getKind()
 				!= SlayerRouteReleaseManifest.EntryKind.ASSIGNMENT;
-			final String taskName = boss
+			final String assignment = boss
 				? entry.getEncounterName() : entry.getAssignmentName();
 			manifestKeys.add(new PlanKey(
-				taskName, entry.getLocation(), boss
+				assignment, entry.getLocation(), boss
 			));
 		}
 
@@ -665,7 +665,7 @@ public final class SlayerRouteReleaseValidator
 	 */
 	private static boolean validateExplicitPlan(
 		final SlayerRouteReleaseManifest.Entry entry,
-		final String taskName,
+		final String assignment,
 		final boolean boss,
 		final PlanLookup lookup,
 		final List<String> failures)
@@ -676,9 +676,9 @@ public final class SlayerRouteReleaseValidator
 		try
 		{
 			explicit = lookup.hasExplicitPlan(
-				taskName, entry.getLocation(), boss
+				assignment, entry.getLocation(), boss
 			);
-			plan = lookup.resolve(taskName, entry.getLocation(), boss);
+			plan = lookup.resolve(assignment, entry.getLocation(), boss);
 		}
 		catch (final RuntimeException ex)
 		{
@@ -710,7 +710,7 @@ public final class SlayerRouteReleaseValidator
 		validatePlanGraph(plan, identity, planFailures);
 		validatePlanLegContracts(entry, plan, identity, planFailures);
 		validatePlanTerminal(
-			entry, taskName, plan, identity, planFailures
+			entry, assignment, plan, identity, planFailures
 		);
 		validatePlanAccess(entry, plan, identity, planFailures);
 		validatePlanRetention(entry, plan, identity, planFailures);
@@ -1146,7 +1146,7 @@ public final class SlayerRouteReleaseValidator
 
 	private static void validatePlanTerminal(
 		final SlayerRouteReleaseManifest.Entry entry,
-		final String taskName,
+		final String assignment,
 		final RoutePlan plan,
 		final String identity,
 		final List<String> failures)
@@ -1234,7 +1234,7 @@ public final class SlayerRouteReleaseValidator
 			);
 		}
 
-		if (exactNpc && !hasExpectedPlanNpcAlias(predicate, taskName))
+		if (exactNpc && !hasExpectedPlanNpcAlias(predicate, assignment))
 		{
 			failures.add(
 				"route plan terminal has no exact target NPC alias: " + identity
@@ -1369,12 +1369,12 @@ public final class SlayerRouteReleaseValidator
 
 	private static boolean hasExpectedPlanNpcAlias(
 		final RouteCheck predicate,
-		final String taskName)
+		final String assignment)
 	{
 		final Set<String> expected = new LinkedHashSet<>();
-		expected.add(normalize(taskName));
-		expected.add(identityKey(taskName));
-		for (final String alias : SlayerTaskNpcCatalog.aliasesFor(taskName))
+		expected.add(normalize(assignment));
+		expected.add(identityKey(assignment));
+		for (final String alias : SlayerTaskNpcCatalog.aliasesFor(assignment))
 		{
 			expected.add(normalize(alias));
 			expected.add(identityKey(alias));
@@ -1424,7 +1424,7 @@ public final class SlayerRouteReleaseValidator
 		}
 		if (predicate.getKind() == RouteCheck.Kind.EXACT_NPC)
 		{
-			for (final String name : predicate.getExactNpcNames())
+			for (final String name : predicate.getNpcs())
 			{
 				result.add(normalize(name));
 			}
@@ -1666,22 +1666,22 @@ public final class SlayerRouteReleaseValidator
 		}
 
 		final String identity = rowIdentity(entry);
-		final String taskName = entry.getKind()
+		final String assignment = entry.getKind()
 			== SlayerRouteReleaseManifest.EntryKind.ASSIGNMENT
 				? entry.getAssignmentName() : entry.getEncounterName();
 		final boolean boss = entry.getKind()
 			!= SlayerRouteReleaseManifest.EntryKind.ASSIGNMENT;
 		final boolean validPlan = validateExplicitPlan(
-			entry, taskName, boss, planLookup, failures
+			entry, assignment, boss, planLookup, failures
 		);
 
 		validateEntryShape(entry, identity, validPlan, failures);
 
 		final boolean explicit = lookup.hasExplicitProfile(
-			taskName, entry.getLocation(), boss
+			assignment, entry.getLocation(), boss
 		);
 		final RouteCatalog.RouteProfile profile = lookup.resolve(
-			taskName, entry.getLocation(), boss
+			assignment, entry.getLocation(), boss
 		);
 		if (!explicit)
 		{
@@ -1708,7 +1708,7 @@ public final class SlayerRouteReleaseValidator
 		{
 			failures.add("boss/assignment profile identity mismatch: " + identity);
 		}
-		if (!routeTaskKey(profile.getTaskName()).equals(routeTaskKey(taskName))
+		if (!routeTaskKey(profile.getTaskName()).equals(routeTaskKey(assignment))
 			|| !normalize(profile.getLocation()).equals(normalize(entry.getLocation())))
 		{
 			failures.add(
@@ -1716,7 +1716,7 @@ public final class SlayerRouteReleaseValidator
 					+ profile.getTaskName() + " @ " + profile.getLocation()
 			);
 		}
-		if (!hasExpectedNpcAlias(profile, taskName))
+		if (!hasExpectedNpcAlias(profile, assignment))
 		{
 			failures.add("profile has no exact target NPC alias: " + identity);
 		}
@@ -1981,7 +1981,7 @@ public final class SlayerRouteReleaseValidator
 		{
 			failures.add("profile has no terminal route targets: " + identity);
 		}
-		if (!profile.isInsideEncounterArea(terminal))
+		if (!profile.insideArea(terminal))
 		{
 			failures.add("terminal is outside its encounter stop area: " + identity);
 		}
@@ -2020,7 +2020,7 @@ public final class SlayerRouteReleaseValidator
 		{
 			failures.add("staged profile has no transition instruction: " + identity);
 		}
-		if (profile.isInsideEncounterArea(access))
+		if (profile.insideArea(access))
 		{
 			failures.add(
 				"staged access is already inside the terminal stop area: " + identity
@@ -2098,16 +2098,16 @@ public final class SlayerRouteReleaseValidator
 
 	private static boolean hasExpectedNpcAlias(
 		final RouteCatalog.RouteProfile profile,
-		final String taskName)
+		final String assignment)
 	{
-		for (final String alias : SlayerTaskNpcCatalog.aliasesFor(taskName))
+		for (final String alias : SlayerTaskNpcCatalog.aliasesFor(assignment))
 		{
 			if (profile.matchesNpc(alias))
 			{
 				return true;
 			}
 		}
-		return profile.matchesNpc(taskName);
+		return profile.matchesNpc(assignment);
 	}
 
 	private static boolean isDirectVerifiedMode(

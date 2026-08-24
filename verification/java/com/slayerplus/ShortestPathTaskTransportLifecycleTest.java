@@ -20,7 +20,10 @@ public class ShortestPathTaskTransportLifecycleTest
 		final Map<?, ?> config = taskRouteConfig(false, false);
 		assertEquals("Inventory", config.get("useTeleportationItems"));
 		assertEquals(Boolean.FALSE, config.get("includeBankPath"));
+		assertEquals(Boolean.TRUE, config.get("avoidWilderness"));
 		assertEquals(Boolean.TRUE, config.get("postTransports"));
+		assertEquals(null, config.get("bankPath"));
+		assertEquals(null, config.get("avoidWildy"));
 	}
 
 	@Test
@@ -44,12 +47,41 @@ public class ShortestPathTaskTransportLifecycleTest
 		assertNotNull(message);
 		final Map<?, ?> config = (Map<?, ?>) message.getData().get("config");
 		assertEquals("Inventory", config.get("useTeleportationItems"));
+		assertEquals(Boolean.FALSE, config.get("includeBankPath"));
+		assertEquals(Boolean.TRUE, config.get("avoidWilderness"));
+		assertEquals(Boolean.TRUE, config.get("postTransports"));
+	}
+
+	@Test
+	public void localRouteStillDrawsShortestPath()
+	{
+		final EventBus eventBus = new EventBus();
+		final AtomicReference<PluginMessage> posted = new AtomicReference<>();
+		eventBus.register(PluginMessage.class, posted::set, 0.0f);
+		final ShortestPathBridge bridge = new ShortestPathBridge(eventBus);
+		assertTrue(bridge.routeToLocalTaskArea(new WorldPoint(3200, 3200, 0),
+			Collections.singleton(new WorldPoint(3210, 3210, 0)), true, true));
+		final Map<?, ?> config = (Map<?, ?>) posted.get().getData().get("config");
+		assertEquals(Boolean.TRUE, config.get("drawMap"));
+	}
+
+	@Test
+	public void spellbookRouteRequestsTeleportSelection()
+	{
+		final EventBus eventBus = new EventBus();
+		final AtomicReference<PluginMessage> posted = new AtomicReference<>();
+		eventBus.register(PluginMessage.class, posted::set, 0.0f);
+		final ShortestPathBridge bridge = new ShortestPathBridge(eventBus);
+		assertTrue(bridge.routeToSpellbookChange(new WorldPoint(3200, 3200, 0),
+			Collections.singleton(new WorldPoint(3300, 3300, 0)), true, false));
+		final Map<?, ?> config = (Map<?, ?>) posted.get().getData().get("config");
+		assertEquals(Boolean.TRUE, config.get("drawMap"));
 		assertEquals(Boolean.TRUE, config.get("postTransports"));
 	}
 
 	private static Map<?, ?> taskRouteConfig(
-		final boolean useBankItems,
-		final boolean includeBankPath)
+		final boolean useBank,
+		final boolean bankPath)
 	{
 		final EventBus eventBus = new EventBus();
 		final AtomicReference<PluginMessage> posted = new AtomicReference<>();
@@ -60,9 +92,10 @@ public class ShortestPathTaskTransportLifecycleTest
 			new WorldPoint(3200, 3200, 0),
 			Collections.singleton(new WorldPoint(3300, 3300, 0)),
 			true,
-			useBankItems,
-			includeBankPath,
-			true
+			useBank,
+			bankPath,
+			true,
+			false
 		));
 		final PluginMessage message = posted.get();
 		assertNotNull(message);

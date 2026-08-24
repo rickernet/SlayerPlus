@@ -32,6 +32,14 @@ import static org.junit.Assert.assertTrue;
 public class SlayerRegressionTest
 {
 	@Test
+	public void spellbookFirstRouteOwnsTheGreenTeleportHighlight()
+	{
+		assertTrue(SlayerPlusPlugin.phaseUsesRouteIdentityForHighlight(
+			SlayerPlusPlugin.Phase.ROUTING_TO_SPELLBOOK));
+		assertFalse(SlayerPlusPlugin.shouldResolvePreparationForTask("Unknown task"));
+	}
+
+	@Test
 	public void exactAssignmentChatRestoresTaskBeforeVarpsSettle()
 	{
 		final SlayerTaskChatUpdate assignment = SlayerTaskChatUpdate.parse(
@@ -112,7 +120,7 @@ public class SlayerRegressionTest
 			"Scorpions", "Skeletons", "Spiders", "Wolves", "Zombies"
 		};
 		assertEquals(24, assignments.length);
-		assertTrue(TuraelBoost.sizeForRegression() >= 24);
+		assertTrue(TuraelBoost.sizeForTest() >= 24);
 		assertNotNull(TuraelBoost.find("Dwarf"));
 		assertNotNull(TuraelBoost.find("Wolf"));
 
@@ -151,7 +159,7 @@ public class SlayerRegressionTest
 			);
 			assertEquals(task, 0, rules.resolveRestoreSlots(strategy));
 			assertEquals(task, 2,
-				rules.resolveFoodSlots(strategy, strategy.getFoodSlots()));
+				rules.resolveFoodSlots(strategy, strategy.getFood()));
 			if (strategy.hasTag(TaskStrategy.MethodTag.CANNON))
 			{
 				assertEquals(task, 300, rules.getCannonballQuantity());
@@ -186,7 +194,7 @@ public class SlayerRegressionTest
 			"Bats", recommendation.getLocation(), recommendation.getStrategy()
 		).resolveFoodSlots(
 			recommendation.getStrategy(),
-			recommendation.getStrategy().getFoodSlots()
+			recommendation.getStrategy().getFood()
 		));
 	}
 
@@ -205,13 +213,13 @@ public class SlayerRegressionTest
 		);
 
 		/* Worn travel gear is not copied into the pack. */
-		assertTrue(plan == SlayerPlusPlugin.appendMasterReturnTeleportForRegression(
+		assertTrue(plan == SlayerPlusPlugin.appendMasterReturnTeleportForTest(
 			plan, 100, "Max cape"
 		));
 
 		for (int id = 301; id <= 304; id++)
 		{
-			plan = SlayerPlusPlugin.appendMasterReturnTeleportForRegression(
+			plan = SlayerPlusPlugin.appendMasterReturnTeleportForTest(
 				plan, id, "Travel item " + id
 			);
 		}
@@ -296,7 +304,7 @@ public class SlayerRegressionTest
 		assertNotNull(task, route.getPrimaryDestination());
 		assertFalse(task, route.getSurfaceAccess().equals(
 			route.getPrimaryDestination()));
-		assertTrue(task, route.isInsideEncounterArea(
+		assertTrue(task, route.insideArea(
 			route.getPrimaryDestination()));
 	}
 
@@ -367,7 +375,7 @@ public class SlayerRegressionTest
 			false
 		);
 		assertEquals(TaskStrategy.CombatStyle.MELEE,
-			melee.getCombatStyle());
+			melee.getStyle());
 		assertEquals("dragon hunter lance", melee.getWeaponPriorities().get(0));
 		assertTrue(melee.getWeaponPriorities().contains("abyssal whip"));
 		assertFalse(melee.getWeaponPriorities().contains("osmumten s fang"));
@@ -384,7 +392,7 @@ public class SlayerRegressionTest
 			"Skeletal wyverns", "Asgarnian Ice Dungeon", melee
 		);
 		assertEquals(4, meleeRules.resolveRestoreSlots(melee));
-		assertEquals(8, meleeRules.resolveFoodSlots(melee, melee.getFoodSlots()));
+		assertEquals(8, meleeRules.resolveFoodSlots(melee, melee.getFood()));
 		assertTrue(meleeRules.includesStyleBoost());
 		assertTrue(meleeRules.getRequiredItems().stream().anyMatch(
 			item -> item.getDisplayName().equals("Special attack weapon")
@@ -408,7 +416,7 @@ public class SlayerRegressionTest
 			false
 		);
 		assertEquals(TaskStrategy.CombatStyle.RANGED,
-			ranged.getCombatStyle());
+			ranged.getStyle());
 		assertTrue(ranged.getMethod().contains("dragonstone bolts"));
 		assertEquals("dragonfire ward", SlayerEquipmentAuditCatalog.priorities(
 			"Skeletal wyverns", ranged, EquipmentInventorySlot.SHIELD,
@@ -418,7 +426,7 @@ public class SlayerRegressionTest
 			"Skeletal wyverns", "Asgarnian Ice Dungeon", ranged
 		);
 		assertEquals(2, rangedRules.resolveRestoreSlots(ranged));
-		assertEquals(6, rangedRules.resolveFoodSlots(ranged, ranged.getFoodSlots()));
+		assertEquals(6, rangedRules.resolveFoodSlots(ranged, ranged.getFood()));
 		assertTrue(rangedRules.includesStyleBoost());
 		assertFalse(rangedRules.getRequiredItems().stream().anyMatch(
 			item -> item.getDisplayName().equals("Special attack weapon")
@@ -434,7 +442,7 @@ public class SlayerRegressionTest
 			false
 		);
 		assertEquals(TaskStrategy.CombatStyle.MAGIC,
-			magic.getCombatStyle());
+			magic.getStyle());
 		final MethodRules magicRules = SlayerMethodRuleCatalog.resolve(
 			"Skeletal wyverns", "Asgarnian Ice Dungeon", magic
 		);
@@ -445,22 +453,22 @@ public class SlayerRegressionTest
 			"Dragon hunter wand"
 		).get(0));
 		assertEquals(2, magicRules.resolveRestoreSlots(magic));
-		assertEquals(6, magicRules.resolveFoodSlots(magic, magic.getFoodSlots()));
+		assertEquals(6, magicRules.resolveFoodSlots(magic, magic.getFood()));
 		assertTrue(magicRules.includesStyleBoost());
 	}
 
 	@Test
 	public void eternalSlayerRingOutranksChargedRingsForEternalFamily()
 	{
-		final int eternal = SlayerPlusPlugin.travelNameMatchQualityForRegression(
+		final int eternal = SlayerPlusPlugin.travelNameMatchQualityForTest(
 			"Slayer ring (eternal)", "Eternal slayer ring"
 		);
-		final int charged = SlayerPlusPlugin.travelNameMatchQualityForRegression(
+		final int charged = SlayerPlusPlugin.travelNameMatchQualityForTest(
 			"Slayer ring (8)", "Eternal slayer ring"
 		);
 
 		assertTrue(eternal > charged);
-		assertTrue(SlayerPlusPlugin.travelNameMatchQualityForRegression(
+		assertTrue(SlayerPlusPlugin.travelNameMatchQualityForTest(
 			"Slayer ring (8)", "Slayer ring"
 		) > 0);
 	}
@@ -468,16 +476,16 @@ public class SlayerRegressionTest
 	@Test
 	public void portraitPollingSkipsIdleTicksAndThrottlesFailedRetries()
 	{
-		assertFalse(SlayerPlusPlugin.shouldCheckPortraitForRegression(
+		assertFalse(SlayerPlusPlugin.shouldCheckPortraitForTest(
 			4, false, 0
 		));
-		assertTrue(SlayerPlusPlugin.shouldCheckPortraitForRegression(
+		assertTrue(SlayerPlusPlugin.shouldCheckPortraitForTest(
 			5, false, 0
 		));
-		assertFalse(SlayerPlusPlugin.shouldCheckPortraitForRegression(
+		assertFalse(SlayerPlusPlugin.shouldCheckPortraitForTest(
 			8, true, 10
 		));
-		assertTrue(SlayerPlusPlugin.shouldCheckPortraitForRegression(
+		assertTrue(SlayerPlusPlugin.shouldCheckPortraitForTest(
 			10, true, 10
 		));
 	}
@@ -554,7 +562,7 @@ public class SlayerRegressionTest
 			"Rub", "Digsite pendant"
 		) > 0);
 		final WorldPoint transportLanding = new WorldPoint(3595, 10291, 0);
-		assertTrue(route.isInsideEncounterArea(transportLanding));
+		assertTrue(route.insideArea(transportLanding));
 		assertEquals(new WorldPoint(3616, 10272, 0),
 			route.getRouteDestination(transportLanding));
 
@@ -568,7 +576,7 @@ public class SlayerRegressionTest
 			false
 		);
 		assertEquals(TaskStrategy.CombatStyle.MELEE,
-			automatic.getCombatStyle());
+			automatic.getStyle());
 		assertEquals(TaskStrategy.ArmourFocus.DAMAGE,
 			automatic.getArmourFocus());
 		assertTrue(automatic.getWeaponPriorities().contains("abyssal whip"));
@@ -593,7 +601,7 @@ public class SlayerRegressionTest
 			"Fossil Island wyverns", "Wyvern Cave on Fossil Island", automatic
 		);
 		assertEquals(3, supplies.resolveRestoreSlots(automatic));
-		assertEquals(8, supplies.resolveFoodSlots(automatic, automatic.getFoodSlots()));
+		assertEquals(8, supplies.resolveFoodSlots(automatic, automatic.getFood()));
 	}
 
 	@Test
@@ -629,48 +637,48 @@ public class SlayerRegressionTest
 				true, 0, true, -1
 			)
 		));
-		assertFalse(SlayerPlusPlugin.shouldPollExtraQuiverSnapshotForRegression(1));
-		assertFalse(SlayerPlusPlugin.shouldPollExtraQuiverSnapshotForRegression(4));
-		assertTrue(SlayerPlusPlugin.shouldPollExtraQuiverSnapshotForRegression(5));
-		assertTrue(SlayerPlusPlugin.shouldPollExtraQuiverSnapshotForRegression(10));
-		assertTrue(SlayerPlusPlugin.isQuiverRelevantInterfaceGroupForRegression(
+		assertFalse(SlayerPlusPlugin.shouldPollExtraQuiverSnapshotForTest(1));
+		assertFalse(SlayerPlusPlugin.shouldPollExtraQuiverSnapshotForTest(4));
+		assertTrue(SlayerPlusPlugin.shouldPollExtraQuiverSnapshotForTest(5));
+		assertTrue(SlayerPlusPlugin.shouldPollExtraQuiverSnapshotForTest(10));
+		assertTrue(SlayerPlusPlugin.isQuiverRelevantInterfaceGroupForTest(
 			InterfaceID.EQUIPMENT
 		));
-		assertTrue(SlayerPlusPlugin.isQuiverRelevantInterfaceGroupForRegression(
+		assertTrue(SlayerPlusPlugin.isQuiverRelevantInterfaceGroupForTest(
 			InterfaceID.DIZANAS_QUIVER
 		));
-		assertFalse(SlayerPlusPlugin.isQuiverRelevantInterfaceGroupForRegression(
+		assertFalse(SlayerPlusPlugin.isQuiverRelevantInterfaceGroupForTest(
 			InterfaceID.CHATMENU
 		));
-		assertFalse(SlayerPlusPlugin.shouldSkipUnchangedBankScanForRegression(
+		assertFalse(SlayerPlusPlugin.shouldSkipUnchangedBankScanForTest(
 			false, true
 		));
-		assertFalse(SlayerPlusPlugin.shouldSkipUnchangedBankScanForRegression(
+		assertFalse(SlayerPlusPlugin.shouldSkipUnchangedBankScanForTest(
 			true, false
 		));
-		assertTrue(SlayerPlusPlugin.shouldSkipUnchangedBankScanForRegression(
+		assertTrue(SlayerPlusPlugin.shouldSkipUnchangedBankScanForTest(
 			true, true
 		));
-		assertFalse(SlayerPlusPlugin.shouldRefreshCarriedContainerForRegression(
+		assertFalse(SlayerPlusPlugin.shouldRefreshCarriedContainerForTest(
 			InventoryID.WORN, false, true
 		));
-		assertTrue(SlayerPlusPlugin.shouldRefreshCarriedContainerForRegression(
+		assertTrue(SlayerPlusPlugin.shouldRefreshCarriedContainerForTest(
 			InventoryID.WORN, true, false
 		));
-		assertFalse(SlayerPlusPlugin.shouldRefreshCarriedContainerForRegression(
+		assertFalse(SlayerPlusPlugin.shouldRefreshCarriedContainerForTest(
 			InventoryID.INV, true, false
 		));
-		assertTrue(SlayerPlusPlugin.shouldRefreshCarriedContainerForRegression(
+		assertTrue(SlayerPlusPlugin.shouldRefreshCarriedContainerForTest(
 			InventoryID.INV, false, true
 		));
 
-		assertFalse(SlayerPlusPlugin.shouldPersistSnapshotForRegression(
+		assertFalse(SlayerPlusPlugin.shouldPersistSnapshotForTest(
 			true, Collections.singleton(1), Collections.singleton(1)
 		));
-		assertTrue(SlayerPlusPlugin.shouldPersistSnapshotForRegression(
+		assertTrue(SlayerPlusPlugin.shouldPersistSnapshotForTest(
 			true, Collections.singleton(1), Collections.singleton(2)
 		));
-		assertTrue(SlayerPlusPlugin.shouldPersistSnapshotForRegression(
+		assertTrue(SlayerPlusPlugin.shouldPersistSnapshotForTest(
 			false, 5, 5
 		));
 
@@ -686,46 +694,46 @@ public class SlayerRegressionTest
 		assertTrue(TeleportHighlighter.shouldRefreshOpenMenuOnTick(
 			true, false, true
 		));
-		assertFalse(TeleportHighlighter.shouldInspectWidgetGroupForRegression(
+		assertFalse(TeleportHighlighter.shouldInspectWidgetGroupForTest(
 			InterfaceID.BANKMAIN
 		));
-		assertTrue(SlayerPlusPlugin.shouldHandleBankWidgetLoadForRegression(
+		assertTrue(SlayerPlusPlugin.shouldHandleBankWidgetLoadForTest(
 			false, InterfaceID.BANKMAIN
 		));
-		assertFalse(SlayerPlusPlugin.shouldHandleBankWidgetLoadForRegression(
+		assertFalse(SlayerPlusPlugin.shouldHandleBankWidgetLoadForTest(
 			true, InterfaceID.BANKMAIN
 		));
-		assertFalse(SlayerPlusPlugin.shouldHandleBankWidgetLoadForRegression(
+		assertFalse(SlayerPlusPlugin.shouldHandleBankWidgetLoadForTest(
 			false, InterfaceID.CHATMENU
 		));
-		assertTrue(SlayerPlusPlugin.shouldReconcileBankVisibilityForRegression(
+		assertTrue(SlayerPlusPlugin.shouldReconcileBankVisibilityForTest(
 			false, true
 		));
-		assertTrue(SlayerPlusPlugin.shouldReconcileBankVisibilityForRegression(
+		assertTrue(SlayerPlusPlugin.shouldReconcileBankVisibilityForTest(
 			true, false
 		));
-		assertFalse(SlayerPlusPlugin.shouldReconcileBankVisibilityForRegression(
+		assertFalse(SlayerPlusPlugin.shouldReconcileBankVisibilityForTest(
 			true, true
 		));
-		assertTrue(TeleportHighlighter.shouldInspectWidgetGroupForRegression(
+		assertTrue(TeleportHighlighter.shouldInspectWidgetGroupForTest(
 			InterfaceID.CHATMENU
 		));
-		assertTrue(TeleportHighlighter.shouldInspectWidgetGroupForRegression(
+		assertTrue(TeleportHighlighter.shouldInspectWidgetGroupForTest(
 			InterfaceID.GRAPHICAL_MULTI
 		));
-		assertTrue(BankTagLayout.samePersistedStateForRegression(
+		assertTrue(BankTagLayout.samePersistedStateForTest(
 			new int[] {1, -1, 2},
 			new int[] {1, -1, 2},
 			new java.util.LinkedHashSet<>(Arrays.asList(1, 2)),
 			new java.util.LinkedHashSet<>(Arrays.asList(2, 1))
 		));
-		assertFalse(BankTagLayout.samePersistedStateForRegression(
+		assertFalse(BankTagLayout.samePersistedStateForTest(
 			new int[] {1, -1, 2},
 			new int[] {1, 2, -1},
 			new java.util.LinkedHashSet<>(Arrays.asList(1, 2)),
 			new java.util.LinkedHashSet<>(Arrays.asList(1, 2))
 		));
-		assertFalse(BankTagLayout.samePersistedStateForRegression(
+		assertFalse(BankTagLayout.samePersistedStateForTest(
 			new int[] {1, -1, 2},
 			new int[] {1, -1, 2},
 			new java.util.LinkedHashSet<>(Arrays.asList(1, 2)),
@@ -736,46 +744,46 @@ public class SlayerRegressionTest
 	@Test
 	public void nearbyBankDiscoveryAcceptsOnlyRealBankActions()
 	{
-		assertTrue(SlayerPlusPlugin.hasBankActionForRegression(
+		assertTrue(SlayerPlusPlugin.hasBankActionForTest(
 			new String[] {"Use", "Bank", "Collect"}
 		));
-		assertTrue(SlayerPlusPlugin.hasBankActionForRegression(
+		assertTrue(SlayerPlusPlugin.hasBankActionForTest(
 			new String[] {null, " bank "}
 		));
-		assertFalse(SlayerPlusPlugin.hasBankActionForRegression(
+		assertFalse(SlayerPlusPlugin.hasBankActionForTest(
 			new String[] {"Deposit", "Collect"}
 		));
-		assertFalse(SlayerPlusPlugin.hasBankActionForRegression(null));
+		assertFalse(SlayerPlusPlugin.hasBankActionForTest(null));
 
-		assertTrue(SlayerPlusPlugin.isBankObjectForRegression(
+		assertTrue(SlayerPlusPlugin.isBankObjectForTest(
 			"Bank chest", new String[] {"Use", "Collect"}
 		));
-		assertTrue(SlayerPlusPlugin.isBankObjectForRegression(
+		assertTrue(SlayerPlusPlugin.isBankObjectForTest(
 			"Bank chest", new String[] {"Bank", "Collect"}
 		));
-		assertFalse(SlayerPlusPlugin.isBankObjectForRegression(
+		assertFalse(SlayerPlusPlugin.isBankObjectForTest(
 			"Bank deposit box", new String[] {"Deposit"}
 		));
-		assertFalse(SlayerPlusPlugin.isBankObjectForRegression(
+		assertFalse(SlayerPlusPlugin.isBankObjectForTest(
 			"Brimstone chest", new String[] {"Open"}
 		));
-		assertFalse(SlayerPlusPlugin.isBankObjectForRegression(
+		assertFalse(SlayerPlusPlugin.isBankObjectForTest(
 			"Storage chest", new String[] {"Use"}
 		));
 
 		final WorldPoint banker = new WorldPoint(3300, 3100, 0);
 		final WorldPoint perimeter = new WorldPoint(3299, 3100, 0);
 		assertEquals(perimeter,
-			SlayerPlusPlugin.liveBankNpcTargetForRegression(perimeter, banker));
+			SlayerPlusPlugin.liveBankNpcTargetForTest(perimeter, banker));
 		assertEquals(banker,
-			SlayerPlusPlugin.liveBankNpcTargetForRegression(null, banker));
+			SlayerPlusPlugin.liveBankNpcTargetForTest(null, banker));
 	}
 
 	@Test
 	public void profitArrowPolicyDiffersFromFastXpAndHonorsCompatibility()
 	{
 		final List<String> regularProfit =
-			SlayerLoadoutAnalyzer.standardArrowPriorityForRegression(
+			SlayerLoadoutAnalyzer.standardArrowPriorityForTest(
 				TaskStrategy.CostPolicy.EFFICIENT,
 				false,
 				true
@@ -785,7 +793,7 @@ public class SlayerRegressionTest
 			< regularProfit.indexOf("dragon arrow"));
 
 		final List<String> bossProfit =
-			SlayerLoadoutAnalyzer.standardArrowPriorityForRegression(
+			SlayerLoadoutAnalyzer.standardArrowPriorityForTest(
 				TaskStrategy.CostPolicy.EFFICIENT,
 				true,
 				true
@@ -793,7 +801,7 @@ public class SlayerRegressionTest
 		assertEquals("amethyst arrow", bossProfit.get(0));
 
 		final List<String> fastXp =
-			SlayerLoadoutAnalyzer.standardArrowPriorityForRegression(
+			SlayerLoadoutAnalyzer.standardArrowPriorityForTest(
 				TaskStrategy.CostPolicy.MAX_DPS,
 				false,
 				true
@@ -801,7 +809,7 @@ public class SlayerRegressionTest
 		assertEquals("seeking dragon arrow", fastXp.get(0));
 
 		final List<String> incompatibleBow =
-			SlayerLoadoutAnalyzer.standardArrowPriorityForRegression(
+			SlayerLoadoutAnalyzer.standardArrowPriorityForTest(
 				TaskStrategy.CostPolicy.MAX_DPS,
 				false,
 				false
@@ -837,7 +845,7 @@ public class SlayerRegressionTest
 				"Standard spellbook", SlayerSpellbookRouteCatalog.ARCEUUS
 			);
 		assertEquals(new WorldPoint(1714, 3883, 0), standardFromArceuus.getDestination());
-		assertEquals("Standard spellbook", standardFromArceuus.getSpellbookName());
+		assertEquals("Standard spellbook", standardFromArceuus.getBookName());
 		assertTrue(standardFromArceuus.getInteraction().contains("Talk to Tyss"));
 		assertTrue(standardFromArceuus.getInteraction().contains("lift"));
 		assertEquals(
@@ -866,10 +874,10 @@ public class SlayerRegressionTest
 			)),
 			Collections.emptyList()
 		);
-		assertTrue(SlayerPlusPlugin.shouldReturnToBankAfterSpellbookForRegression(
+		assertTrue(SlayerPlusPlugin.shouldReturnToBankAfterSpellbookForTest(
 			false, carried
 		));
-		assertTrue(SlayerPlusPlugin.shouldReturnToBankAfterSpellbookForRegression(
+		assertTrue(SlayerPlusPlugin.shouldReturnToBankAfterSpellbookForTest(
 			true, carried
 		));
 
@@ -882,7 +890,7 @@ public class SlayerRegressionTest
 			Collections.emptyList(),
 			Collections.emptyList()
 		);
-		assertTrue(SlayerPlusPlugin.shouldReturnToBankAfterSpellbookForRegression(
+		assertTrue(SlayerPlusPlugin.shouldReturnToBankAfterSpellbookForTest(
 			true, banked
 		));
 	}
@@ -895,13 +903,13 @@ public class SlayerRegressionTest
 			HelmetPreference.normalize("Automatic (best)")
 		);
 		assertEquals(3, SlayerLoadoutAnalyzer
-			.combatAchievementHelmetTierForRegression("TzKal slayer helmet (i)"));
+			.combatAchievementHelmetTierForTest("TzKal slayer helmet (i)"));
 		assertEquals(2, SlayerLoadoutAnalyzer
-			.combatAchievementHelmetTierForRegression("Vampyric slayer helmet (i)"));
+			.combatAchievementHelmetTierForTest("Vampyric slayer helmet (i)"));
 		assertEquals(1, SlayerLoadoutAnalyzer
-			.combatAchievementHelmetTierForRegression("TzTok slayer helmet (i)"));
+			.combatAchievementHelmetTierForTest("TzTok slayer helmet (i)"));
 		assertEquals(0, SlayerLoadoutAnalyzer
-			.combatAchievementHelmetTierForRegression("Purple slayer helmet (i)"));
+			.combatAchievementHelmetTierForTest("Purple slayer helmet (i)"));
 	}
 
 	@Test
@@ -937,25 +945,25 @@ public class SlayerRegressionTest
 	@Test
 	public void shardPreferenceOverridesEfficiencyOnlyAtValidShardLocations()
 	{
-		assertEquals(0, SlayerRecommendationEngine.shardPreferenceBonusForRegression(
+		assertEquals(0, SlayerRecommendationEngine.shardPreferenceBonusForTest(
 			Preference.Shard.NO_PREFERENCE, "Bloodvelds", "Catacombs of Kourend"
 		));
-		assertEquals(1000, SlayerRecommendationEngine.shardPreferenceBonusForRegression(
+		assertEquals(1000, SlayerRecommendationEngine.shardPreferenceBonusForTest(
 			Preference.Shard.ANCIENT_SHARD, "Bloodvelds", "Catacombs of Kourend"
 		));
-		assertEquals(1000, SlayerRecommendationEngine.shardPreferenceBonusForRegression(
+		assertEquals(1000, SlayerRecommendationEngine.shardPreferenceBonusForTest(
 			Preference.Shard.CRYSTAL_SHARD, "Bloodvelds", "Iorwerth Dungeon"
 		));
-		assertEquals(1000, SlayerRecommendationEngine.shardPreferenceBonusForRegression(
+		assertEquals(1000, SlayerRecommendationEngine.shardPreferenceBonusForTest(
 			Preference.Shard.ANCIENT_AND_CRYSTAL_SHARD, "Nechryaels", "Catacombs of Kourend"
 		));
-		assertEquals(1000, SlayerRecommendationEngine.shardPreferenceBonusForRegression(
+		assertEquals(1000, SlayerRecommendationEngine.shardPreferenceBonusForTest(
 			Preference.Shard.ANCIENT_AND_CRYSTAL_SHARD, "Nechryaels", "Iorwerth Dungeon"
 		));
-		assertEquals(0, SlayerRecommendationEngine.shardPreferenceBonusForRegression(
+		assertEquals(0, SlayerRecommendationEngine.shardPreferenceBonusForTest(
 			Preference.Shard.ANCIENT_SHARD, "Ghosts", "Catacombs of Kourend"
 		));
-		assertEquals(0, SlayerRecommendationEngine.shardPreferenceBonusForRegression(
+		assertEquals(0, SlayerRecommendationEngine.shardPreferenceBonusForTest(
 			Preference.Shard.CRYSTAL_SHARD, "Bloodvelds", "Stronghold Slayer Cave"
 		));
 	}
@@ -969,9 +977,9 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC,
 			"Iorwerth Dungeon", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MELEE, strategy.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MELEE, strategy.getStyle());
 		assertTrue(strategy.getMethod().contains("crystal shard"));
-		assertFalse(strategy.hasTag(TaskStrategy.MethodTag.BURST_BARRAGE));
+		assertFalse(strategy.hasTag(TaskStrategy.MethodTag.BARRAGE));
 	}
 
 	@Test
@@ -1065,20 +1073,20 @@ public class SlayerRegressionTest
 			KitItem.Status.BANK
 		);
 
-		assertTrue(SlayerLoadoutAnalyzer.gloveFallbackMatchesSlotForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.gloveFallbackMatchesSlotForTest(
 			"Bracelet of slaughter"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.gloveFallbackMatchesSlotForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.gloveFallbackMatchesSlotForTest(
 			"Expeditious bracelet"
 		));
 		assertTrue(
-			BankTagLayout.optionalItemDuplicatesEquipmentForRegression(
+			BankTagLayout.optionalItemDuplicatesEquipmentForTest(
 				slaughter,
 				Collections.singletonList(slaughter)
 			)
 		);
 		assertFalse(
-			BankTagLayout.optionalItemDuplicatesEquipmentForRegression(
+			BankTagLayout.optionalItemDuplicatesEquipmentForTest(
 				expeditious,
 				Collections.singletonList(slaughter)
 			)
@@ -1248,25 +1256,25 @@ public class SlayerRegressionTest
 	@Test
 	public void qualifiedBloodveldRouteStagesAtTheMissingMeiyerditchShortcut()
 	{
-		assertTrue(SlayerPlusPlugin.shouldUseMeiyerditchShortcutForRegression(
+		assertTrue(SlayerPlusPlugin.shouldUseMeiyerditchShortcutForTest(
 			"Bloodveld",
 			"Meiyerditch Laboratories",
 			new WorldPoint(3200, 3200, 0),
 			93
 		));
-		assertTrue(SlayerPlusPlugin.shouldUseMeiyerditchShortcutForRegression(
+		assertTrue(SlayerPlusPlugin.shouldUseMeiyerditchShortcutForTest(
 			"Bloodvelds",
 			"Meiyerditch Laboratories",
 			new WorldPoint(3500, 9803, 0),
 			99
 		));
-		assertTrue(!SlayerPlusPlugin.shouldUseMeiyerditchShortcutForRegression(
+		assertTrue(!SlayerPlusPlugin.shouldUseMeiyerditchShortcutForTest(
 			"Bloodveld",
 			"Meiyerditch Laboratories",
 			new WorldPoint(3200, 3200, 0),
 			92
 		));
-		assertTrue(!SlayerPlusPlugin.shouldUseMeiyerditchShortcutForRegression(
+		assertTrue(!SlayerPlusPlugin.shouldUseMeiyerditchShortcutForTest(
 			"Bloodveld",
 			"Meiyerditch Laboratories",
 			new WorldPoint(3535, 9768, 0),
@@ -1277,15 +1285,15 @@ public class SlayerRegressionTest
 	@Test
 	public void undergroundTaskRoutesAvoidMisalignedWorldMapPanels()
 	{
-		assertTrue(SlayerPlusPlugin.shouldUseLocalTaskRouteForRegression(
+		assertTrue(SlayerPlusPlugin.shouldUseLocalTaskRouteForTest(
 			new WorldPoint(3492, 9824, 0),
 			new WorldPoint(3500, 9803, 0)
 		));
-		assertTrue(SlayerPlusPlugin.shouldUseLocalTaskRouteForRegression(
+		assertTrue(SlayerPlusPlugin.shouldUseLocalTaskRouteForTest(
 			new WorldPoint(3535, 9768, 0),
 			new WorldPoint(3594, 9743, 0)
 		));
-		assertTrue(!SlayerPlusPlugin.shouldUseLocalTaskRouteForRegression(
+		assertTrue(!SlayerPlusPlugin.shouldUseLocalTaskRouteForTest(
 			new WorldPoint(3200, 3200, 0),
 			new WorldPoint(3500, 9803, 0)
 		));
@@ -1310,7 +1318,7 @@ public class SlayerRegressionTest
 		final WorldPoint deeperRope = new WorldPoint(3508, 9498, 2);
 		assertEquals(
 			deeperRope,
-			SlayerPlusPlugin.kalphiteQueenInteriorTransitionForRegression(
+			SlayerPlusPlugin.kalphiteQueenInteriorTransitionForTest(
 				"The Kalphite Queen",
 				"Kalphite Lair",
 				new WorldPoint(3483, 9510, 2)
@@ -1318,40 +1326,40 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			deeperRope,
-			SlayerPlusPlugin.kalphiteQueenInteriorTransitionForRegression(
+			SlayerPlusPlugin.kalphiteQueenInteriorTransitionForTest(
 				"Kalphite Queen",
 				"Kalphite Lair",
 				new WorldPoint(3510, 9499, 2)
 			)
 		);
-		assertEquals(null, SlayerPlusPlugin.kalphiteQueenInteriorTransitionForRegression(
+		assertEquals(null, SlayerPlusPlugin.kalphiteQueenInteriorTransitionForTest(
 			"The Kalphite Queen",
 			"Kalphite Lair",
 			new WorldPoint(3508, 9493, 0)
 		));
-		assertEquals(null, SlayerPlusPlugin.kalphiteQueenInteriorTransitionForRegression(
+		assertEquals(null, SlayerPlusPlugin.kalphiteQueenInteriorTransitionForTest(
 			"Kalphites",
 			"Kalphite Slayer Cave",
 			new WorldPoint(3483, 9510, 2)
 		));
 
-		assertFalse(SlayerPlusPlugin.shouldEnableAgilityShortcutsForStageForRegression(
+		assertFalse(SlayerPlusPlugin.shouldEnableAgilityShortcutsForStageForTest(
 			"The Kalphite Queen", "Kalphite Lair", deeperRope, 99, false
 		));
-		assertFalse(SlayerPlusPlugin.shouldEnableAgilityShortcutsForStageForRegression(
+		assertFalse(SlayerPlusPlugin.shouldEnableAgilityShortcutsForStageForTest(
 			"The Kalphite Queen", "Kalphite Lair", deeperRope, 85, true
 		));
-		assertTrue(SlayerPlusPlugin.shouldEnableAgilityShortcutsForStageForRegression(
+		assertTrue(SlayerPlusPlugin.shouldEnableAgilityShortcutsForStageForTest(
 			"The Kalphite Queen", "Kalphite Lair", deeperRope, 86, true
 		));
-		assertTrue(SlayerPlusPlugin.shouldEnableAgilityShortcutsForStageForRegression(
+		assertTrue(SlayerPlusPlugin.shouldEnableAgilityShortcutsForStageForTest(
 			"Bloodveld", "Meiyerditch Laboratories", deeperRope, 99, false
 		));
 
-		assertTrue(SlayerLoadoutAnalyzer.requiresKalphiteQueenRopesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.requiresKalphiteQueenRopesForTest(
 			"The Kalphite Queen", "Kalphite Lair", false
 		));
-		assertFalse(SlayerLoadoutAnalyzer.requiresKalphiteQueenRopesForRegression(
+		assertFalse(SlayerLoadoutAnalyzer.requiresKalphiteQueenRopesForTest(
 			"The Kalphite Queen", "Kalphite Lair", true
 		));
 	}
@@ -1373,7 +1381,7 @@ public class SlayerRegressionTest
 		assertNotNull(message);
 		final Map<?, ?> config = (Map<?, ?>) message.getData().get("config");
 		assertEquals(Boolean.FALSE, config.get("useAgilityShortcuts"));
-		assertEquals(Boolean.FALSE, config.get("drawMap"));
+		assertEquals(Boolean.TRUE, config.get("drawMap"));
 	}
 
 	@Test
@@ -1476,137 +1484,6 @@ public class SlayerRegressionTest
 	}
 
 	@Test
-	public void portraitEquipmentMaskUsesTheActualCaptureStride()
-	{
-		final boolean[] source = new boolean[6 * 6];
-		source[4 * 6 + 4] = true;
-		final boolean[] expanded = PlayerPortraitRenderer.expandMask(source, 6);
-
-		assertEquals(36, expanded.length);
-		assertTrue(expanded[3 * 6 + 3]);
-		assertTrue(expanded[4 * 6 + 4]);
-		assertTrue(expanded[5 * 6 + 5]);
-		assertFalse(expanded[2 * 6 + 2]);
-	}
-
-	@Test
-	public void portraitFinalPassUsesCompleteThreeTimesSupersampling()
-	{
-		assertEquals(87, PlayerPortraitRenderer.supersampledZoom(260));
-		assertEquals(
-			168,
-			PlayerPortraitRenderer.supersampledVerticalOffset(
-				100,
-				260,
-				90.0,
-				512
-			)
-		);
-		assertEquals(
-			3,
-			PlayerPortraitRenderer.supersampledCaptureMarginOffset(
-				260,
-				512
-			)
-		);
-		assertEquals(
-			740,
-			PlayerPortraitRenderer.lockedScaleSourceHeight(800, 3)
-		);
-		assertEquals(
-			20,
-			PlayerPortraitRenderer.lockedOutputTargetY(120)
-		);
-		assertEquals(
-			352.0,
-			PlayerPortraitRenderer.projectCalibrationCoordinate(
-				224.0,
-				704,
-				3
-			),
-			0.001
-		);
-		assertEquals(
-			352.0,
-			PlayerPortraitRenderer.projectCalibrationCoordinate(
-				90.0,
-				90.0,
-				704,
-				3
-			),
-			0.001
-		);
-		assertEquals(
-			124.0,
-			PlayerPortraitRenderer.projectCalibrationCoordinate(
-				14.0,
-				90.0,
-				704,
-				3
-			),
-			0.001
-		);
-		assertEquals(
-			370.0,
-			PlayerPortraitRenderer.projectCalibrationCoordinate(
-				230.0,
-				704,
-				3
-			),
-			0.001
-		);
-
-		final java.awt.image.BufferedImage empty =
-			new java.awt.image.BufferedImage(
-				116,
-				116,
-				java.awt.image.BufferedImage.TYPE_INT_ARGB
-			);
-		assertFalse(PlayerPortraitRenderer.hasSufficientVisiblePixels(empty));
-		for (int y = 20; y < 100; y++)
-		{
-			for (int x = 30; x < 90; x++)
-			{
-				empty.setRGB(x, y, 0xFFFFFFFF);
-			}
-		}
-		assertTrue(PlayerPortraitRenderer.hasSufficientVisiblePixels(empty));
-
-		final java.awt.image.BufferedImage clippedStrip =
-			new java.awt.image.BufferedImage(
-				116,
-				116,
-				java.awt.image.BufferedImage.TYPE_INT_ARGB
-			);
-		for (int y = 94; y < 116; y++)
-		{
-			for (int x = 0; x < 116; x++)
-			{
-				clippedStrip.setRGB(x, y, 0xFFFFFFFF);
-			}
-		}
-		assertFalse(PlayerPortraitRenderer.hasSufficientVisiblePixels(
-			clippedStrip
-		));
-	}
-
-	@Test
-	public void portraitDepthLightingIsDirectionalAndGeometryIndependent()
-	{
-		final int[] bounds = {10, 20, 110, 120};
-		final double upperLeft = PlayerPortraitRenderer
-			.portraitDirectionalLight(10, 20, bounds);
-		final double center = PlayerPortraitRenderer
-			.portraitDirectionalLight(60, 70, bounds);
-		final double lowerRight = PlayerPortraitRenderer
-			.portraitDirectionalLight(110, 120, bounds);
-
-		assertTrue(upperLeft > center);
-		assertEquals(0.0, center, 0.001);
-		assertTrue(center > lowerRight);
-	}
-
-	@Test
 	public void potionPolicyPrefersUsefulExtendedUptimeAndPreservesPlusTiers()
 	{
 		assertEquals(
@@ -1653,7 +1530,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			"Extended stamina potion(3)",
-			SlayerLoadoutAnalyzer.preferredInventoryItemForRegression(
+			SlayerLoadoutAnalyzer.preferredInventoryItemForTest(
 				Arrays.asList(
 					"Stamina potion(4)",
 					"Extended stamina potion(3)"
@@ -1663,20 +1540,20 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			"Saturated heart",
-			SlayerLoadoutAnalyzer.preferredInventoryItemForRegression(
+			SlayerLoadoutAnalyzer.preferredInventoryItemForTest(
 				Arrays.asList("Magic potion(4)", "Saturated heart"),
 				PotionPolicy.magicBoostAlternatives()
 			)
 		);
 		assertEquals(
 			"anti venom plus 4",
-			SlayerLoadoutAnalyzer.normalizePotionDisplayNameForRegression(
+			SlayerLoadoutAnalyzer.normalizePotionDisplayNameForTest(
 				"Anti-venom+(4)"
 			)
 		);
 		assertEquals(
 			"antidote plus plus 4",
-			SlayerLoadoutAnalyzer.normalizePotionDisplayNameForRegression(
+			SlayerLoadoutAnalyzer.normalizePotionDisplayNameForTest(
 				"Antidote++(4)"
 			)
 		);
@@ -1709,7 +1586,7 @@ public class SlayerRegressionTest
 			);
 			assertEquals(task,
 				TaskStrategy.CombatStyle.RANGED,
-				strategy.getCombatStyle());
+				strategy.getStyle());
 			assertTrue(task, strategy.getMethod().toLowerCase().contains("safespot"));
 		}
 
@@ -1722,7 +1599,7 @@ public class SlayerRegressionTest
 			"Not restricted",
 			false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MAGIC, otherworldly.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MAGIC, otherworldly.getStyle());
 		assertTrue(otherworldly.getMethod().contains("35% Air weakness"));
 	}
 
@@ -1849,54 +1726,54 @@ public class SlayerRegressionTest
 	@Test
 	public void openingBankDuringActiveTaskAlwaysResumesBankAwareTaskRoute()
 	{
-		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.TASKING, 25
+		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankForTest(
+			SlayerPlusPlugin.Phase.TASKING, 25
 		));
-		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_TASK, 25
+		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankForTest(
+			SlayerPlusPlugin.Phase.TO_TASK, 25
 		));
-		assertFalse(SlayerPlusPlugin.shouldResumeTaskAfterBankForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_MASTER, 0
+		assertFalse(SlayerPlusPlugin.shouldResumeTaskAfterBankForTest(
+			SlayerPlusPlugin.Phase.ROUTING_TO_MASTER, 0
 		));
-		assertFalse(SlayerPlusPlugin.shouldResumeTaskAfterBankForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.TASKING, 0
+		assertFalse(SlayerPlusPlugin.shouldResumeTaskAfterBankForTest(
+			SlayerPlusPlugin.Phase.TASKING, 0
 		));
-		assertTrue(SlayerPlusPlugin.shouldContinueMasterAfterBankPickupForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_MASTER, true
+		assertTrue(SlayerPlusPlugin.shouldContinueMasterAfterBankPickupForTest(
+			SlayerPlusPlugin.Phase.ROUTING_TO_MASTER, true
 		));
-		assertFalse(SlayerPlusPlugin.shouldContinueMasterAfterBankPickupForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_MASTER, false
+		assertFalse(SlayerPlusPlugin.shouldContinueMasterAfterBankPickupForTest(
+			SlayerPlusPlugin.Phase.ROUTING_TO_MASTER, false
 		));
-		assertFalse(SlayerPlusPlugin.shouldContinueMasterAfterBankPickupForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_TASK, true
+		assertFalse(SlayerPlusPlugin.shouldContinueMasterAfterBankPickupForTest(
+			SlayerPlusPlugin.Phase.TO_TASK, true
 		));
-		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForRegression(
-			true, SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_BANK, 25
+		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForTest(
+			true, SlayerPlusPlugin.Phase.ROUTING_TO_BANK, 25
 		));
-		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForRegression(
-			true, SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_TASK, 25
+		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForTest(
+			true, SlayerPlusPlugin.Phase.TO_TASK, 25
 		));
-		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForRegression(
-			true, SlayerPlusPlugin.GuidedSessionPhase.TASKING, 25
+		assertTrue(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForTest(
+			true, SlayerPlusPlugin.Phase.TASKING, 25
 		));
-		assertFalse(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForRegression(
-			false, SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_TASK, 25
+		assertFalse(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForTest(
+			false, SlayerPlusPlugin.Phase.TO_TASK, 25
 		));
-		assertFalse(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForRegression(
-			true, SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_MASTER, 0
+		assertFalse(SlayerPlusPlugin.shouldResumeTaskAfterBankCloseForTest(
+			true, SlayerPlusPlugin.Phase.ROUTING_TO_MASTER, 0
 		));
 	}
 
 	@Test
 	public void routingUsesResolvedTaskSnapshotAcrossLoginAndCompletionBoundaries()
 	{
-		assertEquals(57, SlayerPlusPlugin.effectiveTaskRemainingForRegression(
+		assertEquals(57, SlayerPlusPlugin.effectiveTaskRemainingForTest(
 			57, 0
 		));
-		assertEquals(0, SlayerPlusPlugin.effectiveTaskRemainingForRegression(
+		assertEquals(0, SlayerPlusPlugin.effectiveTaskRemainingForTest(
 			0, 57
 		));
-		assertEquals(57, SlayerPlusPlugin.effectiveTaskRemainingForRegression(
+		assertEquals(57, SlayerPlusPlugin.effectiveTaskRemainingForTest(
 			-1, 57
 		));
 		assertTrue(SlayerPlusPlugin.shouldInvalidateTaskObservationForGameState(
@@ -1919,14 +1796,14 @@ public class SlayerRegressionTest
 	@Test
 	public void delayedTaskCountsAndBankOnlyEncounterTeleportsCannotBreakRouting()
 	{
-		assertTrue(SlayerPlusPlugin.shouldConfirmTaskAreaAfterCountDecreaseForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.TASKING
+		assertTrue(SlayerPlusPlugin.shouldConfirmTaskAreaAfterCountDecreaseForTest(
+			SlayerPlusPlugin.Phase.TASKING
 		));
-		assertFalse(SlayerPlusPlugin.shouldConfirmTaskAreaAfterCountDecreaseForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_BANK
+		assertFalse(SlayerPlusPlugin.shouldConfirmTaskAreaAfterCountDecreaseForTest(
+			SlayerPlusPlugin.Phase.ROUTING_TO_BANK
 		));
-		assertFalse(SlayerPlusPlugin.shouldConfirmTaskAreaAfterCountDecreaseForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_TASK
+		assertFalse(SlayerPlusPlugin.shouldConfirmTaskAreaAfterCountDecreaseForTest(
+			SlayerPlusPlugin.Phase.TO_TASK
 		));
 		assertTrue(SlayerPlusPlugin.mayUseEncounterTravelMatch(true, false));
 		assertTrue(SlayerPlusPlugin.mayUseEncounterTravelMatch(false, true));
@@ -1947,8 +1824,8 @@ public class SlayerRegressionTest
 			destination.getY(),
 			destination.getPlane()
 		);
-		assertTrue(profile.isInsideEncounterArea(distantInside));
-		assertFalse(SlayerPlusPlugin.shouldCountTaskAreaExitForRegression(
+		assertTrue(profile.insideArea(distantInside));
+		assertFalse(SlayerPlusPlugin.shouldCountTaskAreaExitForTest(
 			distantInside, destination, profile
 		));
 
@@ -1957,8 +1834,8 @@ public class SlayerRegressionTest
 			destination.getY(),
 			destination.getPlane()
 		);
-		assertFalse(profile.isInsideEncounterArea(outside));
-		assertTrue(SlayerPlusPlugin.shouldCountTaskAreaExitForRegression(
+		assertFalse(profile.insideArea(outside));
+		assertTrue(SlayerPlusPlugin.shouldCountTaskAreaExitForTest(
 			outside, destination, profile
 		));
 	}
@@ -1991,38 +1868,38 @@ public class SlayerRegressionTest
 			)
 		);
 		assertTrue(
-			SlayerPlusPlugin.shouldPreferDirectConsumableTeleportForRegression(
+			SlayerPlusPlugin.shouldPreferDirectConsumableTeleportForTest(
 				"Morytania Spider Cave", "Spider cave teleport"
 			)
 		);
 		assertFalse(
-			SlayerPlusPlugin.shouldPreferDirectConsumableTeleportForRegression(
+			SlayerPlusPlugin.shouldPreferDirectConsumableTeleportForTest(
 				"Morytania Spider Cave", "Max cape"
 			)
 		);
 		final WorldPoint caveEntrance = new WorldPoint(3657, 3407, 0);
-		assertTrue(SlayerPlusPlugin.isAraxxorSpiderTeleportLandingForRegression(
+		assertTrue(SlayerPlusPlugin.isAraxxorSpiderTeleportLandingForTest(
 			"Araxxor",
 			"Morytania Spider Cave",
 			new WorldPoint(3658, 3408, 0),
 			caveEntrance,
 			false
 		));
-		assertTrue(SlayerPlusPlugin.isAraxxorSpiderTeleportLandingForRegression(
+		assertTrue(SlayerPlusPlugin.isAraxxorSpiderTeleportLandingForTest(
 			"Araxxor",
 			"Morytania Spider Cave",
 			new WorldPoint(3707, 3407, 0),
 			caveEntrance,
 			false
 		));
-		assertTrue(SlayerPlusPlugin.isAraxxorSpiderTeleportLandingForRegression(
+		assertTrue(SlayerPlusPlugin.isAraxxorSpiderTeleportLandingForTest(
 			"Araxxor",
 			"Morytania Spider Cave",
 			new WorldPoint(3700, 9800, 0),
 			caveEntrance,
 			true
 		));
-		assertFalse(SlayerPlusPlugin.isAraxxorSpiderTeleportLandingForRegression(
+		assertFalse(SlayerPlusPlugin.isAraxxorSpiderTeleportLandingForTest(
 			"Araxxor",
 			"Morytania Spider Cave",
 			new WorldPoint(3200, 3200, 0),
@@ -2034,16 +1911,16 @@ public class SlayerRegressionTest
 	@Test
 	public void mortimerRingLandingAndMasterTileAreRecognizedAsOneCavern()
 	{
-		assertTrue(SlayerPlusPlugin.isMortimerCavernForRegression(
+		assertTrue(SlayerPlusPlugin.isMortimerCavernForTest(
 			new WorldPoint(2581, 8633, 0)
 		));
-		assertTrue(SlayerPlusPlugin.isMortimerCavernForRegression(
+		assertTrue(SlayerPlusPlugin.isMortimerCavernForTest(
 			MasterRoutes.find(10).getDestination()
 		));
-		assertFalse(SlayerPlusPlugin.isMortimerCavernForRegression(
+		assertFalse(SlayerPlusPlugin.isMortimerCavernForTest(
 			new WorldPoint(2581, 8633, 1)
 		));
-		assertFalse(SlayerPlusPlugin.isMortimerCavernForRegression(
+		assertFalse(SlayerPlusPlugin.isMortimerCavernForTest(
 			new WorldPoint(2445, 4431, 0)
 		));
 	}
@@ -2124,34 +2001,34 @@ public class SlayerRegressionTest
 	@Test
 	public void liveZeroWinsTheTaskCompletionRaceAgainstStaleCaches()
 	{
-		assertEquals(0, SlayerPlusPlugin.resolveTaskRemainingForRegression(
+		assertEquals(0, SlayerPlusPlugin.resolveTaskRemainingForTest(
 			57, 57, 0, 57, -1));
-		assertEquals(57, SlayerPlusPlugin.resolveTaskRemainingForRegression(
+		assertEquals(57, SlayerPlusPlugin.resolveTaskRemainingForTest(
 			-1, 57, 0, 57, -1));
-		assertEquals(42, SlayerPlusPlugin.resolveTaskRemainingForRegression(
+		assertEquals(42, SlayerPlusPlugin.resolveTaskRemainingForTest(
 			57, 42, 42, 57, -1));
-		assertFalse(SlayerPlusPlugin.shouldExposeTravelHighlightForRegression(
+		assertFalse(SlayerPlusPlugin.shouldExposeTravelHighlightForTest(
 			true, true));
-		assertTrue(SlayerPlusPlugin.shouldExposeTravelHighlightForRegression(
+		assertTrue(SlayerPlusPlugin.shouldExposeTravelHighlightForTest(
 			true, false));
 	}
 
 	@Test
 	public void pohSpellbookAltarsExposeOnlyTheirRealSwitches()
 	{
-		assertTrue(SlayerPlusPlugin.pohAltarSupportsSpellbookForRegression(
+		assertTrue(SlayerPlusPlugin.pohAltarSupportsSpellbookForTest(
 			net.runelite.api.gameval.ObjectID.POH_ALTAR_OCCULT,
 			"Arceuus spellbook"));
-		assertTrue(SlayerPlusPlugin.pohAltarSupportsSpellbookForRegression(
+		assertTrue(SlayerPlusPlugin.pohAltarSupportsSpellbookForTest(
 			net.runelite.api.gameval.ObjectID.POH_ALTAR_ANCIENT,
 			"Ancient Magicks"));
-		assertTrue(SlayerPlusPlugin.pohAltarSupportsSpellbookForRegression(
+		assertTrue(SlayerPlusPlugin.pohAltarSupportsSpellbookForTest(
 			net.runelite.api.gameval.ObjectID.POH_ALTAR_ANCIENT,
 			"Standard spellbook"));
-		assertFalse(SlayerPlusPlugin.pohAltarSupportsSpellbookForRegression(
+		assertFalse(SlayerPlusPlugin.pohAltarSupportsSpellbookForTest(
 			net.runelite.api.gameval.ObjectID.POH_ALTAR_ANCIENT,
 			"Arceuus spellbook"));
-		assertFalse(SlayerPlusPlugin.isPohSpellbookAltarIdForRegression(
+		assertFalse(SlayerPlusPlugin.isPohSpellbookAltarIdForTest(
 			-1));
 	}
 
@@ -2176,7 +2053,7 @@ public class SlayerRegressionTest
 		).withInventoryGroup(MethodRules.InventoryGroup.UTILITY));
 
 		final KitPlan enriched =
-			SlayerPlusPlugin.appendMasterReturnTeleportForRegression(
+			SlayerPlusPlugin.appendMasterReturnTeleportForTest(
 				new KitPlan(
 					"Gear", "Inventory", "Owned", "Test",
 					Collections.emptyList(), inventory, Collections.emptyList()
@@ -2262,70 +2139,70 @@ public class SlayerRegressionTest
 		assertTrue(!SlayerPlusPlugin.shouldRetainVerifiedTravelItem(
 			"Lassar Undercity", lassarRing, false
 		));
-		assertTrue(SlayerPlusPlugin.bossNpcNameMatchesTaskForRegression(
+		assertTrue(SlayerPlusPlugin.bossNpcNameMatchesTaskForTest(
 			"The Whisperer", "The Whisperer"
 		));
-		assertTrue(SlayerPlusPlugin.bossNpcNameMatchesTaskForRegression(
+		assertTrue(SlayerPlusPlugin.bossNpcNameMatchesTaskForTest(
 			"Whisperer", "The Whisperer"
 		));
-		assertTrue(!SlayerPlusPlugin.bossNpcNameMatchesTaskForRegression(
+		assertTrue(!SlayerPlusPlugin.bossNpcNameMatchesTaskForTest(
 			"The Whisperer", "Odd Figure"
 		));
-		assertTrue(SlayerPlusPlugin.shouldConfirmWhispererArenaForRegression(
+		assertTrue(SlayerPlusPlugin.shouldConfirmWhispererArenaForTest(
 			"The Whisperer", true
 		));
-		assertTrue(SlayerPlusPlugin.shouldConfirmWhispererArenaForRegression(
+		assertTrue(SlayerPlusPlugin.shouldConfirmWhispererArenaForTest(
 			"Whisperer", true
 		));
-		assertTrue(!SlayerPlusPlugin.shouldConfirmWhispererArenaForRegression(
+		assertTrue(!SlayerPlusPlugin.shouldConfirmWhispererArenaForTest(
 			"The Whisperer", false
 		));
-		assertTrue(!SlayerPlusPlugin.shouldConfirmWhispererArenaForRegression(
+		assertTrue(!SlayerPlusPlugin.shouldConfirmWhispererArenaForTest(
 			"Vardorvis", true
 		));
 		final WorldPoint lassarRingLanding = new WorldPoint(2588, 6435, 0);
 		assertEquals(
 			lassarRingLanding,
-			SlayerPlusPlugin.whispererRingLandingForRegression()
+			SlayerPlusPlugin.whispererRingLandingForTest()
 		);
 		assertEquals(
 			new WorldPoint(2593, 6424, 0),
-			SlayerPlusPlugin.whispererCathedralTeleporterApproachForRegression(
+			SlayerPlusPlugin.whispererCathedralTeleporterApproachForTest(
 				"The Whisperer", "Lassar Undercity", lassarRingLanding
 			)
 		);
 		assertEquals(
 			null,
-			SlayerPlusPlugin.whispererCathedralTeleporterApproachForRegression(
+			SlayerPlusPlugin.whispererCathedralTeleporterApproachForTest(
 				"The Whisperer", "Lassar Undercity",
 				new WorldPoint(2652, 6405, 0)
 			)
 		);
 		assertTrue(
-			SlayerPlusPlugin.isWhispererCathedralTeleporterLandingForRegression(
+			SlayerPlusPlugin.isWhispererCathedralTeleporterLandingForTest(
 				"Whisperer", "Lassar Undercity",
 				new WorldPoint(2652, 6405, 0)
 			)
 		);
-		assertTrue(whisperer.isInsideEncounterArea(lassarRingLanding));
-		assertTrue(SlayerPlusPlugin.isWhispererLassarInteriorForRegression(
+		assertTrue(whisperer.insideArea(lassarRingLanding));
+		assertTrue(SlayerPlusPlugin.isWhispererLassarInteriorForTest(
 			"The Whisperer", "Lassar Undercity", lassarRingLanding
 		));
-		assertTrue(!SlayerPlusPlugin.isWhispererLassarInteriorForRegression(
+		assertTrue(!SlayerPlusPlugin.isWhispererLassarInteriorForTest(
 			"The Whisperer", "Lassar Undercity", new WorldPoint(3000, 3494, 0)
 		));
-		assertTrue(SlayerPlusPlugin.isWhispererRingTravelForRegression(
+		assertTrue(SlayerPlusPlugin.isWhispererRingTravelForTest(
 			"The Whisperer", "Lassar Undercity",
 			"Ring of shadows", "Lassar Undercity"
 		));
-		assertTrue(!SlayerPlusPlugin.isWhispererRingTravelForRegression(
+		assertTrue(!SlayerPlusPlugin.isWhispererRingTravelForTest(
 			"The Whisperer", "Lassar Undercity",
 			"Max cape", "Mind Altar"
 		));
 
 		assertEquals(
 			new WorldPoint(2922, 5827, 0),
-			SlayerPlusPlugin.whispererIntermediateDestinationForRegression(
+			SlayerPlusPlugin.whispererIntermediateDestinationForTest(
 				"Whisperer",
 				"Lassar Undercity",
 				new WorldPoint(2978, 5798, 0)
@@ -2333,7 +2210,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			new WorldPoint(2922, 5827, 0),
-			SlayerPlusPlugin.whispererIntermediateDestinationForRegression(
+			SlayerPlusPlugin.whispererIntermediateDestinationForTest(
 				"The Whisperer",
 				"Lassar Undercity",
 				new WorldPoint(2978, 5798, 0)
@@ -2341,7 +2218,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			null,
-			SlayerPlusPlugin.whispererIntermediateDestinationForRegression(
+			SlayerPlusPlugin.whispererIntermediateDestinationForTest(
 				"Whisperer",
 				"Lassar Undercity",
 				new WorldPoint(3200, 3200, 0)
@@ -2349,7 +2226,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			null,
-			SlayerPlusPlugin.whispererIntermediateDestinationForRegression(
+			SlayerPlusPlugin.whispererIntermediateDestinationForTest(
 				"Whisperer",
 				"Lassar Undercity",
 				new WorldPoint(2588, 6435, 0)
@@ -2366,7 +2243,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC,
 			"Kalphite Slayer Cave", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MELEE, regular.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MELEE, regular.getStyle());
 		assertEquals("keris partisan of breaching", regular.getWeaponPriorities().get(0));
 		assertTrue(regular.hasTag(TaskStrategy.MethodTag.CANNON));
 		assertTrue(regular.hasTag(TaskStrategy.MethodTag.MULTI_COMBAT));
@@ -2376,7 +2253,7 @@ public class SlayerRegressionTest
 		assertTrue(regularRules.usesCannon());
 		assertEquals(1500, regularRules.getCannonballQuantity());
 		assertEquals(5, regularRules.resolveRestoreSlots(regular));
-		assertEquals(0, regularRules.resolveFoodSlots(regular, regular.getFoodSlots()));
+		assertEquals(0, regularRules.resolveFoodSlots(regular, regular.getFood()));
 		assertTrue(regularRules.getRequiredItems().stream().anyMatch(
 			item -> item.getDisplayName().equals("Special attack weapon")
 		));
@@ -2406,7 +2283,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC,
 			"Kalphite Lair", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.HYBRID, queen.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.HYBRID, queen.getStyle());
 		assertEquals("keris partisan of breaching", queen.getWeaponPriorities().get(0));
 		final MethodRules queenRules = SlayerMethodRuleCatalog.resolve(
 			"The Kalphite Queen", "Kalphite Lair", queen
@@ -2416,7 +2293,7 @@ public class SlayerRegressionTest
 		assertTrue(queenRules.requiresBookOfDead());
 		assertEquals(Arrays.asList("Fire", "Cosmic", "Soul", "Blood", "Death"),
 			queenRules.getPouchRunes().stream()
-				.map(MethodRules.PouchRuneRequirement::getName)
+				.map(MethodRules.RuneRequirement::getName)
 				.collect(java.util.stream.Collectors.toList()));
 		final RunePolicy.Resolution queenBaseRunes =
 			RunePolicy.resolve(
@@ -2470,7 +2347,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.PREFER_MAGIC,
 			"Kalphite Lair", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MAGIC, queenMagic.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MAGIC, queenMagic.getStyle());
 		assertEquals(Arrays.asList("tumeken s shadow", "eye of ayak"),
 			queenMagic.getWeaponPriorities());
 		assertTrue(queenMagic.isStrictWeaponProfile());
@@ -2580,9 +2457,9 @@ public class SlayerRegressionTest
 	public void regularBlueDragonsNeverPairLightbearerWithoutASpecWeapon()
 	{
 		assertTrue(!SlayerLoadoutAnalyzer
-			.regularBlueDragonsAllowLightbearerForRegression());
+			.regularBlueDragonsAllowLightbearerForTest());
 		assertTrue(SlayerLoadoutAnalyzer
-			.vorkathAllowsLightbearerForRegression());
+			.vorkathAllowsLightbearerForTest());
 	}
 
 	@Test
@@ -2739,7 +2616,7 @@ public class SlayerRegressionTest
 			item -> item.getDisplayName().equals("Crumble Undead staff")
 		));
 		assertTrue(
-			BankTagLayout.preparationReferencesRenderBelowGearForRegression()
+			BankTagLayout.preparationReferencesRenderBelowGearForTest()
 		);
 
 		final PreparationCatalog.PreparationPlan preparation =
@@ -2758,10 +2635,10 @@ public class SlayerRegressionTest
 			);
 		assertTrue(preparation.isActive());
 		assertEquals(ItemID.BH_RUNE_POUCH,
-			(int) preparation.getBankTagItemIds().get(0));
-		assertTrue(preparation.getBankTagItemIds().contains(ItemID.DUSTRUNE));
-		assertTrue(preparation.getBankTagItemIds().contains(ItemID.CHAOSRUNE));
-		assertTrue(preparation.getBankTagItemIds().contains(ItemID.LAWRUNE));
+			(int) preparation.getTagIds().get(0));
+		assertTrue(preparation.getTagIds().contains(ItemID.DUSTRUNE));
+		assertTrue(preparation.getTagIds().contains(ItemID.CHAOSRUNE));
+		assertTrue(preparation.getTagIds().contains(ItemID.LAWRUNE));
 	}
 
 	@Test
@@ -2817,7 +2694,7 @@ public class SlayerRegressionTest
 				null, null, null, Collections.emptyMap()
 			);
 		assertEquals(Collections.singletonList(ItemID.BH_RUNE_POUCH),
-			noRunes.getBankTagItemIds());
+			noRunes.getTagIds());
 	}
 
 	@Test
@@ -2867,7 +2744,7 @@ public class SlayerRegressionTest
 		assertEquals("Vorkath", resolved.getTaskName());
 		assertEquals(
 			TaskStrategy.CombatStyle.MELEE,
-			resolved.getStrategy().getCombatStyle()
+			resolved.getStrategy().getStyle()
 		);
 		final MethodRules meleeRules = SlayerMethodRuleCatalog.resolve(
 			"Vorkath", "Ungael", resolved.getStrategy()
@@ -2881,16 +2758,16 @@ public class SlayerRegressionTest
 	@Test
 	public void everyNamedDefenderIncludingGhommalVariantsMatchesShieldFallback()
 	{
-		assertTrue(SlayerLoadoutAnalyzer.defenderFallbackMatchesShieldForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.defenderFallbackMatchesShieldForTest(
 			"Ghommal's avernic defender 5 (l)"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.defenderFallbackMatchesShieldForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.defenderFallbackMatchesShieldForTest(
 			"Dragon defender"
 		));
-		assertTrue(!SlayerLoadoutAnalyzer.defenderFallbackMatchesShieldForRegression(
+		assertTrue(!SlayerLoadoutAnalyzer.defenderFallbackMatchesShieldForTest(
 			"Avernic defender hilt"
 		));
-		assertTrue(!SlayerLoadoutAnalyzer.defenderFallbackMatchesShieldForRegression(
+		assertTrue(!SlayerLoadoutAnalyzer.defenderFallbackMatchesShieldForTest(
 			"Ghommal's hilt 6"
 		));
 	}
@@ -2911,9 +2788,9 @@ public class SlayerRegressionTest
 			"Blue dragons", "Taverley Dungeon", strategy
 		);
 
-		assertEquals(24, rules.getReservedLootSlots());
+		assertEquals(24, rules.getLoot());
 		assertEquals(0, rules.resolveRestoreSlots(strategy));
-		assertEquals(0, rules.resolveFoodSlots(strategy, strategy.getFoodSlots()));
+		assertEquals(0, rules.resolveFoodSlots(strategy, strategy.getFood()));
 	}
 
 	@Test
@@ -2966,15 +2843,15 @@ public class SlayerRegressionTest
 		);
 
 		assertEquals(TaskStrategy.CombatStyle.MAGIC,
-			strategy.getCombatStyle());
+			strategy.getStyle());
 		assertTrue(strategy.getMethod().contains("Water Blast"));
 		assertEquals("dragon hunter wand", strategy.getWeaponPriorities().get(0));
 		assertEquals(MethodRules.Spellbook.STANDARD, rules.getSpellbook());
 		assertTrue(rules.requiresRunePouch());
 		assertEquals(3, rules.getPouchRunes().size());
 		assertEquals(ItemID.WATERRUNE, rules.getPouchRunes().get(1).getItemId());
-		assertEquals(24, rules.getReservedLootSlots());
-		assertEquals(0, rules.resolveFoodSlots(strategy, strategy.getFoodSlots()));
+		assertEquals(24, rules.getLoot());
+		assertEquals(0, rules.resolveFoodSlots(strategy, strategy.getFood()));
 	}
 
 	@Test
@@ -2994,9 +2871,9 @@ public class SlayerRegressionTest
 		);
 
 		assertEquals(TaskStrategy.CombatStyle.MELEE,
-			strategy.getCombatStyle());
-		assertEquals(12, rules.getReservedLootSlots());
-		assertEquals(6, rules.resolveFoodSlots(strategy, strategy.getFoodSlots()));
+			strategy.getStyle());
+		assertEquals(12, rules.getLoot());
+		assertEquals(6, rules.resolveFoodSlots(strategy, strategy.getFood()));
 	}
 
 	@Test
@@ -3015,7 +2892,7 @@ public class SlayerRegressionTest
 				false
 			);
 			assertEquals(TaskStrategy.CombatStyle.RANGED,
-				strategy.getCombatStyle());
+				strategy.getStyle());
 			assertFalse(strategy.getWeaponPriorities().contains("twisted bow"));
 			assertFalse(strategy.getWeaponPriorities().contains("bow of faerdhinen"));
 			assertFalse(strategy.getWeaponPriorities().contains("toxic blowpipe"));
@@ -3039,7 +2916,7 @@ public class SlayerRegressionTest
 			"Metal dragons", "Brimhaven Dungeon", magic
 		);
 
-		assertEquals(TaskStrategy.CombatStyle.MAGIC, magic.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MAGIC, magic.getStyle());
 		assertTrue(magic.getMethod().contains("Earth Wave"));
 		assertFalse(magic.getWeaponPriorities().contains("tumeken s shadow"));
 		assertEquals(MethodRules.Spellbook.STANDARD, rules.getSpellbook());
@@ -3071,7 +2948,7 @@ public class SlayerRegressionTest
 		);
 
 		assertEquals(TaskStrategy.CombatStyle.MELEE,
-			strategy.getCombatStyle());
+			strategy.getStyle());
 		assertEquals("scythe of vitur", strategy.getWeaponPriorities().get(0));
 		assertEquals(5, rules.resolveRestoreSlots(strategy));
 		assertEquals(MethodRules.Spellbook.STANDARD, rules.getSpellbook());
@@ -3111,7 +2988,7 @@ public class SlayerRegressionTest
 			EquipmentInventorySlot.RING))
 		{
 			assertTrue(slot.name(),
-				SlayerLoadoutAnalyzer.ordinaryOwnedSlotFallbackForRegression(
+				SlayerLoadoutAnalyzer.ordinaryOwnedSlotFallbackForTest(
 					slot, "Regression owned " + slot.name().toLowerCase()
 				));
 		}
@@ -3127,7 +3004,7 @@ public class SlayerRegressionTest
 				.withInventoryGroup(MethodRules.InventoryGroup.SWITCH),
 			switchItem("Zaryte crossbow", KitItem.SwitchStyle.RANGED)
 				.withInventoryGroup(MethodRules.InventoryGroup.SWITCH),
-			groupItem("Diamond dragon bolts (e)", MethodRules.InventoryGroup.RUNES_AMMO),
+			groupItem("Diamond dragon bolts (e)", MethodRules.InventoryGroup.RUNES),
 			groupItem("Divine ranging potion", MethodRules.InventoryGroup.BOOST),
 			groupItem("Extended anti-venom+", MethodRules.InventoryGroup.PROTECTION),
 			groupItem("Extended super antifire", MethodRules.InventoryGroup.PROTECTION),
@@ -3223,7 +3100,7 @@ public class SlayerRegressionTest
 	}
 
 	@Test
-	public void infernoPreparationRouteAcceptsAdjacentArrivalAtZukBankObject()
+	public void infernoPreparationAccessAcceptsAdjacentArrivalAtZukBankObject()
 	{
 		final EventBus eventBus = new EventBus();
 		final AtomicReference<PluginMessage> posted = new AtomicReference<>();
@@ -3232,7 +3109,7 @@ public class SlayerRegressionTest
 		final WorldPoint start = new WorldPoint(3200, 3200, 0);
 		final WorldPoint zukBank = new WorldPoint(2543, 5141, 0);
 
-		assertTrue(bridge.routeToPreparationBank(
+		assertTrue(bridge.routeToPreparationAccess(
 			start,
 			Collections.singleton(zukBank),
 			true,
@@ -3286,7 +3163,7 @@ public class SlayerRegressionTest
 		assertEquals(Boolean.TRUE, config.get("includeBankPath"));
 		assertEquals(Boolean.TRUE, config.get("showTransportInfo"));
 		assertEquals(Boolean.FALSE, config.get("showBankPickupInfo"));
-		assertEquals(Boolean.FALSE, config.get("postTransports"));
+		assertEquals(Boolean.TRUE, config.get("postTransports"));
 		assertFalse(config.containsKey("usePoh"));
 		assertEquals(1_000_000, config.get("costNonConsumableTeleportationItems"));
 	}
@@ -3294,9 +3171,9 @@ public class SlayerRegressionTest
 	@Test
 	public void bankDiscoveryKeepsNativeTransportTextVisible()
 	{
-		assertTrue(ShortestPathBridge.showsNativeTransportInfoForRegression(true, true));
-		assertTrue(ShortestPathBridge.showsNativeTransportInfoForRegression(false, true));
-		assertTrue(ShortestPathBridge.showsNativeTransportInfoForRegression(false, false));
+		assertTrue(ShortestPathBridge.showsNativeTransportInfoForTest(true, true));
+		assertTrue(ShortestPathBridge.showsNativeTransportInfoForTest(false, true));
+		assertTrue(ShortestPathBridge.showsNativeTransportInfoForTest(false, false));
 	}
 
 	@Test
@@ -3343,22 +3220,22 @@ public class SlayerRegressionTest
 		));
 		assertEquals(
 			new WorldPoint(3245, 9500, 2),
-			SlayerPlusPlugin.tormentedTearsLandingForRegression()
+			SlayerPlusPlugin.tormentedTearsLandingForTest()
 		);
 		assertEquals(
 			new WorldPoint(3241, 9525, 2),
-			SlayerPlusPlugin.tormentedLightCreatureApproachForRegression()
+			SlayerPlusPlugin.tormentedLightCreatureApproachForTest()
 		);
 		assertTrue(SlayerPlusPlugin.isOnTearsOfGuthixLayer(
 			new WorldPoint(3245, 9500, 2)
 		));
-		assertTrue(SlayerPlusPlugin.isOnTearsOfGuthixUpperLayer(
+		assertTrue(SlayerPlusPlugin.onTearsUpper(
 			new WorldPoint(3245, 9500, 2)
 		));
-		assertFalse(SlayerPlusPlugin.isOnTearsOfGuthixUpperLayer(
+		assertFalse(SlayerPlusPlugin.onTearsUpper(
 			new WorldPoint(3245, 9500, 0)
 		));
-		assertTrue(SlayerPlusPlugin.isOnAncientGuthixianTempleLayer(
+		assertTrue(SlayerPlusPlugin.onGuthixianTemple(
 			new WorldPoint(4097, 4419, 0)
 		));
 		assertFalse(SlayerPlusPlugin.shouldSubmitTormentedPath(
@@ -3399,7 +3276,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			new WorldPoint(1666, 10050, 0),
-			SlayerPlusPlugin.skotizoCatacombsAltarForRegression()
+			SlayerPlusPlugin.skotizoCatacombsAltarForTest()
 		);
 		assertTrue(SlayerPlusPlugin.isOnCatacombsCoordinateLayer(
 			new WorldPoint(1666, 10050, 0)
@@ -3443,13 +3320,13 @@ public class SlayerRegressionTest
 	@Test
 	public void inactiveOwnedQuestCapeIsNotTreatedAsUsable()
 	{
-		assertTrue(SlayerPlusPlugin.shouldSuppressInactiveQuestCapeForRegression(
+		assertTrue(SlayerPlusPlugin.shouldSuppressInactiveQuestCapeForTest(
 			true, 332, 333
 		));
-		assertFalse(SlayerPlusPlugin.shouldSuppressInactiveQuestCapeForRegression(
+		assertFalse(SlayerPlusPlugin.shouldSuppressInactiveQuestCapeForTest(
 			true, 333, 333
 		));
-		assertFalse(SlayerPlusPlugin.shouldSuppressInactiveQuestCapeForRegression(
+		assertFalse(SlayerPlusPlugin.shouldSuppressInactiveQuestCapeForTest(
 			false, 332, 333
 		));
 	}
@@ -3457,17 +3334,17 @@ public class SlayerRegressionTest
 	@Test
 	public void guidedRoutingLetsShortestPathResolveInstancedPohStart()
 	{
-		assertEquals(null, SlayerPlusPlugin.shortestPathStartForRegression(
+		assertEquals(null, SlayerPlusPlugin.shortestPathStartForTest(
 			new WorldPoint(3200, 3200, 0),
 			true
 		));
 		assertEquals(new WorldPoint(2953, 3224, 0),
-			SlayerPlusPlugin.shortestPathStartForRegression(
+			SlayerPlusPlugin.shortestPathStartForTest(
 				new WorldPoint(2953, 3224, 0),
 				false
 			)
 		);
-		assertEquals(null, SlayerPlusPlugin.shortestPathStartForRegression(
+		assertEquals(null, SlayerPlusPlugin.shortestPathStartForTest(
 			null,
 			false
 		));
@@ -3477,10 +3354,10 @@ public class SlayerRegressionTest
 	public void spellbookRouteRequiresAnAuthoritativeBankSnapshot()
 	{
 		assertTrue(
-			SlayerPlusPlugin.needsBankSnapshotBeforeSpellbookRouteForRegression(false)
+			SlayerPlusPlugin.needsBankSnapshotBeforeSpellbookRouteForTest(false)
 		);
 		assertFalse(
-			SlayerPlusPlugin.needsBankSnapshotBeforeSpellbookRouteForRegression(true)
+			SlayerPlusPlugin.needsBankSnapshotBeforeSpellbookRouteForTest(true)
 		);
 	}
 
@@ -3541,7 +3418,7 @@ public class SlayerRegressionTest
 		assertEquals("None", config.get("useTeleportationItems"));
 		assertEquals(Boolean.FALSE, config.get("includeBankPath"));
 		assertEquals(Boolean.FALSE, config.get("postTransports"));
-		assertEquals(Boolean.FALSE, config.get("drawMap"));
+		assertEquals(Boolean.TRUE, config.get("drawMap"));
 		assertEquals(2, config.get("unreachableTargetDistanceThreshold"));
 	}
 
@@ -3555,7 +3432,7 @@ public class SlayerRegressionTest
 		final WorldPoint start = new WorldPoint(2543, 5141, 0);
 		final WorldPoint entrancePerimeter = new WorldPoint(2500, 5100, 0);
 
-		assertTrue(bridge.routeToExactLocalTarget(
+		assertTrue(bridge.routeLocal(
 			start, entrancePerimeter, true
 		));
 
@@ -3566,7 +3443,7 @@ public class SlayerRegressionTest
 		assertEquals("None", config.get("useTeleportationItems"));
 		assertEquals(Boolean.FALSE, config.get("includeBankPath"));
 		assertEquals(Boolean.FALSE, config.get("postTransports"));
-		assertEquals(Boolean.FALSE, config.get("drawMap"));
+		assertEquals(Boolean.TRUE, config.get("drawMap"));
 		assertEquals(0, config.get("unreachableTargetDistanceThreshold"));
 	}
 
@@ -3593,7 +3470,7 @@ public class SlayerRegressionTest
 		final ShortestPathBridge bridge = new ShortestPathBridge(eventBus);
 		final WorldPoint bank = new WorldPoint(2543, 5141, 0);
 		assertTrue(bridge.routeToLocalTaskArea(
-			bank, Collections.singleton(approach), true
+			bank, Collections.singleton(approach), true, true
 		));
 
 		final PluginMessage message = posted.get();
@@ -3605,22 +3482,22 @@ public class SlayerRegressionTest
 		);
 		final Map<?, ?> config = (Map<?, ?>) message.getData().get("config");
 		assertEquals("None", config.get("useTeleportationItems"));
-		assertEquals(Boolean.FALSE, config.get("drawMap"));
+		assertEquals(Boolean.TRUE, config.get("drawMap"));
 		assertEquals(6, config.get("unreachableTargetDistanceThreshold"));
 	}
 
 	@Test
 	public void manualGhommalHandoffRemainsVisibleWhileRoutinePathsStayCompact()
 	{
-		assertTrue(SlayerPlusPlugin.isTormentedChasmWallForRegression(
+		assertTrue(SlayerPlusPlugin.isTormentedChasmWallForTest(
 			"Stone wall", new String[]{"Climb-up", null}));
-		assertFalse(SlayerPlusPlugin.isTormentedChasmWallForRegression(
+		assertFalse(SlayerPlusPlugin.isTormentedChasmWallForTest(
 			"Stone wall", new String[]{"Examine", null}));
-		assertTrue(SlayerPlusPlugin.isTormentedChasmExitForRegression(
+		assertTrue(SlayerPlusPlugin.isTormentedChasmExitForTest(
 			"Cave opening", new String[]{"Enter", null}));
-		assertTrue(SlayerPlusPlugin.isTormentedChasmExitForRegression(
+		assertTrue(SlayerPlusPlugin.isTormentedChasmExitForTest(
 			"Cave opening", new String[]{"Climb-through", null}));
-		assertFalse(SlayerPlusPlugin.isTormentedChasmExitForRegression(
+		assertFalse(SlayerPlusPlugin.isTormentedChasmExitForTest(
 			"Cave opening", new String[]{"Examine", null}));
 		assertTrue(
 			SlayerPlusPlugin.isTormentedLightCreatureAttractionMessage(
@@ -3730,7 +3607,7 @@ public class SlayerRegressionTest
 		final SlayerPlusPanel panel = new SlayerPlusPanel();
 		panel.showTask("Araxytes", 183, 231, "Kuradal", "", 119, 768);
 		final int compactHeight =
-			panel.currentTaskCardMaximumHeightForRegression();
+			panel.currentTaskCardMaximumHeightForTest();
 
 		panel.showPointBoostStatus(
 			"Point boosting resumes after this existing assignment."
@@ -3741,7 +3618,7 @@ public class SlayerRegressionTest
 			"Point boosting resumes after this existing assignment."
 		));
 		assertTrue(
-			panel.currentTaskCardMaximumHeightForRegression() > compactHeight
+			panel.currentTaskCardMaximumHeightForTest() > compactHeight
 		);
 	}
 
@@ -3790,7 +3667,7 @@ public class SlayerRegressionTest
 		final SlayerPlusPanel panel = new SlayerPlusPanel();
 		panel.showTask("Bats", 10, 10, "Kuradal", "", 119, 768);
 		final int shortTaskHeight =
-			panel.currentTaskNamePreferredHeightForRegression();
+			panel.currentTaskNamePreferredHeightForTest();
 
 		panel.showTask(
 			"Extremely long multi-part Slayer assignment requiring clean wrapping",
@@ -3804,19 +3681,19 @@ public class SlayerRegressionTest
 		);
 
 		assertTrue(
-			panel.currentTaskNamePreferredHeightForRegression()
+			panel.currentTaskNamePreferredHeightForTest()
 				> shortTaskHeight
 		);
 
 		panel.showTravelRecommendation("Games necklace", "");
 		final int shortTravelHeight =
-			panel.bankTravelMaximumHeightForRegression();
+			panel.bankTravelMaximumHeightForTest();
 		panel.showTravelRecommendation(
 			"A very long teleport item instruction that must remain fully visible",
 			""
 		);
 		assertTrue(
-			panel.bankTravelMaximumHeightForRegression()
+			panel.bankTravelMaximumHeightForTest()
 				> shortTravelHeight
 		);
 	}
@@ -3835,17 +3712,17 @@ public class SlayerRegressionTest
 			768
 		);
 
-		panel.setCurrentTaskContainerWidthForRegression(140);
+		panel.setCurrentTaskContainerWidthForTest(140);
 		final int narrowWrapWidth =
-			panel.currentTaskRenderedWrapWidthForRegression();
+			panel.currentTaskRenderedWrapWidthForTest();
 		final int narrowHeight =
-			panel.currentTaskNamePreferredHeightForRegression();
+			panel.currentTaskNamePreferredHeightForTest();
 
-		panel.setCurrentTaskContainerWidthForRegression(230);
+		panel.setCurrentTaskContainerWidthForTest(230);
 		final int wideWrapWidth =
-			panel.currentTaskRenderedWrapWidthForRegression();
+			panel.currentTaskRenderedWrapWidthForTest();
 		final int wideHeight =
-			panel.currentTaskNamePreferredHeightForRegression();
+			panel.currentTaskNamePreferredHeightForTest();
 
 		assertTrue(wideWrapWidth > narrowWrapWidth);
 		assertTrue(wideHeight < narrowHeight);
@@ -3857,7 +3734,7 @@ public class SlayerRegressionTest
 		for (final String reviewedName
 			: TaskResearch.getReviewedTaskNames())
 		{
-			final String displayName = SlayerDisplayText.taskName(reviewedName);
+			final String displayName = SlayerDisplayText.assignment(reviewedName);
 			for (final String word : displayName.split("\\s+"))
 			{
 				assertTrue(
@@ -3867,19 +3744,19 @@ public class SlayerRegressionTest
 				);
 			}
 		}
-		assertEquals("The Whisperer", SlayerDisplayText.taskName("THE WHISPERER"));
-		assertEquals("TzKal-Zuk", SlayerDisplayText.taskName("TZKAL-ZUK"));
-		assertEquals("TzTok-Jad", SlayerDisplayText.taskName("TZTOK-JAD"));
-		assertEquals("Kree'arra", SlayerDisplayText.taskName("KREE'ARRA"));
-		assertEquals("K'ril Tsutsaroth", SlayerDisplayText.taskName("K'RIL TSUTSAROTH"));
-		assertEquals("Greater Demons", SlayerDisplayText.taskName("GREATER DEMONS"));
+		assertEquals("The Whisperer", SlayerDisplayText.assignment("THE WHISPERER"));
+		assertEquals("TzKal-Zuk", SlayerDisplayText.assignment("TZKAL-ZUK"));
+		assertEquals("TzTok-Jad", SlayerDisplayText.assignment("TZTOK-JAD"));
+		assertEquals("Kree'arra", SlayerDisplayText.assignment("KREE'ARRA"));
+		assertEquals("K'ril Tsutsaroth", SlayerDisplayText.assignment("K'RIL TSUTSAROTH"));
+		assertEquals("Greater Demons", SlayerDisplayText.assignment("GREATER DEMONS"));
 		assertEquals(
 			"Fossil Island Wyverns",
-			SlayerDisplayText.taskName("FOSSIL ISLAND WYVERNS")
+			SlayerDisplayText.assignment("FOSSIL ISLAND WYVERNS")
 		);
 		assertEquals(
 			"Skeletal Wyverns",
-			SlayerDisplayText.taskName("skeletal wyverns")
+			SlayerDisplayText.assignment("skeletal wyverns")
 		);
 		assertEquals(
 			"Skeletal Wyverns",
@@ -3887,7 +3764,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			"TEST: The Whisperer",
-			SlayerDisplayText.taskName("test: the whisperer")
+			SlayerDisplayText.assignment("test: the whisperer")
 		);
 		assertEquals(
 			"Waiting for Slayer task",
@@ -4029,14 +3906,14 @@ public class SlayerRegressionTest
 			"Teleport to house"
 		);
 
-		assertTrue(coordinator.currentFor(requestedRoute).hasPhysicalItem());
+		assertTrue(coordinator.currentFor(requestedRoute).physical());
 		assertEquals(
 			"Max cape",
 			coordinator.currentFor(requestedRoute).getItemName()
 		);
 		assertTrue(!coordinator.currentFor(
 			"bloodveld|meiyerditch|later-display-resolution"
-		).hasPhysicalItem());
+		).physical());
 	}
 
 	@Test
@@ -4111,7 +3988,7 @@ public class SlayerRegressionTest
 		coordinator.beginRoute(route);
 		final TravelChoice restored = coordinator.selectionFor(route);
 		assertTrue(restored.isResolved());
-		assertTrue(restored.hasPhysicalItem());
+		assertTrue(restored.physical());
 		assertEquals(ItemID.CA_OFFHAND_GRANDMASTER, restored.getItemId());
 		assertEquals("Ghommal's hilt 6", restored.getItemName());
 		assertEquals("Mor Ul Rek", restored.getDestination());
@@ -4407,7 +4284,7 @@ public class SlayerRegressionTest
 			assertTrue(task + " has no reviewed strategy", strategy.isReviewed());
 			assertTrue(
 				task + " has incomplete non-weapon equipment progression",
-				SlayerEquipmentAuditCatalog.auditedSlotsForRegression(
+				SlayerEquipmentAuditCatalog.auditedSlotsForTest(
 					task, strategy, strategy.getWeaponPriorities().isEmpty()
 						? "" : strategy.getWeaponPriorities().get(0)
 				).size() >= 8
@@ -4483,18 +4360,18 @@ public class SlayerRegressionTest
 		assertTrue(magicBody.indexOf("mystic robe top")
 			< magicBody.indexOf("xerician top"));
 
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Saradomin d'hide body", "Blessed body"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Imbued Guthix cape", "Imbued god cape"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Staff of fire", "Elemental staff"
 		));
 
 		final List<String> weapons =
-			SlayerLoadoutAnalyzer.weaponProgressionForRegression(melee);
+			SlayerLoadoutAnalyzer.weaponProgressionForTest(melee);
 		assertEquals("Abyssal whip", weapons.get(0));
 		assertTrue(weapons.contains("rune scimitar"));
 		assertTrue(weapons.contains("iron scimitar"));
@@ -4524,7 +4401,7 @@ public class SlayerRegressionTest
 			.strictWeaponProfile(true)
 			.build();
 		final List<String> strictWeapons =
-			SlayerLoadoutAnalyzer.weaponProgressionForRegression(strict);
+			SlayerLoadoutAnalyzer.weaponProgressionForTest(strict);
 		assertEquals(1, strictWeapons.size());
 		assertEquals("Dragon hunter crossbow", strictWeapons.get(0));
 
@@ -4548,58 +4425,58 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			0,
-			SlayerLoadoutAnalyzer.directEquipmentProgressionRankForRegression(
+			SlayerLoadoutAnalyzer.directEquipmentProgressionRankForTest(
 				"Masori body (f)", masori
 			)
 		);
 		assertEquals(
 			1,
-			SlayerLoadoutAnalyzer.directEquipmentProgressionRankForRegression(
+			SlayerLoadoutAnalyzer.directEquipmentProgressionRankForTest(
 				"Masori body", masori
 			)
 		);
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Radiant oathplate chest", "Oathplate chest"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Imbued Saradomin max cape", "Imbued god cape"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Infernal max cape", "Infernal cape"
 		));
 		assertEquals(
 			"Infernal max cape",
-			SlayerLoadoutAnalyzer.preferredInventoryEquipmentForRegression(
+			SlayerLoadoutAnalyzer.preferredInventoryEquipmentForTest(
 				Arrays.asList("Fire cape", "Infernal max cape"),
 				"infernal cape", "fire cape", "mythical cape"
 			)
 		);
 		assertEquals(
 			"Imbued Saradomin max cape",
-			SlayerLoadoutAnalyzer.preferredInventoryEquipmentForRegression(
+			SlayerLoadoutAnalyzer.preferredInventoryEquipmentForTest(
 				Arrays.asList("God cape", "Imbued Saradomin max cape"),
 				"imbued god cape", "god cape"
 			)
 		);
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Dizana's max cape", "Dizana's quiver"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Masori assembler max cape", "Ava's assembler"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Saradomin coif", "Blessed coif"
 		));
-		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.equipmentProgressionNameMatchesForTest(
 			"Dharok's platebody 50", "Barrows platebody"
 		));
-		assertTrue(!SlayerLoadoutAnalyzer.usableEquipmentVariantForRegression(
+		assertTrue(!SlayerLoadoutAnalyzer.usableEquipmentVariantForTest(
 			"Dharok's platebody 0", EquipmentInventorySlot.BODY
 		));
-		assertTrue(!SlayerLoadoutAnalyzer.usableEquipmentVariantForRegression(
+		assertTrue(!SlayerLoadoutAnalyzer.usableEquipmentVariantForTest(
 			"Scythe of vitur (uncharged)", EquipmentInventorySlot.WEAPON
 		));
-		assertTrue(SlayerLoadoutAnalyzer.usableEquipmentVariantForRegression(
+		assertTrue(SlayerLoadoutAnalyzer.usableEquipmentVariantForTest(
 			"Dizana's quiver (uncharged)", EquipmentInventorySlot.CAPE
 		));
 
@@ -4684,7 +4561,7 @@ public class SlayerRegressionTest
 			Preference.Cannon.ALLOW, Preference.Burst.ALLOW,
 			Preference.CombatStyle.AUTOMATIC, "Catacombs of Kourend", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MAGIC, fireGiants.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MAGIC, fireGiants.getStyle());
 		assertTrue(fireGiants.getMethod().contains("Water"));
 
 		final TaskStrategy tzhaar = SlayerTaskStrategyCatalog.resolve(
@@ -4721,7 +4598,7 @@ public class SlayerRegressionTest
 			Preference.Cannon.ALLOW, Preference.Burst.NEVER,
 			Preference.CombatStyle.AUTOMATIC, "Lumbridge area", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.RANGED, birds.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.RANGED, birds.getStyle());
 		assertTrue(birds.getMethod().contains("flying variants"));
 
 		final TaskStrategy rats = SlayerTaskStrategyCatalog.resolve(
@@ -4736,7 +4613,7 @@ public class SlayerRegressionTest
 			Preference.Cannon.ALLOW, Preference.Burst.NEVER,
 			Preference.CombatStyle.AUTOMATIC, "Feldip Hills", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.RANGED, wolves.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.RANGED, wolves.getStyle());
 
 		final MethodRules crocodiles = SlayerMethodRuleCatalog.resolve(
 			"Crocodiles", "Nardah desert",
@@ -4767,44 +4644,44 @@ public class SlayerRegressionTest
 		assertEquals(new WorldPoint(2275, 9880, 0), aquaniteRoute.getPrimaryDestination());
 		assertEquals(
 			new WorldPoint(2218, 3477, 0),
-			SlayerPlusPlugin.aquaniteIslandDestinationForRegression(
+			SlayerPlusPlugin.aquaniteIslandDestinationForTest(
 				"Aquanites", "Ynysdail Cavern", new WorldPoint(2227, 3469, 0)
 			)
 		);
 		assertEquals(
 			null,
-			SlayerPlusPlugin.aquaniteIslandDestinationForRegression(
+			SlayerPlusPlugin.aquaniteIslandDestinationForTest(
 				"Aquanites", "Ynysdail Cavern", new WorldPoint(2218, 3425, 0)
 			)
 		);
-		assertFalse(SlayerPlusPlugin.hasBuiltYnysdailRowboatForRegression(0));
-		assertTrue(SlayerPlusPlugin.hasBuiltYnysdailRowboatForRegression(1));
+		assertFalse(SlayerPlusPlugin.hasBuiltYnysdailRowboatForTest(0));
+		assertTrue(SlayerPlusPlugin.hasBuiltYnysdailRowboatForTest(1));
 		assertEquals(
 			new WorldPoint(1889, 3292, 0),
-			SlayerPlusPlugin.aquaniteSailingDepartureForRegression(
+			SlayerPlusPlugin.aquaniteSailingDepartureForTest(
 				"Aquanites", "Ynysdail Cavern",
 				new WorldPoint(3200, 3200, 0), false
 			)
 		);
 		assertEquals(
 			null,
-			SlayerPlusPlugin.aquaniteSailingDepartureForRegression(
+			SlayerPlusPlugin.aquaniteSailingDepartureForTest(
 				"Aquanites", "Ynysdail Cavern",
 				new WorldPoint(3200, 3200, 0), true
 			)
 		);
 		assertTrue(
-			SlayerPlusPlugin.shouldRejectTravelItemForSpellbookRouteForRegression(
+			SlayerPlusPlugin.shouldRejectTravelItemForSpellbookRouteForTest(
 				true, "Hallowed crystal shard"
 			)
 		);
 		assertFalse(
-			SlayerPlusPlugin.shouldRejectTravelItemForSpellbookRouteForRegression(
+			SlayerPlusPlugin.shouldRejectTravelItemForSpellbookRouteForTest(
 				false, "Spider cave teleport"
 			)
 		);
 		assertTrue(
-			SlayerPlusPlugin.shouldRejectTravelItemForSpellbookRouteForRegression(
+			SlayerPlusPlugin.shouldRejectTravelItemForSpellbookRouteForTest(
 				false, "Hallowed crystal shard"
 			)
 		);
@@ -4813,11 +4690,11 @@ public class SlayerRegressionTest
 		).stream().anyMatch(option -> option.getItemFamily().equalsIgnoreCase(
 			"Hallowed crystal shard"
 		)));
-		assertTrue(SlayerPlusPlugin.pohSpellbookTravelFamiliesForRegression()
+		assertTrue(SlayerPlusPlugin.pohSpellbookTravelFamiliesForTest()
 			.contains("teleport to house"));
 		assertEquals(
 			null,
-			SlayerPlusPlugin.aquaniteIslandDestinationForRegression(
+			SlayerPlusPlugin.aquaniteIslandDestinationForTest(
 				"Aquanites", "Ynysdail Cavern", new WorldPoint(2300, 3400, 0)
 			)
 		);
@@ -4869,7 +4746,7 @@ public class SlayerRegressionTest
 			));
 		}
 		assertTrue(maggotRules.fillsRemainingWithFood());
-		assertEquals(0, maggotRules.getReservedLootSlots());
+		assertEquals(0, maggotRules.getLoot());
 		final MethodRules.RequiredItem maggotCape = maggotRules
 			.getRequiredItems().stream()
 			.filter(item -> item.getDisplayName().equals("Melee cape switch"))
@@ -4888,10 +4765,10 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC, "Feldip Hills", false
 		);
 		assertFalse(
-			SlayerLoadoutAnalyzer.weaponProgressionForRegression("Bats", bats)
+			SlayerLoadoutAnalyzer.weaponProgressionForTest("Bats", bats)
 				.contains("scythe of vitur")
 		);
-		assertEquals(TaskStrategy.CombatStyle.RANGED, bats.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.RANGED, bats.getStyle());
 		assertTrue(bats.getWeaponPriorities().contains("toxic blowpipe"));
 		assertTrue(bats.getWeaponPriorities().contains("shortbow"));
 		assertFalse(bats.getWeaponPriorities().contains("blade of saeldor"));
@@ -4905,7 +4782,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals("scythe of vitur", araxxor.getWeaponPriorities().get(0));
 		assertTrue(
-			SlayerLoadoutAnalyzer.weaponProgressionForRegression("Araxxor", araxxor)
+			SlayerLoadoutAnalyzer.weaponProgressionForTest("Araxxor", araxxor)
 				.contains("scythe of vitur")
 		);
 		assertTrue(SlayerTargetFootprintCatalog.isReviewedMultiTileScytheTarget("Araxxor"));
@@ -4919,7 +4796,7 @@ public class SlayerRegressionTest
 			.build();
 		assertEquals(
 			Collections.singletonList("abyssal whip"),
-			SlayerLoadoutAnalyzer.weaponProgressionForRegression(
+			SlayerLoadoutAnalyzer.weaponProgressionForTest(
 				"Unreviewed one tile target", accidentalOneByOne
 			)
 		);
@@ -4932,7 +4809,7 @@ public class SlayerRegressionTest
 		 * instead of a generic TravelRouteCatalog fallback. */
 		final Set<String> intentionallyLocal = Collections.singleton("inferno");
 		final List<String> missing = new ArrayList<>();
-		for (final String location : RouteCatalog.reviewedAccessLocationsForRegression())
+		for (final String location : RouteCatalog.reviewedAccessLocationsForTest())
 		{
 			if (!intentionallyLocal.contains(location)
 				&& TravelRoutes.fallbacksFor(location).isEmpty())
@@ -4954,7 +4831,7 @@ public class SlayerRegressionTest
 		final MethodRules aquaniteRules = SlayerMethodRuleCatalog.resolve(
 			"Aquanites", "Ynysdail Cavern", aquanites
 		);
-		assertEquals(TaskStrategy.CombatStyle.MELEE, aquanites.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MELEE, aquanites.getStyle());
 		assertTrue(aquanites.needsRunePouch());
 		assertTrue(aquaniteRules.getRequiredItems().stream().anyMatch(
 			item -> item.getDisplayName().equals("Fast Slash lure-severing weapon")
@@ -4971,7 +4848,7 @@ public class SlayerRegressionTest
 			Preference.Cannon.NEVER, Preference.Burst.NEVER,
 			Preference.CombatStyle.AUTOMATIC, "Hunter's End", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.RANGED, artio.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.RANGED, artio.getStyle());
 		assertEquals("webweaver bow", artio.getWeaponPriorities().get(0));
 
 		final RouteCatalog.RouteProfile sire = RouteCatalog.resolve(
@@ -5014,12 +4891,12 @@ public class SlayerRegressionTest
 		));
 		assertEquals(
 			"dragon javelin",
-			SlayerLoadoutAnalyzer.araxxorSafeAmmunitionForRegression(
+			SlayerLoadoutAnalyzer.araxxorSafeAmmunitionForTest(
 				"Heavy ballista"
 			).get(0)
 		);
 		assertTrue(
-			SlayerLoadoutAnalyzer.araxxorSafeAmmunitionForRegression(
+			SlayerLoadoutAnalyzer.araxxorSafeAmmunitionForTest(
 				"Noxious halberd"
 			).isEmpty()
 		);
@@ -5027,7 +4904,7 @@ public class SlayerRegressionTest
 			item -> item.getDisplayName().equals("Divine ranging potion")
 		));
 		assertTrue(araxxorInventory.fillsRemainingWithFood());
-		assertEquals(2, araxxorInventory.getReservedLootSlots());
+		assertEquals(2, araxxorInventory.getLoot());
 		final TaskStrategy araxxorStrategy =
 			SlayerTaskStrategyCatalog.resolve(
 				"Araxxor", Preference.Playstyle.FAST_XP,
@@ -5056,7 +4933,7 @@ public class SlayerRegressionTest
 			Preference.Cannon.NEVER, Preference.Burst.NEVER,
 			Preference.CombatStyle.AUTOMATIC, "Taverley Dungeon", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.RANGED, blackDragons.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.RANGED, blackDragons.getStyle());
 		assertEquals("dragon hunter crossbow", blackDragons.getWeaponPriorities().get(0));
 		assertFalse(blackDragons.getWeaponPriorities().contains("twisted bow"));
 		assertFalse(blackDragons.getWeaponPriorities().contains("toxic blowpipe"));
@@ -5069,7 +4946,7 @@ public class SlayerRegressionTest
 		final MethodRules blackKnightRules = SlayerMethodRuleCatalog.resolve(
 			"Black Knights", "Black Knights' Fortress", blackKnights
 		);
-		assertEquals(TaskStrategy.CombatStyle.RANGED, blackKnights.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.RANGED, blackKnights.getStyle());
 		assertEquals(0, blackKnightRules.resolveRestoreSlots(blackKnights));
 		assertEquals(2, blackKnightRules.resolveFoodSlots(blackKnights, 0));
 	}
@@ -5078,16 +4955,16 @@ public class SlayerRegressionTest
 	public void grotesqueGuardiansUseCompleteReviewedHybridLoadout()
 	{
 		assertTrue(SlayerLoadoutAnalyzer
-			.requiresGenericRockHammerForRegression("Gargoyles"));
+			.requiresGenericRockHammerForTest("Gargoyles"));
 		assertFalse(SlayerLoadoutAnalyzer
-			.requiresGenericRockHammerForRegression("The Grotesque Guardians"));
+			.requiresGenericRockHammerForTest("The Grotesque Guardians"));
 
 		final TaskStrategy strategy = SlayerTaskStrategyCatalog.resolve(
 			"The Grotesque Guardians", Preference.Playstyle.FAST_XP,
 			Preference.Cannon.NEVER, Preference.Burst.NEVER,
 			Preference.CombatStyle.AUTOMATIC, "Slayer Tower rooftop", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.HYBRID, strategy.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.HYBRID, strategy.getStyle());
 		assertEquals("scythe of vitur", strategy.getWeaponPriorities().get(0));
 		assertTrue(strategy.getWeaponPriorities().contains("noxious halberd"));
 		assertFalse(strategy.getWeaponPriorities().contains("inquisitor s mace"));
@@ -5229,11 +5106,11 @@ public class SlayerRegressionTest
 		));
 
 		assertTrue(SlayerLoadoutAnalyzer
-			.requiresKaruulmProtectionBootsForRegression(
+			.requiresKaruulmProtectionBootsForTest(
 				"Alchemical Hydra", "Mount Karuulm", false
 			));
 		assertFalse(SlayerLoadoutAnalyzer
-			.requiresKaruulmProtectionBootsForRegression(
+			.requiresKaruulmProtectionBootsForTest(
 				"Alchemical Hydra", "Mount Karuulm", true
 			));
 	}
@@ -5241,7 +5118,7 @@ public class SlayerRegressionTest
 	@Test
 	public void wikiElementalWeaknessesAreRealMagicPreferenceBranches()
 	{
-		assertTrue(SlayerElementalWeaknessCatalog.sizeForRegression() >= 50);
+		assertTrue(SlayerElementalWeaknessCatalog.sizeForTest() >= 50);
 
 		final TaskStrategy blackDemonMagic = SlayerTaskStrategyCatalog.resolve(
 			"Black demons", Preference.Playstyle.FAST_XP,
@@ -5249,7 +5126,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.PREFER_MAGIC,
 			"Catacombs of Kourend", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MAGIC, blackDemonMagic.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MAGIC, blackDemonMagic.getStyle());
 		assertTrue(blackDemonMagic.getMethod().contains("40% Water weakness"));
 
 		final TaskStrategy blackDemonAutomatic = SlayerTaskStrategyCatalog.resolve(
@@ -5258,7 +5135,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC,
 			"Catacombs of Kourend", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MELEE, blackDemonAutomatic.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MELEE, blackDemonAutomatic.getStyle());
 
 		final TaskStrategy waterfiends = SlayerTaskStrategyCatalog.resolve(
 			"Waterfiends", Preference.Playstyle.FAST_XP,
@@ -5266,7 +5143,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC,
 			"Ancient Cavern", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MAGIC, waterfiends.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MAGIC, waterfiends.getStyle());
 		assertTrue(waterfiends.getMethod().contains("100% Earth weakness"));
 	}
 
@@ -5371,7 +5248,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC,
 			"Catacombs of Kourend", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MELEE, regular.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MELEE, regular.getStyle());
 		assertEquals("emberlight", regular.getWeaponPriorities().get(0));
 		final MethodRules regularRules = SlayerMethodRuleCatalog.resolve(
 			"Greater demons", "Catacombs of Kourend", regular
@@ -5386,7 +5263,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.PREFER_MAGIC,
 			"Catacombs of Kourend", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.MAGIC, water.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.MAGIC, water.getStyle());
 		assertTrue(water.getMethod().contains("40% Water weakness"));
 		final TaskStrategy karuulmCannon = SlayerTaskStrategyCatalog.resolve(
 			"Greater demons", Preference.Playstyle.FAST_XP,
@@ -5397,7 +5274,7 @@ public class SlayerRegressionTest
 		assertTrue(karuulmCannon.hasTag(TaskStrategy.MethodTag.CANNON));
 		assertEquals(
 			TaskStrategy.CombatStyle.RANGED,
-			karuulmCannon.getCombatStyle()
+			karuulmCannon.getStyle()
 		);
 
 		final TaskStrategy chasmCannon = SlayerTaskStrategyCatalog.resolve(
@@ -5408,7 +5285,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals(
 			TaskStrategy.CombatStyle.RANGED,
-			chasmCannon.getCombatStyle()
+			chasmCannon.getStyle()
 		);
 		assertTrue(chasmCannon.hasTag(TaskStrategy.MethodTag.CANNON));
 		assertTrue(chasmCannon.hasTag(TaskStrategy.MethodTag.SAFESPOT));
@@ -5422,7 +5299,7 @@ public class SlayerRegressionTest
 			);
 		assertEquals(
 			TaskStrategy.CombatStyle.MELEE,
-			explicitChasmMelee.getCombatStyle()
+			explicitChasmMelee.getStyle()
 		);
 		assertFalse(explicitChasmMelee.hasTag(
 			TaskStrategy.MethodTag.CANNON
@@ -5434,7 +5311,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC,
 			"God Wars Dungeon", false
 		);
-		assertEquals(TaskStrategy.CombatStyle.RANGED, kril.getCombatStyle());
+		assertEquals(TaskStrategy.CombatStyle.RANGED, kril.getStyle());
 		assertEquals("scorching bow", kril.getWeaponPriorities().get(0));
 		assertEquals("lightbearer", SlayerEquipmentAuditCatalog.priorities(
 			"K'ril Tsutsaroth", kril,
@@ -5527,8 +5404,8 @@ public class SlayerRegressionTest
 			"Tormented demons", "Ancient Guthixian Temple", tormented
 		);
 		assertEquals(7, tormentedRules.resolveRestoreSlots(tormented));
-		assertEquals(5, tormentedRules.resolveFoodSlots(tormented, tormented.getFoodSlots()));
-		assertEquals(3, tormentedRules.getReservedLootSlots());
+		assertEquals(5, tormentedRules.resolveFoodSlots(tormented, tormented.getFood()));
+		assertEquals(3, tormentedRules.getLoot());
 		assertEquals("emberlight", tormented.getWeaponPriorities().get(0));
 		assertTrue(tormented.getWeaponPriorities().contains("abyssal bludgeon"));
 		assertTrue(tormented.getWeaponPriorities().contains("arkan blade"));
@@ -5608,7 +5485,7 @@ public class SlayerRegressionTest
 		assertTrue(rules.requiresBookOfDead());
 		assertEquals(Arrays.asList("Fire", "Blood", "Cosmic"),
 			rules.getPouchRunes().stream()
-				.map(MethodRules.PouchRuneRequirement::getName)
+				.map(MethodRules.RuneRequirement::getName)
 				.collect(java.util.stream.Collectors.toList()));
 	}
 
@@ -5627,8 +5504,8 @@ public class SlayerRegressionTest
 			)),
 			Collections.emptyList()
 		);
-		assertTrue(SlayerPlusPlugin.carriedTravelOutranksBankForRegression());
-		assertTrue(SlayerPlusPlugin.isCarriedLoadoutReadyForRegression(carried));
+		assertTrue(SlayerPlusPlugin.carriedTravelOutranksBankForTest());
+		assertTrue(SlayerPlusPlugin.isCarriedLoadoutReadyForTest(carried));
 
 		final KitPlan needsBank = new KitPlan(
 			"Ready", "Banked", "Needs bank", "Needs bank",
@@ -5639,7 +5516,7 @@ public class SlayerRegressionTest
 			)),
 			Collections.emptyList()
 		);
-		assertFalse(SlayerPlusPlugin.isCarriedLoadoutReadyForRegression(needsBank));
+		assertFalse(SlayerPlusPlugin.isCarriedLoadoutReadyForTest(needsBank));
 	}
 
 	@Test
@@ -5701,7 +5578,7 @@ public class SlayerRegressionTest
 			assertTrue(boss + " has no remaining-slot supply policy",
 				rules.fillsRemainingWithFood() || rules.fillsRemainingWithRestore());
 			assertEquals(boss + " unexpectedly reserves empty cells", 0,
-				rules.getReservedLootSlots());
+				rules.getLoot());
 		}
 	}
 
@@ -5710,7 +5587,7 @@ public class SlayerRegressionTest
 	{
 		final MethodRules jad = bossInventoryRules("TzTok-Jad");
 		assertTrue(jad.fillsRemainingWithRestore());
-		assertEquals(0, jad.getReservedLootSlots());
+		assertEquals(0, jad.getLoot());
 		assertTrue(jad.getRequiredItems().stream().anyMatch(
 			item -> item.getDisplayName().equals("Saradomin brew")
 				&& item.getSlotCount() == 8
@@ -5814,11 +5691,11 @@ public class SlayerRegressionTest
 	public void whileGuthixSleepsChangesDuradelDisplayToKuradalOnly()
 	{
 		assertEquals("Duradel",
-			SlayerPlusPlugin.masterDisplayNameForRegression(5, false));
+			SlayerPlusPlugin.masterDisplayNameForTest(5, false));
 		assertEquals("Kuradal",
-			SlayerPlusPlugin.masterDisplayNameForRegression(5, true));
+			SlayerPlusPlugin.masterDisplayNameForTest(5, true));
 		assertEquals(MasterRoutes.getName(8),
-			SlayerPlusPlugin.masterDisplayNameForRegression(8, true));
+			SlayerPlusPlugin.masterDisplayNameForTest(8, true));
 	}
 
 	@Test
@@ -5836,7 +5713,7 @@ public class SlayerRegressionTest
 			"Catacombs of Kourend", false
 		);
 		assertEquals(TaskStrategy.CombatStyle.RANGED,
-			ranged.getCombatStyle());
+			ranged.getStyle());
 		assertEquals("venator bow", ranged.getWeaponPriorities().get(0));
 		assertEquals("toxic blowpipe", ranged.getWeaponPriorities().get(1));
 		assertTrue(ranged.hasTag(TaskStrategy.MethodTag.VENATOR));
@@ -5844,7 +5721,7 @@ public class SlayerRegressionTest
 			"Ankou", "Catacombs of Kourend", ranged
 		);
 		assertEquals(5, rangedRules.resolveRestoreSlots(ranged));
-		assertEquals(2, rangedRules.resolveFoodSlots(ranged, ranged.getFoodSlots()));
+		assertEquals(2, rangedRules.resolveFoodSlots(ranged, ranged.getFood()));
 
 		final TaskStrategy barrage = SlayerTaskStrategyCatalog.resolve(
 			"Ankou", Preference.Playstyle.FAST_XP,
@@ -5852,7 +5729,7 @@ public class SlayerRegressionTest
 			Preference.CombatStyle.AUTOMATIC,
 			"Catacombs of Kourend", false
 		);
-		assertTrue(barrage.hasTag(TaskStrategy.MethodTag.BURST_BARRAGE));
+		assertTrue(barrage.hasTag(TaskStrategy.MethodTag.BARRAGE));
 		final MethodRules barrageRules = SlayerMethodRuleCatalog.resolve(
 			"Ankou", "Catacombs of Kourend", barrage
 		);
@@ -5868,7 +5745,7 @@ public class SlayerRegressionTest
 		));
 		assertEquals(5, barrageRules.resolveRestoreSlots(barrage));
 		assertEquals(0,
-			barrageRules.resolveFoodSlots(barrage, barrage.getFoodSlots()));
+			barrageRules.resolveFoodSlots(barrage, barrage.getFood()));
 
 		final TaskStrategy automaticAllow = SlayerTaskStrategyCatalog.resolve(
 			"Ankou", Preference.Playstyle.FAST_XP,
@@ -5877,10 +5754,10 @@ public class SlayerRegressionTest
 			"Catacombs of Kourend", false
 		);
 		assertEquals(TaskStrategy.CombatStyle.RANGED,
-			automaticAllow.getCombatStyle());
+			automaticAllow.getStyle());
 		assertTrue(automaticAllow.hasTag(TaskStrategy.MethodTag.VENATOR));
 		assertFalse(automaticAllow.hasTag(
-			TaskStrategy.MethodTag.BURST_BARRAGE));
+			TaskStrategy.MethodTag.BARRAGE));
 
 		final TaskStrategy cannon = SlayerTaskStrategyCatalog.resolve(
 			"Ankou", Preference.Playstyle.FAST_XP,
@@ -5896,7 +5773,7 @@ public class SlayerRegressionTest
 		);
 		assertEquals(3, cannonRules.resolveRestoreSlots(cannon));
 		assertEquals(2,
-			cannonRules.resolveFoodSlots(cannon, cannon.getFoodSlots()));
+			cannonRules.resolveFoodSlots(cannon, cannon.getFood()));
 
 		final TaskStrategy safespot = SlayerTaskStrategyCatalog.resolve(
 			"Ankou", Preference.Playstyle.PROFIT,

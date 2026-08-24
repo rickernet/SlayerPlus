@@ -1,0 +1,1082 @@
+0	slayer-bank-targets.tsv
+1	No concrete recommended items are available yet. Open your bank once, then refresh the
+2	tzkal zuk
+3	The selected Shortest Path teleport could not be retained in the bank-tag layout.
+4	The recommendation contains only unresolved item names. Open your bank once so
+5	 SlayerPlus can select exact item IDs.
+6	Opened the real SlayerPlus Current bank-tag layout with 
+7	Created the SlayerPlus Current bank-tag layout with 
+8	 arranged slots. Open the bank to view it.
+9	[^a-z0-9]+
+10	book of the dead
+11	explorer s ring
+12	leathertop
+13	robeskirt
+14	leatherskirt
+15	leathertop%7Cleatherskirt%7Cplatebody%7Cplatelegs%7Cplateskirt%7C
+16	chainbody%7Cchainskirt%7Cchestplate%7Chauberk%7Ctorso%7Ctunic%7C
+17	saradomin brew
+18	battlemage potion
+19	 [1-4]$
+20	Turael/Aya task 
+21	Use your strongest task setup
+22	Food and task supplies
+23	Loadout recommendations disabled
+24	SlayerPlus will not create a broad or guessed loadout.
+25	 � strategy review pending
+26	Waiting for Slayer task
+27	Turael / Aya
+28	eternal slayer ring
+29	amulet of eternal glory
+30	amulet of glory
+31	karamja gloves 4
+32	karamja gloves 3
+33	rada s blessing 4
+34	rada s blessing 3
+35	rada s blessing
+36	Mount Karuulm
+37	Wyrmscraig Cavern
+38	Unreviewed Slayer method rules: 
+39	Slayer method has no coverage key: 
+40	Slayer method has no combat style: 
+41	Slayer method has no Task Method text: 
+42	Task Method is too long for 
+43	Slayer method has no research source: 
+44	Slayer method has no review date: 
+45	Conflicting inventory-fill rules: 
+46	Ancient spell method has no spell name: 
+47	Rune-pouch method has no selected spellbook: 
+48	Arceuus utility method is not on Arceuus spellbook: 
+49	Thrall method does not require Book of the dead: 
+50	Arceuus utility method does not require a rune pouch: 
+51	Greater Thrall method has an invalid Magic requirement: 
+52	Death Charge method has an invalid Magic requirement: 
+53	Ward of Arceuus method has an invalid spellbook/Magic requirement: 
+54	Arceuus utility method has no rune-pouch package: 
+55	Cannon method has no cannonball quantity: 
+56	Restore slots have no potion family: 
+57	Restore fallback is enabled without a fallback family: 
+58	Food slots have no researched food family: 
+59	Blank required item in Slayer rules: 
+60	Required Slayer inventory item has no resolvable item family: 
+61	Required Slayer utility items exceed the 4x7 inventory: 
+62	High-healing food
+63	moonlight antelope
+64	cooked karambwan
+65	Resurrect Greater Ghost + Death Charge + Ward of Arceuus
+66	Resurrect Greater Ghost + Death Charge
+67	Resurrect Greater Ghost + Ward of Arceuus
+68	Death Charge + Ward of Arceuus
+69	Resurrect Greater Ghost
+70	Ward of Arceuus
+71	v1,%25d,%25d,%25d,%25d,%25d,%25d,%25d,%25d,%25d,%25d
+72	extended anti venom plus
+73	divine bastion potion
+74	divine ranging potion
+75	divine super combat potion
+76	divine battlemage potion
+77	divine magic potion
+78	extended antifire
+79	antifire potion
+80	extended super antifire
+81	super antifire
+82	Turael point boosting
+83	Prefer Ranged
+84	Avoid consumable teleports
+85	Ancient shard + crystal shard
+86	Switch to the Arceuus spellbook
+87	Withdraw a rune pouch
+88	Bring Book of the dead
+89	No owned rune available for 
+90	Thralls + Death Charge
+91	Arceuus ready � 
+92	Preparation required � 
+93	Spellbook, book, and rune pouch are ready.
+94	No owned rune package can currently cast 
+95	 into the rune pouch
+96	 No owned rune is available for 
+97	Spellbook is ready; use the runes required by the selected spell.
+98	Spellbook and rune pouch are ready.
+99	Use the rune pouch for the runes required by 
+100	Use the runes required by 
+101	Ancient Magicks
+102	Arceuus spellbook
+103	Switch to Ancient Magicks
+104	70 Magic is required for Ice Burst
+105	Ancient Magicks ready � 
+106	Rune pouch contains 
+107	 into the rune pouch before leaving.
+108	smoke devils
+109	ancient magicks
+110	seeking bronze arrow
+111	seeking iron arrow
+112	seeking steel arrow
+113	seeking mithril arrow
+114	seeking adamant arrow
+115	seeking rune arrow
+116	seeking amethyst arrow
+117	seeking dragon arrow
+118	seeking broad arrow
+119	Selected from the available unlocked locations.
+120	Staged Slayer route is missing a surface entrance: 
+121	Staged Slayer route surface entrance is not on the overworld: 
+122	Staged Slayer route surface entrance equals its interior target: 
+123	wyvern cave on fossil island
+124	tzhaar ket keh
+125	callisto s den
+126	scorpia s cave
+127	vet ion s rest
+128	slayer-route-profiles.tsv
+129	Invalid route profile row type: 
+130	Staged route access and interior are on the same coordinate layer: 
+131	; continue to the reviewed boss-room checkpoint.
+132	Unsupported route profile helper 
+133	Missing access route for 
+134	; SlayerPlus will continue only to the exact loaded 
+135	TzTok-Jad
+136	TzHaar Fight Cave
+137	Mourner Tunnels
+138	Bloodvelds
+139	Meiyerditch Laboratories
+140	Buccaneers' Laboratory
+141	Iorwerth Dungeon
+142	Stronghold Slayer Cave
+143	Mos Le'Harmless Cave
+144	Catacombs of Kourend
+145	 transition; SlayerPlus will continue only to an exact loaded task NPC.
+146	 access route; SlayerPlus will continue only to the exact loaded boss.
+147	Duplicate Slayer route profile: 
+148	Slayer access route has a blank name
+149	Duplicate Slayer access route: 
+150	catacombs of kourend
+151	wilderness god wars dungeon
+152	ynysdail cavern
+153	ruins of tapoyauik
+154	climb down stairs
+155	A coordinate transition must use one coordinate space
+156	Source and destination layers must differ
+157	Widget ids cannot be negative
+158	An exact NPC predicate needs at least one exact name
+159	 requires at least one predicate
+160	Invalid route area bounds
+161	Route area radii cannot be negative
+162	A coordinate layer needs a plane and reviewed regions
+163	A coordinate layer needs reviewed regions
+164	Region ids cannot be negative
+165	Reviewed object ids must be positive
+166	An object spec needs reviewed ids or exact names
+167	An object spec needs at least one exact action
+168	An object action needs a reviewed id or exact name
+169	An object action needs an exact action
+170	Widget component ids cannot be negative
+171	Widget group ids cannot be negative
+172	Exact NPC names cannot be blank
+173	Cursor belongs to a different route plan
+174	Cursor references an unknown route leg
+175	Route target radius cannot be negative
+176	A routed target needs at least one static point
+177	A terminal needs explicit arrival evidence
+178	Activity retention needs at least one explicit area
+179	A terminal leg needs a TerminalSpec
+180	Terminal completion belongs only in TerminalSpec
+181	A non-terminal leg needs one completion predicate
+182	A non-terminal leg needs at least one branch
+183	Travel and manual legs need a guidance target
+184	A manual leg needs an interaction instruction
+185	A manual leg needs explicit checkpoint readiness
+186	Manual completion cannot advance from a menu click alone
+187	Manual completion needs confirmed resultant evidence
+188	Only manual legs use readiness predicates
+189	A decision leg must be immediately selectable
+190	Travel and manual legs need explicit completion evidence
+191	Cursor active leg id
+192	Duplicate route leg id: 
+193	Invalid Slayer route plan: 
+194	route id is blank
+195	start leg id is blank
+196	start leg does not exist: 
+197	activity retention is missing
+198	route graph is empty
+199	 has multiple default branches
+200	 has branches after its default
+201	route graph needs exactly one terminal; found 
+202	unreachable route leg: 
+203	route graph contains a cycle: 
+204	route leg cannot reach terminal: 
+205	useAgilityShortcuts
+206	costAgilityShortcuts
+207	showBankPickupInfo
+208	useTeleportationItems
+209	useTeleportationSpells
+210	useTeleportationSpellsHome
+211	useTeleportationMinigames
+212	useTeleportationLevers
+213	useTeleportationPortals
+214	usePohFairyRing
+215	usePohSpiritTree
+216	useTeleportationPortalsPoh
+217	usePohMountedItems
+218	usePohObelisk
+219	pohJewelleryBoxTier
+220	useCharterShips
+221	costNonConsumableTeleportationItems
+222	unreachableTargetDistanceThreshold
+223	morytania
+224	ardougne cloak 
+225	desert amulet 
+226	fremennik sea boots 
+227	kandarin headgear 
+228	rada s blessing 
+229	explorer s ring 
+230	morytania legs 
+231	k ril tsutsaroth
+232	general graardor
+233	cave kraken boss
+234	slayer-boss-inventory.tsv
+235	Invalid boss policy row 
+236	Invalid boss inventory policy at row 
+237	right-click Check to learn charges
+238	It then regenerates itself to full charge!)
+239	crumbles to dust
+240	 spell against the Wiki-listed 
+241	harmonised nightmare staff
+242	mystic water staff
+243	twinflame staff
+244	smoke battlestaff
+245	lava battlestaff
+246	mystic fire staff
+247	staff of the dead
+248	mud battlestaff
+249	mystic earth staff
+250	mystic air staff
+251	slayer-elemental-weaknesses.tsv
+252	Duplicate elemental weakness audit: 
+253	No reviewed method is available for this encounter.
+254	Slayer boss catalog is unavailable
+255	Null Slayer boss definition
+256	Encounter definition uses a non-boss variant: 
+257	Boss definition has no target name
+258	Boss definition has no location: 
+259	Boss definition has no display label: 
+260	shellbane gryphon
+261	vorkath-melee
+262	vorkath-ranged
+263	royal titans
+264	skeletal wyverns
+265	bow of faerdhinen
+266	kril-ranged
+267	kril-melee
+268	grotesque guardians
+269	the grotesque guardians
+270	tumeken s shadow
+271	the kalphite queen
+272	kalphite-magic
+273	kalphite-melee
+274	maggot king
+275	melee-magic-defence
+276	melee-prayer
+277	ranged-prayer
+278	royal-titans
+279	soulreaper axe
+280	wilderness-magic
+281	wilderness-melee
+282	wilderness-ranged
+283	Missing equipment list: 
+284	Missing equipment profile: 
+285	slayer-equipment-lists.tsv
+286	slayer-equipment-profiles.tsv
+287	slayer-loadout-lists.tsv
+288	slayer-loadout-arrays.tsv
+289	Automatic compared the reviewed viable combat styles against 
+290	your real bank, inventory, and equipped items. 
+291	 produced the strongest owned setup for this method. 
+292	necklace of anguish
+293	amulet of rancour
+294	amulet of fury
+295	amulet of torture
+296	salve amulet ei
+297	salve amulet e
+298	salve amulet i
+299	webweaver bow
+300	chinchompa
+301	amethyst javelin
+302	rune javelin
+303	atlatl dart
+304	hunters sunlight crossbow
+305	moonlight antler bolts
+306	sunlight antler bolts
+307	dragonstone dragon bolts e
+308	dragonstone bolts e
+309	ruby dragon bolts e
+310	diamond dragon bolts e
+311	amethyst broad bolts
+312	scythe of vitur
+313	toxic blowpipe
+314	sanguinesti staff
+315	tzkal slayer helmet
+316	vampyric slayer helmet
+317	tztok slayer helmet
+318	Slayer helmet / black mask
+319	Ranged amulet
+320	No off-hand selected until a compatible weapon is found
+321	Two-handed weapon � no off-hand
+322	Ranged off-hand
+323	Defender / shield
+324	Ruby dragon bolts (e)
+325	Safe araxyte ammunition
+326	Atlatl darts
+327	Enchanted dragonstone bolts
+328	Cost-efficient owned arrows
+329	scorching bow
+330	3rd age bow
+331	Best owned arrows for the Inferno
+332	Ghommal's lucky penny
+333	ghommal s lucky penny
+334	ghommals lucky penny
+335	rada s blessing 2
+336	rada s blessing 1
+337	unholy blessing
+338	honourable blessing
+339	(?:dharok%7Cguthan%7Ctorag%7Cverac) s .+ 0
+340	vambraces
+341	defender hilt
+342	Dizana's quiver / Ava's assembler
+343	arcane spirit shield
+344	malediction ward
+345	ancient wyvern shield
+346	elysian spirit shield
+347	toktz ket xile
+348	eye of ayak
+349	zaryte crossbow
+350	guthixian temple teleport
+351	Lit sapphire lantern
+352	divine rune pouch
+353	Book of the dead
+354	Crush punish weapon
+355	melee body switch
+356	melee legs switch
+357	melee defender switch
+358	abyssal bludgeon
+359	dual macuahuitl
+360	eclipse atlatl
+361	magic off hand switch
+362	bracelet of slaughter
+363	expeditious bracelet
+364	nechryael
+365	pyrefiend
+366	Giantsoul amulet
+367	giantsoul amulet
+368	Games necklace / POH jewellery box
+369	Cowbell amulet
+370	cowbell amulet
+371	guthixian temple
+372	Guthixian temple teleport
+373	morytania legs 3
+374	morytania legs 4
+375	burning amulet
+376	wilderness obelisk
+377	royal seed pod
+378	Drakan's medallion
+379	drakan s medallion
+380	Amulet of glory
+381	ring of dueling
+382	Ring of dueling
+383	Mort'ton teleport
+384	pollnivneach teleport
+385	Pollnivneach teleport
+386	Zul-andra teleport
+387	zul andra teleport
+388	Xeric's talisman
+389	xeric s talisman
+390	karuulm
+391	Rada's blessing
+392	Dramen or lunar staff
+393	teleport to house
+394	Slayer helmet or black mask
+395	magic-damage weapon and prayer/magic gear
+396	ranged weapon, ammo, and ranged armour
+397	melee weapon and strength gear
+398	task-appropriate combat switches
+399	runes or rune pouch
+400	Magic boost and prayer potions
+401	ranging/prayer potions
+402	super combat/prayer potions
+403	combat-switch potions and prayer supplies
+404	No food: the reviewed method expects zero incoming damage 
+405	while its protection method is maintained
+406	extended stamina potion (regular stamina fallback)
+407	multicannon pieces and cannonballs
+408	Bank not scanned � open it once
+409	not carried; bank unknown
+410	all pieces and ammo found
+411	not fully carried; bank unknown
+412	Equipped setup detected
+413	Desert heat protection
+414	circlet of water
+415	desert amulet 4
+416	waterskin 4
+417	waterskin 3
+418	waterskin 2
+419	waterskin 1
+420	Stone-protection boots
+421	boots of stone
+422	boots of brimstone
+423	amethyst broad arrows
+424	slayer s staff e
+425	slayer s staff
+426	toxic staff of the dead
+427	Leaf-bladed weapon
+428	leaf bladed battleaxe
+429	leaf bladed sword
+430	leaf bladed spear
+431	fossil island wyvern
+432	Wyvern-protection shield
+433	Dragonfire shield protection
+434	grotesque guardian
+435	kalphite lair
+436	zamorak 
+437	blessed body
+438	blessed coif
+439	blessed chaps
+440	blessed vambraces
+441	blessed boots
+442	imbued god cape
+443	imbued (?:saradomin%7Cguthix%7Czamorak)(?: max)? cape
+444	(?:saradomin%7Cguthix%7Czamorak)(?: max)? cape
+445	dizana s quiver
+446	(?:blessed )?dizana s (?:quiver%7Cmax cape)(?: [a-z0-9]+)*
+447	dizana s max cape
+448	assembler max cape
+449	infernal max cape
+450	mythical cape
+451	mythical max cape
+452	ardougne cloak 4
+453	ardougne max cape
+454	mystic staff
+455	barrows platebody
+456	verac s brassard
+457	barrows platelegs
+458	verac s plateskirt
+459	(?:dharok%7Cguthan%7Ctorag) s 
+460	(?: [a-z0-9]+)*
+461	(?:attack%7Cstrength%7Cdefence%7Cranging%7Cprayer%7Cmagic%7Crunecraft%7C
+462	construction%7Chitpoints%7Cagility%7Cherblore%7Cthieving%7Ccrafting%7C
+463	fletching%7Cslayer%7Chunter%7Cmining%7Csmithing%7Cfishing%7Ccooking%7C
+464	firemaking%7Cwoodcutting%7Cfarming%7Csailing%7Cquest point%7Cmusic%7C
+465	achievement diary) cape(?: t)?
+466	slayer-requirements.tsv
+467	Missing loadout list: 
+468	Missing loadout array: 
+469	Duplicate loadout list: 
+470	Duplicate loadout array: 
+471	thermonuclear smoke devil
+472	Disturb a regular whirlpool, keep Protect from Magic active, and use the selected
+473	Ice Barrage or Ice Burst
+474	Tagging darts/knives
+475	suqahs
+476	blighted super restore
+477	Blighted high-healing food
+478	blighted anglerfish
+479	blighted manta ray
+480	blighted karambwan
+481	Level-30 Wilderness escape
+482	dragonstone teleport scroll
+483	bloodvelds
+484	fossil island wyverns
+485	lithkren
+486	antidote plus plus
+487	antidote plus
+488	superantipoison
+489	bullseye lantern
+490	Armadyl protection
+491	armadyl pendant
+492	armadyl bracers
+493	armadyl d hide boots
+494	armadyl d hide body
+495	armadyl chaps
+496	armadyl cloak
+497	Zamorak protection
+498	unholy book
+499	zamorak bracers
+500	zamorak d hide boots
+501	zamorak d hide body
+502	zamorak chaps
+503	zamorak cloak
+504	meiyerditch
+505	buccaneer
+506	High Level Alchemy
+507	stronghold of security
+508	Missing researched boss inventory policy: 
+509	Water / Fire spells
+510	Water Surge or Water Wave
+511	Earth Surge or Earth Wave
+512	Fire Surge or Fire Wave
+513	Wind Surge or Wind Wave
+514	abyssal demons
+515	abyssal demon
+516	nechryaels
+517	amoxliatl
+518	phantom muspah
+519	the phantom muspah
+520	alchemical hydra
+521	the alchemical hydra
+522	; keep a thrall active and use Ward of Arceuus/Death Charge when useful
+523	; keep a thrall active and use Death Charge
+524	; keep a thrall active
+525	Keep Protect from Missiles active, stack the group with a cannon, then Ice Barrage
+526	Keep Protect from Missiles active and use the selected ranged setup; cannon where
+527	Keep Protect from Missiles active and use the selected setup; cannon where allowed.
+528	Use Blood Barrage for sustain; protection prayers do not reduce Thermy's typeless
+529	Blood Barrage or Blood Burst
+530	Freeze Thermy, move beyond its 8-tile range, then use Shadow on Longrange; refreeze
+531	 before it reaches you.
+532	Best available ice spell
+533	Ice ancient sceptre
+534	ice ancient sceptre
+535	ancient sceptre
+536	Attack from range and step underneath between attacks when Thermy closes in;
+537	 protection prayers do not help.
+538	Attack once, step underneath between attacks, then step back out when ready;
+539	Use the reviewed setup and follow the encounter's required protection and positioning.
+540	Bind and kite K'ril with Scorching bow, Protect from Missiles, then stack the
+541	 bodyguards and Blood Barrage them for healing.
+542	Use demonbane melee, Protect from Melee, and step under or reposition between
+543	Use the selected door-altar or kite cycle, keep the tile rhythm, and clean up the
+544	Protect from Melee, step under as required, and clean up the bodyguards after the
+545	slayer-boss-method-guidance.tsv
+546	Duplicate boss method: 
+547	OSRS Wiki: 
+548	OSRS Wiki: Slayer task/
+549	revenant caves
+550	NOT LOGGED IN
+551	Create or update bank tag
+552	Report a bug on Discord
+553	Open the SlayerPlus Discord to report a bug
+554	Preferences apply immediately to your recommendation and bank tag.
+555	Choose the assignment workflow independently from your loadout preferences.
+556	Every 10th task
+557	Complete nine fast Turael or Aya tasks, then take the milestone task from this master.
+558	LOADOUT PREFERENCES
+559	Controls how valid gear, supplies, and task methods are ranked.
+560	pointBoostBonusMaster
+561	Rebuilding the bank layout for the selected encounter.
+562	Amethyst darts
+563	Create or replace the SlayerPlus Current bank tag
+564	Open your bank once to finish this setup.
+565	Ancient Magicks ready �
+566	Ancient Magicks �
+567	Preparation required �
+568	Use the selected reviewed combat setup and follow the task's protection and positioning
+569	Pass through the glowing Hot vent door. SlayerPlus will start the local Zuk-bank
+570	 route after you cross.
+571	at the task area
+572	shortest path is comparing
+573	start a guided session
+574	Enable Shortest Path routing in SlayerPlus settings first
+575	Enable Shortest Path routing in settings.
+576	Log in to start a guided Slayer session
+577	Log in to start a Slayer session.
+578	opened the real slayerplus
+579	Open your bank to create the layout.
+580	Bank Tag Layouts is unavailable.
+581	No usable teleport was found for this route.
+582	The previously selected teleport is no longer owned, so it was omitted from the bank
+583	Teleport omitted because it is no longer owned.
+584	A real Bank Tags layout will be created inside your bank
+585	Click the light creature → Into the chasm
+586	Teleport to Mor Ul Rek. Shortest Path starts after you land.
+587	Use it on a light creature, descend, run south, climb both walls, then enter the
+588	After landing, run south, climb both walls, then enter the skull.
+589	routeCheckpointV3.r
+590	tzhaar ket yil
+591	Start a guided session to route through your Slayer task
+592	slayerplus_sidebar_v2.png
+593	ancient guthixian temple
+594	Light creature → Into the chasm
+595	Click the attracted light creature and choose Into the chasm.
+596	The light creature is ready — click it and choose Into the chasm.
+597	the light creature is attracted to your beam and comes towards you
+598	KONAR_FOCUSED
+599	Session stopped because Shortest Path routing is disabled
+600	Bracelet of slaughter
+601	Expeditious bracelet
+602	Unable to process Shortest Path transport response
+603	Follow the transport selected by Shortest Path. No unrelated inventory teleport will be
+604	Using the selected carried teleport
+605	<col=00ff00>
+606	Unable to capture SlayerPlus portrait; retrying later
+607	Unable to restore portrait pose after scene transition
+608	Loadout scanner unavailable
+609	Encounter/profile changed
+610	Saved {} owned Slayer helmet variants
+611	Unable to save owned Slayer helmet snapshot
+612	Loaded {} owned Slayer helmet variants
+613	Unable to load owned Slayer helmet snapshot
+614	Ignoring invalid Slayer helmet snapshot item id: {}
+615	Saved Inferno travel-item bank snapshot: {}
+616	Unable to save Inferno travel-item bank snapshot
+617	Loaded Inferno travel-item bank snapshot: {}
+618	Migrated Inferno travel-item snapshot from SlayerPlus layout: {}
+619	Ignoring invalid Inferno travel-item bank snapshot
+620	Unable to load Inferno travel-item bank snapshot
+621	the staging strip above the 4 x 7 until the Inferno bank is opened
+622	Bank Tag slot 1
+623	Using this owned item for Shortest Path's selected route and including it when the
+624	 Bank Tag Layout is generated. The item is outlined in green.
+625	Using this owned item for Shortest Path's selected route and including it in 
+626	. The item and exact live teleport menu path are highlighted in green.
+627	Temporary route-specific travel item while Shortest Path finishes calculating. A live
+628	 Shortest Path selection always replaces it.
+629	sailor s amulet
+630	Inferno preparation selected currently observed Ghommal item {}
+631	Inferno preparation selected profile bank-snapshot Ghommal item {}
+632	Unable to resolve remembered Inferno travel item {}
+633	Inferno preparation found no Ghommal item; selecting the Hot vent branch
+634	Mor Ul Rek
+635	Waiting for the exact Shortest Path transport to the Inferno preparation bank; the
+636	 staging item will appear above the 4 x 7 without consuming a combat slot.
+637	Waiting for the exact Shortest Path transport for this route; SlayerPlus will not
+638	 insert a competing teleport.
+639	Opened the existing SlayerPlus Current layout without rebuilding it.
+640	Using the currently owned equivalent state of Shortest Path's selected travel item.
+641	 Panel, highlight, and Bank Tag travel placement remain synchronized.
+642	Guided Slayer session stopped
+643	Required spellbook is not active
+644	TzKal-Zuk task found - preparation starts at the east Mor Ul Rek bank
+645	The complete reviewed loadout is already carried
+646	Active task found — go to a bank to gear up
+647	Session active — get a Slayer task and SlayerPlus will guide the next step
+648	Inferno preparation bank scan replaced the Hot vent branch with Ghommal item {}
+649	Supported Ghommal item found in the open bank
+650	Inferno preparation bank opened
+651	Bank scanned — resuming the active task
+652	Bank opened, but no active task is available
+653	Bank closed — use Ring of shadows -> Lassar Undercity
+654	Bank closed before the Ring of shadows was withdrawn
+655	Bank closed — returning to the unfinished task
+656	Task complete — waiting for the Slayer streak to update before choosing the next
+657	 point-boost master.
+658	New task requires a different spellbook
+659	New TzKal-Zuk task received - preparation starts at the east Mor Ul Rek bank
+660	New task received — go to a bank to gear up
+661	Unable to send a bank route to Shortest Path
+662	. Follow the highlighted route using teleports you carry.
+663	. A usable bank is already nearby — follow the local route and open it.
+664	A different spellbook is required, but no reviewed change route is available
+665	 — scan a bank so owned teleports can be compared
+666	 — use the loaded POH altar to switch to 
+667	. SlayerPlus will route back to a bank after the switch.
+668	spellbook-poh%7C
+669	 — use the highlighted 
+670	. SlayerPlus will verify the loaded altar and continue automatically.
+671	Unable to send the 
+672	 change route to Shortest Path
+673	 — Shortest Path is routing to the reviewed 
+674	 change point using the fastest teleport you own in your inventory or bank. 
+675	Teleport to house
+676	Spellbook changed — return to a bank to finish the loadout
+677	Spellbook changed and the carried loadout is complete
+678	lassar undercity
+679	meiyerditch laboratories
+680	Kalphite Queen
+681	The Kalphite Queen
+682	Kalphite Lair
+683	%7Ctravelpref=
+684	%7Croutecannon=
+685	Waiting for the reviewed encounter arrival signal.
+686	ghommal s hilt
+687	ghommal s avernic defender
+688	The reviewed Inferno preparation bank route is unavailable
+689	Already at the Inferno preparation bank
+690	 - withdraw the Ghommal item shown above the 4 x 7, use Mor Ul Rek, and SlayerPlus
+691	 will start Shortest Path's local Zuk-bank route immediately after you land.
+692	Shortest Path is selecting the best owned route it supports to the east Mor Ul Rek Hot
+693	Unable to send the reviewed east Mor Ul Rek Hot vent door to Shortest Path
+694	 — routing to the east Mor Ul Rek Hot vent door. Pass through the glowing barrier;
+695	 SlayerPlus will then start a separate collision-checked route to the Zuk bank.
+696	Unable to send the separate Inferno-entrance approach segment to Shortest Path
+697	 — 28-slot Inferno setup is ready. Routing separately to the reviewed Inferno
+698	 entrance approach; SlayerPlus will switch to an exact tile beside TzHaar-Ket-Keh
+699	Unable to send the exact Inferno entrance route to Shortest Path
+700	 — 28-slot Inferno setup is ready. Routing to a collision-checked tile beside
+701	 TzHaar-Ket-Keh; enter the Inferno from there.
+702	Enter the Inferno
+703	Follow Shortest Path → Inferno entrance
+704	Use TzHaar-Ket-Keh to begin the Inferno.
+705	The 28-slot setup is ready. Follow the route to TzHaar-Ket-Keh.
+706	No verified Shortest Path target is available for this task location
+707	Wilderness route blocked unless Krystilia assigned the task
+708	Selected Slayer method requires a different spellbook
+709	No verified entrance or current-scene monster checkpoint exists for 
+710	. SlayerPlus will not guess a destination.
+711	 — use Ring of shadows -> Lassar Undercity.
+712	 — use Ring of shadows -> Lassar Undercity; 
+713	Shortest Path could not draw the teleport leg.
+714	Shortest Path is comparing the teleport items in your bank.
+715	 - use the highlighted Spider cave teleport. 
+716	Shortest Path is keeping the cave entrance active and will rebase after you
+717	SlayerPlus will start the cave-entrance walk after you land.
+718	Unable to send the task route to Shortest Path
+719	 — withdraw the highlighted teleport, then follow Shortest Path to 
+720	 — follow Shortest Path to 
+721	the Lassar sinkhole inside Camdozaal
+722	the Palace teleporter inside Lassar Undercity
+723	the level-93 cave under The Hollows
+724	the Port Roberts mooring point
+725	a walkable tile beside the nearest exact 
+726	 — Shortest Path can use teleports in your bank. Withdraw the highlighted teleport
+727	 and follow the route to 
+728	 — follow the route back to 
+729	 Descend into Lassar Undercity; SlayerPlus will continue to the Cathedral after
+730	 Use the teleporter and choose The Cathedral; SlayerPlus will start the
+731	 walking route after you arrive.
+732	 Enter the cave manually; the shortcut must have been cleared once from
+733	 the laboratory side with 78 Mining.
+734	 Summon or board your player-owned boat and sail to Ynysdail.
+735	 SlayerPlus will resume at the island landing and route to the
+736	morytania spider cave
+737	spider cave teleport
+738	skotizo s lair
+739	Skotizo's Lair
+740	 - follow Shortest Path to the central Catacombs altar, then use the highlighted
+741	Use the highlighted Dark totem on the Catacombs altar. Shortest Path will resume
+742	 inside Skotizo's lair.
+743	Use the highlighted Guthixian temple teleport. Shortest Path will resume inside
+744	 beside the Tormented demons.
+745	The required manual entrance item was not found. 
+746	At the light creatures — use the lit Sapphire lantern on one.
+747	Ancient Guthixian Temple
+748	 - use the highlighted Guthixian temple teleport. Shortest Path will resume once
+749	Use it on a light creature, then descend into the chasm.
+750	Follow Shortest Path to a walkable tile beside the nearest light creature; a lit
+751	 Sapphire lantern is required.
+752	Tears of Guthix
+753	Shortest Path is comparing a carried Games necklace, a POH jewellery box route, and
+754	 the overland fallback.
+755	 - routing to Tears of Guthix. Fastest available order is direct Games necklace, POH
+756	 jewellery box, then the overland cave route. Bring the lit Sapphire lantern shown
+757	 in the Bank Tag.
+758	The next wall or skull entrance has not loaded yet.
+759	Inside the lower chasm — continue south until the next stone wall loads.
+760	Climb the stone wall
+761	Use the highlighted interaction, then the next route segment will appear.
+762	Follow Shortest Path to the next required interaction.
+763	Follow Shortest Path to 
+764	Task complete, but the last-used Slayer master route is unavailable
+765	Task complete — the fastest Slayer-master teleport is in your bank
+766	Shortest Path is selecting the fastest carried or bank-owned teleport for your
+767	Shortest Path is selecting the carried teleport for your Slayer master.
+768	Inside Wyrmscraig Cavern — routing locally to Mortimer.
+769	Inside Wyrmscraig Cavern, but the local route to Mortimer could not be drawn.
+770	Withdraw the highlighted Slayer ring, then use Wyrmscraig Cavern. Routing will
+771	 resume inside to Mortimer.
+772	Use the highlighted Slayer ring -> Wyrmscraig Cavern. Routing will resume inside
+773	Carry a Slayer ring with the Wyrmscraig Cavern teleport to return to Mortimer.
+774	Unable to send the Slayer master route to Shortest Path
+775	Task complete — routing to 
+776	 using the open bank and teleports you carry.
+777	 using teleports you carry.
+778	Point boosting — routing to 
+779	 SlayerPlus will route you back if you leave before finishing.
+780	Assigned task requires a different spellbook
+781	Assigned task detected after leaving the Slayer master
+782	Assigned task detected — routing to the nearest bank
+783	Teleport detected — recalculating the nearest bank from your landing point
+784	Use the loaded POH altar to switch to 
+785	Use the highlighted cape -> Teleport to house. SlayerPlus will verify the altar
+786	 after the POH loads.
+787	POH altar found — use it to switch to 
+788	. SlayerPlus will continue after the switch.
+789	POH loaded — checking its spellbook altar.
+790	The loaded POH has no compatible altar — using the reviewed world change point
+791	Travel detected — recalculating the spellbook-change route
+792	 SlayerPlus will continue automatically after the spellbook changes.
+793	Routing to the reviewed 
+794	Use the highlighted Slayer ring -> Wyrmscraig Cavern.
+795	Wyrmscraig Cavern reached — routing locally to Mortimer.
+796	Wyrmscraig Cavern reached, but the local route to Mortimer could not be drawn.
+797	 — get a new task and SlayerPlus will route you to a bank
+798	Mor Ul Rek reached, but SlayerPlus could not start the separate local route to
+799	 TzHaar-Ket-Yil.
+800	Open the east Mor Ul Rek bank
+801	Open the bank beside TzHaar-Ket-Yil to finalize the Inferno setup.
+802	Routing to a collision-checked tile beside TzHaar-Ket-Yil at the east Mor Ul Rek
+803	 (Zuk) bank — open the bank there to finalize the Inferno setup.
+804	At the east Mor Ul Rek Hot vent door — Pass through the glowing barrier.
+805	 SlayerPlus will detect the reachable banker and start the local Zuk-bank
+806	Routing to the east Mor Ul Rek Hot vent door; pass the glowing barrier there to
+807	 enter the Zuk-bank side.
+808	Mor Ul Rek reached — Shortest Path is now routing locally to its exact east
+809	 Mor Ul Rek bank destination; SlayerPlus will lock onto TzHaar-Ket-Yil
+810	 as soon as he is loaded.
+811	Mor Ul Rek reached, but SlayerPlus could not hand the local Zuk-bank walk to
+812	Use the highlighted Ghommal -> Mor Ul Rek teleport. Shortest Path cannot model that
+813	 teleport itself; SlayerPlus will hand it the bank walk after you land.
+814	East Mor Ul Rek Zuk-bank destination reached — waiting for TzHaar-Ket-Yil to load,
+815	 then SlayerPlus will finish on an exact collision-safe banker tile.
+816	Routing to Shortest Path's exact east Mor Ul Rek (Zuk) bank destination for
+817	Use the highlighted Spider cave teleport. Shortest Path will start at the cave
+818	 entrance after you land.
+819	Spider cave teleport landing reached
+820	Use Ring of shadows -> Lassar Undercity.
+821	Lassar Undercity reached
+822	Follow Shortest Path to the Palace teleporter, then choose The Cathedral.
+823	Cathedral teleporter reached
+824	Continuing the reviewed encounter route
+825	Inferno preparation is not finalized
+826	Inferno setup is ready — routing to the reviewed Inferno entrance approach so
+827	 TzHaar-Ket-Keh can load.
+828	At TzHaar-Ket-Keh — enter the Inferno. The 28-slot loadout is ready.
+829	Routing to a collision-checked tile beside TzHaar-Ket-Keh for Inferno entry.
+830	Waiting for the exact reviewed transition or 
+831	Following the reviewed encounter route.
+832	At the Lassar sinkhole — descend into the Undercity. SlayerPlus will continue
+833	 to the Cathedral after it loads.
+834	At the level-93 cave under The Hollows — enter it manually. It must have
+835	 been cleared once from the laboratory side with 78 Mining.
+836	Routing through Camdozaal to the Lassar sinkhole.
+837	Routing through the Myreque tunnels to the level-93 Meiyerditch cave
+838	 — routing to the exact reviewed dwarf multicannon setup tile.
+839	 — routing to a collision-checked tile beside the nearest exact 
+840	Using the versioned locally verified 
+841	 — following the reviewed interior route toward 
+842	You left the unfinished task area — routing to the nearest bank before returning
+843	Point boosting resumes after this existing assignment.
+844	Enable Shortest Path routing in SlayerPlus settings to start a session
+845	Start a session to route to a bank, gear up, and travel to your task
+846	Start a session to route to 
+847	Unable to read RuneLite Slayer profile key {}
+848	Unable to read SlayerPlus profile key {}
+849	Unable to store the last Slayer master
+850	Unable to read Slayer task from the game database
+851	Unable to read Slayer area from the game database
+852	Non-Wilderness recommendation
+853	Turael/Aya point boosting uses the current Wiki point-farming 
+854	location, the lowest practical monster variant, an expeditious 
+855	bracelet when owned, and a cannon only when the selected area 
+856	Turael/Aya point-boost route
+857	No non-Wilderness match
+858	Check the assignment with your Slayer master
+859	Safety rule blocked a Wilderness route because Krystilia is not the selected master.
+860	Do not route into the Wilderness
+861	Assigned-area data needs verification
+862	Wilderness blocked unless Krystilia assigned it
+863	Konar fixes the destination. Your combat preferences still shape the recommended
+864	 method and cannon guidance.
+865	The assignment fixes the destination, so preferences are applied only to the
+866	Use the monster inside the assigned area
+867	Konar — assigned area required
+868	Wilderness Slayer Cave
+869	Wilderness God Wars Dungeon
+870	Nearest matching Wilderness spawn
+871	Krystilia overrides the normal Wilderness block. Safety and low carried risk take priority
+872	 over the normal profile score. 
+873	Start from Ferox Enclave and use the safest route
+874	Krystilia assignment active
+875	Wilderness — protect-item planning required
+876	The task has a Wiki-reviewed fallback destination and loadout. 
+877	Task-specific equipment and inventory audit active
+878	Krystilia Wilderness task
+879	The task has a reviewed combat profile, but its preferred travel destination has
+880	 not been added to the route catalog yet. 
+881	No generated loadout is available until this task is individually reviewed. 
+882	Use the nearest unlocked standard task location
+883	Task-specific equipment profile active
+884	Wilderness locations excluded
+885	The highest-scoring catalog option is locked by an access requirement. 
+886	basilisk knight
+887	minigame teleport
+888	 profile selected this unlocked option
+889	 for its stronger loot and supply-efficiency potential
+890	 for maximum kill-speed potential without a gear-cost penalty
+891	; cannon preference increased its score
+892	; it naturally avoids cannon use
+893	; burst/barrage preference increased its score
+894	; it avoids burst/barrage
+895	; shard preference selected a valid shard-producing area
+896	. Travel was ranked by 
+897	iorwerth dungeon
+898	Check assigned-area rules
+899	Locked — complete Dwarf Cannon
+900	Xeric's talisman to Xeric's Heart
+901	Slayer ring to Slayer Tower
+902	fremennik slayer dungeon
+903	Slayer ring to Fremennik Slayer Dungeon
+904	stronghold slayer cave
+905	Slayer ring to Stronghold Slayer Cave
+906	Rada's blessing to Mount Karuulm
+907	Games necklace to Barbarian Outpost, then run north
+908	lunar isle
+909	Drakan's medallion to Darkmeyer, then enter the laboratories
+910	Trouble Brewing minigame teleport, then run east
+911	wilderness god wars
+912	Cemetery teleport or Wilderness obelisk, then enter the Wilderness God Wars Dungeon
+913	Trollheim teleport, then enter God Wars Dungeon
+914	brimhaven dungeon
+915	House teleport to Brimhaven, then run south
+916	taverley dungeon
+917	Falador teleport, then run northwest
+918	Use the nearest unlocked teleport to the assigned area
+919	kalphite slayer cave
+920	smoke devil dungeon
+921	slayer-task-locations.tsv
+922	Invalid task-location row type: 
+923	Duplicate task-location alias 
+924	Task-location resource is empty
+925	harpie bug swarms
+926	Telekinetic Grab / High Level Alchemy
+927	Fast Slash lure-severing weapon
+928	saradomin godsword
+929	abyssal whip
+930	blade of saeldor
+931	dragon scimitar
+932	rune scimitar
+933	dragon dagger p plus plus
+934	dragon dagger p plus
+935	slayer-regular-inventory.tsv
+936	Duplicate regular inventory audit: 
+937	slayer-route-plans.tsv
+938	Invalid or duplicate route key 
+939	Route-plan resource is empty
+940	Invalid route-plan resource line 
+941	Pray at the altar inside the Ancient Pyramid to switch spellbooks.
+942	Pray at the Astral Altar to switch spellbooks.
+943	Do not use the Dark Altar itself. Talk to Tyss beside it and ask to activate the Arceuus
+944	Do not use the Dark Altar itself. Talk to Tyss beside it and ask him to lift the Arceuus
+945	abyssal sire
+946	the abyssal sire
+947	dagannoth kings
+948	duke sucellus
+949	the maggot king
+950	the thermonuclear smoke devil
+951	Slayer NPC alias catalog contains an incomplete task: 
+952	Slayer NPC alias catalog contains a blank alias: 
+953	Boss exclusion is not present in the base NPC aliases: 
+954	Boss NPC leaked into a standard Slayer route: 
+955	slayer-task-npcs.tsv
+956	Invalid NPC alias resource record: 
+957	Conflicting duplicate Slayer NPC exclusion entry: 
+958	Conflicting duplicate Slayer NPC alias entry: 
+959	Slayer setup required
+960	SWITCH SPELLBOOK
+961	Magic preference applied using the current Wiki-listed elemental weakness;
+962	 Automatic keeps the reviewed practical method.
+963	Cannon preference applied because the individually audited task location permits
+964	 a dwarf multicannon.
+965	Reviewed low-risk Wilderness profile applied.
+966	Krystilia assignment: individually reviewed LOW_RISK Wilderness branch applied.
+967	location:ankou:stronghold_slayer_cave
+968	location:ankou:stronghold_of_security
+969	location:abyssal_demons:slayer_tower
+970	location:bloodveld:multi_cannon
+971	location:bloodveld:single_cannon
+972	location:bloodveld:catacombs
+973	location:bloodveld:slayer_tower
+974	location:bloodveld:god_wars
+975	aberrant spectres
+976	location:aberrant_spectres:stronghold_slayer_cave
+977	location:aberrant_spectres:catacombs
+978	karuulm slayer dungeon
+979	location:hellhounds:cannon
+980	location:hellhounds:catacombs
+981	location:greater_demons:cannon
+982	location:nechryael:iorwerth
+983	Research pending — loadout disabled
+984	 has not yet passed individual strategy review. SlayerPlus will not invent a
+985	Wilderness research pending — loadout disabled
+986	 has no individually reviewed Krystilia profile. The normal-task profile is
+987	 never reused in the Wilderness.
+988	slayer-task-strategies.tsv
+989	Duplicate Slayer strategy id 
+990	Invalid Slayer profile mapping at row 
+991	Unknown Slayer strategy id 
+992	Invalid Slayer strategy row 
+993	: expected an S or P record
+994	Unable to load reviewed Slayer strategies
+995	Invalid Slayer strategy at row 
+996	slayer-task-aliases.tsv
+997	Incomplete Slayer strategy group 
+998	Disabled cannon/burst preferences were enforced with a reviewed compatible fallback.
+999	 applied because this task has a reviewed viable 
+1000	Automatic selected the reviewed 
+1001	 Burst/Barrage preference permits this method.
+1002	 Cannon preference permits this method.
+1003	 Profit uses the efficient-cost equipment policy.
+1004	 Fast XP forces damage gear and MAX_DPS equipment without considering item or charge
+1005	slayer-task-travel-audit.tsv
+1006	ME2 Caves
+1007	Mor-Ul-Rek
+1008	Inner Mor Ul Rek
+1009	Shilo Village gem mine
+1010	Tele to POH
+1011	Teleport to POH
+1012	Kourend & Kebos
+1013	Lumbridge & Draynor
+1014	Twiggy O'Korn
+1015	gnome stronghold caves
+1016	Gnome Stronghold Caves
+1017	Slayer Stronghold
+1018	morytania slayer tower
+1019	Morytania Slayer Tower
+1020	rellekka slayer caves
+1021	rellekka caves
+1022	Rellekka Slayer Caves
+1023	Rellekka Caves
+1024	tarn s lair
+1025	Wyrmscraig Caverns
+1026	wyrmscraig cavern
+1027	wyrmscraig caverns
+1028	inner mor ul rek
+1029	shilo village gem mine
+1030	shilo village mine
+1031	mount karuulm
+1032	tele to poh
+1033	tele to poh 
+1034	teleport to poh
+1035	teleport to house 
+1036	teleport to poh 
+1037	([a-z0-9])([A-Z])
+1038	(?i)<[^>]+>
+1039	slayer-task-research.tsv
+1040	Duplicate Slayer research entry: 
+1041	Use a task-appropriate setup
+1042	Task-specific combat profile
+1043	Highlighted live Ghommal destination widget {} (group {})
+1044	mor ul rek east bank
+1045	prifddinas
+1046	Travel fallback has a blank location
+1047	Travel fallback location has no options: 
+1048	Travel fallback has an incomplete option: 
+1049	Travel fallback is authored as an unusable item state: 
+1050	Duplicate travel fallback: 
+1051	Slayer ring (8)
+1052	Travel regression: Iorwerth Dungeon accepted a Slayer ring route
+1053	Travel regression: Mourner Tunnels rejected the reviewed ME2 Caves route
+1054	Travel regression: POH physical-item preference must be Max cape > Construction cape >
+1055	Mor Ul Rek east bank
+1056	Ghommal's hilt 6
+1057	Xeric's Heart
+1058	Travel regression: external teleport handoff classification is incorrect
+1059	ghommal s hilt 6
+1060	Travel regression: Inferno prep-bank fallback no longer starts with Ghommal's hilt 6 ->
+1061	 Mor Ul Rek
+1062	slayer-travel-routes.tsv
+1063	Invalid travel route alias: 
+1064	Invalid travel route record type: 
+1065	slayer-turael-boost.tsv
+1066	slayer-task-variants.tsv
+1067	Invalid task-variant row type: 
+1068	Task-variant resource is empty
+1069	Cave Kraken Boss
+1070	The Cave Kraken Boss
+1071	Boss definition requires a boss variant
+1072	Boss variant does not belong to this assignment
+1073	 — strategy review pending
+1074	Arceuus ready • 
+1075	Preparation required • 
+1076	Ancient Magicks ready • 
+1077	Two-handed weapon — no off-hand
+1078	Bank not scanned — open it once
+1079	Ancient Magicks ready •
+1080	Ancient Magicks •
+1081	Preparation required •

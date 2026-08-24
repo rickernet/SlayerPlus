@@ -68,7 +68,7 @@ public class SlayerRoutePlanCatalogTest
 	@Test
 	public void catalogHasEveryAuditedExactKeyWithNoBossAssignmentFallback()
 	{
-		assertEquals(AUDITED.length, SlayerRoutePlanCatalog.keysForRegression().size());
+		assertEquals(AUDITED.length, SlayerRoutePlanCatalog.keysForTest().size());
 		assertEquals(AUDITED.length, SlayerRoutePlanCatalog.allPlans().size());
 		for (final Expected expected : AUDITED)
 		{
@@ -76,7 +76,7 @@ public class SlayerRoutePlanCatalogTest
 				expected.task, expected.location, expected.boss));
 			assertTrue(SlayerRoutePlanCatalog.hasExactPlan(
 				expected.task, expected.location, expected.boss));
-			assertTrue(SlayerRoutePlanCatalog.hasExplicitPlanForRegression(
+			assertTrue(SlayerRoutePlanCatalog.hasExplicitPlanForTest(
 				expected.task, expected.location, expected.boss));
 			assertNull(SlayerRoutePlanCatalog.resolve(
 				expected.task, expected.location, !expected.boss));
@@ -100,8 +100,8 @@ public class SlayerRoutePlanCatalogTest
 	@Test
 	public void exportedKeysAndPlansAreImmutable()
 	{
-		assertImmutable(SlayerRoutePlanCatalog.keysForRegression());
-		assertImmutable(SlayerRoutePlanCatalog.plansForRegression());
+		assertImmutable(SlayerRoutePlanCatalog.keysForTest());
+		assertImmutable(SlayerRoutePlanCatalog.plansForTest());
 		assertImmutable(SlayerRoutePlanCatalog.allPlans());
 	}
 

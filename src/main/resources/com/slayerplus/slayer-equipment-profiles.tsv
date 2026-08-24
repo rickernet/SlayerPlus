@@ -22,3 +22,9 @@ araxxor	e137	e138	e140	e143	e142	e074	e075	e145	e144
 wilderness-ranged	e032	e033	e034	e146	e035	e036	e037	e038	-
 wilderness-magic	e147	e148	e149	e153	e150	e151	e152	e038	-
 wilderness-melee	e154	e155	e156	e159	e157	e158	e037	e038	-
+blue-ranged	e012	e013	e014	e044	e015	e016	e017	e018	-
+blue-magic	e022	e023	e024	e044	e025	e026	e027	e028	-
+blue-melee	e001	e002	e003	e009	e004	e005	e006	e007	-
+vorkath-ranged	e012	e013	e014	e044	e015	e110	e017	e059	-
+vorkath-melee	e001	e002	e003	e009	e004	e113	e006	e160	-
+inferno	e012	e013	e014	e019	e015	e110	e017	e018	-

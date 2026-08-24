@@ -26,7 +26,7 @@ public class ShortestPathResponseCorrelationTest
 			new WorldPoint(3200, 3200, 0),
 			new WorldPoint(3300, 3300, 0)
 		);
-		final ShortestPathBridge.TransportRequestToken request =
+		final ShortestPathBridge.RequestToken request =
 			bridge.claimPendingTransportResponse();
 		assertNotNull(request);
 
@@ -43,7 +43,7 @@ public class ShortestPathResponseCorrelationTest
 		malformed.put("displayInfo", Collections.singletonList(
 			"Games necklace: Burthorpe"
 		));
-		final ShortestPathBridge.TransportRequestToken malformedClaim =
+		final ShortestPathBridge.RequestToken malformedClaim =
 			bridge.claimPendingTransportResponse();
 		assertNotNull(malformedClaim);
 		assertFalse(bridge.tryAcceptTransportResponse(
@@ -51,7 +51,7 @@ public class ShortestPathResponseCorrelationTest
 		));
 
 		/* A rejected payload does not consume the live request. */
-		final ShortestPathBridge.TransportRequestToken validClaim =
+		final ShortestPathBridge.RequestToken validClaim =
 			bridge.claimPendingTransportResponse();
 		assertNotNull(validClaim);
 		assertTrue(bridge.tryAcceptTransportResponse(
@@ -71,7 +71,7 @@ public class ShortestPathResponseCorrelationTest
 			new WorldPoint(3200, 3200, 0),
 			new WorldPoint(3300, 3300, 0)
 		);
-		final ShortestPathBridge.TransportRequestToken request =
+		final ShortestPathBridge.RequestToken request =
 			bridge.claimPendingTransportResponse();
 		final Map<String, Object> response = transportPayload(
 			new WorldPoint(3200, 3200, 0),
@@ -92,7 +92,7 @@ public class ShortestPathResponseCorrelationTest
 			new WorldPoint(3200, 3200, 0),
 			new WorldPoint(3300, 3300, 0)
 		);
-		final ShortestPathBridge.TransportRequestToken request =
+		final ShortestPathBridge.RequestToken request =
 			bridge.claimPendingTransportResponse();
 
 		assertNotNull(request);
@@ -123,9 +123,10 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
+			true,
 			true
 		));
-		final ShortestPathBridge.TransportRequestToken first =
+		final ShortestPathBridge.RequestToken first =
 			bridge.claimPendingTransportResponse();
 		assertNotNull(first);
 		assertTrue(bridge.tryAcceptTransportResponse(
@@ -139,9 +140,10 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
-		final ShortestPathBridge.TransportRequestToken second =
+		final ShortestPathBridge.RequestToken second =
 			bridge.claimPendingTransportResponse();
 		assertNotNull(second);
 		assertTrue(bridge.tryAcceptTransportResponse(
@@ -162,7 +164,7 @@ public class ShortestPathResponseCorrelationTest
 			new WorldPoint(3200, 3200, 0),
 			new WorldPoint(3300, 3300, 0)
 		);
-		final ShortestPathBridge.TransportRequestToken queued =
+		final ShortestPathBridge.RequestToken queued =
 			bridge.claimPendingTransportResponse();
 
 		assertNotNull(queued);
@@ -195,9 +197,10 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
-		final ShortestPathBridge.TransportRequestToken first =
+		final ShortestPathBridge.RequestToken first =
 			bridge.claimPendingTransportResponse();
 		assertTrue(bridge.routeToTaskArea(
 			start,
@@ -205,9 +208,10 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
-		final ShortestPathBridge.TransportRequestToken second =
+		final ShortestPathBridge.RequestToken second =
 			bridge.claimPendingTransportResponse();
 
 		assertEquals(
@@ -228,7 +232,7 @@ public class ShortestPathResponseCorrelationTest
 			),
 			messageNames
 		);
-		final ShortestPathBridge.TransportRequestToken secondRetry =
+		final ShortestPathBridge.RequestToken secondRetry =
 			bridge.claimPendingTransportResponse();
 		assertNotNull(secondRetry);
 		assertTrue(bridge.tryAcceptTransportResponse(
@@ -236,7 +240,7 @@ public class ShortestPathResponseCorrelationTest
 			transportPayload(start, new WorldPoint(1210, 1210, 0))
 		));
 		assertEquals(Collections.singleton(secondTarget),
-			secondRetry.getTargetsForRegression());
+			secondRetry.getTargetsForTest());
 	}
 
 	@Test
@@ -260,7 +264,8 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
 		assertTrue(bridge.routeToTaskArea(
 			start,
@@ -268,9 +273,10 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
-		final ShortestPathBridge.TransportRequestToken current =
+		final ShortestPathBridge.RequestToken current =
 			bridge.claimPendingTransportResponse();
 
 		assertNotNull(current);
@@ -304,7 +310,8 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
 		assertTrue(bridge.routeToTaskArea(
 			start,
@@ -312,9 +319,10 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
-		final ShortestPathBridge.TransportRequestToken ambiguous =
+		final ShortestPathBridge.RequestToken ambiguous =
 			bridge.claimPendingTransportResponse();
 
 		assertNotNull(ambiguous);
@@ -329,7 +337,7 @@ public class ShortestPathResponseCorrelationTest
 			messageNames
 		);
 
-		final ShortestPathBridge.TransportRequestToken retry =
+		final ShortestPathBridge.RequestToken retry =
 			bridge.claimPendingTransportResponse();
 		assertNotNull(retry);
 		assertTrue(bridge.tryAcceptTransportResponse(
@@ -376,7 +384,7 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true
 		));
-		final ShortestPathBridge.TransportRequestToken ambiguous =
+		final ShortestPathBridge.RequestToken ambiguous =
 			bridge.claimPendingTransportResponse();
 
 		assertNotNull(ambiguous);
@@ -388,7 +396,7 @@ public class ShortestPathResponseCorrelationTest
 			messageNames
 		);
 
-		final ShortestPathBridge.TransportRequestToken retry =
+		final ShortestPathBridge.RequestToken retry =
 			bridge.claimPendingTransportResponse();
 		assertNotNull(retry);
 		assertTrue(bridge.tryAcceptTransportResponse(retry, response));
@@ -422,7 +430,8 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
 		assertTrue(bridgeRef[0].routeToTaskArea(
 			start,
@@ -430,7 +439,8 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
 
 		assertEquals(1, clearMessages.get());
@@ -464,7 +474,8 @@ public class ShortestPathResponseCorrelationTest
 				true,
 				true,
 				true,
-				true
+				true,
+				false
 			));
 		}
 		assertEquals(1, pathMessages.get());
@@ -481,7 +492,8 @@ public class ShortestPathResponseCorrelationTest
 			true,
 			true,
 			true,
-			true
+			true,
+			false
 		));
 		return bridge;
 	}

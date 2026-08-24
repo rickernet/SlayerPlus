@@ -75,12 +75,12 @@ public final class SlayerCatalogRegressionValidator
 		}
 
 		final Set<String> validatedCoverage = new LinkedHashSet<>();
-		for (final String taskName : SlayerTaskStrategyCatalog.getCurrentTaskNames())
+		for (final String assignment : SlayerTaskStrategyCatalog.getCurrentTaskNames())
 		{
 			final Set<String> locations = new LinkedHashSet<>();
 			locations.add("Not restricted");
 			locations.addAll(
-				SlayerRecommendationEngine.catalogLocationsForValidation(taskName)
+				SlayerRecommendationEngine.catalogLocationsForValidation(assignment)
 			);
 
 			for (final String location : locations)
@@ -98,7 +98,7 @@ public final class SlayerCatalogRegressionValidator
 								: Preference.CombatStyle.values())
 							{
 								validateSelection(
-									taskName,
+									assignment,
 									location,
 									playstyle,
 									cannon,
@@ -156,31 +156,31 @@ public final class SlayerCatalogRegressionValidator
 	private static void validateBankStartRouteCoverage()
 	{
 		final List<String> missing = new ArrayList<>();
-		for (final String taskName : SlayerTaskStrategyCatalog.getCurrentTaskNames())
+		for (final String assignment : SlayerTaskStrategyCatalog.getCurrentTaskNames())
 		{
 			final Set<String> selectableLocations =
-				SlayerRecommendationEngine.catalogLocationsForValidation(taskName);
+				SlayerRecommendationEngine.catalogLocationsForValidation(assignment);
 			if (selectableLocations.isEmpty())
 			{
 				final SlayerTaskTravelAuditCatalog.Entry travel =
-					SlayerTaskTravelAuditCatalog.find(taskName);
+					SlayerTaskTravelAuditCatalog.find(assignment);
 				if (travel == null || normalize(travel.getLocation()).isEmpty())
 				{
-					missing.add(taskName + " @ <no audited travel location>");
+					missing.add(assignment + " @ <no audited travel location>");
 					continue;
 				}
-				if (!hasBankStartRoute(taskName, travel.getLocation(), false))
+				if (!hasBankStartRoute(assignment, travel.getLocation(), false))
 				{
-					missing.add(taskName + " @ " + travel.getLocation());
+					missing.add(assignment + " @ " + travel.getLocation());
 				}
 				continue;
 			}
 
 			for (final String location : selectableLocations)
 			{
-				if (!hasBankStartRoute(taskName, location, false))
+				if (!hasBankStartRoute(assignment, location, false))
 				{
-					missing.add(taskName + " @ " + location);
+					missing.add(assignment + " @ " + location);
 				}
 			}
 		}
@@ -218,17 +218,17 @@ public final class SlayerCatalogRegressionValidator
 	}
 
 	private static boolean hasBankStartRoute(
-		final String taskName,
+		final String assignment,
 		final String location,
 		final boolean boss)
 	{
-		if (RouteCatalog.requiresPreparationBank(taskName, location, boss))
+		if (RouteCatalog.requiresPreparationBank(assignment, location, boss))
 		{
-			return BankRoutes.getInfernoPreparationBankTarget() != null;
+			return BankRoutes.infernoBankTarget() != null;
 		}
 
 		final RouteCatalog.RouteProfile profile = RouteCatalog.resolve(
-			taskName,
+			assignment,
 			location,
 			boss
 		);
@@ -294,7 +294,7 @@ public final class SlayerCatalogRegressionValidator
 				false
 			);
 			if (strategy == null
-				|| !strategy.hasTag(TaskStrategy.MethodTag.BURST_BARRAGE))
+				|| !strategy.hasTag(TaskStrategy.MethodTag.BARRAGE))
 			{
 				throw new IllegalStateException(
 					"Dust Devil " + playstyle + " lost its reviewed Ancient AoE method"
@@ -368,7 +368,7 @@ public final class SlayerCatalogRegressionValidator
 			);
 		}
 		final Map<String, Integer> cerberusRunes = new LinkedHashMap<>();
-		for (final MethodRules.PouchRuneRequirement rune
+		for (final MethodRules.RuneRequirement rune
 			: cerberusRules.getPouchRunes())
 		{
 			cerberusRunes.put(normalize(rune.getName()), rune.getMinimumQuantity());
@@ -385,7 +385,7 @@ public final class SlayerCatalogRegressionValidator
 	}
 
 	private static void validateSelection(
-		final String taskName,
+		final String assignment,
 		final String location,
 		final Preference.Playstyle playstyle,
 		final Preference.Cannon cannon,
@@ -397,7 +397,7 @@ public final class SlayerCatalogRegressionValidator
 		try
 		{
 			final TaskStrategy strategy = SlayerTaskStrategyCatalog.resolve(
-				taskName,
+				assignment,
 				playstyle,
 				cannon,
 				burst,
@@ -408,32 +408,32 @@ public final class SlayerCatalogRegressionValidator
 			if (strategy == null || !strategy.isReviewed())
 			{
 				failures.add(selectionLabel(
-					taskName, location, playstyle, cannon, burst, combat
+					assignment, location, playstyle, cannon, burst, combat
 				) + ": unreviewed/null strategy");
 				return;
 			}
 
 			final MethodRules rules = SlayerMethodRuleCatalog.resolve(
-				taskName,
+				assignment,
 				location,
 				strategy
 			);
 			if (validatedCoverage.add(rules.getCoverageKey()))
 			{
-				rules.validateFor(taskName, strategy);
-				validateMethodContracts(taskName, strategy, rules);
+				rules.validateFor(assignment, strategy);
+				validateMethodContracts(assignment, strategy, rules);
 			}
 		}
 		catch (RuntimeException ex)
 		{
 			failures.add(selectionLabel(
-				taskName, location, playstyle, cannon, burst, combat
+				assignment, location, playstyle, cannon, burst, combat
 			) + ": " + safeMessage(ex));
 		}
 	}
 
 	private static void validateMethodContracts(
-		final String taskName,
+		final String assignment,
 		final TaskStrategy strategy,
 		final MethodRules rules)
 	{
@@ -444,7 +444,7 @@ public final class SlayerCatalogRegressionValidator
 				"cannon strategy has no structured cannon package"
 			);
 		}
-		if (strategy.hasTag(TaskStrategy.MethodTag.BURST_BARRAGE)
+		if (strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)
 			&& (rules.getSpellbook() != MethodRules.Spellbook.ANCIENT
 				|| (!rules.requiresRunePouch() && !strategy.needsRunePouch())
 				|| rules.getPrimarySpell() == null
@@ -458,7 +458,7 @@ public final class SlayerCatalogRegressionValidator
 				== TaskStrategy.DamageProfile.ZERO_WHILE_PROTECTED
 				|| strategy.getDamageProfile()
 				== TaskStrategy.DamageProfile.ZERO_WHILE_SAFESPOTTING)
-			&& rules.resolveFoodSlots(strategy, strategy.getFoodSlots()) != 0)
+			&& rules.resolveFoodSlots(strategy, strategy.getFood()) != 0)
 		{
 			throw new IllegalStateException(
 				"zero-damage method still reserves food"
@@ -466,7 +466,7 @@ public final class SlayerCatalogRegressionValidator
 		}
 
 		final int footprint = mandatoryInventoryFootprint(
-			taskName,
+			assignment,
 			strategy,
 			rules
 		);
@@ -488,11 +488,11 @@ public final class SlayerCatalogRegressionValidator
 	 * not consume extra slots.
 	 */
 	private static int mandatoryInventoryFootprint(
-		final String taskName,
+		final String assignment,
 		final TaskStrategy strategy,
 		final MethodRules rules)
 	{
-		final boolean infernoStaging = "tzkal zuk".equals(normalize(taskName));
+		final boolean infernoStaging = "tzkal zuk".equals(normalize(assignment));
 		int slots = infernoStaging ? 0 : 1;
 		if (rules.usesCannon())
 		{
@@ -501,7 +501,7 @@ public final class SlayerCatalogRegressionValidator
 
 		final boolean runePouchRequested = rules.requiresRunePouch()
 			|| strategy.needsRunePouch()
-			|| (strategy.getCombatStyle() == TaskStrategy.CombatStyle.MAGIC
+			|| (strategy.getStyle() == TaskStrategy.CombatStyle.MAGIC
 				&& rules.includesRunePouchForMagic());
 		int pouchSlotsRemaining = runePouchRequested
 			? (infernoStaging ? 4 : 3)
@@ -516,7 +516,7 @@ public final class SlayerCatalogRegressionValidator
 		}
 
 		final Set<String> structuredRunes = new LinkedHashSet<>();
-		for (final MethodRules.PouchRuneRequirement rune : rules.getPouchRunes())
+		for (final MethodRules.RuneRequirement rune : rules.getPouchRunes())
 		{
 			structuredRunes.add(normalize(rune.getName()));
 			if (pouchSlotsRemaining > 0)
@@ -556,7 +556,7 @@ public final class SlayerCatalogRegressionValidator
 		}
 
 		slots += rules.resolveRestoreSlots(strategy);
-		slots += rules.resolveFoodSlots(strategy, strategy.getFoodSlots());
+		slots += rules.resolveFoodSlots(strategy, strategy.getFood());
 		if (rules.includesStyleBoost())
 		{
 			slots++;

@@ -1,5 +1,4 @@
 package com.slayerplus;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -8,41 +7,17 @@ import javax.inject.Inject;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
-
-class SlayerTravelItemOverlay extends WidgetItemOverlay {
-  private static final Color ROUTE_ITEM_COLOR = new Color(0, 255, 80);
-  private final ItemManager itemManager;
-  private final SlayerPlusPlugin plugin;
-
-  @Inject
-  private SlayerTravelItemOverlay(ItemManager itemManager, SlayerPlusPlugin plugin) {
-    this.itemManager = itemManager;
-    this.plugin = plugin;
-    showOnInventory();
-    showOnBank();
-    showOnEquipment();
-  }
-
-  @Override
-  public Dimension render(Graphics2D graphics) {
-    return plugin.getSelectedTravelItemIdForOverlay() > 0 ? super.render(graphics) : null;
-  }
-
-  @Override
-  public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem widgetItem) {
-    if (graphics == null
-        || widgetItem == null
-        || itemId != plugin.getSelectedTravelItemIdForOverlay()) {
-      return;
-    }
-    Rectangle bounds = widgetItem.getCanvasBounds();
-    if (bounds == null) {
-      return;
-    }
-    graphics.drawImage(
-        itemManager.getItemOutline(itemId, widgetItem.getQuantity(), ROUTE_ITEM_COLOR),
-        bounds.x,
-        bounds.y,
-        null);
-  }
-}
+class SlayerTravelItemOverlay extends WidgetItemOverlay{private static final Color ROUTE_ITEM_COLOR=new Color(0,255,80);
+private final ItemManager itemManager;
+private final SlayerPlusPlugin plugin;
+@Inject private SlayerTravelItemOverlay(ItemManager itemManager,SlayerPlusPlugin plugin){this.itemManager=itemManager;
+this.plugin=plugin;
+showOnInventory();
+showOnBank();
+showOnEquipment();
+}@Override public Dimension render(Graphics2D graphics){return plugin.getSelectedTravelItemIdForOverlay()>0?super.render(graphics):null;
+}@Override public void renderItemOverlay(Graphics2D graphics,int itemId,WidgetItem widgetItem){if(graphics==null||widgetItem==null||itemId!=plugin.getSelectedTravelItemIdForOverlay()){return;
+}Rectangle bounds=widgetItem.getCanvasBounds();
+if(bounds==null){return;
+}graphics.drawImage(itemManager.getItemOutline(itemId,widgetItem.getQuantity(),ROUTE_ITEM_COLOR),bounds.x,bounds.y,null);
+}}

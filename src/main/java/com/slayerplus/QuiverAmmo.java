@@ -1,391 +1,94 @@
 package com.slayerplus;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import static com.slayerplus.Text.text;
+import java.util.*;
+import lombok.Getter;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.client.game.ItemVariationMapping;
-
-class QuiverAmmo {
-  private static final Set<Integer> USABLE_DIZANA_VARIANT_IDS = createUsableDizanaVariantIds();
-
-  private QuiverAmmo() {}
-
-  static boolean isUsableDizanaVariant(int rawItemId) {
-    return rawItemId > 0 && USABLE_DIZANA_VARIANT_IDS.contains(rawItemId);
-  }
-
-  static int preferUsableDizanaVariant(int currentItemId, int candidateItemId) {
-    return dizanaPreference(candidateItemId) > dizanaPreference(currentItemId)
-        ? candidateItemId
-        : currentItemId;
-  }
-
-  private static int dizanaPreference(int rawItemId) {
-    if (!isUsableDizanaVariant(rawItemId)) {
-      return -1;
-    }
-    switch (rawItemId) {
-      case ItemID.SKILLCAPE_MAX_DIZANAS:
-      case ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER:
-        return 400;
-      case ItemID.DIZANAS_QUIVER_INFINITE:
-      case ItemID.DIZANAS_QUIVER_INFINITE_TROUVER:
-        return 300;
-      case ItemID.DIZANAS_QUIVER_CHARGED:
-      case ItemID.DIZANAS_QUIVER_CHARGED_TROUVER:
-        return 200;
-      case ItemID.DIZANAS_QUIVER_UNCHARGED:
-      case ItemID.DIZANAS_QUIVER_UNCHARGED_TROUVER:
-        return 100;
-      default:
-        return 1;
-    }
-  }
-
-  private static Set<Integer> createUsableDizanaVariantIds() {
-    Set<Integer> itemIds = new HashSet<>();
-    addVariationFamily(itemIds, ItemID.DIZANAS_QUIVER_CHARGED);
-    addVariationFamily(itemIds, ItemID.DIZANAS_QUIVER_INFINITE);
-    addVariationFamily(itemIds, ItemID.SKILLCAPE_MAX_DIZANAS);
-    itemIds.remove(ItemID.DIZANAS_QUIVER_BROKEN);
-    itemIds.remove(ItemID.DIZANAS_QUIVER_INFINITE_BROKEN);
-    itemIds.remove(ItemID.SKILLCAPE_MAX_DIZANAS_BROKEN);
-    itemIds.remove(ItemID.SKILLCAPE_MAX_HOOD_DIZANAS);
-    itemIds.remove(ItemID.DIZANAS_QUIVER_TROUVER_BROKEN);
-    itemIds.remove(ItemID.DIZANAS_QUIVER_TROUVER_MANGLED);
-    itemIds.remove(ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_BROKEN);
-    itemIds.remove(ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_MANGLED);
-    itemIds.remove(ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_BROKEN);
-    itemIds.remove(ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_MANGLED);
-    return Collections.unmodifiableSet(itemIds);
-  }
-
-  private static void addVariationFamily(Set<Integer> itemIds, int representativeItemId) {
-    int canonicalItemId = ItemVariationMapping.map(representativeItemId);
-    itemIds.add(canonicalItemId);
-    itemIds.addAll(ItemVariationMapping.getVariations(canonicalItemId));
-  }
-
-  static int normalizeSeekingArrowItemId(int rawItemId) {
-    if (rawItemId <= 0) {
-      return -1;
-    }
-    switch (rawItemId) {
-      case ItemID.SEEKING_BRONZE_ARROW:
-      case ItemID.SEEKING_BRONZE_ARROW_2:
-      case ItemID.SEEKING_BRONZE_ARROW_3:
-      case ItemID.SEEKING_BRONZE_ARROW_4:
-      case ItemID.SEEKING_BRONZE_ARROW_5:
-        return ItemID.SEEKING_BRONZE_ARROW;
-      case ItemID.SEEKING_IRON_ARROW:
-      case ItemID.SEEKING_IRON_ARROW_2:
-      case ItemID.SEEKING_IRON_ARROW_3:
-      case ItemID.SEEKING_IRON_ARROW_4:
-      case ItemID.SEEKING_IRON_ARROW_5:
-        return ItemID.SEEKING_IRON_ARROW;
-      case ItemID.SEEKING_STEEL_ARROW:
-      case ItemID.SEEKING_STEEL_ARROW_2:
-      case ItemID.SEEKING_STEEL_ARROW_3:
-      case ItemID.SEEKING_STEEL_ARROW_4:
-      case ItemID.SEEKING_STEEL_ARROW_5:
-        return ItemID.SEEKING_STEEL_ARROW;
-      case ItemID.SEEKING_MITHRIL_ARROW:
-      case ItemID.SEEKING_MITHRIL_ARROW_2:
-      case ItemID.SEEKING_MITHRIL_ARROW_3:
-      case ItemID.SEEKING_MITHRIL_ARROW_4:
-      case ItemID.SEEKING_MITHRIL_ARROW_5:
-        return ItemID.SEEKING_MITHRIL_ARROW;
-      case ItemID.SEEKING_ADAMANT_ARROW:
-      case ItemID.SEEKING_ADAMANT_ARROW_2:
-      case ItemID.SEEKING_ADAMANT_ARROW_3:
-      case ItemID.SEEKING_ADAMANT_ARROW_4:
-      case ItemID.SEEKING_ADAMANT_ARROW_5:
-        return ItemID.SEEKING_ADAMANT_ARROW;
-      case ItemID.SEEKING_RUNE_ARROW:
-      case ItemID.SEEKING_RUNE_ARROW_2:
-      case ItemID.SEEKING_RUNE_ARROW_3:
-      case ItemID.SEEKING_RUNE_ARROW_4:
-      case ItemID.SEEKING_RUNE_ARROW_5:
-        return ItemID.SEEKING_RUNE_ARROW;
-      case ItemID.SEEKING_AMETHYST_ARROW:
-      case ItemID.SEEKING_AMETHYST_ARROW_2:
-      case ItemID.SEEKING_AMETHYST_ARROW_3:
-      case ItemID.SEEKING_AMETHYST_ARROW_4:
-      case ItemID.SEEKING_AMETHYST_ARROW_5:
-        return ItemID.SEEKING_AMETHYST_ARROW;
-      case ItemID.SEEKING_DRAGON_ARROW:
-      case ItemID.SEEKING_DRAGON_ARROW2:
-      case ItemID.SEEKING_DRAGON_ARROW3:
-      case ItemID.SEEKING_DRAGON_ARROW4:
-      case ItemID.SEEKING_DRAGON_ARROW5:
-        return ItemID.SEEKING_DRAGON_ARROW;
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS:
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS_2:
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS_3:
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS_4:
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS_5:
-        return ItemID.SEEKING_SLAYER_BROAD_ARROWS;
-      default:
-        return rawItemId;
-    }
-  }
-
-  static boolean isSeekingArrow(int itemId) {
-    switch (normalizeSeekingArrowItemId(itemId)) {
-      case ItemID.SEEKING_BRONZE_ARROW:
-      case ItemID.SEEKING_IRON_ARROW:
-      case ItemID.SEEKING_STEEL_ARROW:
-      case ItemID.SEEKING_MITHRIL_ARROW:
-      case ItemID.SEEKING_ADAMANT_ARROW:
-      case ItemID.SEEKING_RUNE_ARROW:
-      case ItemID.SEEKING_AMETHYST_ARROW:
-      case ItemID.SEEKING_DRAGON_ARROW:
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  static String seekingArrowMatchName(int itemId) {
-    switch (normalizeSeekingArrowItemId(itemId)) {
-      case ItemID.SEEKING_BRONZE_ARROW:
-        return "seeking bronze arrow";
-      case ItemID.SEEKING_IRON_ARROW:
-        return "seeking iron arrow";
-      case ItemID.SEEKING_STEEL_ARROW:
-        return "seeking steel arrow";
-      case ItemID.SEEKING_MITHRIL_ARROW:
-        return "seeking mithril arrow";
-      case ItemID.SEEKING_ADAMANT_ARROW:
-        return "seeking adamant arrow";
-      case ItemID.SEEKING_RUNE_ARROW:
-        return "seeking rune arrow";
-      case ItemID.SEEKING_AMETHYST_ARROW:
-        return "seeking amethyst arrow";
-      case ItemID.SEEKING_DRAGON_ARROW:
-        return "seeking dragon arrow";
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS:
-        return "seeking broad arrow";
-      default:
-        return "";
-    }
-  }
-
-  static boolean isUnderlyingArrow(int ordinaryItemId, int seekingItemId) {
-    switch (normalizeSeekingArrowItemId(seekingItemId)) {
-      case ItemID.SEEKING_BRONZE_ARROW:
-        return ordinaryItemId == ItemID.BRONZE_ARROW;
-      case ItemID.SEEKING_IRON_ARROW:
-        return ordinaryItemId == ItemID.IRON_ARROW;
-      case ItemID.SEEKING_STEEL_ARROW:
-        return ordinaryItemId == ItemID.STEEL_ARROW;
-      case ItemID.SEEKING_MITHRIL_ARROW:
-        return ordinaryItemId == ItemID.MITHRIL_ARROW;
-      case ItemID.SEEKING_ADAMANT_ARROW:
-        return ordinaryItemId == ItemID.ADAMANT_ARROW;
-      case ItemID.SEEKING_RUNE_ARROW:
-        return ordinaryItemId == ItemID.RUNE_ARROW;
-      case ItemID.SEEKING_AMETHYST_ARROW:
-        return ordinaryItemId == ItemID.AMETHYST_ARROW;
-      case ItemID.SEEKING_DRAGON_ARROW:
-        return ordinaryItemId == ItemID.DRAGON_ARROW;
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS:
-        return ordinaryItemId == ItemID.SLAYER_BROAD_ARROWS;
-      default:
-        return false;
-    }
-  }
-
-  static int restoreSeekingIdentityFromPlaceholders(
-      int rawAmmoItemId, Iterable<Integer> canonicalPlaceholderItemIds) {
-    int ammoItemId = normalizeSeekingArrowItemId(rawAmmoItemId);
-    if (ammoItemId <= 0 || isSeekingArrow(ammoItemId) || canonicalPlaceholderItemIds == null) {
-      return ammoItemId;
-    }
-    for (Integer rawPlaceholderItemId : canonicalPlaceholderItemIds) {
-      if (rawPlaceholderItemId == null) {
-        continue;
-      }
-      int placeholderItemId = normalizeSeekingArrowItemId(rawPlaceholderItemId);
-      if (isSeekingArrow(placeholderItemId) && isUnderlyingArrow(ammoItemId, placeholderItemId)) {
-        return placeholderItemId;
-      }
-    }
-    return ammoItemId;
-  }
-
-  static int resolveExactIdentity(int widgetItemId, int varpItemId, int cachedItemId) {
-    int widget = normalizeSeekingArrowItemId(widgetItemId);
-    int varp = normalizeSeekingArrowItemId(varpItemId);
-    int cached = normalizeSeekingArrowItemId(cachedItemId);
-    if (isSeekingArrow(varp)) {
-      return varp;
-    }
-    if (isSeekingArrow(widget) && (varp <= 0 || isUnderlyingArrow(varp, widget))) {
-      return widget;
-    }
-    if (varp > 0) {
-      return varp;
-    }
-    if (widget > 0) {
-      return widget;
-    }
-    return cached;
-  }
-
-  static Snapshot resolveSnapshot(
-      boolean wearingQuiver,
-      int storedItemId,
-      int storedQuantity,
-      int widgetItemId,
-      int widgetQuantity,
-      int varpItemId,
-      int varpQuantity,
-      int cachedItemId) {
-    Snapshot stored = Snapshot.of(storedItemId, storedQuantity);
-    int liveItemId = resolveExactIdentity(widgetItemId, varpItemId, cachedItemId);
-    int liveQuantity = varpQuantity > 0 ? varpQuantity : widgetQuantity > 0 ? widgetQuantity : 0;
-    Snapshot live = Snapshot.of(liveItemId, liveQuantity);
-    if (!wearingQuiver) {
-      Snapshot current = stored.isPresent() ? preserveSeekingIdentity(stored, live) : live;
-      return preserveSeekingIdentity(current, Snapshot.of(cachedItemId, current.quantity));
-    }
-    if (live.isPresent()) {
-      return live;
-    }
-    if (stored.isPresent()) {
-      return stored;
-    }
-    return Snapshot.empty();
-  }
-
-  static Snapshot restoreHiddenBankedSeekingAmmo(
-      boolean bankedUsableQuiverFound,
-      Snapshot liveSnapshot,
-      Iterable<Integer> exactIdentityHints) {
-    Snapshot current = liveSnapshot == null ? Snapshot.empty() : liveSnapshot;
-    if (current.isPresent() || !bankedUsableQuiverFound) {
-      return current;
-    }
-    int bestItemId = -1;
-    int bestRank = Integer.MAX_VALUE;
-    if (exactIdentityHints != null) {
-      for (Integer rawItemId : exactIdentityHints) {
-        if (rawItemId == null) {
-          continue;
-        }
-        int itemId = normalizeSeekingArrowItemId(rawItemId);
-        if (!isSeekingArrow(itemId)) {
-          continue;
-        }
-        int rank = infernoPreference(itemId);
-        if (rank < bestRank) {
-          bestItemId = itemId;
-          bestRank = rank;
-        }
-      }
-    }
-    return bestItemId > 0 ? Snapshot.of(bestItemId, 1) : Snapshot.empty();
-  }
-
-  private static Snapshot preserveSeekingIdentity(Snapshot primary, Snapshot secondary) {
-    if (!primary.isPresent() || !secondary.isPresent()) {
-      return primary;
-    }
-    if (!isSeekingArrow(primary.itemId)
-        && isSeekingArrow(secondary.itemId)
-        && isUnderlyingArrow(primary.itemId, secondary.itemId)) {
-      return Snapshot.of(secondary.itemId, primary.quantity);
-    }
-    return primary;
-  }
-
-  static int infernoPreference(int rawItemId) {
-    int itemId = normalizeSeekingArrowItemId(rawItemId);
-    switch (itemId) {
-      case ItemID.SEEKING_DRAGON_ARROW:
-        return 0;
-      case ItemID.SEEKING_AMETHYST_ARROW:
-        return 1;
-      case ItemID.DRAGON_ARROW:
-        return 2;
-      case ItemID.SEEKING_RUNE_ARROW:
-        return 3;
-      case ItemID.AMETHYST_ARROW:
-        return 4;
-      case ItemID.RUNE_ARROW:
-        return 5;
-      case ItemID.SEEKING_ADAMANT_ARROW:
-        return 6;
-      case ItemID.SEEKING_SLAYER_BROAD_ARROWS:
-        return 7;
-      case ItemID.ADAMANT_ARROW:
-        return 8;
-      case ItemID.SEEKING_MITHRIL_ARROW:
-        return 9;
-      case ItemID.SLAYER_BROAD_ARROWS:
-        return 10;
-      case ItemID.SEEKING_STEEL_ARROW:
-        return 11;
-      case ItemID.MITHRIL_ARROW:
-        return 12;
-      case ItemID.SEEKING_IRON_ARROW:
-        return 13;
-      case ItemID.STEEL_ARROW:
-        return 14;
-      case ItemID.SEEKING_BRONZE_ARROW:
-        return 15;
-      case ItemID.IRON_ARROW:
-        return 16;
-      case ItemID.BRONZE_ARROW:
-        return 17;
-      default:
-        return Integer.MAX_VALUE;
-    }
-  }
-
-  static int preferBetterInfernoArrow(int recommendedItemId, int liveQuiverItemId) {
-    int recommendedRank = infernoPreference(recommendedItemId);
-    int liveRank = infernoPreference(liveQuiverItemId);
-    if (liveRank < recommendedRank) {
-      return normalizeSeekingArrowItemId(liveQuiverItemId);
-    }
-    return recommendedItemId;
-  }
-
-  static final class Snapshot {
-    private static final Snapshot EMPTY = new Snapshot(-1, 0);
-    private final int itemId;
-    private final int quantity;
-
-    private Snapshot(int itemId, int quantity) {
-      this.itemId = itemId;
-      this.quantity = quantity;
-    }
-
-    static Snapshot empty() {
-      return EMPTY;
-    }
-
-    static Snapshot of(int rawItemId, int quantity) {
-      if (rawItemId <= 0 || quantity <= 0) {
-        return EMPTY;
-      }
-      return new Snapshot(normalizeSeekingArrowItemId(rawItemId), quantity);
-    }
-
-    int getItemId() {
-      return itemId;
-    }
-
-    int getQuantity() {
-      return quantity;
-    }
-
-    boolean isPresent() {
-      return itemId > 0 && quantity > 0;
-    }
-  }
-}
+final class QuiverAmmo{private static final Set<Integer>USABLE_QUIVERS=usableQuivers();
+private static final Map<Integer,Arrow>ARROWS=arrows();
+private QuiverAmmo(){}static boolean isUsableDizanaVariant(int id){return id>0&&USABLE_QUIVERS.contains(id);
+}static int preferUsableDizanaVariant(int current,int candidate){return quiverRank(candidate)>quiverRank(current)?candidate:current;
+}private static int quiverRank(int id){if(!isUsableDizanaVariant(id))return-1;
+if(id==ItemID.SKILLCAPE_MAX_DIZANAS||id==ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER)return 400;
+if(id==ItemID.DIZANAS_QUIVER_INFINITE||id==ItemID.DIZANAS_QUIVER_INFINITE_TROUVER)return 300;
+if(id==ItemID.DIZANAS_QUIVER_CHARGED||id==ItemID.DIZANAS_QUIVER_CHARGED_TROUVER)return 200;
+if(id==ItemID.DIZANAS_QUIVER_UNCHARGED||id==ItemID.DIZANAS_QUIVER_UNCHARGED_TROUVER)return 100;
+return 1;
+}private static Set<Integer>usableQuivers(){Set<Integer>ids=new HashSet<>();
+addFamily(ids,ItemID.DIZANAS_QUIVER_CHARGED);
+addFamily(ids,ItemID.DIZANAS_QUIVER_INFINITE);
+addFamily(ids,ItemID.SKILLCAPE_MAX_DIZANAS);
+int[]unusable={ItemID.DIZANAS_QUIVER_BROKEN,ItemID.DIZANAS_QUIVER_INFINITE_BROKEN,ItemID.SKILLCAPE_MAX_DIZANAS_BROKEN,ItemID.SKILLCAPE_MAX_HOOD_DIZANAS,ItemID.DIZANAS_QUIVER_TROUVER_BROKEN,ItemID.DIZANAS_QUIVER_TROUVER_MANGLED,ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_BROKEN,ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_MANGLED,ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_BROKEN,ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_MANGLED};
+for(int id:unusable)ids.remove(id);
+return Set.copyOf(ids);
+}private static void addFamily(Set<Integer>ids,int representative){int canonical=ItemVariationMapping.map(representative);
+ids.add(canonical);
+ids.addAll(ItemVariationMapping.getVariations(canonical));
+}private static Map<Integer,Arrow>arrows(){Map<Integer,Arrow>result=new HashMap<>();
+add(result,ItemID.SEEKING_BRONZE_ARROW,ItemID.BRONZE_ARROW,text(110),15,ItemID.SEEKING_BRONZE_ARROW_2,ItemID.SEEKING_BRONZE_ARROW_3,ItemID.SEEKING_BRONZE_ARROW_4,ItemID.SEEKING_BRONZE_ARROW_5);
+add(result,ItemID.SEEKING_IRON_ARROW,ItemID.IRON_ARROW,text(111),13,ItemID.SEEKING_IRON_ARROW_2,ItemID.SEEKING_IRON_ARROW_3,ItemID.SEEKING_IRON_ARROW_4,ItemID.SEEKING_IRON_ARROW_5);
+add(result,ItemID.SEEKING_STEEL_ARROW,ItemID.STEEL_ARROW,text(112),11,ItemID.SEEKING_STEEL_ARROW_2,ItemID.SEEKING_STEEL_ARROW_3,ItemID.SEEKING_STEEL_ARROW_4,ItemID.SEEKING_STEEL_ARROW_5);
+add(result,ItemID.SEEKING_MITHRIL_ARROW,ItemID.MITHRIL_ARROW,text(113),9,ItemID.SEEKING_MITHRIL_ARROW_2,ItemID.SEEKING_MITHRIL_ARROW_3,ItemID.SEEKING_MITHRIL_ARROW_4,ItemID.SEEKING_MITHRIL_ARROW_5);
+add(result,ItemID.SEEKING_ADAMANT_ARROW,ItemID.ADAMANT_ARROW,text(114),6,ItemID.SEEKING_ADAMANT_ARROW_2,ItemID.SEEKING_ADAMANT_ARROW_3,ItemID.SEEKING_ADAMANT_ARROW_4,ItemID.SEEKING_ADAMANT_ARROW_5);
+add(result,ItemID.SEEKING_RUNE_ARROW,ItemID.RUNE_ARROW,text(115),3,ItemID.SEEKING_RUNE_ARROW_2,ItemID.SEEKING_RUNE_ARROW_3,ItemID.SEEKING_RUNE_ARROW_4,ItemID.SEEKING_RUNE_ARROW_5);
+add(result,ItemID.SEEKING_AMETHYST_ARROW,ItemID.AMETHYST_ARROW,text(116),1,ItemID.SEEKING_AMETHYST_ARROW_2,ItemID.SEEKING_AMETHYST_ARROW_3,ItemID.SEEKING_AMETHYST_ARROW_4,ItemID.SEEKING_AMETHYST_ARROW_5);
+add(result,ItemID.SEEKING_DRAGON_ARROW,ItemID.DRAGON_ARROW,text(117),0,ItemID.SEEKING_DRAGON_ARROW2,ItemID.SEEKING_DRAGON_ARROW3,ItemID.SEEKING_DRAGON_ARROW4,ItemID.SEEKING_DRAGON_ARROW5);
+add(result,ItemID.SEEKING_SLAYER_BROAD_ARROWS,ItemID.SLAYER_BROAD_ARROWS,text(118),7,ItemID.SEEKING_SLAYER_BROAD_ARROWS_2,ItemID.SEEKING_SLAYER_BROAD_ARROWS_3,ItemID.SEEKING_SLAYER_BROAD_ARROWS_4,ItemID.SEEKING_SLAYER_BROAD_ARROWS_5);
+return Map.copyOf(result);
+}private static void add(Map<Integer,Arrow>map,int canonical,int ordinary,String name,int rank,int...variants){Arrow arrow=new Arrow(canonical,ordinary,name,rank);
+map.put(canonical,arrow);
+for(int id:variants)map.put(id,arrow);
+}static int arrow(int id){Arrow arrow=ARROWS.get(id);
+return id<=0?-1:arrow==null?id:arrow.canonical;
+}static boolean isSeekingArrow(int id){return ARROWS.containsKey(id);
+}static String seekingArrowMatchName(int id){Arrow arrow=ARROWS.get(id);
+return arrow==null?"":arrow.name;
+}static boolean isUnderlyingArrow(int ordinary,int seeking){Arrow arrow=ARROWS.get(seeking);
+return arrow!=null&&arrow.ordinary==ordinary;
+}static int restoreSeekingIdentityFromPlaceholders(int rawAmmo,Iterable<Integer>hints){int ammo=arrow(rawAmmo);
+if(ammo<=0||isSeekingArrow(ammo)||hints==null)return ammo;
+for(Integer raw:hints)if(raw!=null&&isUnderlyingArrow(ammo,raw))return arrow(raw);
+return ammo;
+}static int resolveExactIdentity(int widgetId,int varpId,int cachedId){int widget=arrow(widgetId),varp=arrow(varpId);
+if(isSeekingArrow(varp))return varp;
+if(isSeekingArrow(widget)&&(varp<=0||isUnderlyingArrow(varp,widget)))return widget;
+return varp>0?varp:widget>0?widget:arrow(cachedId);
+}static Snapshot resolveSnapshot(boolean wearing,int storedId,int storedQty,int widgetId,int widgetQty,int varpId,int varpQty,int cachedId){Snapshot stored=Snapshot.of(storedId,storedQty);
+Snapshot live=Snapshot.of(resolveExactIdentity(widgetId,varpId,cachedId),varpQty>0?varpQty:Math.max(0,widgetQty));
+if(!wearing){Snapshot current=stored.isPresent()?preserveSeekingIdentity(stored,live):live;
+return preserveSeekingIdentity(current,Snapshot.of(cachedId,current.quantity));
+}return live.isPresent()?live:stored;
+}static Snapshot restoreHiddenBankedSeekingAmmo(boolean quiverFound,Snapshot live,Iterable<Integer>hints){Snapshot current=live==null?Snapshot.empty():live;
+if(current.isPresent()||!quiverFound)return current;
+int best=-1,rank=Integer.MAX_VALUE;
+if(hints!=null)for(Integer raw:hints){int candidate=raw==null?-1:arrow(raw);
+int candidateRank=infernoPreference(candidate);
+if(isSeekingArrow(candidate)&&candidateRank<rank){best=candidate;
+rank=candidateRank;
+}}return Snapshot.of(best,1);
+}private static Snapshot preserveSeekingIdentity(Snapshot primary,Snapshot secondary){if(primary.isPresent()&&secondary.isPresent()&&!isSeekingArrow(primary.itemId)&&isSeekingArrow(secondary.itemId)&&isUnderlyingArrow(primary.itemId,secondary.itemId))return Snapshot.of(secondary.itemId,primary.quantity);
+return primary;
+}static int infernoPreference(int id){Arrow arrow=ARROWS.get(id);
+if(arrow!=null)return arrow.rank;
+int normalized=arrow(id);
+int[]ordinary={ItemID.DRAGON_ARROW,ItemID.AMETHYST_ARROW,ItemID.RUNE_ARROW,ItemID.ADAMANT_ARROW,ItemID.SLAYER_BROAD_ARROWS,ItemID.MITHRIL_ARROW,ItemID.STEEL_ARROW,ItemID.IRON_ARROW,ItemID.BRONZE_ARROW};
+int[]ranks={2,4,5,8,10,12,14,16,17};
+for(int i=0;
+i<ordinary.length;
+i++)if(normalized==ordinary[i])return ranks[i];
+return Integer.MAX_VALUE;
+}static int preferBetterInfernoArrow(int recommended,int live){return infernoPreference(live)<infernoPreference(recommended)?arrow(live):recommended;
+}private static final class Arrow{final int canonical,ordinary,rank;
+final String name;
+Arrow(int canonical,int ordinary,String name,int rank){this.canonical=canonical;
+this.ordinary=ordinary;
+this.name=name;
+this.rank=rank;
+}}@Getter static final class Snapshot{private static final Snapshot EMPTY=new Snapshot(-1,0);
+private final int itemId,quantity;
+private Snapshot(int itemId,int quantity){this.itemId=itemId;
+this.quantity=quantity;
+}static Snapshot empty(){return EMPTY;
+}static Snapshot of(int id,int quantity){return id>0&&quantity>0?new Snapshot(arrow(id),quantity):EMPTY;
+}boolean isPresent(){return itemId>0&&quantity>0;
+}}}

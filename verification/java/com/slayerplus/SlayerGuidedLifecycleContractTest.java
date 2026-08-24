@@ -109,23 +109,23 @@ public class SlayerGuidedLifecycleContractTest
 	@Test
 	public void completedTaskBankDetourResumesOnlyThePendingMasterRoute()
 	{
-		assertTrue(SlayerPlusPlugin.shouldResumeMasterAfterBankForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_BANK,
+		assertTrue(SlayerPlusPlugin.shouldResumeMasterAfterBankForTest(
+			SlayerPlusPlugin.Phase.ROUTING_TO_BANK,
 			true,
 			0
 		));
-		assertTrue(!SlayerPlusPlugin.shouldResumeMasterAfterBankForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_BANK,
+		assertTrue(!SlayerPlusPlugin.shouldResumeMasterAfterBankForTest(
+			SlayerPlusPlugin.Phase.ROUTING_TO_BANK,
 			true,
 			12
 		));
-		assertTrue(!SlayerPlusPlugin.shouldResumeMasterAfterBankForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_BANK,
+		assertTrue(!SlayerPlusPlugin.shouldResumeMasterAfterBankForTest(
+			SlayerPlusPlugin.Phase.ROUTING_TO_BANK,
 			false,
 			0
 		));
-		assertTrue(!SlayerPlusPlugin.shouldResumeMasterAfterBankForRegression(
-			SlayerPlusPlugin.GuidedSessionPhase.ROUTING_TO_TASK,
+		assertTrue(!SlayerPlusPlugin.shouldResumeMasterAfterBankForTest(
+			SlayerPlusPlugin.Phase.TO_TASK,
 			true,
 			0
 		));

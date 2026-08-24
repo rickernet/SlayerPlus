@@ -110,7 +110,7 @@ public final class SlayerTaskStrategyValidator
 		{
 			errors.add(label + ": no weapon priorities");
 		}
-		if (strategy.hasTag(TaskStrategy.MethodTag.BURST_BARRAGE)
+		if (strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)
 			&& !strategy.needsRunePouch())
 		{
 			errors.add(label + ": burst/barrage profile lacks rune pouch");
@@ -141,10 +141,10 @@ public final class SlayerTaskStrategyValidator
 		 * the NPC has an elemental/style weakness.  Automatic is reserved for the
 		 * researched practical/meta method for the requested playstyle.
 		 */
-		for (final String taskName : SlayerTaskStrategyCatalog.getCurrentTaskNames())
+		for (final String assignment : SlayerTaskStrategyCatalog.getCurrentTaskNames())
 		{
 			final TaskResearch.Entry research =
-				TaskResearch.find(taskName);
+				TaskResearch.find(assignment);
 			final String location = research == null || research.getLocations().isEmpty()
 				? "Not restricted"
 				: research.getLocations().get(0);
@@ -160,7 +160,7 @@ public final class SlayerTaskStrategyValidator
 					{
 						final TaskStrategy automatic =
 							SlayerTaskStrategyCatalog.resolve(
-								taskName,
+								assignment,
 								playstyle,
 								cannon,
 								burst,
@@ -175,7 +175,7 @@ public final class SlayerTaskStrategyValidator
 							))
 						{
 							errors.add(
-								taskName + ": Automatic selected a preference-only alternative for "
+								assignment + ": Automatic selected a preference-only alternative for "
 									+ playstyle + "/" + cannon + "/" + burst
 							);
 						}
@@ -194,10 +194,10 @@ public final class SlayerTaskStrategyValidator
 		 * player disabled it. This audits the full current catalog rather than a
 		 * handful of representative tasks.
 		 */
-		for (final String taskName : SlayerTaskStrategyCatalog.getCurrentTaskNames())
+		for (final String assignment : SlayerTaskStrategyCatalog.getCurrentTaskNames())
 		{
 			final TaskResearch.Entry research =
-				TaskResearch.find(taskName);
+				TaskResearch.find(assignment);
 			final String location = research == null || research.getLocations().isEmpty()
 				? "Not restricted"
 				: research.getLocations().get(0);
@@ -213,7 +213,7 @@ public final class SlayerTaskStrategyValidator
 					{
 						final TaskStrategy strategy =
 							SlayerTaskStrategyCatalog.resolve(
-								taskName,
+								assignment,
 								playstyle,
 								Preference.Cannon.NEVER,
 								burst,
@@ -224,7 +224,7 @@ public final class SlayerTaskStrategyValidator
 						if (strategy != null
 							&& strategy.hasTag(TaskStrategy.MethodTag.CANNON))
 						{
-							errors.add(taskName + ": Cannon.NEVER leaked a cannon method");
+							errors.add(assignment + ": Cannon.NEVER leaked a cannon method");
 						}
 					}
 				}
@@ -237,7 +237,7 @@ public final class SlayerTaskStrategyValidator
 					{
 						final TaskStrategy strategy =
 							SlayerTaskStrategyCatalog.resolve(
-								taskName,
+								assignment,
 								playstyle,
 								cannon,
 								Preference.Burst.NEVER,
@@ -246,9 +246,9 @@ public final class SlayerTaskStrategyValidator
 								false
 							);
 						if (strategy != null
-							&& strategy.hasTag(TaskStrategy.MethodTag.BURST_BARRAGE))
+							&& strategy.hasTag(TaskStrategy.MethodTag.BARRAGE))
 						{
-							errors.add(taskName + ": Burst.NEVER leaked a burst/barrage method");
+							errors.add(assignment + ": Burst.NEVER leaked a burst/barrage method");
 						}
 					}
 				}
@@ -308,7 +308,7 @@ public final class SlayerTaskStrategyValidator
 			return;
 		}
 
-		if (strategy.getCombatStyle()
+		if (strategy.getStyle()
 			!= TaskStrategy.CombatStyle.RANGED)
 		{
 			errors.add("TzKal-Zuk " + profile + ": must remain Ranged");
@@ -384,7 +384,7 @@ public final class SlayerTaskStrategyValidator
 		}
 
 		final java.util.Set<String> runeNames = new java.util.LinkedHashSet<>();
-		for (final MethodRules.PouchRuneRequirement rune : rules.getPouchRunes())
+		for (final MethodRules.RuneRequirement rune : rules.getPouchRunes())
 		{
 			runeNames.add(normalize(rune.getName()));
 		}
@@ -505,7 +505,7 @@ public final class SlayerTaskStrategyValidator
 				"Catacombs of Kourend",
 				false
 			);
-		if (dustNoBurst.hasTag(TaskStrategy.MethodTag.BURST_BARRAGE))
+		if (dustNoBurst.hasTag(TaskStrategy.MethodTag.BARRAGE))
 		{
 			errors.add("Dust devils: Burst.NEVER returned a barrage profile");
 		}
@@ -520,7 +520,7 @@ public final class SlayerTaskStrategyValidator
 				"Kraken Cove",
 				false
 			);
-		if (krakenMeleePreference.getCombatStyle()
+		if (krakenMeleePreference.getStyle()
 			!= TaskStrategy.CombatStyle.MAGIC)
 		{
 			errors.add("Cave kraken: unsafe melee preference did not fall back to Magic");
@@ -536,7 +536,7 @@ public final class SlayerTaskStrategyValidator
 				"Slayer Tower",
 				false
 			);
-		if (abyssalTower.hasTag(TaskStrategy.MethodTag.BURST_BARRAGE))
+		if (abyssalTower.hasTag(TaskStrategy.MethodTag.BARRAGE))
 		{
 			errors.add("Abyssal demons: Slayer Tower returned a multi-target barrage profile");
 		}
@@ -568,7 +568,7 @@ public final class SlayerTaskStrategyValidator
 			);
 		if (smokeNoCannon.hasTag(TaskStrategy.MethodTag.CANNON)
 			|| !smokeNoCannon.hasTag(
-				TaskStrategy.MethodTag.BURST_BARRAGE
+				TaskStrategy.MethodTag.BARRAGE
 			))
 		{
 			errors.add(
@@ -586,7 +586,7 @@ public final class SlayerTaskStrategyValidator
 				"Catacombs of Kourend",
 				false
 			);
-		if (regularHellhound.getCombatStyle()
+		if (regularHellhound.getStyle()
 				!= TaskStrategy.CombatStyle.RANGED
 			|| !regularHellhound.hasTag(
 				TaskStrategy.MethodTag.VENATOR
@@ -620,7 +620,7 @@ public final class SlayerTaskStrategyValidator
 			|| !cannonHellhound.hasTag(
 				TaskStrategy.MethodTag.AUTOMATIC_STYLE_LOCKED
 			)
-			|| cannonHellhound.getCombatStyle()
+			|| cannonHellhound.getStyle()
 				!= TaskStrategy.CombatStyle.RANGED
 			|| cannonHellhound.getWeaponPriorities().size() < 2
 			|| !cannonHellhound.getWeaponPriorities().get(0)
@@ -644,7 +644,7 @@ public final class SlayerTaskStrategyValidator
 				"Stronghold Slayer Cave",
 				false
 			);
-		if (profitStrongholdHellhound.getCombatStyle()
+		if (profitStrongholdHellhound.getStyle()
 				!= TaskStrategy.CombatStyle.RANGED
 			|| !profitStrongholdHellhound.hasTag(
 				TaskStrategy.MethodTag.SAFESPOT
@@ -655,9 +655,9 @@ public final class SlayerTaskStrategyValidator
 			|| profitStrongholdHellhound.hasTag(
 				TaskStrategy.MethodTag.CANNON
 			)
-			|| profitStrongholdHellhound.getWeaponPrioritiesForPolicy()
+			|| profitStrongholdHellhound.weapons()
 				.isEmpty()
-			|| !profitStrongholdHellhound.getWeaponPrioritiesForPolicy()
+			|| !profitStrongholdHellhound.weapons()
 				.get(0).equals("toxic blowpipe"))
 		{
 			errors.add(
@@ -686,16 +686,16 @@ public final class SlayerTaskStrategyValidator
 				"Catacombs of Kourend",
 				false
 			);
-		if (fastMeleeHellhound.getWeaponPrioritiesForPolicy().isEmpty()
-			|| !fastMeleeHellhound.getWeaponPrioritiesForPolicy().get(0)
+		if (fastMeleeHellhound.weapons().isEmpty()
+			|| !fastMeleeHellhound.weapons().get(0)
 				.equals("scythe of vitur"))
 		{
 			errors.add(
 				"Hellhounds: Fast XP melee should keep the max-DPS Scythe-first order"
 			);
 		}
-		if (profitMeleeHellhound.getWeaponPrioritiesForPolicy().isEmpty()
-			|| !profitMeleeHellhound.getWeaponPrioritiesForPolicy().get(0)
+		if (profitMeleeHellhound.weapons().isEmpty()
+			|| !profitMeleeHellhound.weapons().get(0)
 				.equals("emberlight")
 			|| profitMeleeHellhound.getCostPolicy()
 				!= TaskStrategy.CostPolicy.EFFICIENT)
@@ -715,7 +715,7 @@ public final class SlayerTaskStrategyValidator
 				"Cerberus' Lair",
 				false
 			);
-		if (cerberusAutomatic.getCombatStyle()
+		if (cerberusAutomatic.getStyle()
 				!= TaskStrategy.CombatStyle.MELEE
 			|| cerberusAutomatic.hasTag(
 				TaskStrategy.MethodTag.PREFERENCE_ONLY_ALTERNATIVE
@@ -746,9 +746,9 @@ public final class SlayerTaskStrategyValidator
 				"Great Conch",
 				false
 			);
-		if (gryphonAutomatic.getCombatStyle()
+		if (gryphonAutomatic.getStyle()
 				!= TaskStrategy.CombatStyle.MELEE
-			|| gryphonMagicPreference.getCombatStyle()
+			|| gryphonMagicPreference.getStyle()
 				!= TaskStrategy.CombatStyle.MAGIC
 			|| !gryphonMagicPreference.hasTag(
 				TaskStrategy.MethodTag.PREFERENCE_ONLY_ALTERNATIVE
@@ -779,9 +779,9 @@ public final class SlayerTaskStrategyValidator
 				"Grimstone",
 				false
 			);
-		if (frostFast.getCombatStyle()
+		if (frostFast.getStyle()
 				!= TaskStrategy.CombatStyle.MAGIC
-			|| frostProfit.getCombatStyle()
+			|| frostProfit.getStyle()
 				!= TaskStrategy.CombatStyle.MELEE
 			|| !frostProfit.getMethod().toLowerCase().contains("crush")
 			|| frostProfit.getWeaponPriorities().isEmpty()

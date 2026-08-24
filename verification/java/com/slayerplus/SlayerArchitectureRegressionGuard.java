@@ -54,7 +54,7 @@ public final class SlayerArchitectureRegressionGuard
 		if (coordinator.current().getItemId() != 2
 			|| !coordinator.current().isResolved()
 			|| !coordinator.current().isStructurallyValid()
-			|| !coordinator.current().getEquivalentItemFamilies().equals(edgeFamilies))
+			|| !coordinator.current().getEquivalents().equals(edgeFamilies))
 		{
 			throw new IllegalStateException(
 				"Travel regression: provisional travel overrode a resolved Shortest Path winner"
@@ -86,7 +86,7 @@ public final class SlayerArchitectureRegressionGuard
 		);
 		coordinator.clearAll();
 
-		if (coordinator.current().hasPhysicalItem()
+		if (coordinator.current().physical()
 			|| coordinator.current().isResolved()
 			|| coordinator.selectionFor("account-a-route").isResolved())
 		{
@@ -107,7 +107,7 @@ public final class SlayerArchitectureRegressionGuard
 			"Home"
 		);
 
-		if (coordinator.currentFor("thermonuclear-smoke-devil").hasPhysicalItem())
+		if (coordinator.currentFor("thermonuclear-smoke-devil").physical())
 		{
 			throw new IllegalStateException(
 				"Travel regression: a consumer could observe another profile's live travel selection"
@@ -127,7 +127,7 @@ public final class SlayerArchitectureRegressionGuard
 		);
 		if (!coordinator.ownsCurrentRoute("thermonuclear-smoke-devil")
 			|| coordinator.getGeneration() != bossGeneration
-			|| coordinator.current().hasPhysicalItem()
+			|| coordinator.current().physical()
 			|| coordinator.selectionFor("regular-smoke-devils").isResolved())
 		{
 			throw new IllegalStateException(
@@ -161,7 +161,7 @@ public final class SlayerArchitectureRegressionGuard
 			|| !"Eternal slayer ring".equals(repaired.getItemName())
 			|| !"ME2 Caves".equals(repaired.getDestination())
 			|| repaired.getGeneration() != generation
-			|| !repaired.getEquivalentItemFamilies().equals(families)
+			|| !repaired.getEquivalents().equals(families)
 			|| !repaired.isResolved())
 		{
 			throw new IllegalStateException(
@@ -259,8 +259,8 @@ public final class SlayerArchitectureRegressionGuard
 			"Max cape",
 			"POH Portals: Brimhaven"
 		);
-		if (!coordinator.currentFor("master|id=6").hasPhysicalItem()
-			|| coordinator.currentFor("task|dust-devils").hasPhysicalItem())
+		if (!coordinator.currentFor("master|id=6").physical()
+			|| coordinator.currentFor("task|dust-devils").physical())
 		{
 			throw new IllegalStateException(
 				"Travel regression: master-return travel selection was not isolated from the completed task profile"
@@ -288,7 +288,7 @@ public final class SlayerArchitectureRegressionGuard
 			);
 		}
 
-		if (BankRoutes.getInfernoPreparationBankTarget() == null
+		if (BankRoutes.infernoBankTarget() == null
 			|| !new WorldPoint(2495, 5157, 0).equals(
 				BankRoutes.getInfernoPreparationHotVentDoorTarget()
 			)
@@ -346,28 +346,28 @@ public final class SlayerArchitectureRegressionGuard
 			);
 		}
 
-		if (!BankTagLayout.hasDedicatedExtraQuiverAmmoPositionForRegression())
+		if (!BankTagLayout.hasDedicatedExtraQuiverAmmoPositionForTest())
 		{
 			throw new IllegalStateException(
 				"Bank Tag regression: Dizana's second ammunition cell no longer sits above the ordinary ammo cell"
 			);
 		}
 
-		if (SlayerPlusPlugin.infernoPreparationBankApproachRadiusForRegression() < 20)
+		if (SlayerPlusPlugin.infernoPreparationBankApproachRadiusForTest() < 20)
 		{
 			throw new IllegalStateException(
 				"Routing regression: Inferno preparation-bank approach threshold is too small for the live-banker handoff"
 			);
 		}
 
-		if (ShortestPathBridge.preparationBankApproachThresholdForRegression() < 2)
+		if (ShortestPathBridge.preparationBankApproachThresholdForTest() < 2)
 		{
 			throw new IllegalStateException(
 				"Routing regression: catalog bank targets must accept Shortest Path's normal adjacent-tile arrival"
 			);
 		}
 
-		if (ShortestPathBridge.preparationAccessApproachThresholdForRegression() != 2)
+		if (ShortestPathBridge.preparationAccessApproachThresholdForTest() != 2)
 		{
 			throw new IllegalStateException(
 				"Routing regression: manual preparation access must finish beside its exact interaction boundary"

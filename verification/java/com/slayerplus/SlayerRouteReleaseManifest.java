@@ -36,7 +36,7 @@ final class SlayerRouteReleaseManifest {
 
   static final class Entry {
     private final EntryKind kind;
-    private final String assignmentName, encounterName, location, unresolvedReason, wikiPageTitle;
+    private final String assignmentName, encounter, location, unresolvedReason, wikiPageTitle;
     private final AreaType areaType;
     private final TerminalContract terminalContract;
     private final TerminalMechanism terminalMechanism;
@@ -44,12 +44,12 @@ final class SlayerRouteReleaseManifest {
     private final List<String> eligibleAssignments;
 
     private Entry(
-        EntryKind kind, String assignmentName, String encounterName, String location,
+        EntryKind kind, String assignmentName, String encounter, String location,
         AreaType areaType, TerminalContract terminalContract, Endpoint expectedAccess,
         Endpoint expectedTerminal, String wikiPageTitle, String[] eligibleAssignments) {
       this.kind = kind;
       this.assignmentName = assignmentName;
-      this.encounterName = encounterName;
+      this.encounter = encounter;
       this.location = location;
       this.areaType = areaType;
       this.terminalContract = terminalContract;
@@ -64,7 +64,7 @@ final class SlayerRouteReleaseManifest {
 
     EntryKind getKind() { return kind; }
     String getAssignmentName() { return assignmentName; }
-    String getEncounterName() { return encounterName; }
+    String getEncounterName() { return encounter; }
     String getLocation() { return location; }
     AreaType getAreaType() { return areaType; }
     TerminalContract getTerminalContract() { return terminalContract; }
@@ -172,17 +172,17 @@ final class SlayerRouteReleaseManifest {
     EnumMap<EntryKind, Set<String>> observed = new EnumMap<>(EntryKind.class);
     for (EntryKind kind : EntryKind.values()) observed.put(kind, new LinkedHashSet<>());
     for (Entry entry : entries) {
-      if (entry.encounterName.isEmpty() || entry.location.isEmpty() || entry.areaType == null
+      if (entry.encounter.isEmpty() || entry.location.isEmpty() || entry.areaType == null
           || entry.terminalContract == null || entry.terminalMechanism == null)
         throw new IllegalStateException("Incomplete Slayer route release manifest row");
       if ((entry.expectedTerminal == null) == entry.unresolvedReason.trim().isEmpty())
         throw new IllegalStateException("Manifest row must establish a terminal or remain unresolved: "
-            + entry.encounterName + " at " + entry.location);
-      String key = entry.kind + "|" + entry.assignmentName + "|" + entry.encounterName + "|"
+            + entry.encounter + " at " + entry.location);
+      String key = entry.kind + "|" + entry.assignmentName + "|" + entry.encounter + "|"
           + entry.location;
       if (!keys.add(key)) throw new IllegalStateException("Duplicate manifest row: " + key);
       observed.get(entry.kind).add(entry.kind == EntryKind.ASSIGNMENT
-          ? entry.assignmentName : entry.encounterName);
+          ? entry.assignmentName : entry.encounter);
     }
     for (EntryKind kind : EntryKind.values()) {
       if (expected.get(kind).equals(observed.get(kind))) continue;
