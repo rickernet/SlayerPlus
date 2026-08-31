@@ -364,6 +364,7 @@ S	s1279	RANGED	PRAYER	MAX_DPS	Complete the full Inferno with a sustainable range
 S	s1280	RANGED	PRAYER	MAX_DPS	Inferno is not AFK: use a completion-first ranged setup with extra healing and prayer regeneration	Zuk cannot be treated as a normal single-room boss: supplies, switches, prayer restoration, and healing must last through the entire Inferno.		2026-08-13	twisted bow; bow of faerdhinen; zaryte crossbow; armadyl crossbow; dragon crossbow; rune crossbow			toxic blowpipe; kodai wand; ancient sceptre; ice ancient sceptre; saradomin brew; super restore; extended stamina potion; stamina potion	BOSS	8	7	FIXED	0.0	0	0	true	false	false	true	true	true
 S	s1285	RANGED	PRAYER	MAX_DPS	Use a Venator bow with a dwarf multicannon in the multi-combat Araxyte room; keep Protect from Melee active and maintain antivenom protection	Task-specific combat profile		2026-08-13	venator bow; bow of faerdhinen; toxic blowpipe				CANNON; VENATOR; MULTI_COMBAT	4	8	FIXED	0.0	0	0	false	true	false	false	false	true
 S	s1290	RANGED	PRAYER	MAX_DPS	Use high-tier Ranged, lure the first three phases over the matching vents, and alternate prayers in the final phase	Task-specific combat profile		2026-08-13	twisted bow; toxic blowpipe; dragon hunter crossbow; bow of faerdhinen; eclipse atlatl			zaryte crossbow; toxic blowpipe; bracelet of slaughter	BOSS	10	5	FIXED	0.0	0	0	false	false	false	true	true	true
+S	s1291	MAGIC	DAMAGE	EFFICIENT	Magic-safespot Dagannoth Rex, its Magic weakness, while running Protect from Melee	Rex-only farming route for early accounts. Accessible with Iban s staff and Iban blast, upgrading to a trident, Sanguinesti staff, or Tumeken s shadow as budget and Magic level allow. Use the Rex safespot; no antifire needed.		2026-08-13	tumeken s shadow; sanguinesti staff; trident of the swamp; trident of the seas; iban s staff				BOSS	2	0	ZERO_WHILE_SAFESPOTTING	0.0	0	0	true	false	false	false	true	true
 # P <profile-key> role=strategy-id;...
 P	base:aberrant spectres	afk=s601;balanced=s601;fast=s601;melee=s601;profit=s601;ranged=s1220
 P	base:abyssal demons	afk=s1238;balanced=s233;burst=s233;fast=s233;magic=s233;melee=s357;non_burst=s357;profit=s357;ranged=s1238
@@ -415,6 +416,7 @@ P	base:crocodiles	afk=s743;balanced=s743;fast=s743;melee=s396;profit=s743;ranged
 P	base:custodian stalkers	afk=s1248;balanced=s631;burst=s223;cannon=s223;fast=s223;magic=s223;melee=s631;non_burst=s631;non_cannon=s219;profit=s631;ranged=s1248
 P	base:dagannoth	afk=s1246;balanced=s877;cannon=s877;fast=s877;melee=s592;non_cannon=s1211;profit=s877;ranged=s877
 P	base:dagannoth kings	afk=s012;balanced=s012;fast=s012;profit=s012
+P	base:dagannoth rex	afk=s1291;balanced=s1291;fast=s1291;profit=s1291
 P	base:dark beasts	afk=s596;balanced=s273;cannon=s279;fast=s279;melee=s596;non_cannon=s517;profit=s273
 P	base:dark warriors	afk=s326;balanced=s326;fast=s326;profit=s326
 P	base:demonic gorillas	afk=s004;balanced=s004;fast=s004;profit=s004

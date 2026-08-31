@@ -4,7 +4,7 @@ public final class Preference{private Preference(){}public enum Workflow{NORMAL(
 private final String displayName;
 Workflow(String displayName){this.displayName=displayName;
 }@Override public String toString(){return displayName;
-}}public enum BonusMaster{MAZCHNA("Mazchna",2),VANNAKA("Vannaka",3),CHAELDAR("Chaeldar",4),DURADEL("Duradel",5),NIEVE_STEVE("Nieve / Steve",6),KONAR("Konar",8);
+}}public enum BonusMaster{MAZCHNA("Mazchna",2),VANNAKA("Vannaka",3),CHAELDAR("Chaeldar",4),DURADEL("Duradel",5),NIEVE_STEVE("Nieve",6),KONAR("Konar",8);
 private final String displayName;
 private final int masterId;
 BonusMaster(String displayName,int masterId){this.displayName=displayName;

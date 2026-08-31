@@ -1,0 +1,26 @@
+package com.slayerplus;
+import java.util.HashMap;
+import java.util.Map;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.events.PluginMessage;
+final class ShortestPathBridge{private static final String NAMESPACE="shortestpath";
+private final EventBus eventBus;
+private WorldPoint lastTarget;
+private boolean lastBankDetour;
+ShortestPathBridge(EventBus eventBus){this.eventBus=eventBus;
+}void routeTo(WorldPoint target,boolean allowBankDetour){if(eventBus==null||target==null||(target.equals(lastTarget)&&allowBankDetour==lastBankDetour)){return;
+}lastTarget=target;
+lastBankDetour=allowBankDetour;
+Map<String,Object>config=new HashMap<>();
+config.put("includeBankPath",allowBankDetour);
+config.put("showTransportInfo",true);
+Map<String,Object>data=new HashMap<>();
+data.put("target",target);
+data.put("config",config);
+try{eventBus.post(new PluginMessage(NAMESPACE,"path",data));
+}catch(RuntimeException ex){lastTarget=null;
+}}void clear(){if(lastTarget==null){return;
+}lastTarget=null;
+if(eventBus!=null){try{eventBus.post(new PluginMessage(NAMESPACE,"clear"));
+}catch(RuntimeException ex){}}}}

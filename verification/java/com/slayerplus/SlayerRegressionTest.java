@@ -830,6 +830,17 @@ public class SlayerRegressionTest
 
 
 	@Test
+	public void liveVarpWinsOverAStaleThirdPartySlayerServiceCount()
+	{
+		// RuneLite's built-in Slayer plugin can lag one kill behind the
+		// server-driven varp after a fast kill. The raw varp is the more
+		// authoritative source, so it must win when the two disagree.
+		assertEquals(63, SlayerPlusPlugin.resolveTaskRemainingForTest(
+			64, 64, 63, 64, -1));
+	}
+
+
+	@Test
 	public void masterReturnTeleportUsesBottomUtilityCellWithoutMovingRunePouch()
 	{
 		final List<KitItem> inventory = new ArrayList<>();
@@ -2875,11 +2886,51 @@ public class SlayerRegressionTest
 	public void whileGuthixSleepsChangesDuradelDisplayToKuradalOnly()
 	{
 		assertEquals("Duradel",
-			SlayerPlusPlugin.masterDisplayNameForTest(5, false));
+			SlayerPlusPlugin.masterDisplayNameForTest(5, false, false));
 		assertEquals("Kuradal",
-			SlayerPlusPlugin.masterDisplayNameForTest(5, true));
+			SlayerPlusPlugin.masterDisplayNameForTest(5, true, false));
 		assertEquals(MasterRoutes.getName(8),
-			SlayerPlusPlugin.masterDisplayNameForTest(8, true));
+			SlayerPlusPlugin.masterDisplayNameForTest(8, true, true));
+	}
+
+
+	@Test
+	public void monkeyMadness2ChangesNieveDisplayToSteveOnly()
+	{
+		assertEquals("Nieve",
+			SlayerPlusPlugin.masterDisplayNameForTest(6, false, false));
+		assertEquals("Steve",
+			SlayerPlusPlugin.masterDisplayNameForTest(6, false, true));
+		assertEquals(MasterRoutes.getName(8),
+			SlayerPlusPlugin.masterDisplayNameForTest(8, false, true));
+	}
+
+
+	@Test
+	public void dagannothRexVariantResolvesToMagicStrategyAtWaterbirthDungeon()
+	{
+		assertTrue(VariantCatalog.getAvailableVariants("Dagannoth")
+			.contains(TaskVariant.DAGANNOTH_REX));
+
+		final VariantCatalog.ResolvedTarget resolved =
+			VariantCatalog.resolve(
+				"Dagannoth",
+				TaskVariant.DAGANNOTH_REX,
+				null,
+				new SlayerPlusConfig() { }
+			);
+
+		assertEquals("Dagannoth Rex", resolved.getTaskName());
+		assertEquals("Waterbirth Island Dungeon", resolved.getLocation());
+		assertEquals(
+			TaskStrategy.CombatStyle.MAGIC,
+			resolved.getStrategy().getStyle()
+		);
+
+		final MethodRules rules = SlayerMethodRuleCatalog.resolve(
+			"Dagannoth Rex", "Waterbirth Island Dungeon", resolved.getStrategy()
+		);
+		assertNotNull(rules);
 	}
 
 

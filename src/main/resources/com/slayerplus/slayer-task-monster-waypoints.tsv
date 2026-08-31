@@ -1,0 +1,55 @@
+# SlayerPlus per-monster waypoint overrides v1 (sourced from OSRS Wiki monster spawn coordinates)
+# creature<TAB>location<TAB>x<TAB>y<TAB>plane
+abyssal demon	Catacombs of Kourend	1669	10054	0
+abyssal demon	Slayer Tower	3408	3573	2
+aberrant spectre	Slayer Tower	3413	3550	1
+aberrant spectre	Stronghold Slayer Cave	2443	9785	0
+gargoyle	Slayer Tower	3432	3540	2
+infernal mage	Slayer Tower	3433	3556	1
+bloodveld	Slayer Tower (first floor)	3409	3571	1
+bloodveld	Slayer Tower basement	3403	9934	0
+bloodveld	God Wars Dungeon	2880	5321	0
+bloodveld	Stronghold Slayer Cave	2434	9817	0
+dust devil	Catacombs of Kourend	1708	10014	0
+hellhound	Catacombs of Kourend	1639	10060	0
+hellhound	Stronghold Slayer Cave	2409	9786	0
+fire giant	Catacombs of Kourend	1622	10057	0
+greater demon	Catacombs of Kourend	1686	10097	0
+greater demon	Chasm of Fire	1356	9991	0
+black demon	Catacombs of Kourend	1718	10086	0
+black dragon	Taverley Dungeon	2829	9826	0
+ankou	Catacombs of Kourend	1637	9991	0
+ankou	Stronghold Slayer Cave	2468	9802	0
+ankou	Stronghold of Security	1963	4941	0
+kurask	Fremennik Slayer Dungeon	2694	9995	0
+kurask	Iorwerth Dungeon	3249	12377	0
+waterfiend	Iorwerth Dungeon	3161	12457	0
+waterfiend	Ancient Cavern	1738	5343	0
+dark beast	Iorwerth Dungeon	3158	12427	0
+turoth	Fremennik Slayer Dungeon	2717	10007	0
+basilisk	Fremennik Slayer Dungeon	2738	10008	0
+basilisk	Jormungand's Prison	2459	10398	0
+jelly	Fremennik Slayer Dungeon	2699	10029	0
+chaos druid	Edgeville Dungeon	3104	9942	0
+hill giant	Edgeville Dungeon	3099	9832	0
+wyrm	Karuulm Slayer Dungeon	1260	10192	0
+drake	Karuulm Slayer Dungeon	1195	10189	0
+aviansie	God Wars Dungeon	2833	5289	0
+blue dragon	Taverley Dungeon	2897	9797	0
+cave slime	Lumbridge Swamp Caves	3150	9555	0
+cave bug	Lumbridge Swamp Caves	3149	9578	0
+dagannoth	Jormungand's Prison	2433	10417	0
+lesser demon	Chasm of Fire	1370	10079	0
+bronze dragon	Brimhaven Dungeon	2731	9482	0
+iron dragon	Brimhaven Dungeon	2731	9482	0
+steel dragon	Brimhaven Dungeon	2731	9482	0
+moss giant	Brimhaven Dungeon	2642	9492	0
+skeletal wyvern	Asgarnian Ice Dungeon	3057	9573	3
+ice giant	Asgarnian Ice Dungeon	2962	9570	3
+mithril dragon	Ancient Cavern	1819	5390	0
+rune dragon	Lithkren Vault	1581	5072	0
+adamant dragon	Lithkren Vault	1542	5081	0
+Kree'arra	God Wars Dungeon	2844	5280	0
+K'ril Tsutsaroth	God Wars Dungeon	2914	5350	0
+Scurrius	Varrock Sewers	3299	9867	0
+Bryophyta	Varrock Sewers	3220	9933	0
