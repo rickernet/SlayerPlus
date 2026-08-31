@@ -831,7 +831,7 @@ return direct==null?chooseExact(text(368),1,pool,scanned,"games necklace"):direc
 }if(combined.contains("key master")){return chooseExact("Key master teleport",1,pool,scanned,"key master teleport","games necklace");
 }if(combined.contains("barrows teleport")){return chooseExact("Barrows teleport",1,pool,scanned,"barrows teleport",text(373),text(374));
 }if(combined.contains("ring of shadows")||combined.contains("ancient vault")){return chooseExact("Ring of shadows",1,pool,scanned,"ring of shadows");
-}if(combined.contains(text(375))||combined.contains(text(376))){return chooseExact("Wilderness travel",1,pool,scanned,text(375),text(377),"seed pod");
+}if(combined.contains(text(375))||combined.contains(text(376))){return chooseExact("Wilderness travel",1,pool,scanned,text(375));
 }if(combined.contains("digsite pendant")){return chooseExact("Digsite pendant",1,pool,scanned,"digsite pendant");
 }if(combined.contains("drakan")){return chooseExact(text(378),1,pool,scanned,text(379));
 }if(combined.contains("varrock teleport")){return chooseExact("Varrock teleport",1,pool,scanned,"varrock teleport","varrock tablet");
