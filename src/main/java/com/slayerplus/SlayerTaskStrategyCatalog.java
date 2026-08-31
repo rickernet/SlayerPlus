@@ -17,9 +17,7 @@ if(combatPreference==Preference.CombatStyle.PREFER_MAGIC&&profiles.magic==null){
 if(automatic!=null&&!automatic.isBoss()&&automatic.getStyle()!=TaskStrategy.CombatStyle.HYBRID){var elemental=SlayerElementalWeaknessCatalog.preferenceStrategy(assignment,false);
 if(elemental!=null){selected=elemental.withSelectionNote(text(961)+text(962));
 }}}if(selected==null){selected=profiles.select(playstyle,cannonPreference,burstPreference,combatPreference);
-}var audit=SlayerTaskTravelAuditCatalog.find(assignment);
-var cannonAudit=audit==null?"":normalize(audit.getCannon());
-if(selected!=null&&!selected.isBoss()&&cannonPreference==Preference.Cannon.PREFER&&!selected.hasTag(TaskStrategy.MethodTag.CANNON)&&locationAllowsCannon(assignment,location)&&cannonSupportsSelectedCombat(assignment,selected)&&(cannonAudit.contains("recommended")||cannonAudit.contains("optional"))){selected=selected.withAdditionalTags(TaskStrategy.MethodTag.CANNON).withSelectionNote(text(963)+text(964));
+}if(selected!=null&&!selected.isBoss()&&cannonPreference==Preference.Cannon.PREFER&&!selected.hasTag(TaskStrategy.MethodTag.CANNON)&&locationAllowsCannon(assignment,location)&&cannonSupportsSelectedCombat(assignment,selected)){selected=selected.withAdditionalTags(TaskStrategy.MethodTag.CANNON).withSelectionNote(text(963)+text(964));
 }return selected;
 }private static boolean cannonSupportsSelectedCombat(String assignment,TaskStrategy strategy){return strategy!=null&&(!canonicalTaskKey(assignment).equals("greater demons")||strategy.getStyle()!=TaskStrategy.CombatStyle.MELEE);
 }private static boolean locationAllowsCannon(String assignment,String location){var area=normalize(location);
@@ -29,9 +27,6 @@ return!area.contains("catacombs")&&!area.contains("slayer tower")&&!area.contain
 }public static TaskStrategy legacy(String method){return unreviewed("Legacy recommendation");
 }public static boolean hasExplicitStrategy(String assignment){return REVIEWED_TASK_KEYS.contains(canonicalTaskKey(assignment));
 }public static Set<String>getCoveredTaskNames(){return COVERED_TASKS;
-}public static int getCurrentTaskCount(){return REVIEWED_TASK_KEYS.size();
-}public static int getReviewedTaskCount(){return REVIEWED_TASK_KEYS.size();
-}public static int getReviewProgressPercent(){return 100;
 }public static List<String>getCurrentTaskNames(){return Collections.unmodifiableList(new ArrayList<>(COVERED_TASKS));
 }public static TaskResearch.Entry getResearchRecord(String assignment){return TaskResearch.find(canonicalTaskKey(assignment));
 }public static List<String>getMissingCurrentTasks(){List<String>missing=new ArrayList<>();

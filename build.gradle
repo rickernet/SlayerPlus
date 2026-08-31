@@ -31,9 +31,8 @@ dependencies {
 group = 'com.slayerplus'
 
 /*
- * Keep the exhaustive release/audit suite separate from the Plugin Hub's
- * runtime-source review payload. It remains part of Gradle's test source set
- * and is compiled and executed by both test and releaseRouteCheck.
+ * Keep the exhaustive audit suite separate from the Plugin Hub's runtime-source
+ * review payload. It remains part of Gradle's test source set.
  */
 sourceSets {
 	test {
@@ -70,30 +69,13 @@ tasks.register('run', JavaExec) {
 
 	doFirst {
 		def requiredClass = isolatedRunClasses.file(
-			'com/slayerplus/BankRoutes.class'
+			'com/slayerplus/SlayerPlusPlugin.class'
 		).asFile
 		if (!requiredClass.isFile() || requiredClass.length() <= 0) {
 			throw new GradleException(
-				'Missing BankRoutes from isolated RuneLite run classpath'
+				'Missing SlayerPlusPlugin from isolated RuneLite run classpath'
 			)
 		}
-	}
-}
-
-/*
- * Explicit pre-release routing gate. The ordinary development test suite can
- * stay green while researched terminals are being authored; this task enables
- * the zero-failure assertion and must pass before publishing SlayerPlus.
- */
-tasks.register('releaseRouteCheck', Test) {
-	dependsOn tasks.named('testClasses')
-	testClassesDirs = sourceSets.test.output.classesDirs
-	classpath = sourceSets.test.runtimeClasspath
-	systemProperty 'slayerplus.releaseRouteCheck', 'true'
-	filter {
-		includeTestsMatching(
-			'com.slayerplus.SlayerRouteReleaseValidatorTest.completeReleaseMatrixHasNoRoutingFailures'
-		)
 	}
 }
 

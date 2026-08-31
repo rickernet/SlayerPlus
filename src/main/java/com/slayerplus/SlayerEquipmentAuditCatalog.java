@@ -112,9 +112,4 @@ i++){if(!row[i+1].isEmpty()&&!row[i+1].equals("-")){values.put(slots[i],list(row
 }}profiles.put(row[0],Collections.unmodifiableMap(values));
 }return Collections.unmodifiableMap(profiles);
 }private static String normalize(String value){return SlayerText.normalize(value);
-}public static Map<EquipmentInventorySlot,List<String>>auditedSlotsForTest(String assignment,TaskStrategy strategy,String selectedWeaponName){final Map<EquipmentInventorySlot,List<String>>result=new EnumMap<>(EquipmentInventorySlot.class);
-for(EquipmentInventorySlot slot:EquipmentInventorySlot.values()){if(slot==EquipmentInventorySlot.WEAPON||slot==EquipmentInventorySlot.AMMO){continue;
-}var values=priorities(assignment,strategy,slot,selectedWeaponName);
-if(!values.isEmpty()){result.put(slot,values);
-}}return Collections.unmodifiableMap(result);
 }}

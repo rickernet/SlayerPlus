@@ -47,6 +47,7 @@ out/
 .codex-backups/
 .route-audit-*
 .tmp/
+.tokenizer-live/
 
 ### OS Files ###
 .DS_Store

@@ -12,7 +12,6 @@ applyTaskSpecificSupplies(task,rules,strategy);
 return;
 }MethodRules.DamageControl control=strategy==null?MethodRules.DamageControl.DIRECT_DAMAGE:strategy.getDamageProfile()==TaskStrategy.DamageProfile.ZERO_WHILE_PROTECTED?MethodRules.DamageControl.PRAYER_PROTECTED:strategy.getDamageProfile()==TaskStrategy.DamageProfile.ZERO_WHILE_SAFESPOTTING?MethodRules.DamageControl.SAFESPOT:MethodRules.DamageControl.DIRECT_DAMAGE;
 (control==MethodRules.DamageControl.SAFESPOT?SAFESPOT:control==MethodRules.DamageControl.PRAYER_PROTECTED?PRAYER:DIRECT).apply(rules,strategy);
-}static boolean hasPolicy(String assignment){return POLICIES.containsKey(normalize(assignment));
 }static int sizeForTest(){return POLICIES.size();
 }private static void applyTaskSpecificSupplies(String task,MethodRules.Builder rules,TaskStrategy strategy){if(task.equals("bandits")||task.equals("crocodiles")||task.equals("lizards")){rules.require(text(413),1,MethodRules.InventoryGroup.PROTECTION,text(414),text(415),text(416),text(417),text(418),text(419));
 }if(task.equals(text(925))){rules.restore("prayer potion","super restore").restoreSlots(3).food(6).loot(10).require("Poison protection",1,MethodRules.InventoryGroup.PROTECTION,text(486),text(488),"antipoison").require("Nature runes",200,MethodRules.InventoryGroup.RUNES,"nature rune");

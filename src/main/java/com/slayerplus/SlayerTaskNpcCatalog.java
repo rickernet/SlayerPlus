@@ -15,7 +15,6 @@ if(reviewed!=null){aliases.addAll(reviewed);
 Set<String>excluded=STANDARD_EXCLUSIONS.get(taskKey(assignment));
 if(excluded!=null){aliases.removeAll(excluded);
 }return aliases;
-}public static boolean hasTask(String assignment){return ALIASES.containsKey(taskKey(assignment));
 }public static void validateOrThrow(){for(Map.Entry<String,Set<String>>entry:ALIASES.entrySet()){if(entry.getKey()==null||entry.getKey().trim().isEmpty()||entry.getValue()==null||entry.getValue().isEmpty()){throw new IllegalStateException(text(951)+entry.getKey());
 }for(String alias:entry.getValue()){if(alias==null||alias.trim().isEmpty()){throw new IllegalStateException(text(952)+entry.getKey());
 }}}for(Map.Entry<String,Set<String>>entry:STANDARD_EXCLUSIONS.entrySet()){Set<String>base=aliasesFor(entry.getKey());

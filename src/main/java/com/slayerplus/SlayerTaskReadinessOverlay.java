@@ -25,7 +25,7 @@ setPosition(OverlayPosition.TOP_RIGHT);
 setPriority(PRIORITY_HIGH);
 setLayer(OverlayLayer.ABOVE_SCENE);
 panelComponent.setPreferredSize(new Dimension(330,0));
-}@Override public Dimension render(Graphics2D graphics){if(client.getGameState()!=GameState.LOGGED_IN||!plugin.isGuidedSessionActiveForOverlay()){clearRows();
+}@Override public Dimension render(Graphics2D graphics){if(client.getGameState()!=GameState.LOGGED_IN||!plugin.isTaskActiveForOverlay()){clearRows();
 return null;
 }PreparationCatalog.PreparationPlan plan=plugin.getCurrentPreparationForOverlay();
 boolean setupRequired=plan!=null&&plan.isActive()&&!plan.isReady();

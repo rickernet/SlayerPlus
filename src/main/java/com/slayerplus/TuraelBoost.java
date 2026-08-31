@@ -17,8 +17,6 @@ this.requirements=requirements;
 return!value.equals("not allowed")&&!value.equals("not needed");
 }}private static final Map<String,Entry>ENTRIES=loadEntries();
 private TuraelBoost(){}static Entry find(String assignment){return ENTRIES.get(normalize(assignment));
-}static boolean isBoostProfile(String assignment,String location){Entry entry=find(assignment);
-return entry!=null&&normalize(entry.location).equals(normalize(location));
 }static int sizeForTest(){return ENTRIES.size();
 }private static Map<String,Entry>loadEntries(){Map<String,Entry>entries=new LinkedHashMap<>();
 for(String[]fields:ResourceTable.rows(text(1065),5)){put(entries,fields[0],new Entry(fields[1],fields[2],fields[3],fields[4]));

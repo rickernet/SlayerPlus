@@ -18,10 +18,6 @@ for(BossDefinition boss:bosses){if(!variants.contains(boss.variant)){variants.ad
 }}return Collections.unmodifiableList(variants);
 }public static TaskVariant getDefaultVariant(String assignment){BossDefinition directVariant=BOSSES_BY_ENCOUNTER.get(normalize(assignment));
 return directVariant==null?TaskVariant.STANDARD_TASK:directVariant.variant;
-}public static boolean supportsBossVariant(String assignment){List<BossDefinition>bosses=BOSSES_BY_ASSIGNMENT.get(normalize(assignment));
-return bosses!=null&&!bosses.isEmpty();
-}public static boolean isDirectBossTask(String assignment){String key=normalize(assignment);
-return BOSSES_BY_ENCOUNTER.containsKey(key)||DIRECT_BOSSES.containsKey(key);
 }public static String getOptionLabel(String assignment,TaskVariant variant){if(variant!=null&&variant.isBoss()){BossDefinition boss=findBossForAssignment(assignment,variant);
 if(boss!=null){return boss.displayName;
 }BossDefinition direct=BOSSES_BY_ENCOUNTER.get(normalize(assignment));

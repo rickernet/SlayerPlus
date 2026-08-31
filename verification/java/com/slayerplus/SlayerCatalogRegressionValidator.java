@@ -29,11 +29,9 @@ public final class SlayerCatalogRegressionValidator
 	{
 		validateResearchStrategyRegistryParity();
 		SlayerTaskNpcCatalog.validateOrThrow();
-		TravelRoutes.validateOrThrow();
 		SlayerEncounterStandards.validateBossDefinitions(
 			VariantCatalog.getBossDefinitions()
 		);
-		validateBossRouteIsolation();
 		validateCriticalMethodContracts();
 	}
 
@@ -51,15 +49,6 @@ public final class SlayerCatalogRegressionValidator
 		catch (RuntimeException ex)
 		{
 			failures.add("startup contract: " + safeMessage(ex));
-		}
-
-		try
-		{
-			validateBankStartRouteCoverage();
-		}
-		catch (RuntimeException ex)
-		{
-			failures.add("route coverage: " + safeMessage(ex));
 		}
 
 		final List<String> strategyErrors = SlayerTaskStrategyValidator.validate();
@@ -148,133 +137,6 @@ public final class SlayerCatalogRegressionValidator
 		}
 	}
 
-	/**
-	 * Every selectable location must offer a deterministic first Shortest Path
-	 * target from the bank. NPC-only discovery is useful after arrival, but it
-	 * cannot start a route while the encounter is outside the loaded scene.
-	 */
-	private static void validateBankStartRouteCoverage()
-	{
-		final List<String> missing = new ArrayList<>();
-		for (final String assignment : SlayerTaskStrategyCatalog.getCurrentTaskNames())
-		{
-			final Set<String> selectableLocations =
-				SlayerRecommendationEngine.catalogLocationsForValidation(assignment);
-			if (selectableLocations.isEmpty())
-			{
-				final SlayerTaskTravelAuditCatalog.Entry travel =
-					SlayerTaskTravelAuditCatalog.find(assignment);
-				if (travel == null || normalize(travel.getLocation()).isEmpty())
-				{
-					missing.add(assignment + " @ <no audited travel location>");
-					continue;
-				}
-				if (!hasBankStartRoute(assignment, travel.getLocation(), false))
-				{
-					missing.add(assignment + " @ " + travel.getLocation());
-				}
-				continue;
-			}
-
-			for (final String location : selectableLocations)
-			{
-				if (!hasBankStartRoute(assignment, location, false))
-				{
-					missing.add(assignment + " @ " + location);
-				}
-			}
-		}
-
-		for (final VariantCatalog.EncounterDefinition definition
-			: VariantCatalog.getBossDefinitions())
-		{
-			if (!hasBankStartRoute(
-				definition.getTargetName(), definition.getLocation(), true))
-			{
-				missing.add(definition.getTargetName() + " @ "
-					+ definition.getLocation() + " [boss]");
-			}
-		}
-
-		/* Directly assigned bosses use STANDARD_TASK as their selector identity,
-		 * but still require strict boss routing and a deterministic bank-start leg. */
-		for (final VariantCatalog.EncounterDefinition definition
-			: VariantCatalog.getDirectBossDefinitions())
-		{
-			if (!hasBankStartRoute(
-				definition.getTargetName(), definition.getLocation(), true))
-			{
-				missing.add(definition.getTargetName() + " @ "
-					+ definition.getLocation() + " [direct boss]");
-			}
-		}
-
-		if (!missing.isEmpty())
-		{
-			throw new IllegalStateException(
-				"No bank-start Shortest Path target: " + missing
-			);
-		}
-	}
-
-	private static boolean hasBankStartRoute(
-		final String assignment,
-		final String location,
-		final boolean boss)
-	{
-		if (RouteCatalog.requiresPreparationBank(assignment, location, boss))
-		{
-			return BankRoutes.infernoBankTarget() != null;
-		}
-
-		final RouteCatalog.RouteProfile profile = RouteCatalog.resolve(
-			assignment,
-			location,
-			boss
-		);
-		return profile != null && !profile.getRouteTargets(null).isEmpty();
-	}
-
-	private static void validateBossRouteIsolation()
-	{
-		for (final VariantCatalog.EncounterDefinition definition
-			: VariantCatalog.getBossDefinitions())
-		{
-			final String bossName = definition.getTargetName();
-			final String location = definition.getLocation();
-			final RouteCatalog.RouteProfile boss = RouteCatalog.resolve(
-				bossName,
-				location,
-				true
-			);
-			if (boss == null || !boss.isBoss() || !boss.matchesNpc(bossName))
-			{
-				throw new IllegalStateException(
-					"Boss route is not strict to its encounter: " + bossName
-						+ " @ " + location
-				);
-			}
-
-			final String assignment = definition.getAssignmentName();
-			if (assignment == null || assignment.trim().isEmpty())
-			{
-				continue;
-			}
-			final RouteCatalog.RouteProfile standard = RouteCatalog.resolve(
-				assignment,
-				location,
-				false
-			);
-			if (standard != null && standard.matchesNpc(bossName))
-			{
-				throw new IllegalStateException(
-					"Boss NPC leaked into standard route: " + assignment
-						+ " -> " + bossName + " @ " + location
-				);
-			}
-		}
-	}
-
 	private static void validateCriticalMethodContracts()
 	{
 		/* Dust Devil stacking requires a real aggression utility in the 4 x 7. */
@@ -329,18 +191,6 @@ public final class SlayerCatalogRegressionValidator
 					"Dust Devil stacking method has no owned-resolvable aggression utility slot"
 				);
 			}
-		}
-
-		final RouteCatalog.RouteProfile dustRoute = RouteCatalog.resolve(
-			"Dust devils", "Catacombs of Kourend", false
-		);
-		if (dustRoute == null || !dustRoute.isStaged()
-			|| dustRoute.getTransitionSpec() == null
-			|| !dustRoute.getTransitionSpec().matchesAction("Investigate"))
-		{
-			throw new IllegalStateException(
-				"Dust Devil Catacombs route lost its explicit King Rada transition"
-			);
 		}
 
 		/*

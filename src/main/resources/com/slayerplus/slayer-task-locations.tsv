@@ -23,7 +23,7 @@ O	cave horror%7Ccave horrors	Mos Le'Harmless Cave	Fast ranged attacks with a wit
 O	dagannoth%7Cdagannoths	Lighthouse Dungeon	Cannon in multi-combat	Games necklace to Barbarian Outpost, then run north	RECOMMENDED	QUEST	HORROR_FROM_THE_DEEP	Horror from the Deep
 O	dagannoth%7Cdagannoths	Jormungand's Prison	Prayer melee against melee-only Dagannoth	Rellekka teleport, then travel to the prison	NOT_ALLOWED	QUEST	THE_FREMENNIK_EXILES	The Fremennik Exiles
 O	dagannoth%7Cdagannoths	Waterbirth Island Dungeon	Multi-combat ranged or melee	Waterbirth teleport or travel from Rellekka	NOT_ALLOWED			
-O	kalphite%7Ckalphites	Kalphite Slayer Cave	Cannon in the task-only cave	Use the nearest unlocked Desert teleport	RECOMMENDED			
+O	kalphite%7Ckalphites	Kalphite Cave	Cannon in the task-only cave	Use the nearest unlocked Desert teleport	RECOMMENDED			
 O	suqah%7Csuqahs	Lunar Isle	Cannon the clustered suqahs	Lunar Isle teleport	RECOMMENDED	QUEST	LUNAR_DIPLOMACY	Lunar Diplomacy
 O	troll%7Ctrolls	Death Plateau	Cannon the dense troll spawns	Games necklace to Burthorpe, then run north	RECOMMENDED	QUEST	DEATH_PLATEAU	Death Plateau
 O	wyrm%7Cwyrms	Karuulm Slayer Dungeon	Ranged or melee with boots of stone protection	Rada's blessing to Mount Karuulm	NOT_ALLOWED			
@@ -52,7 +52,7 @@ O	waterfiend%7Cwaterfiends	Iorwerth Dungeon	Use Earth spells with optional canno
 O	spiritual creature%7Cspiritual creatures	God Wars Dungeon	Kill the highest unlocked spiritual creature	Trollheim teleport, then enter God Wars Dungeon	NOT_ALLOWED	QUEST	TROLL_STRONGHOLD	Troll Stronghold
 O	fossil island wyvern%7Cfossil island wyverns	Wyvern Cave on Fossil Island	Use an elemental or dragonfire shield	Digsite pendant to Fossil Island	NOT_ALLOWED	QUEST	BONE_VOYAGE	Bone Voyage
 O	vampyre%7Cvampyres	Darkmeyer	Use an Ivandis or blisterwood weapon	Drakan's medallion to Darkmeyer	NOT_ALLOWED	QUEST	SINS_OF_THE_FATHER	Sins of the Father
-O	basilisk%7Cbasilisks	Jormungand's Prison	Basilisk Knights for the higher-value option	Fremennik sea boots or Rellekka teleport, then run north	NOT_ALLOWED	QUEST	THE_FREMENNIK_EXILES	The Fremennik Exiles
+O	basilisk%7Cbasilisks	Jormungand's Prison	Basilisk Knights for the higher-value option	Sea boots or Rellekka teleport, then run north	NOT_ALLOWED	QUEST	THE_FREMENNIK_EXILES	The Fremennik Exiles
 O	basilisk%7Cbasilisks	Fremennik Slayer Dungeon	Use a mirror shield against regular basilisks	Slayer ring to Fremennik Slayer Dungeon	NOT_ALLOWED			
 O	elf%7Celves	Iorwerth Dungeon	Melee or ranged against Iorwerth elves	Teleport crystal to Prifddinas	NOT_ALLOWED	QUEST	SONG_OF_THE_ELVES	Song of the Elves
 O	elf%7Celves	Lletya	Kill the elves around Lletya	Teleport crystal to Lletya	NOT_ALLOWED	QUEST	REGICIDE	Regicide
@@ -62,3 +62,36 @@ O	mutated zygomite%7Cmutated zygomites	Zanaris	Use fungicide spray to finish eac
 O	brine rat%7Cbrine rats	Brine Rat Cavern	Melee or ranged in the cavern	Rellekka teleport, then run northeast	NOT_ALLOWED	QUEST	OLAFS_QUEST	Olaf's Quest
 O	adamant dragon%7Cadamant dragons	Lithkren Vault	Ranged with strong dragonfire protection	Digsite pendant to Lithkren	NOT_ALLOWED	QUEST	DRAGON_SLAYER_II	Dragon Slayer II
 O	rune dragon%7Crune dragons	Lithkren Vault	Ranged or melee with strong dragonfire protection	Digsite pendant to Lithkren	NOT_ALLOWED	QUEST	DRAGON_SLAYER_II	Dragon Slayer II
+O	black dragon%7Cblack dragons	Taverley Dungeon	Strong stab melee with antifire protection	Falador teleport, then run northwest	OPTIONAL			
+
+O	green dragon%7Cgreen dragons	Wilderness green dragon area	Cannon in the multi-combat wilderness spawns	Burning amulet to the Lava Maze, then head south into the dragon spawns	RECOMMENDED			
+O	lava dragon%7Clava dragons	Lava Dragon Isle	Cannon or ranged from the isle; 74 Agility recommended for the escape shortcut	Burning amulet to the Lava Maze, then cross into Lava Dragon Isle	RECOMMENDED			
+O	aviansie%7Caviansies	God Wars Dungeon	Ranged or Magic only; melee cannot hit flying Aviansies	Trollheim teleport, then enter God Wars Dungeon	RECOMMENDED	QUEST	DEATH_PLATEAU	Death Plateau
+O	black knight%7Cblack knights	Black Knights' Fortress	Melee or ranged in the fortress rooms	Falador teleport, then run south	RECOMMENDED			
+O	chaos druid%7Cchaos druids	Edgeville Dungeon	Melee or ranged near the entrance	Varrock teleport, then run north into Edgeville and enter the dungeon	RECOMMENDED			
+O	moss giant%7Cmoss giants	Brimhaven Dungeon	Cannon or melee the giant spawns	Fairy ring CKR, then run north to Brimhaven Dungeon	RECOMMENDED			
+O	hill giant%7Chill giants	Edgeville Dungeon	Cannon or melee near the entrance	Varrock teleport, then run north into Edgeville and enter the dungeon	RECOMMENDED			
+O	ice giant%7Cice giants	Asgarnian Ice Dungeon	Cannon or melee the giant packs	Falador teleport, then run south	RECOMMENDED			
+O	ogre	Kourend Woodland	Melee or ranged; can be crowded with other cannon users	Travel to Hosidius, then head north to the Kourend Woodland ogre enclosure	OPTIONAL			
+O	mogre	Mudskipper Point	Melee or ranged with a safespot	Falador teleport, then run southwest to Mudskipper Point	OPTIONAL			
+O	molanisk	Dorgesh-Kaan South Dungeon	Lure off the wall with a Slayer bell, then melee or ranged	Lumbridge Swamp Caves entrance, then travel to Dorgesh-Kaan and enter the south dungeon	NOT_ALLOWED	QUEST	DEATH_TO_THE_DORGESHUUN	Death to the Dorgeshuun
+O	cave slime%7Ccave slimes	Lumbridge Swamp Caves	Melee or ranged in the caves	Lumbridge home teleport, then enter the Lumbridge Swamp Caves	RECOMMENDED			
+O	ent%7Cents	Woodcutting Guild Dungeon	Melee or ranged in the dungeon	Travel to Hosidius, then enter the Woodcutting Guild and descend to the dungeon	RECOMMENDED	SKILL	WOODCUTTING	60
+O	custodian stalker%7Ccustodian stalkers	Stalker Den	Cannon in the multi-combat south-west area; melee or ranged elsewhere	Travel to Civitas illa Fortis and enter the Stalker Den	OPTIONAL	QUEST	SHADOWS_OF_CUSTODIA	Shadows of Custodia
+O	harpie bug swarm%7Charpie bug swarms	Tai Bwo Wannai	Equip a lit bug lantern to damage them; cannon usable with the lantern equipped	Fairy ring DKP, then travel to Tai Bwo Wannai	OPTIONAL			
+O	fever spider%7Cfever spiders	Braindeath Island	Wear Slayer gloves; ranged or magic can safespot near the crates	Complete Rum Deal, then travel to Braindeath Island and enter the brewery basement	NOT_ALLOWED	QUEST	RUM_DEAL	Rum Deal
+O	infernal mage%7Cinfernal mages	Slayer Tower	Melee or ranged past the Banshees	Slayer ring to Slayer Tower	RECOMMENDED	QUEST	PRIEST_IN_PERIL	Priest in Peril
+O	jelly%7Cjellies	Fremennik Slayer Dungeon	Melee or ranged; no particular strategy required	Slayer ring to Fremennik Slayer Dungeon	NOT_ALLOWED			
+O	killerwatt%7Ckillerwatts	Killerwatt plane	Melee, ranged, or magic	Travel to Draynor Manor and use the portal machine on the top floor	NOT_ALLOWED	QUEST	ERNEST_THE_CHICKEN	Ernest the Chicken
+O	lesser demon%7Clesser demons	Chasm of Fire	Cannon with a safespot in the lower levels	Use the nearest unlocked Kourend teleport	RECOMMENDED			
+O	lesser nagua%7Clesser naguas	Ruins of Tapoyauik	Melee, ranged, or magic against the Frost Nagua	Civitas illa Fortis teleport, then travel to the Ruins of Tapoyauik	UNKNOWN			
+O	magic axe%7Cmagic axes	Magic axe hut	Melee or ranged in the wilderness hut	Wilderness obelisk or Ferox Enclave, then travel to the Magic axe hut	RECOMMENDED	SKILL	THIEVING	23
+O	aquanite%7Caquanites	Ynysdail Cavern	Melee, ranged, or magic; no cannon	Sail to Ynysdail from Port Roberts, then enter the cavern	NOT_ALLOWED			
+O	crocodile%7Ccrocodiles	Nardah desert	Ranged from a safe distance along the riverbank	Pharaoh's sceptre to Nardah, then head to the riverside crocodiles	NOT_ALLOWED			
+O	dark warrior%7Cdark warriors	Dark Warriors' Fortress	Melee or ranged in the fortress	Run north from Edgeville into the wilderness to Dark Warriors' Fortress	UNKNOWN			
+O	rogue%7Crogues	Rogues' Castle	Melee or ranged in the castle	Wilderness obelisk or Ferox Enclave, then travel to Rogues' Castle	UNKNOWN			
+O	bat%7Cbats	Edgeville Dungeon	Melee or ranged near the entrance	Varrock teleport, then run north into Edgeville and enter the dungeon	RECOMMENDED			
+O	cave bug%7Ccave bugs	Lumbridge Swamp Caves	Melee, ranged, or magic in the caves	Lumbridge home teleport, then enter the Lumbridge Swamp Caves	RECOMMENDED			
+O	cave crawler%7Ccave crawlers	Stronghold Slayer Cave	Melee, ranged, or magic with a safespot	Slayer ring to Stronghold Slayer Cave	RECOMMENDED			
+O	crawling hand%7Ccrawling hands	Edgeville Dungeon	Melee or ranged near the entrance	Varrock teleport, then run north into Edgeville and enter the dungeon	OPTIONAL			
+O	werewolf%7Cwerewolves	Canifis	Melee, ranged, or magic around Canifis	Ectophial to Canifis	OPTIONAL			
