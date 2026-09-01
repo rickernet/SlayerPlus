@@ -20,6 +20,8 @@ if(slot==EquipmentInventorySlot.HEAD){if(task.contains(text(260))){return list("
 }if(task.equals(text(2))){return ranged(slot,weapon,false);
 }if(task.equals(text(263))){return royalTitans(slot);
 }if(task.equals("araxxor")){return araxxor(slot,weapon);
+}if(task.equals("dagannoth rex")){return profile("dagannoth-rex",slot);
+}if(task.equals("dagannoth kings")){return profile("dagannoth-kings",slot);
 }if(slot==EquipmentInventorySlot.AMULET&&task.contains("banshee")){return list("e043");
 }if((task.equals("blue dragon")||task.equals("blue dragons"))&&style==TaskStrategy.CombatStyle.RANGED&&slot==EquipmentInventorySlot.SHIELD){return list("e044");
 }if((task.equals("skeletal wyvern")||task.equals(text(264)))&&slot==EquipmentInventorySlot.SHIELD){if(style==TaskStrategy.CombatStyle.RANGED){return list("e045");

@@ -1,0 +1,5 @@
+# SlayerPlus mandatory pre-entrance waypoints v1 (e.g. boat docks needed before any entrance/shortcut is reachable)
+# creature<TAB>location<TAB>x<TAB>y<TAB>plane
+dagannoth	Waterbirth Island Dungeon	2620	3684	0
+Dagannoth Rex	Waterbirth Island Dungeon	2620	3684	0
+Dagannoth Kings	Waterbirth Island Dungeon	2620	3684	0

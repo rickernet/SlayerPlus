@@ -2,6 +2,7 @@
 # O<TAB>aliases(|)<TAB>location<TAB>method<TAB>travel<TAB>cannon<TAB>requirement-type<TAB>requirement-key<TAB>requirement-value
 O	abyssal demon%7Cabyssal demons	Catacombs of Kourend	Multi-combat melee or burst/barrage	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
 O	abyssal demon%7Cabyssal demons	Slayer Tower	Single-combat melee	Slayer ring to Slayer Tower	NOT_ALLOWED	QUEST	PRIEST_IN_PERIL	Priest in Peril
+O	araxyte%7Caraxytes	Morytania Spider Cave	Multi-combat melee or ranged with venom protection; cannon usable	Spider cave teleport, or travel through Morytania to the cave entrance	RECOMMENDED	SKILL	SLAYER	92
 O	bloodveld%7Cbloodvelds	Meiyerditch Laboratories	Cannon mutated bloodvelds in multi-combat	Drakan's medallion to Darkmeyer, then enter the laboratories	RECOMMENDED	QUEST	SINS_OF_THE_FATHER	Sins of the Father
 O	bloodveld%7Cbloodvelds	Buccaneers' Laboratory	Cannon mutated Bloodvelds in unobstructed multi-combat	Pirates' Cove, then the built rowboat to Buccaneers' Haven	RECOMMENDED	SKILL	SAILING	76
 O	bloodveld%7Cbloodvelds	Iorwerth Dungeon	Cannon mutated Bloodvelds in a single-combat crystal-shard area	Teleport crystal to Prifddinas, then enter Iorwerth Dungeon	OPTIONAL	QUEST	SONG_OF_THE_ELVES	Song of the Elves
@@ -18,11 +19,11 @@ O	gargoyle%7Cgargoyles	Slayer Tower	Melee with a rock hammer or automatic finish
 O	kurask%7Ckurasks	Iorwerth Dungeon	Leaf-bladed weapon, broad ammunition, or Magic Dart	Teleport crystal to Prifddinas, then enter Iorwerth Dungeon	NOT_ALLOWED	QUEST	SONG_OF_THE_ELVES	Song of the Elves
 O	kurask%7Ckurasks	Fremennik Slayer Dungeon	Leaf-bladed weapon, broad ammunition, or Magic Dart	Slayer ring to Fremennik Slayer Dungeon	NOT_ALLOWED			
 O	turoth%7Cturoths	Fremennik Slayer Dungeon	Leaf-bladed weapon, broad ammunition, or Magic Dart	Slayer ring to Fremennik Slayer Dungeon	NOT_ALLOWED			
-O	cave kraken%7Ckraken	Kraken Cove	Magic against cave kraken	Use the nearest unlocked teleport to Kraken Cove	NOT_ALLOWED			
+O	cave kraken%7Ckraken%7Ccave krakens	Kraken Cove	Magic against cave kraken, or ranged/magic from a safespot	Use the nearest unlocked teleport to Kraken Cove, or fairy ring code AKQ	NOT_ALLOWED			
 O	cave horror%7Ccave horrors	Mos Le'Harmless Cave	Fast ranged attacks with a witchwood icon and dwarf multicannon	Trouble Brewing minigame teleport, then run east	RECOMMENDED	QUEST	CABIN_FEVER	Cabin Fever
 O	dagannoth%7Cdagannoths	Lighthouse Dungeon	Cannon in multi-combat	Games necklace to Barbarian Outpost, then run north	RECOMMENDED	QUEST	HORROR_FROM_THE_DEEP	Horror from the Deep
 O	dagannoth%7Cdagannoths	Jormungand's Prison	Prayer melee against melee-only Dagannoth	Rellekka teleport, then travel to the prison	NOT_ALLOWED	QUEST	THE_FREMENNIK_EXILES	The Fremennik Exiles
-O	dagannoth%7Cdagannoths	Waterbirth Island Dungeon	Multi-combat ranged or melee	Waterbirth teleport or travel from Rellekka	NOT_ALLOWED			
+O	dagannoth%7Cdagannoths	Waterbirth Island Dungeon	Multi-combat ranged or melee	Fremennik sea boots to Rellekka, then boat to Waterbirth Island	NOT_ALLOWED			
 O	kalphite%7Ckalphites	Kalphite Cave	Cannon in the task-only cave	Use the nearest unlocked Desert teleport	RECOMMENDED			
 O	suqah%7Csuqahs	Lunar Isle	Cannon the clustered suqahs	Lunar Isle teleport	RECOMMENDED	QUEST	LUNAR_DIPLOMACY	Lunar Diplomacy
 O	troll%7Ctrolls	Death Plateau	Cannon the dense troll spawns	Games necklace to Burthorpe, then run north	RECOMMENDED	QUEST	DEATH_PLATEAU	Death Plateau
@@ -72,7 +73,7 @@ O	chaos druid%7Cchaos druids	Edgeville Dungeon	Melee or ranged near the entrance
 O	moss giant%7Cmoss giants	Brimhaven Dungeon	Cannon or melee the giant spawns	Fairy ring CKR, then run north to Brimhaven Dungeon	RECOMMENDED			
 O	hill giant%7Chill giants	Edgeville Dungeon	Cannon or melee near the entrance	Varrock teleport, then run north into Edgeville and enter the dungeon	RECOMMENDED			
 O	ice giant%7Cice giants	Asgarnian Ice Dungeon	Cannon or melee the giant packs	Falador teleport, then run south	RECOMMENDED			
-O	ogre	Kourend Woodland	Melee or ranged; can be crowded with other cannon users	Travel to Hosidius, then head north to the Kourend Woodland ogre enclosure	OPTIONAL			
+O	ogre%7Cogres	Kourend Woodland	Melee or ranged; can be crowded with other cannon users	Travel to Hosidius, then head north to the Kourend Woodland ogre enclosure	OPTIONAL			
 O	mogre	Mudskipper Point	Melee or ranged with a safespot	Falador teleport, then run southwest to Mudskipper Point	OPTIONAL			
 O	molanisk	Dorgesh-Kaan South Dungeon	Lure off the wall with a Slayer bell, then melee or ranged	Lumbridge Swamp Caves entrance, then travel to Dorgesh-Kaan and enter the south dungeon	NOT_ALLOWED	QUEST	DEATH_TO_THE_DORGESHUUN	Death to the Dorgeshuun
 O	cave slime%7Ccave slimes	Lumbridge Swamp Caves	Melee or ranged in the caves	Lumbridge home teleport, then enter the Lumbridge Swamp Caves	RECOMMENDED			
@@ -95,3 +96,52 @@ O	cave bug%7Ccave bugs	Lumbridge Swamp Caves	Melee, ranged, or magic in the cave
 O	cave crawler%7Ccave crawlers	Stronghold Slayer Cave	Melee, ranged, or magic with a safespot	Slayer ring to Stronghold Slayer Cave	RECOMMENDED			
 O	crawling hand%7Ccrawling hands	Edgeville Dungeon	Melee or ranged near the entrance	Varrock teleport, then run north into Edgeville and enter the dungeon	OPTIONAL			
 O	werewolf%7Cwerewolves	Canifis	Melee, ranged, or magic around Canifis	Ectophial to Canifis	OPTIONAL			
+O	rat%7Crats	Stronghold of Security	Any combat style; rats here have a guaranteed bone drop	Entrance near Barbarian Village, south of Varrock	OPTIONAL			
+O	cow%7Ccows	Lumbridge cow field	Any combat style against a non-aggressive target	Lumbridge teleport, then walk to the east farm	RECOMMENDED			
+O	bird%7Cbirds	Ape Atoll	Any combat style	Ape Atoll teleport or Gorilla greegree	OPTIONAL	QUEST	MONKEY_MADNESS_I	Monkey Madness I
+O	goblin%7Cgoblins	Lumbridge	Any combat style	Lumbridge teleport, then walk to the goblin camp	RECOMMENDED			
+O	skeleton%7Cskeletons	Edgeville Dungeon	Crush melee with a Salve amulet, or magic with Crumble Undead	Varrock teleport, then run north into Edgeville and enter the dungeon	OPTIONAL			
+O	dog%7Cdogs	McGrubor's Wood	Ranged or magic; melee is less reliable against guard dogs	Camelot teleport, then travel west to McGrubor's Wood	OPTIONAL			
+O	ghost%7Cghosts	Stronghold of Security	Magic with Crumble Undead, or melee with a Salve amulet	Entrance near Barbarian Village, south of Varrock	OPTIONAL			
+O	zombie%7Czombies	Edgeville Dungeon	Melee or fire magic against their 50% fire weakness	Varrock teleport, then run north into Edgeville and enter the dungeon	OPTIONAL			
+O	bandit%7Cbandits	Wilderness Slayer Cave	Halberd safespot melee	Slayer ring to the Wilderness Slayer Cave	OPTIONAL			
+O	banshee%7Cbanshees	Slayer Tower	Ranged with earmuffs or a Slayer helmet equipped	Slayer ring to Slayer Tower	NOT_ALLOWED	QUEST	PRIEST_IN_PERIL	Priest in Peril
+O	bear%7Cbears	Ardougne	Any combat style, using available safespots	Ardougne teleport	OPTIONAL			
+O	catablepon%7Ccatablepons	Stronghold of Security	Ranged or magic; melee is discouraged due to Strength drain	Entrance near Barbarian Village, south of Varrock	OPTIONAL			
+O	cockatrice%7Ccockatrices	Fremennik Slayer Dungeon	Any combat style with a mirror shield or V's shield equipped	Fremennik Sea Boots or Slayer ring to the dungeon	NOT_ALLOWED			
+O	crab%7Ccrabs	Mogre Camp	Crush melee or earth magic	Speak to Murphy in Port Khazard for diving gear	OPTIONAL			
+O	dwarf%7Cdwarves	Dwarven Mine	Any combat style	Falador teleport, then enter the Dwarven Mine	RECOMMENDED			
+O	earth warrior%7Cearth warriors	Edgeville Dungeon	Crush melee or magic, in the Wilderness section	Varrock teleport, then run north into Edgeville and enter the dungeon	OPTIONAL			
+O	fleshcrawler%7Cfleshcrawlers	Stronghold of Security	Ranged from a safespot	Entrance near Barbarian Village, south of Varrock	OPTIONAL			
+O	frost dragon%7Cfrost dragons	Grimstone Dungeon	Fire magic, or melee/ranged with antifire and an anti-dragon shield	Fairy ring code DLP after mooring at Grimstone Island	NOT_ALLOWED			
+O	ghoul%7Cghouls	Canifis	Ranged or magic from a graveyard safespot west of Canifis	Ectophial to Canifis	OPTIONAL			
+O	gryphon%7Cgryphons	The Great Conch	Melee with at least 30kg equipped weight	Boat from Civitas illa Fortis	NOT_ALLOWED	SKILL	SAILING	45
+O	hobgoblin%7Chobgoblins	Edgeville Dungeon	Ranged or magic from a safespot	Varrock teleport, then run north into Edgeville and enter the dungeon	OPTIONAL			
+O	icefiend%7Cicefiends	Ice Mountain	Fire magic	Falador teleport, then travel to Ice Mountain	OPTIONAL			
+O	ice warrior%7Cice warriors	Asgarnian Ice Dungeon	Fire magic from a safespot	Falador teleport, then enter the Asgarnian Ice Dungeon	RECOMMENDED			
+O	jungle horror%7Cjungle horrors	Mos Le'Harmless Cave	Ranged or magic from a plant/tree safespot	Cabin Fever quest access to Mos Le'Harmless	OPTIONAL	QUEST	CABIN_FEVER	Cabin Fever
+O	lizardman%7Clizardmen	Lizardman Canyon	Multi-combat melee, letting soldiers absorb aggression	Xeric's talisman to Lizardman Canyon	RECOMMENDED			
+O	lizard%7Clizards	Kharidian Desert	Fire magic or melee, finishing with an ice cooler	Fairy ring code DLQ	OPTIONAL			
+O	mammoth%7Cmammoths	Ferox Enclave	Dwarf multicannon or safespotted ranged/magic	Ferox Enclave teleport, then travel southeast	RECOMMENDED			
+O	metal dragon%7Cmetal dragons	Brimhaven Dungeon	Stab or heavy ranged attacks, or earth magic, with antifire	Brimhaven Dungeon teleport or Karamja glider	NOT_ALLOWED			
+O	minotaur%7Cminotaurs	Stronghold of Security	Ranged from a safespot	Entrance near Barbarian Village, south of Varrock	OPTIONAL			
+O	monkey%7Cmonkeys	Ape Atoll	Any combat style	Ape Atoll teleport or Gorilla greegree	OPTIONAL	QUEST	MONKEY_MADNESS_I	Monkey Madness I
+O	ogre%7Cogres	Yanille	Melee, or earth magic against their weakness	Yanille teleport, then travel west	OPTIONAL			
+O	otherworldly being%7Cotherworldly beings	Zanaris	Ranged or magic, corner-trapped at the pond	Dramen staff to Zanaris	OPTIONAL			
+O	pirate%7Cpirates	Pirates' Hideout	Melee	Slayer ring to the Wilderness, then enter the hideout	OPTIONAL	SKILL	THIEVING	39
+O	pyrefiend%7Cpyrefiends	Fremennik Slayer Dungeon	Magic, or ranged with dragonhide armour, from a safespot	Fremennik Sea Boots or Slayer ring to the dungeon	NOT_ALLOWED			
+O	red dragon%7Cred dragons	Brimhaven Dungeon	Ranged or melee with antifire and prayer-flicked Protect from Melee	Brimhaven Dungeon teleport or Karamja glider	NOT_ALLOWED			
+O	revenant%7Crevenants	Revenant Caves	Ranged with a magic shortbow or Craw's bow	Ferox Enclave, then enter the Revenant Caves	OPTIONAL			
+O	rockslug%7Crockslugs	Fremennik Slayer Dungeon	Any combat style, finishing with a bag of salt or a brine sabre	Fremennik Sea Boots or Slayer ring to the dungeon	NOT_ALLOWED			
+O	scorpion%7Cscorpions	Dwarven Mine	Fire magic against their weakness	Falador teleport, then enter the Dwarven Mine	RECOMMENDED			
+O	sea snake%7Csea snakes	Miscellania and Etceteria Dungeon	Magic, with poison protection	Miscellania teleport, then enter the dungeon	OPTIONAL	QUEST	ROYAL_TROUBLE	Royal Trouble
+O	shade%7Cshades	Catacombs of Kourend	Crush melee with a Salve amulet, or wind magic	Xeric's talisman to Xeric's Heart	NOT_ALLOWED			
+O	shadow warrior%7Cshadow warriors	Legends' Guild Dungeon	Safespotted ranged or magic	Legends' Guild teleport, then descend to the dungeon	OPTIONAL			
+O	sourhog%7Csourhogs	Sourhog Cave	Any combat style with reinforced goggles or a Slayer helmet equipped	Travel to the Sourhog Cave	OPTIONAL			
+O	spider%7Cspiders	Stronghold of Security	Fast melee; spiders here deal no damage	Entrance near Barbarian Village, south of Varrock	OPTIONAL			
+O	terror dog%7Cterror dogs	Tarn's Lair	Multi-combat with prayer restoration for the room's prayer drain	Slayer ring to Tarn's Lair	OPTIONAL			
+O	tzhaar	Mor Ul Rek	Water magic against their weakness, or melee/ranged	TokKul-Zo teleport or Karamja volcano entrance	OPTIONAL			
+O	venator%7Cvenators	Virer Hunting Ground	Vampyrebane weapons with correct prayer switching	Travel to the hunting grounds	OPTIONAL			
+O	wall beast%7Cwall beasts	Lumbridge Swamp Caves	Spiny helmet to engage, then switch to a black mask	Lumbridge teleport, then enter the swamp caves with a bullseye lantern	OPTIONAL			
+O	warped creature%7Cwarped creatures	Poison Waste Dungeon	Ranged from the entrance safespot	Crystal chime, with progress in The Path of Glouphrie	OPTIONAL	QUEST	THE_PATH_OF_GLOUPHRIE	The Path of Glouphrie
+O	wolf%7Cwolves	Stronghold of Security	Fire magic against their weakness	Entrance near Barbarian Village, south of Varrock	OPTIONAL			

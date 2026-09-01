@@ -14,6 +14,8 @@ ShortestPathBridge(EventBus eventBus){this.eventBus=eventBus;
 lastBankDetour=allowBankDetour;
 Map<String,Object>config=new HashMap<>();
 config.put("includeBankPath",allowBankDetour);
+config.put("useTeleportationItems","Inventory");
+config.put("useAgilityShortcuts",true);
 config.put("showTransportInfo",true);
 Map<String,Object>data=new HashMap<>();
 data.put("target",target);

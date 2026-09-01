@@ -8,8 +8,9 @@ B	ARAXXOR	Araxxor	Morytania Spider Cave	Travel to the Morytania Spider Cave and 
 B	ARTIO	Artio	Hunter's End	Travel through the Wilderness to Hunter's End	Not allowed	Wilderness boss alternative for Bears	Bears
 B	CALLISTO	Callisto	Callisto's Den	Travel through the Wilderness to Callisto's Den	Not allowed	Wilderness boss alternative for Bears	Bears
 B	CERBERUS	Cerberus	Cerberus' Lair	Key master teleport, Taverley house portal, or Falador west shortcut	Not allowed	Requires 91 Slayer and an active Hellhound or Cerberus task	Hellhounds
-B	DAGANNOTH_KINGS	Dagannoth Kings	Waterbirth Island Dungeon	Waterbirth teleport or travel from Rellekka, then descend to the Kings	Not allowed	Boss alternative for Dagannoth tasks	Dagannoth|Dagannoths
-B	DAGANNOTH_REX	Dagannoth Rex	Waterbirth Island Dungeon	Waterbirth teleport or travel from Rellekka, then descend to the Kings	Not allowed	Boss alternative for Dagannoth tasks — Rex only, accessible for early accounts	Dagannoth|Dagannoths
+B	DAGANNOTH_KINGS	Dagannoth Kings	Waterbirth Island Dungeon	Fremennik sea boots to Rellekka, then boat to Waterbirth Island	Not allowed	Boss alternative for Dagannoth tasks	Dagannoth|Dagannoths
+B	DAGANNOTH_REX	Dagannoth Rex	Waterbirth Island Dungeon	Fremennik sea boots to Rellekka, then boat to Waterbirth Island	Not allowed	Boss alternative for Dagannoth tasks — Rex only, accessible for early accounts	Dagannoth|Dagannoths
+B	BABY_BLUE_DRAGONS	Baby blue dragons	Taverley Dungeon	Falador teleport, then run northwest	Optional	Safer alternative to adult blue dragons — they do not breathe fire, no antifire needed	Blue dragon|Blue dragons
 B	DERANGED_ARCHAEOLOGIST	Deranged Archaeologist	Fossil Island	Use a digsite pendant to Fossil Island, then travel south-east to the ruins	Not allowed	Non-Wilderness alternative for a directly assigned Crazy archaeologist task	Crazy Archaeologist|Crazy Archaeologists
 B	GROTESQUE_GUARDIANS	Grotesque Guardians	Slayer Tower	Slayer ring to Slayer Tower, then climb to the rooftop	Not allowed	Requires a Gargoyle task and access to the rooftop	Gargoyles
 B	KRIL_TSUTSAROTH	K'ril Tsutsaroth	God Wars Dungeon	Trollheim teleport, then enter the Zamorak encampment	Not allowed	Boss alternative for Greater demon tasks	Greater demons

@@ -588,6 +588,7 @@ for(String rune:resolvedRunePackage.getUnownedRequirements()){unavailableStructu
 boolean maggotKing=normalize(task).contains(text(274));
 KitItem tormentedWeapon=null;
 KitItem maggotCrushWeapon=null;
+KitItem kingsMagicWeapon=null;
 for(MethodRules.RequiredItem required:methodRules.getRequiredItems()){if(!diaries.allowsLoadoutReward(required.getDisplayName(),required.getAlternatives())){continue;
 }if(isStructuredUtilityDuplicate(required,methodRules)){continue;
 }if(isRuneRequirement(required)){String requiredRune=normalize(required.getDisplayName()).replace(" runes","").replace(" rune","").trim();
@@ -596,11 +597,15 @@ if(isCoveredByStructuredPouchRune(pouchRunes,requiredRune)){continue;
 }if(pouchSlotsRemaining>0){pouchSlotsRemaining--;
 continue;
 }}List<String>alternativesRequired=required.getAlternatives();
+if(normalize(task).equals("dagannoth kings")&&required.getDisplayName().startsWith("Shadow magic ")&&(kingsMagicWeapon==null||!normalize(kingsMagicWeapon.getDisplayName()).contains("tumeken"))){continue;
+}
 if(maggotKing&&maggotCrushWeapon!=null){if(skipMaggotKingRequirement(required.getDisplayName(),maggotCrushWeapon)){continue;
 }alternativesRequired=maggotKingSwitchAlternatives(required.getDisplayName(),maggotCrushWeapon,alternativesRequired);
 }if(tormentedDemons&&tormentedWeapon!=null){if(skipTormentedRequirement(required.getDisplayName(),tormentedWeapon)){continue;
 }alternativesRequired=tormentedSwitchAlternatives(required.getDisplayName(),tormentedWeapon,alternativesRequired);
 }KitItem require=choose(required.getDisplayName(),required.getSlotCount()>1?1:required.getQuantity(),pool,scanned,alternativesRequired,required.getGroup()==MethodRules.InventoryGroup.SWITCH);
+if(normalize(task).equals("dagannoth kings")&&required.getDisplayName().equals("Magic weapon switch")){kingsMagicWeapon=require;
+}
 if(required.isOwnedOnly()&&(require==null||!require.hasItemId())){continue;
 }if(tormentedDemons&&required.getDisplayName().equals("Secondary weapon switch")){tormentedWeapon=require;
 }if(maggotKing&&required.getDisplayName().equals(text(354))){maggotCrushWeapon=require;
@@ -850,7 +855,7 @@ if(seen.add(key)){result.add(item);
 }}return result;
 }private static void addOwnedOptional(List<KitItem>destination,List<OwnedItem>pool,String...alternatives){OwnedItem owned=findPreferred(pool,alternatives);
 if(owned!=null){destination.add(owned.toItem(1));
-}}private KitItem chooseTeleport(String task,String location,String travel,List<OwnedItem>pool,boolean scanned){String combined=location+" "+travel;
+}}private KitItem chooseTeleport(String task,String location,String travel,List<OwnedItem>pool,boolean scanned){String combined=normalize(location+" "+travel);
 String normalizedTask=normalize(task);
 if(normalizedTask.equals(text(263))){return chooseExact(text(366),1,pool,scanned,text(367),"dramen staff","lunar staff");
 }if(normalizedTask.equals("tormented demons")){OwnedItem direct=exactOwned(pool,text(350));
@@ -875,7 +880,8 @@ return direct==null?chooseExact(text(368),1,pool,scanned,"games necklace"):direc
 }if(combined.contains("zul andra")){return chooseExact(text(386),1,pool,scanned,text(387));
 }if(combined.contains("catacomb")||combined.contains("xeric")){return chooseExact(text(388),1,pool,scanned,text(389));
 }if(combined.contains(text(390))||combined.contains("rada")){return chooseExact(text(391),1,pool,scanned,text(35));
-}if(combined.contains("fremennik")||combined.contains("slayer cave")){return chooseExact("Slayer ring",1,pool,scanned,"slayer ring");
+}if(combined.contains("waterbirth")||combined.contains("rellekka")){return chooseExact("Waterbirth travel",1,pool,scanned,"max cape","construction cape","teleport to house","house tab","fremennik sea boots 4","fremennik sea boots 3","fremennik sea boots 2","fremennik sea boots 1","slayer ring");
+}if(combined.contains("fremennik")||combined.contains("slayer cave")){return chooseExact("Slayer ring",1,pool,scanned,"slayer ring","fremennik sea boots 4","fremennik sea boots 3","fremennik sea boots 2","fremennik sea boots 1");
 }if(combined.contains("fairy ring")){if(diaries.hasTier("lumbridge",4)){return null;
 }return chooseExact(text(392),1,pool,scanned,"lunar staff","dramen staff");
 }return chooseExact("Teleport out",1,pool,scanned,"max cape","construction cape",text(393),"house tab","slayer ring",text(381),"games necklace");

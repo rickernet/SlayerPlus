@@ -1,0 +1,4 @@
+# SlayerPlus combat-level-gated monster waypoint overrides v1
+# creature<TAB>location<TAB>minCombatLevel<TAB>x<TAB>y<TAB>plane
+baby blue dragon	Taverley Dungeon	0	2896	9769	0
+baby blue dragon	Taverley Dungeon	110	2917	9801	0

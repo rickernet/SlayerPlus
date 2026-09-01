@@ -21,7 +21,6 @@ this.optionalItems=immutableCopy(optionalItems);
 Set<Integer>seenIds=new LinkedHashSet<>();
 addBankedUnique(result,seenIds,equipmentItems);
 addBankedUnique(result,seenIds,inventoryItems);
-addBankedUnique(result,seenIds,optionalItems);
 return Collections.unmodifiableList(result);
 }public boolean hasVisualLayout(){return!equipmentItems.isEmpty()||!inventoryItems.isEmpty();
 }public boolean hasConcreteItems(){return getConcreteItemCount()>0;

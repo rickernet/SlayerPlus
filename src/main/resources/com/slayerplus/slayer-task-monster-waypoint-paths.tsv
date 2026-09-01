@@ -1,0 +1,62 @@
+# SlayerPlus multi-stage dungeon path waypoints v1 (sourced from OSRS Wiki, ladder/stair by ladder/stair)
+# creature<TAB>location<TAB>minAgility<TAB>stage<TAB>x<TAB>y<TAB>plane
+dagannoth	Waterbirth Island Dungeon	0	1	2546	10144	0
+dagannoth	Waterbirth Island Dungeon	0	2	1807	4405	3
+dagannoth	Waterbirth Island Dungeon	0	3	1823	4404	2
+dagannoth	Waterbirth Island Dungeon	0	4	1834	4390	3
+dagannoth	Waterbirth Island Dungeon	0	5	1811	4394	2
+dagannoth	Waterbirth Island Dungeon	0	6	1799	4388	1
+dagannoth	Waterbirth Island Dungeon	0	7	1801	4369	1
+dagannoth	Waterbirth Island Dungeon	0	8	1825	4362	2
+dagannoth	Waterbirth Island Dungeon	0	9	1863	4371	1
+dagannoth	Waterbirth Island Dungeon	0	10	1864	4387	2
+dagannoth	Waterbirth Island Dungeon	0	11	1887	4378	0
+dagannoth	Waterbirth Island Dungeon	0	12	1797	4382	2
+dagannoth	Waterbirth Island Dungeon	0	13	1890	4407	1
+dagannoth	Waterbirth Island Dungeon	81	1	2546	10144	0
+dagannoth	Waterbirth Island Dungeon	81	2	1807	4405	3
+dagannoth	Waterbirth Island Dungeon	81	3	1823	4404	2
+dagannoth	Waterbirth Island Dungeon	81	4	1852	4406	3
+dagannoth	Waterbirth Island Dungeon	81	5	1864	4407	1
+dagannoth	Waterbirth Island Dungeon	81	6	1890	4407	1
+dagannoth	Waterbirth Island Dungeon	81	7	1917	4367	0
+Dagannoth Rex	Waterbirth Island Dungeon	0	1	2546	10144	0
+Dagannoth Rex	Waterbirth Island Dungeon	0	2	1807	4405	3
+Dagannoth Rex	Waterbirth Island Dungeon	0	3	1823	4404	2
+Dagannoth Rex	Waterbirth Island Dungeon	0	4	1834	4390	3
+Dagannoth Rex	Waterbirth Island Dungeon	0	5	1811	4394	2
+Dagannoth Rex	Waterbirth Island Dungeon	0	6	1799	4388	1
+Dagannoth Rex	Waterbirth Island Dungeon	0	7	1801	4369	1
+Dagannoth Rex	Waterbirth Island Dungeon	0	8	1825	4362	2
+Dagannoth Rex	Waterbirth Island Dungeon	0	9	1863	4371	1
+Dagannoth Rex	Waterbirth Island Dungeon	0	10	1864	4387	2
+Dagannoth Rex	Waterbirth Island Dungeon	0	11	1887	4378	0
+Dagannoth Rex	Waterbirth Island Dungeon	0	12	1797	4382	2
+Dagannoth Rex	Waterbirth Island Dungeon	0	13	1890	4407	1
+Dagannoth Rex	Waterbirth Island Dungeon	81	1	2546	10144	0
+Dagannoth Rex	Waterbirth Island Dungeon	81	2	1807	4405	3
+Dagannoth Rex	Waterbirth Island Dungeon	81	3	1823	4404	2
+Dagannoth Rex	Waterbirth Island Dungeon	81	4	1852	4406	3
+Dagannoth Rex	Waterbirth Island Dungeon	81	5	1864	4407	1
+Dagannoth Rex	Waterbirth Island Dungeon	81	6	1890	4407	1
+Dagannoth Rex	Waterbirth Island Dungeon	81	7	1917	4367	0
+Dagannoth Kings	Waterbirth Island Dungeon	0	1	2546	10144	0
+Dagannoth Kings	Waterbirth Island Dungeon	0	2	1807	4405	3
+Dagannoth Kings	Waterbirth Island Dungeon	0	3	1823	4404	2
+Dagannoth Kings	Waterbirth Island Dungeon	0	4	1834	4390	3
+Dagannoth Kings	Waterbirth Island Dungeon	0	5	1811	4394	2
+Dagannoth Kings	Waterbirth Island Dungeon	0	6	1799	4388	1
+Dagannoth Kings	Waterbirth Island Dungeon	0	7	1801	4369	1
+Dagannoth Kings	Waterbirth Island Dungeon	0	8	1825	4362	2
+Dagannoth Kings	Waterbirth Island Dungeon	0	9	1863	4371	1
+Dagannoth Kings	Waterbirth Island Dungeon	0	10	1864	4387	2
+Dagannoth Kings	Waterbirth Island Dungeon	0	11	1887	4378	0
+Dagannoth Kings	Waterbirth Island Dungeon	0	12	1797	4382	2
+Dagannoth Kings	Waterbirth Island Dungeon	0	13	1890	4407	1
+Dagannoth Kings	Waterbirth Island Dungeon	81	1	2546	10144	0
+Dagannoth Kings	Waterbirth Island Dungeon	81	2	1807	4405	3
+Dagannoth Kings	Waterbirth Island Dungeon	81	3	1823	4404	2
+Dagannoth Kings	Waterbirth Island Dungeon	81	4	1852	4406	3
+Dagannoth Kings	Waterbirth Island Dungeon	81	5	1864	4407	1
+Dagannoth Kings	Waterbirth Island Dungeon	81	6	1890	4407	1
+Dagannoth Kings	Waterbirth Island Dungeon	81	7	1917	4367	0
