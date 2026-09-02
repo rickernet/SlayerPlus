@@ -1,11 +1,11 @@
 # scope	match	style	slot	quantity	display	alternatives
-task	rockslug	*	I	F	Bag of salt	bag of salt
+task	rockslug|rock slug	*	I	F	Bag of salt	bag of salt
 task	molanisk	*	I	1	Slayer bell	slayer bell
 task	mogre	*	I	F	Fishing explosive	fishing explosive
 task	brine rat	*	I	1	Spade	spade
 task	cave bug	*	I	1	Safe light source	bruma torch|bullseye lantern|emerald lantern|sapphire lantern|oil lantern|candle lantern
 task	cave slime	*	I	1	Safe light source	bruma torch|bullseye lantern|emerald lantern|sapphire lantern|oil lantern|candle lantern
-task	cave crawler	*	I	1	Poison protection	antidote plus plus|antidote plus|superantipoison|antipoison
+task	cave crawler	*	I	1	Poison protection	antidote plus plus|antidote plus|superantipoison|antipoison|sanfew serum|extended anti venom plus|anti venom plus|anti venom
 task	cave slime	*	I	1	Poison protection	antidote plus plus|antidote plus|superantipoison|antipoison
 task	sea snake	*	I	1	Poison protection	antidote plus plus|antidote plus|superantipoison|antipoison
 task	sourhog	*	E	1	Reinforced goggles or Slayer helmet	reinforced goggles|slayer helmet
@@ -24,8 +24,8 @@ task	harpie bug swarm	*	E	1	Lit bug lantern	lit bug lantern
 task	basilisk	*	E	1	Mirror shield or V's shield	mirror shield|v s shield
 task	cockatrice	*	E	1	Mirror shield or V's shield	mirror shield|v s shield
 task	zygomite	*	I	1	Fungicide spray	fungicide spray
-task	vampyre	*	E	1	Sunspear or blisterwood weapon	sunspear|blisterwood flail|blisterwood sickle|blisterwood polearm|ivandis flail
-task	vampire	*	E	1	Sunspear or blisterwood weapon	sunspear|blisterwood flail|blisterwood sickle|blisterwood polearm|ivandis flail
+task	zygomite	*	I	R	Fungicide	fungicide
+task	vampyre|vampire|vyrewatch	*	E	1	Sunspear or blisterwood weapon	sunspear|blisterwood flail|blisterwood sickle|blisterwood polearm|ivandis flail
 task	venator	*	E	1	Sunspear or blisterwood weapon	sunspear|blisterwood flail|blisterwood sickle|blisterwood polearm|ivandis flail
 task	banshee	*	E	1	Earmuffs or Slayer helmet	earmuffs|slayer helmet
 task	aquanite	*	I	1	Fast slash lure-severing weapon	abyssal whip|blade of saeldor|dragon scimitar|rune scimitar|adamant scimitar
@@ -36,4 +36,4 @@ task	wall beast	*	E	1	Spiny helmet or Slayer helmet	spiny helmet|slayer helmet
 task	wall beast	*	I	1	Safe light source	bruma torch|bullseye lantern|emerald lantern|sapphire lantern|oil lantern|candle lantern
 task	killerwatt	*	E	1	Insulated boots	insulated boots
 task	shellbane gryphon	*	E	1	Tortugan shield	tortugan shield
-task	warped creature	*	I	1	Crystal chime	crystal chime
+task	warped creature|warped terrorbird|warped tortoise|mutated terrorbird|mutated tortoise	*	I	1	Crystal chime	crystal chime

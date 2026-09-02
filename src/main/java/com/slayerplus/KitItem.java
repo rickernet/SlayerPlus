@@ -21,6 +21,7 @@ this.switchStyle=switchStyle==null?SwitchStyle.OTHER:switchStyle;
 this.inventoryGroup=inventoryGroup==null?MethodRules.InventoryGroup.OTHER:inventoryGroup;
 }public KitItem asEquipmentSwitch(SwitchStyle style){return new KitItem(displayName,itemId,quantity,status,true,style,inventoryGroup);
 }public KitItem withInventoryGroup(MethodRules.InventoryGroup group){return new KitItem(displayName,itemId,quantity,status,equipmentSwitch,switchStyle,group);
+}KitItem withQuantity(int value){return new KitItem(displayName,itemId,value,status,equipmentSwitch,switchStyle,inventoryGroup);
 }public boolean hasItemId(){return itemId>0;
 }public boolean isBanked(){return status==Status.BANK;
 }}

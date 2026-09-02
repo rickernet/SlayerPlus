@@ -98,6 +98,8 @@ List<Integer>persistedItems=tagManager.getItemsForTag(TAG_NAME);
 if(persistedLayout==null||!samePersistedStateForTest(lastSavedLayout,persistedLayout.getLayout(),lastSavedTaggedItemIds,persistedItems==null?Collections.emptySet():new LinkedHashSet<>(persistedItems))){return false;
 }if(client!=null&&client.getItemContainer(InventoryID.BANK)!=null){bankTagsService.openBankTag(TAG_NAME,BankTagsService.OPTION_ALLOW_MODIFICATIONS|BankTagsService.OPTION_ITEMS_NOT_IN_LAYOUT_AT_BOTTOM);
 }return true;
+}public void closeIfActive(){if(bankTagsService!=null&&TAG_NAME.equals(bankTagsService.getActiveTag())){bankTagsService.closeBankTag();
+}
 }static boolean samePersistedStateForTest(int[]expectedLayout,int[]actualLayout,Set<Integer>expectedItems,Set<Integer>actualItems){return Arrays.equals(expectedLayout,actualLayout)&&expectedItems!=null&&expectedItems.equals(actualItems);
 }private void ensurePersistentTagTab(int iconItemId){String standardizedTag=Text.standardize(TAG_NAME);
 String configuredTabs=configs.getConfiguration(BankTagsPlugin.CONFIG_GROUP,BankTagsPlugin.TAG_TABS_CONFIG);

@@ -8,13 +8,16 @@ final class ShortestPathBridge{private static final String NAMESPACE="shortestpa
 private final EventBus eventBus;
 private WorldPoint lastTarget;
 private boolean lastBankDetour;
+private boolean lastTeleportsAllowed=true;
 ShortestPathBridge(EventBus eventBus){this.eventBus=eventBus;
-}void routeTo(WorldPoint target,boolean allowBankDetour){if(eventBus==null||target==null||(target.equals(lastTarget)&&allowBankDetour==lastBankDetour)){return;
+}void routeTo(WorldPoint target,boolean allowBankDetour){routeTo(target,allowBankDetour,true);
+}void routeTo(WorldPoint target,boolean allowBankDetour,boolean allowTeleports){if(eventBus==null||target==null||(target.equals(lastTarget)&&allowBankDetour==lastBankDetour&&allowTeleports==lastTeleportsAllowed)){return;
 }lastTarget=target;
 lastBankDetour=allowBankDetour;
+lastTeleportsAllowed=allowTeleports;
 Map<String,Object>config=new HashMap<>();
 config.put("includeBankPath",allowBankDetour);
-config.put("useTeleportationItems","Inventory");
+config.put("useTeleportationItems",allowTeleports?"Inventory":"None");
 config.put("useAgilityShortcuts",true);
 config.put("showTransportInfo",true);
 Map<String,Object>data=new HashMap<>();

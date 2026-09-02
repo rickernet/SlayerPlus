@@ -782,6 +782,58 @@ public class SlayerRegressionTest
 
 
 	@Test
+	public void travelDestinationAliasesMatchSlayerRingMenuNames()
+	{
+		assertTrue(SlayerPlusPlugin.travelDestinationNamesMatch(
+			"Fremennik Dungeon", "Fremennik Slayer Dungeon"
+		));
+		assertFalse(SlayerPlusPlugin.travelDestinationNamesMatch(
+			"Stronghold", "Fremennik Slayer Dungeon"
+		));
+	}
+
+	@Test
+	public void caveCrawlerRouteEndsInsideTheFremennikDungeon()
+	{
+		assertEquals(
+			new WorldPoint(2790, 9996, 0),
+			SlayerTaskWaypoints.findSpecific(
+				"Cave crawlers", "Fremennik Slayer Dungeon"
+			)
+		);
+	}
+
+	@Test
+	public void selectedSlayerRingRoutesToItsUndergroundArrivalFirst()
+	{
+		List<WorldPoint> path = SlayerPlusPlugin.prioritizeTravelArrival(
+			Arrays.asList(
+				new WorldPoint(2797, 3616, 0),
+				new WorldPoint(2790, 9996, 0)
+			),
+			"Fremennik Slayer Dungeon",
+			"Slayer ring (eternal)"
+		);
+		assertEquals(new WorldPoint(2802, 9999, 0), path.get(0));
+		assertEquals(new WorldPoint(2790, 9996, 0), path.get(1));
+		assertEquals(2, path.size());
+	}
+
+	@Test
+	public void wildcardInventoryRequirementsApplyToEveryCombatStyle()
+	{
+		assertTrue(SlayerLoadoutAnalyzer.requirementStyleMatches(
+			"*", "RANGED"
+		));
+		assertTrue(SlayerLoadoutAnalyzer.requirementStyleMatches(
+			"magic", "MAGIC"
+		));
+		assertFalse(SlayerLoadoutAnalyzer.requirementStyleMatches(
+			"magic", "RANGED"
+		));
+	}
+
+	@Test
 	public void routingUsesResolvedTaskSnapshotAcrossLoginAndCompletionBoundaries()
 	{
 		assertEquals(57, SlayerPlusPlugin.effectiveTaskRemainingForTest(
