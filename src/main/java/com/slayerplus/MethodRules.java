@@ -174,7 +174,15 @@ private boolean includeRunePouchForMagic=false;
 private int inventoryTarget;
 private int loot;
 private final List<RequiredItem>requiredItems=new ArrayList<>();
-private Builder(){}public Builder coverageKey(String value){coverageKey=value;
+private Builder(){}Builder withoutStandardCombatSpell(){if(spellbook==Spellbook.STANDARD&&PoweredMagic.replacesStandardAttack(primarySpell)){
+spellbook=Spellbook.NONE;
+primarySpell="";
+requireRunePouch=false;
+includeRunePouchForMagic=false;
+pouchRunes.clear();
+requiredItems.removeIf(item->item.getGroup()==InventoryGroup.RUNES);
+}return this;
+}public Builder coverageKey(String value){coverageKey=value;
 return this;
 }public Builder method(String value){method=value;
 return this;

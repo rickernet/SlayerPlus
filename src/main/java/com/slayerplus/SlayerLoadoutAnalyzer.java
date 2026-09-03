@@ -600,7 +600,10 @@ return stats.getStr()*10_000L+attack*120L+stats.getPrayer()*40L+defenceTotal(sta
 if(values!=null){Collections.addAll(result,values);
 }return result;
 }private static boolean isTzKalZukInferno(String task,String location){return normalize(task).equals(text(2))&&normalize(location).equals("inferno");
-}List<KitItem>buildInventoryLayout(String task,TaskStrategy strategy,String location,String travel,CombatStyle style,List<Requirement>requirements,boolean cannonSuggested,int foodSlots,List<OwnedItem>pool,boolean scanned,List<KitItem>equipmentLayout){MethodRules methodRules=SlayerMethodRuleCatalog.resolve(task,location,strategy);
+}List<KitItem>buildInventoryLayout(String task,TaskStrategy strategy,String location,String travel,CombatStyle style,List<Requirement>requirements,boolean cannonSuggested,int foodSlots,List<OwnedItem>pool,boolean scanned,List<KitItem>equipmentLayout){int weaponId=PoweredMagic.weaponId(equipmentLayout);
+MethodRules methodRules=SlayerMethodRuleCatalog.resolve(task,location,strategy,weaponId);
+boolean barrows=normalize(task).equals("barrows brothers");
+boolean barrowsRanged=barrows&&barrowsNeedsRangedSwitch(weaponId,methodRules);
 List<KitItem>layout=new ArrayList<>();
 boolean analyzerOwnsTravelSlot=!isTzKalZukInferno(task,location);
 if(analyzerOwnsTravelSlot){KitItem selectedTravel=chooseTeleport(task,location,travel,pool,scanned);
@@ -612,9 +615,11 @@ addItem(layout,litLantern==null?missingItem(text(351),scanned):litLantern.toItem
 if(resolvedCannonMethod){for(String part:new String[]{"base","stand","barrels","furnace"}){addItem(layout,choose("Cannon "+part,1,pool,scanned,"cannon "+part));
 }int cannonballs=methodRules.getCannonballQuantity()>0?methodRules.getCannonballQuantity():SlayerMethodRuleCatalog.auditedCannonballQuantity(task);
 addItem(layout,choose("Cannonballs",cannonballs,pool,scanned,"cannonball"));
-}boolean runePouchRequested=(strategy!=null&&strategy.needsRunePouch())||methodRules.requiresRunePouch()||style==CombatStyle.MAGIC&&methodRules.includesRunePouchForMagic();
+}boolean runePouchRequested=(strategy!=null&&strategy.needsRunePouch()&&!PoweredMagic.usesBuiltInSpell(weaponId))||methodRules.requiresRunePouch()||style==CombatStyle.MAGIC&&methodRules.includesRunePouchForMagic();
 int runePouchCapacity=runePouchRequested?ownedRunePouchCapacity(pool):0;
-if(runePouchRequested){addItem(layout,choose("Rune pouch",1,pool,scanned,text(352),"rune pouch"));
+if(runePouchRequested||barrows){KitItem pouch=choose("Rune pouch",1,pool,scanned,text(352),"rune pouch");
+if(runePouchRequested||pouch.hasItemId()){addItem(layout,pouch);
+}
 }if(methodRules.requiresBookOfDead()){addItem(layout,choose(text(353),1,pool,scanned,text(10)));
 }Map<Integer,Integer>ownedRuneQuantities=ownedItemQuantities(pool);
 RunePolicy.Resolution resolvedRunePackage=RunePolicy.resolve(methodRules.getPouchRunes(),ownedRuneQuantities);
@@ -632,8 +637,13 @@ boolean maggotKing=normalize(task).contains(text(274));
 KitItem tormentedWeapon=null;
 KitItem maggotCrushWeapon=null;
 KitItem kingsMagicWeapon=null;
+KitItem barrowsRangedWeapon=null;
 for(MethodRules.RequiredItem required:methodRules.getRequiredItems()){if(!diaries.allowsLoadoutReward(required.getDisplayName(),required.getAlternatives())){continue;
 }if(isStructuredUtilityDuplicate(required,methodRules)){continue;
+}if(barrows){String name=required.getDisplayName();
+if(!barrowsRanged&&(name.startsWith("Ranged ")||name.equals("Ranging potion"))){continue;
+}if(name.equals("Exit and restoration teleport")&&(hasRestorationTeleport(layout)||hasRestorationTeleport(equipmentLayout))){continue;
+}
 }if(isRuneRequirement(required)){String requiredRune=normalize(required.getDisplayName()).replace(" runes","").replace(" rune","").trim();
 if(isCoveredByStructuredPouchRune(pouchRunes,requiredRune)){continue;
 }if(unavailableStructuredRunes.contains(requiredRune)){continue;
@@ -647,6 +657,8 @@ if(maggotKing&&maggotCrushWeapon!=null){if(skipMaggotKingRequirement(required.ge
 }if(tormentedDemons&&tormentedWeapon!=null){if(skipTormentedRequirement(required.getDisplayName(),tormentedWeapon)){continue;
 }alternativesRequired=tormentedSwitchAlternatives(required.getDisplayName(),tormentedWeapon,alternativesRequired);
 }KitItem require=choose(required.getDisplayName(),required.getSlotCount()>1?1:required.getQuantity(),pool,scanned,alternativesRequired,required.getGroup()==MethodRules.InventoryGroup.SWITCH);
+if(barrows&&required.getDisplayName().equals("Ranged weapon switch")){barrowsRangedWeapon=require;
+}
 if(normalize(task).equals("dagannoth kings")&&required.getDisplayName().equals("Magic weapon switch")){kingsMagicWeapon=require;
 }
 if(required.isOwnedOnly()&&(require==null||!require.hasItemId())){continue;
@@ -658,8 +670,9 @@ if(isAlreadyEquippedInPlan(require,equipmentLayout)){continue;
 }}for(int slot=0;
 slot<required.getSlotCount()&&layout.size()<28;
 slot++){addItem(layout,require);
-}}if(tormentedDemons){addItem(layout,tormentedSwitchAmmunition(tormentedWeapon,strategy,pool,scanned));
-}if(methodRules.includesStyleBoost()){TaskStrategy.CostPolicy potionCostPolicy=strategy==null?TaskStrategy.CostPolicy.EFFICIENT:strategy.getCostPolicy();
+}}if(barrows&&barrowsRangedWeapon!=null&&barrowsRangedWeapon.hasItemId()){addItem(layout,switchAmmunition(barrowsRangedWeapon,strategy,pool,scanned));
+}if(tormentedDemons){addItem(layout,switchAmmunition(tormentedWeapon,strategy,pool,scanned));
+}if(methodRules.includesStyleBoost()||barrows&&PoweredMagic.usesBuiltInSpell(weaponId)){TaskStrategy.CostPolicy potionCostPolicy=strategy==null?TaskStrategy.CostPolicy.EFFICIENT:strategy.getCostPolicy();
 if(style==CombatStyle.MAGIC){addItem(layout,choose("Magic boost",1,pool,scanned,PotionPolicy.magicBoostAlternatives()));
 }else if(style==CombatStyle.RANGED){addItem(layout,choose("Ranging potion",1,pool,scanned,PotionPolicy.rangedBoostAlternatives(potionCostPolicy)));
 }else if(style==CombatStyle.FLEXIBLE){addItem(layout,choose("Super combat potion",1,pool,scanned,PotionPolicy.meleeBoostAlternatives(potionCostPolicy)));
@@ -669,6 +682,9 @@ if(hybridUsesCombatMagic(strategy)){addItem(layout,choose("Magic boost",1,pool,s
 }}if(strategy!=null&&strategy.needsAntivenom()){addItem(layout,choose(PotionPolicy.EXTENDED_ANTIVENOM_DISPLAY,1,pool,scanned,PotionPolicy.antivenomAlternatives()));
 }if(strategy!=null&&strategy.needsStamina()){addItem(layout,choose(PotionPolicy.EXTENDED_STAMINA_DISPLAY,1,pool,scanned,PotionPolicy.staminaAlternatives()));
 }KitItem prayerRestore=chooseRestore(methodRules,pool,scanned);
+if(barrows&&prayerRestore.hasItemId()&&!normalize(prayerRestore.getDisplayName()).contains("super restore")){
+addItem(layout,choose("Stat restore",1,pool,scanned,"restore potion","super restore"));
+}
 int prayers=methodRules.resolveRestoreSlots(strategy);
 for(int i=0;
 i<prayers&&layout.size()<28;
@@ -684,6 +700,19 @@ i++){layout.add(i<ownedMealCount?meal:missingItem(meal.getDisplayName(),scanned)
 if(methodRules.fillsRemainingWithRestore()){while(layout.size()<target&&layout.size()<28){layout.add(prayerRestore);
 }}else if(methodRules.fillsRemainingWithFood()){while(layout.size()<target&&layout.size()<28){layout.add(meal);
 }}return enforceConcreteInventoryTarget(organizeInventoryLayout(layout,methodRules,analyzerOwnsTravelSlot),methodRules,prayerRestore,meal);
+}private static boolean barrowsNeedsRangedSwitch(int weaponId,MethodRules rules){
+// Wiki Barrows/Strategies: ranged is optional with Shadow or Air spells.
+switch(weaponId){case ItemID.TUMEKENS_SHADOW:case ItemID.TUMEKENS_SHADOW_UNCHARGED:
+case ItemID.DEADMAN_BLIGHTED_TUMEKENS_SHADOW:case ItemID.DEADMAN_BLIGHTED_TUMEKENS_SHADOW_UNCHARGED:return false;
+default:break;
+}
+String spell=normalize(rules.getPrimarySpell());
+return rules.getSpellbook()!=MethodRules.Spellbook.STANDARD||!(spell.contains("air spell")||spell.contains("wind "));
+}private static boolean hasRestorationTeleport(List<KitItem>items){if(items==null){return false;
+}for(KitItem item:items){if(item==null||!item.hasItemId()){continue;
+}String name=normalize(item.getDisplayName());
+if(name.equals("max cape")||name.startsWith("construction cape")||name.equals("teleport to house")||name.startsWith("ring of dueling")){return true;
+}}return false;
 }private static List<String>maggotKingSwitchAlternatives(String displayName,KitItem crushWeapon,List<String>defaults){String requirement=normalize(displayName);
 String weapon=normalize(crushWeapon==null?"":crushWeapon.getDisplayName());
 if(weapon.contains(text(279))){if(requirement.equals(text(355))){return list("l038");
@@ -716,11 +745,14 @@ if(requirement.equals(text(361))){return!isPurgingStaff(secondaryWeapon);
 }private static boolean isTormentedSecondaryRequirement(String displayName){String requirement=normalize(displayName);
 return requirement.equals("secondary weapon switch")||requirement.equals("secondary body switch")||requirement.equals("secondary legs switch")||requirement.equals(text(361));
 }private static boolean isPurgingStaff(KitItem secondaryWeapon){return secondaryWeapon!=null&&normalize(secondaryWeapon.getDisplayName()).contains("purging staff");
-}private static KitItem tormentedSwitchAmmunition(KitItem rangedWeapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){String weapon=normalize(rangedWeapon==null?"":rangedWeapon.getDisplayName());
+}private static KitItem switchAmmunition(KitItem rangedWeapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){String weapon=normalize(rangedWeapon==null?"":rangedWeapon.getDisplayName());
 if(weapon.contains("purging staff")){return null;
 }if(weapon.contains(text(313))||weapon.contains(text(265))){return null;
 }if(weapon.contains(text(360))){return recommendedAmmo(true,text(326),pool,scanned,text(303)).asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
 }if(weapon.contains(text(304))){return recommendedAmmo(true,"Antler bolts",pool,scanned,text(305),text(306)).asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+}if(weapon.contains("karil")){return recommendedAmmo(true,"Bolt racks",pool,scanned,"bolt rack").asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+}if(weapon.contains("dorgeshuun")){return recommendedAmmo(true,"Bone bolts",pool,scanned,"bone bolts").asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+}if(weapon.equals("rune crossbow")){return recommendedAmmo(true,"Compatible bolts",pool,scanned,"diamond bolts e","runite bolts","broad bolts").asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
 }if(weapon.contains("crossbow")){return recommendedAmmo(true,"Compatible bolts",pool,scanned,text(309),text(310),"dragon bolts","ruby bolts e","diamond bolts e",text(311),"runite bolts","broad bolts").asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
 }return bestOwnedStandardArrow(true,null,weapon,strategy,pool,scanned).asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
 }private static boolean isAlreadyEquippedInPlan(KitItem candidate,List<KitItem>equipmentLayout){if(candidate==null||equipmentLayout==null){return false;

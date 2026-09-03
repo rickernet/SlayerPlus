@@ -8,7 +8,7 @@ magic	e022	e023	e024	e029	e025	e026	e027	e028	-
 magic-prayer			e010		e011			e122	-
 magic-defence			e030		e031				-
 hybrid	e123	e124	e125	e126	e127	e128	e129	e130	-
-barrows	e022	e023	e049	e029	e050	e026	e027	e051	-
+barrows	e022	e023	e049	e029	e050	e111	e027	e051	-
 kril-ranged	e012	e052	e054	e019	e056	e057	e058	e059	-
 kril-melee	e060	e061	e062	e064	e063	e065	e066	e067	e068
 grotesque	e069	e070	e071	e073	e072	e074	e075	e076	-

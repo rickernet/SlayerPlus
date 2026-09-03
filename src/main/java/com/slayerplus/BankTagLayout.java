@@ -41,8 +41,9 @@ Set<Integer>tags=new LinkedHashSet<>();
 int layoutSlots=0;
 int optionalIndex=0;
 List<KitItem>equipment=plan.getEquipmentItems();
+int braceletAlternative=equipment.size()>8?braceletAlternativeId(equipment.get(8).getItemId()):-1;
 for(KitItem item:plan.getOptionalItems()){if(optionalIndex>=OPTIONAL_LIMIT){break;
-}if(!pinnedIds.contains(item.getItemId())&&(isLightbearer(item)||duplicatesConcreteEquipment(item,equipment))){continue;
+}if(!showOptionalItem(item,equipment,braceletAlternative,pinnedIds)){continue;
 }if(place(layout,tags,item,optionalIndex)){layoutSlots++;
 optionalIndex++;
 }}int resolvedDizanaVariantId=resolveOwnedDizanaVariantId(plan);
@@ -56,7 +57,8 @@ index++){if(index==1&&resolvedDizanaVariantId>0){if(placeEquipmentItemId(layout,
 }if(index==11){if(hasUsableDizanaForLayout&&recommendedExtraQuiverAmmoItemId>0&&placeNestedQuiverAmmoItemId(layout,tags,recommendedExtraQuiverAmmoItemId,EQUIPMENT_POSITIONS[index])){layoutSlots++;
 }continue;
 }if(placeEquipmentItemId(layout,tags,equipment.get(index).getItemId(),EQUIPMENT_POSITIONS[index],pinnedIds)){layoutSlots++;
-}}KitItem lightbearer=findLightbearer(plan);
+}}if(equipment.size()>8&&placeBraceletAlternative(layout,tags,equipment.get(8).getItemId(),pinnedIds)){layoutSlots++;
+}KitItem lightbearer=findLightbearer(plan);
 if(place(layout,tags,lightbearer,LIGHTBEARER_SWAP_POSITION)){layoutSlots++;
 }List<KitItem>inventoryItems=plan.getInventoryItems();
 List<Candidate>inventoryCandidates=new ArrayList<>();
@@ -396,6 +398,12 @@ values.put(row[0],Collections.unmodifiableList(new ArrayList<>(entries)));
 }return placeItemId(layout,tags,item.getItemId(),position);
 }private static boolean placeInventory(Layout layout,Set<Integer>tags,KitItem item,int position){if(!concrete(item)){return false;
 }return placeInventoryItemId(layout,tags,item.getItemId(),position);
+}static boolean placeBraceletAlternative(Layout layout,Set<Integer>tags,int recommendedId,Set<Integer>pinnedIds){
+return placeEquipmentItemId(layout,tags,braceletAlternativeId(recommendedId),EQUIPMENT_POSITIONS[8]+BANK_COLUMNS,pinnedIds);
+}private static int braceletAlternativeId(int recommendedId){return recommendedId==ItemID.EXPEDITIOUS_BRACELET?ItemID.BRACELET_OF_SLAUGHTER:
+recommendedId==ItemID.BRACELET_OF_SLAUGHTER?ItemID.EXPEDITIOUS_BRACELET:-1;
+}static boolean showOptionalItem(KitItem item,List<KitItem>equipment,int braceletAlternative,Set<Integer>pinnedIds){
+return pinnedIds.contains(item.getItemId())||!(item.getItemId()==braceletAlternative||isLightbearer(item)||duplicatesConcreteEquipment(item,equipment));
 }static boolean placeEquipmentItemId(Layout layout,Set<Integer>tags,int raw,int position,Set<Integer>pinnedIds){return pinnedIds.contains(raw)?placeInventoryItemId(layout,tags,raw,position):placeItemId(layout,tags,raw,position);
 }private static boolean placeInventoryItemId(Layout layout,Set<Integer>tags,int raw,int position){if(raw<=0){return false;
 }tags.add(raw);

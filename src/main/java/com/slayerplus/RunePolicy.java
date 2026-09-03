@@ -20,7 +20,7 @@ this.unownedRequirements=Collections.unmodifiableList(unownedRequirements);
 }Map<Integer,ResolvedRune>selected=new LinkedHashMap<>();
 List<String>unowned=new ArrayList<>();
 for(MethodRules.RuneRequirement requirement:requirements){int selectedId=existingSatisfyingRune(selected.keySet(),requirement.getItemId());
-if(selectedId<=0){selectedId=bestOwnedRune(requirement.getItemId(),requirements,ownedQuantities);
+if(selectedId<=0){selectedId=bestOwnedRune(requirement.getItemId(),requirements,ownedQuantities,selected.keySet());
 }if(selectedId<=0){unowned.add(requirement.getName());
 continue;
 }ResolvedRune existing=selected.get(selectedId);
@@ -30,14 +30,15 @@ if(existing==null){selected.put(selectedId,new ResolvedRune(selectedId,runeName(
 }}}return new Resolution(new ArrayList<>(selected.values()),unowned);
 }private static int existingSatisfyingRune(Set<Integer>selectedIds,int requiredId){for(int itemId:selectedIds){if(satisfies(itemId,requiredId)){return itemId;
 }}return-1;
-}private static int bestOwnedRune(int requiredId,List<MethodRules.RuneRequirement>requirements,Map<Integer,Integer>ownedQuantities){int bestId=-1;
+}private static int bestOwnedRune(int requiredId,List<MethodRules.RuneRequirement>requirements,Map<Integer,Integer>ownedQuantities,Set<Integer>selectedIds){int bestId=-1;
 int bestCoverage=-1;
 int bestQuantity=-1;
 for(int candidateId:candidates(requiredId)){int quantity=ownedQuantities==null?0:ownedQuantities.getOrDefault(candidateId,0);
 if(quantity<=0){continue;
 }int coverage=0;
-for(MethodRules.RuneRequirement requirement:requirements){if(satisfies(candidateId,requirement.getItemId())){coverage++;
-}}if(coverage>bestCoverage||(coverage==bestCoverage&&quantity>bestQuantity)||(coverage==bestCoverage&&quantity==bestQuantity&&candidateId==requiredId)){bestId=candidateId;
+for(MethodRules.RuneRequirement requirement:requirements){if(satisfies(candidateId,requirement.getItemId())&&existingSatisfyingRune(selectedIds,requirement.getItemId())<=0){coverage++;
+}}// Prefer the normal rune on equal coverage; stock size only breaks ties between alternatives.
+if(coverage>bestCoverage||(coverage==bestCoverage&&bestId!=requiredId&&(candidateId==requiredId||quantity>bestQuantity))){bestId=candidateId;
 bestCoverage=coverage;
 bestQuantity=quantity;
 }}return bestId;
