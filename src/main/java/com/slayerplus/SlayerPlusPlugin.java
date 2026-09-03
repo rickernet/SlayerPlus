@@ -344,9 +344,13 @@ if(bankChanged){if(!cacheBankContainer(event.getItemContainer())){return;
 }}else if(containerId==InventoryID.WORN){if(!captureWornIdentityChange(event.getItemContainer())){return;
 }portraitPending=true;
 portraitRetry=0;
-}else if(containerId==InventoryID.INV){if(!captureInventoryChange(event.getItemContainer())){return;
+}else if(containerId==InventoryID.INV){if(!bankInterfaceOpen){if(!preparation.isReady()){scheduleProgressRefresh();
+}return;
+}if(!captureInventoryChange(event.getItemContainer())){return;
 }}else{return;
-}scheduleRefresh(bankChanged);
+}if(bankChanged||bankInterfaceOpen){scheduleRefresh(bankChanged);
+}else if(!preparation.isReady()){scheduleProgressRefresh();
+}
 }private void refreshBraceletChargeInfoBox(){if(infoBoxManager==null||itemManager==null||client==null){return;
 }ItemContainer worn=client.getItemContainer(InventoryID.WORN);
 Item gloves=worn==null?null:worn.getItem(EquipmentInventorySlot.GLOVES.getSlotIdx());
@@ -434,7 +438,7 @@ int offset=slot*2;
 state[offset]=item==null?-1:item.getId();
 state[offset+1]=item==null?0:item.getQuantity();
 }return state;
-}void scheduleRefresh(boolean bankOpened){loadoutRefreshPending=true;
+}void scheduleRefresh(boolean bankOpened){loadoutRefreshPending|=bankOpened||bankInterfaceOpen||settingsRefresh;
 bankOpenedRefreshPending|=bankOpened;
 scheduleProgressRefresh();
 }void scheduleProgressRefresh(){

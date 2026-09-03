@@ -50,10 +50,26 @@ public class SlayerRefreshPerformanceTest
 		assertFalse(plugin.loadoutRefreshPending);
 		plugin.scheduleRefresh(false);
 		plugin.scheduleProgressRefresh();
-		assertTrue(plugin.loadoutRefreshPending);
+		assertFalse(plugin.loadoutRefreshPending);
 		plugin = new SlayerPlusPlugin();
 		plugin.scheduleRefresh(true);
 		plugin.scheduleProgressRefresh();
+		assertTrue(plugin.loadoutRefreshPending);
+		plugin.scheduleRefresh(false);
+		assertTrue(plugin.loadoutRefreshPending);
+	}
+
+	@Test
+	public void bankCloseAndRepeatedCombatEventsKeepLoadoutFrozen()
+	{
+		SlayerPlusPlugin plugin = new SlayerPlusPlugin();
+		plugin.handleBankClosed();
+		for (int event = 0; event < 100; event++)
+		{
+			plugin.scheduleRefresh(false);
+			assertFalse(plugin.loadoutRefreshPending);
+		}
+		plugin.scheduleRefresh(true);
 		assertTrue(plugin.loadoutRefreshPending);
 	}
 
