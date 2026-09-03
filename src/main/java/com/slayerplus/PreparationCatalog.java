@@ -83,7 +83,7 @@ if(!correctBook){warnings.add(text(86));
 tagIds.add(layoutPouchId);
 if(rules.requiresBookOfDead()){tagIds.add(BOOK_OF_THE_DEAD);
 }for(RunePolicy.ResolvedRune rune:runes){tagIds.add(rune.getItemId());
-}String utility=rules.usesThralls()&&rules.usesDeathCharge()?text(90):rules.usesThralls()?"Thralls":"Death Charge";
+}String utility=safeSpellName(rules.getPrimarySpell());
 String headline=ready?text(1074)+utility:text(1075)+utility;
 String detail=ready?text(93):String.join(". ",warnings)+".";
 List<String>pouchNames=new ArrayList<>();

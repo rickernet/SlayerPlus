@@ -39,7 +39,7 @@ public class SlayerPreparationReminderTest {
         assertEquals(OverlayPosition.TOP_RIGHT, overlay.getPosition());
         assertFalse(overlay.isClearChildren());
         int count = overlay.getPanelComponent().getChildren().size();
-        assertEquals(5, count); // Title, spellbook, three rune rows; no explanatory footer.
+        assertEquals(6, count); // Title, spellbook, spell, three rune rows; no explanatory footer.
         Object firstRow = overlay.getPanelComponent().getChildren().get(0);
         Graphics2D graphics = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB).createGraphics();
         try {
@@ -67,6 +67,21 @@ public class SlayerPreparationReminderTest {
         overlay.update(PreparationCatalog.PreparationPlan.none());
         assertNull(overlay.render(null));
         assertTrue(overlay.getPanelComponent().getChildren().isEmpty());
+    }
+
+    @Test public void arceuusReminderListsEachActualSpellEvenWithNoRunes() {
+        TaskStrategy strategy = SlayerTaskStrategyCatalog.resolve("Araxxor", Preference.Playstyle.FAST_XP,
+            Preference.Cannon.NEVER, Preference.Burst.NEVER, Preference.CombatStyle.AUTOMATIC,
+            "Morytania Spider Cave", false);
+        PreparationCatalog.PreparationPlan plan = PreparationCatalog.resolve("Araxxor", "Morytania Spider Cave",
+            strategy, null, null, null, Collections.emptyMap());
+        assertTrue(plan.getSpellName().contains("Resurrect Greater Ghost"));
+        assertTrue(plan.getSpellName().contains("Death Charge"));
+        SlayerTaskReadinessOverlay overlay = new SlayerTaskReadinessOverlay(new SlayerPlusPlugin());
+        overlay.update(plan);
+        int spellCount = plan.getSpellName().split("\\s*\\+\\s*").length;
+        assertEquals(2 + spellCount + (plan.isLevelReady() ? 0 : 1) + plan.getRuneStatuses().size(),
+            overlay.getPanelComponent().getChildren().size());
     }
 
     private static PreparationCatalog.PreparationPlan plan(boolean ready, boolean bookReady, boolean runesReady) {

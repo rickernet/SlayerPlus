@@ -30,10 +30,13 @@ renderedFingerprint=fingerprint;
 rowsVisible=true;
 panelComponent.getChildren().add(TitleComponent.builder().text(plan.getEncounterName().isEmpty()?text(959):plan.getEncounterName()+" setup required").color(WARNING).build());
 panelComponent.getChildren().add(LineComponent.builder().left(plan.spellbookName().isEmpty()?"Spellbook":plan.spellbookName()).right(plan.isSpellbookReady()?"Ready":text(960)).rightColor(plan.isSpellbookReady()?READY:MISSING).build());
+if(!plan.getSpellName().isEmpty()){for(String spell:plan.getSpellName().split("\\s*\\+\\s*")){
+panelComponent.getChildren().add(LineComponent.builder().left("Spell: "+spell).leftColor(MUTED).build());
+}}
 if(!plan.isLevelReady()){panelComponent.getChildren().add(LineComponent.builder().left("Magic level").right(plan.getMagicLevel()+" / "+plan.getRequiredMagicLevel()).rightColor(MISSING).build());
 }for(PreparationCatalog.RuneStatus rune:plan.getRuneStatuses()){boolean runeReady=rune.isReady();
 panelComponent.getChildren().add(LineComponent.builder().left(rune.getName()+" runes").leftColor(MUTED).right(rune.getAvailable()+" / "+rune.getRequired()).rightColor(runeReady?READY:MISSING).build());
-}if(plan.getCastsAvailable()>0){panelComponent.getChildren().add(LineComponent.builder().left(plan.getSpellName()+" casts available").right(Integer.toString(plan.getCastsAvailable())).rightColor(plan.isRunesReady()?READY:MISSING).build());
+}if(plan.getCastsAvailable()>0){panelComponent.getChildren().add(LineComponent.builder().left("Casts available").right(Integer.toString(plan.getCastsAvailable())).rightColor(plan.isRunesReady()?READY:MISSING).build());
 }
 }@Override public Dimension render(Graphics2D graphics){return rowsVisible?super.render(graphics):null;
 }private void clearRows(){if(!rowsVisible){return;

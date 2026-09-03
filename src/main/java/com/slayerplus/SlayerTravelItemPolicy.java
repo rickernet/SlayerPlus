@@ -7,7 +7,7 @@ private SlayerTravelItemPolicy(){}public static boolean isUsableDisplayName(Stri
 }if(ZERO_CHARGE_SUFFIX.matcher(displayName.trim()).matches()){return false;
 }String normalized=normalize(displayName);
 if(normalized.isEmpty()){return false;
-}return!hasExplicitUnusableState(normalized);
+}return!normalized.contains("hallowed crystal")&&!hasExplicitUnusableState(normalized);
 }public static boolean hasExplicitUnusableState(String value){String normalized=normalize(value);
 if(normalized.isEmpty()){return true;
 }return containsToken(normalized,"inert")||containsToken(normalized,"uncharged")||containsToken(normalized,"depleted")||normalized.endsWith(" no charges")||normalized.contains(" 0 charges");

@@ -1,15 +1,14 @@
-# SlayerPlus commonly-used bank locations v1 (sourced from OSRS Wiki "List of banks")
+# Unrestricted fallback banks. Access-gated banks are learned when the player opens them.
+# Coordinates cross-checked against Shortest Path destinations/game_features/bank.tsv.
 # name<TAB>x<TAB>y<TAB>plane
 Falador West	2946	3367	0
 Falador East	3015	3357	0
-Canifis	3512	3478	0
 Edgeville	3095	3494	0
-Zanaris	2383	4459	0
-Shilo Village	2852	2955	0
-Tree Gnome Stronghold South	2446	3424	0
+Tree Gnome Stronghold South	2446	3424	1
+Grand Tree East	2449	3482	1
+Grand Tree West	2442	3488	1
 Hosidius	1748	3599	0
 Draynor Village	3093	3244	0
-Wyrmscraig	2586	2260	0
 Grand Exchange	3165	3490	0
 Varrock West	3185	3441	0
 Varrock East	3254	3421	0
@@ -20,6 +19,30 @@ Seers' Village	2725	3492	0
 Ardougne North	2617	3333	0
 Ardougne South	2653	3284	0
 Yanille	2613	3093	0
-Port Phasmatys	3692	3468	0
-Prifddinas South	3297	6060	0
 Ferox Enclave	3130	3632	0
+Barbarian Outpost	2536	3573	0
+Castle Wars	2443	3083	0
+Arceuus West	1624	3744	0
+Arceuus East	1635	3744	0
+Lovakengj South	1522	3738	0
+Lovakengj North	1436	3824	0
+Hosidius Kitchen	1674	3615	0
+Hosidius Sand Crabs	1719	3465	0
+Hosidius Vinery	1809	3566	0
+Land's End	1512	3421	0
+Mount Karuulm	1324	3824	0
+Mount Quidamortem	1254	3571	0
+Nardah	3427	2891	0
+Port Khazard	2661	3162	0
+Port Piscarilius	1800	3790	0
+Rogues' Den	3040	4969	1
+Shantay Pass	3308	3120	0
+Shayzien	1487	3594	0
+Shayzien Encampment	1483	3646	0
+Sulphur Mine West	1478	3856	0
+Sulphur Mine East	1501	3871	0
+Void Knights' Outpost	2666	2653	0
+Wintertodt Camp	1640	3944	0
+Ruins of Unkah	3156	2835	0
+Emir's Arena	3382	3269	0
+The Pandemonium	3038	3000	0
