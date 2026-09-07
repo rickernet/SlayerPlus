@@ -1,38 +1,96 @@
 package com.slayerplus;
-import static com.slayerplus.Text.text;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.runelite.api.gameval.ItemID;
-class SlayerBraceletChargeTracker{static final int MAX_CHARGES=30;
-static final String CONFIG_GROUP="itemCharge";
-static final String SLAUGHTER_KEY="braceletOfSlaughter";
-static final String EXPEDITIOUS_KEY="expeditiousBracelet";
-private static final Pattern SLAUGHTER_ACTIVATE=Pattern.compile("Your bracelet of slaughter prevents your slayer count from decreasing\\. "+"(?:It has (\\d{1,2}) charges? left\\.|It then crumbles to dust\\.|"+text(238));
-private static final Pattern SLAUGHTER_CHECK=Pattern.compile("Your bracelet of slaughter has (\\d{1,2}) charges? left\\.");
-private static final Pattern EXPEDITIOUS_ACTIVATE=Pattern.compile("Your expeditious bracelet helps you progress your slayer (?:task )?faster\\. "+"(?:It has (\\d{1,2}) charges? left\\.|It then crumbles to dust\\.|"+text(238));
-private static final Pattern EXPEDITIOUS_CHECK=Pattern.compile("Your expeditious bracelet has (\\d{1,2}) charges? left\\.");
-private SlayerBraceletChargeTracker(){}static Update parse(String message){if(message==null||message.isEmpty()){return null;
-}Update update=match(message,SLAUGHTER_ACTIVATE,ItemID.BRACELET_OF_SLAUGHTER,SLAUGHTER_KEY,true);
-if(update!=null){return update;
-}update=match(message,SLAUGHTER_CHECK,ItemID.BRACELET_OF_SLAUGHTER,SLAUGHTER_KEY,false);
-if(update!=null){return update;
-}update=match(message,EXPEDITIOUS_ACTIVATE,ItemID.EXPEDITIOUS_BRACELET,EXPEDITIOUS_KEY,true);
-return update!=null?update:match(message,EXPEDITIOUS_CHECK,ItemID.EXPEDITIOUS_BRACELET,EXPEDITIOUS_KEY,false);
-}private static Update match(String message,Pattern pattern,int itemId,String configKey,boolean resetWhenNoCount){Matcher matcher=pattern.matcher(message);
-if(!matcher.find()){return null;
-}String count=matcher.group(1);
-int charges=count==null&&resetWhenNoCount?message.contains(text(239))?0:MAX_CHARGES:Integer.parseInt(count);
-return new Update(itemId,configKey,charges);
-}static String configKey(int itemId){if(itemId==ItemID.BRACELET_OF_SLAUGHTER){return SLAUGHTER_KEY;
-}if(itemId==ItemID.EXPEDITIOUS_BRACELET){return EXPEDITIOUS_KEY;
-}return "";
-}static final class Update{private final int itemId;
-private final String configKey;
-private final int charges;
-private Update(int itemId,String configKey,int charges){this.itemId=itemId;
-this.configKey=configKey;
-this.charges=Math.max(0,Math.min(MAX_CHARGES,charges));
-}int getItemId(){return itemId;
-}String getConfigKey(){return configKey;
-}int getCharges(){return charges;
-}}}
+
+class SlayerBraceletChargeTracker {
+  static final int MAX_CHARGES = 30;
+  static final String CONFIG_GROUP = "itemCharge";
+  static final String SLAUGHTER_KEY = "braceletOfSlaughter";
+  static final String EXPEDITIOUS_KEY = "expeditiousBracelet";
+  private static final Pattern SLAUGHTER_ACTIVATE =
+      Pattern.compile(
+          "Your bracelet of slaughter prevents your slayer count from decreasing\\. "
+              + "(?:It has (\\d{1,2}) charges? left\\.|It then crumbles to dust\\.|"
+              + "It then regenerates itself to full charge!)");
+  private static final Pattern SLAUGHTER_CHECK =
+      Pattern.compile("Your bracelet of slaughter has (\\d{1,2}) charges? left\\.");
+  private static final Pattern EXPEDITIOUS_ACTIVATE =
+      Pattern.compile(
+          "Your expeditious bracelet helps you progress your slayer (?:task )?faster\\. "
+              + "(?:It has (\\d{1,2}) charges? left\\.|It then crumbles to dust\\.|"
+              + "It then regenerates itself to full charge!)");
+  private static final Pattern EXPEDITIOUS_CHECK =
+      Pattern.compile("Your expeditious bracelet has (\\d{1,2}) charges? left\\.");
+
+  private SlayerBraceletChargeTracker() {}
+
+  static Update parse(String message) {
+    if (message == null || message.isEmpty()) {
+      return null;
+    }
+    Update update =
+        match(message, SLAUGHTER_ACTIVATE, ItemID.BRACELET_OF_SLAUGHTER, SLAUGHTER_KEY, true);
+    if (update != null) {
+      return update;
+    }
+    update = match(message, SLAUGHTER_CHECK, ItemID.BRACELET_OF_SLAUGHTER, SLAUGHTER_KEY, false);
+    if (update != null) {
+      return update;
+    }
+    update =
+        match(message, EXPEDITIOUS_ACTIVATE, ItemID.EXPEDITIOUS_BRACELET, EXPEDITIOUS_KEY, true);
+    return update != null
+        ? update
+        : match(message, EXPEDITIOUS_CHECK, ItemID.EXPEDITIOUS_BRACELET, EXPEDITIOUS_KEY, false);
+  }
+
+  private static Update match(
+      String message, Pattern pattern, int itemId, String configKey, boolean resetWhenNoCount) {
+    Matcher matcher = pattern.matcher(message);
+    if (!matcher.find()) {
+      return null;
+    }
+    String count = matcher.group(1);
+    int charges =
+        count == null && resetWhenNoCount
+            ? message.contains("crumbles to dust") ? 0 : MAX_CHARGES
+            : Integer.parseInt(count);
+    return new Update(itemId, configKey, charges);
+  }
+
+  static String configKey(int itemId) {
+    if (itemId == ItemID.BRACELET_OF_SLAUGHTER) {
+      return SLAUGHTER_KEY;
+    }
+    if (itemId == ItemID.EXPEDITIOUS_BRACELET) {
+      return EXPEDITIOUS_KEY;
+    }
+    return "";
+  }
+
+  static final class Update {
+    private final int itemId;
+    private final String configKey;
+    private final int charges;
+
+    private Update(int itemId, String configKey, int charges) {
+      this.itemId = itemId;
+      this.configKey = configKey;
+      this.charges = Math.max(0, Math.min(MAX_CHARGES, charges));
+    }
+
+    int getItemId() {
+      return itemId;
+    }
+
+    String getConfigKey() {
+      return configKey;
+    }
+
+    int getCharges() {
+      return charges;
+    }
+  }
+}

@@ -1,5 +1,5 @@
 package com.slayerplus;
-import static com.slayerplus.Text.text;
+
 import com.google.inject.Provides;
 import java.awt.Color;
 import java.awt.Font;
@@ -38,1376 +38,3258 @@ import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-@PluginDescriptor(name="SlayerPlus",description="Plan Slayer tasks, loadouts, and locations.",tags={"slayer","gear","loadout"})@PluginDependency(BankTagsPlugin.class)public class SlayerPlusPlugin extends Plugin{private static final Logger log=LoggerFactory.getLogger(SlayerPlusPlugin.class);
-private static final Map<String,List<String>>LOADOUT_LISTS=loadLists();
-private static final int KRYSTILIA=7;
-private static final int KONAR_MASTER_ID=8;
-private static final Color TRAVEL_ITEM_HIGHLIGHT_COLOR=new Color(0,255,80);
-private static final String RUNELITE_SLAYER_CONFIG_GROUP="slayer";
-private static final String RUNELITE_SLAYER_TASK_NAME_KEY="assignment";
-private static final String RUNELITE_SLAYER_AMOUNT_KEY="amount";
-private static final String RUNELITE_SLAYER_INITIAL_AMOUNT_KEY="initialAmount";
-private static final String RUNELITE_SLAYER_LOCATION_KEY="taskLocation";
-private static final String RUNELITE_SLAYER_STREAK_KEY="streak";
-private static final String RUNELITE_SLAYER_POINTS_KEY="points";
-private static final String LAST_SLAYER_MASTER_SNAPSHOT_KEY="lastSlayerMasterIdV1";
-private static final String PORTRAIT_CALIBRATION_KEY="portraitCalibrationV1";
-private static final String PLAYSTYLE_KEY="playstyle";
-private static final String EASY_TELEPORTS_CONFIG_GROUP="easypharaohsceptre";
-private static final String INFERNO_TRAVEL_SNAPSHOT_KEY="infernoTravelItemSnapshotV1";
-private static final String OWNED_SLAYER_HELMETS_SNAPSHOT_KEY="ownedSlayerHelmetItemIdsV1";
-private static final int TRAVEL_BANK_SOURCE_SCORE=2000;
-private static final int TRAVEL_INVENTORY_SOURCE_SCORE=3000;
-private static final int TRAVEL_WORN_SOURCE_SCORE=2900;
-private static final int SPELLBOOK_VARBIT=VarbitID.SPELLBOOK;
-private static final int EXTRA_QUIVER_SAFETY_POLL_TICKS=5;
-private static final int REFRESH_DEBOUNCE_TICKS=5;
-private static final int PORTRAIT_APPEARANCE_POLL_TICKS=5;
-private static final int PORTRAIT_CACHE_SIZE=8;
-private static final int[]INFERNO_PREPARATION_TRAVEL_ITEM_IDS={ItemID.CA_OFFHAND_GRANDMASTER,ItemID.INFERNAL_DEFENDER_GHOMMAL_6,ItemID.INFERNAL_DEFENDER_GHOMMAL_6_TROUVER,ItemID.CA_OFFHAND_MASTER,ItemID.INFERNAL_DEFENDER_GHOMMAL_5,ItemID.INFERNAL_DEFENDER_GHOMMAL_5_TROUVER,ItemID.CA_OFFHAND_ELITE};
-private static final class Target{private final String assignment;
-private final String location;
-private final boolean bossEncounter;
-private Target(String assignment,String location,boolean bossEncounter){this.assignment=assignment==null?"":assignment.trim();
-this.location=location==null?"":location.trim();
-this.bossEncounter=bossEncounter;
-}private boolean isBoss(){return bossEncounter;
-}}@Inject private Client client;
-@Inject private ClientThread clientThread;
-@Inject private ClientToolbar clientToolbar;
-@Inject private SlayerPlusConfig config;
-@Inject private ConfigManager configs;
-@Inject private ItemManager itemManager;
-@Inject private TagManager tagManager;
-@Inject private LayoutManager layoutManager;
-@Inject private BankTagsService bankTagsService;
-@Inject private OverlayManager overlayManager;
-@Inject private InfoBoxManager infoBoxManager;
-@Inject private PluginManager pluginManager;
-private SlayerPluginService slayerService;
-@Inject private SlayerTaskReadinessOverlay readinessOverlay;
-@Inject private SlayerTravelItemOverlay travelItemOverlay;
-@Inject private EventBus eventBus;
-private PlayerPortraitRenderer portraitRenderer;
-private SlayerRecommendationEngine recommendationEngine;
-private SlayerLoadoutAnalyzer analyzer;
-private SlayerAchievementDiarySnapshot diaries=SlayerAchievementDiarySnapshot.empty();
-private SlayerPlusPanel panel;
-private NavigationButton navigationButton;
-private SlayerBraceletChargeInfoBox chargeBox;
-private int braceletChargeInfoBoxItemId=-1;
-private boolean braceletAbsentAfterDepletion;
-private int lastAppearanceHash=Integer.MIN_VALUE;
-private boolean portraitPending;
-private long portraitRetry;
-private boolean portraitLoaded;
-private String lastAccountName="";
-private final Map<Integer,BufferedImage>portraitCache=new LinkedHashMap<Integer,BufferedImage>(PORTRAIT_CACHE_SIZE,0.75f,true){@Override protected boolean removeEldestEntry(Map.Entry<Integer,BufferedImage>entry){return size()>PORTRAIT_CACHE_SIZE;
-}};
-private final Map<Integer,Integer>bank=new LinkedHashMap<>();
-private int[]rawBankState=new int[0];
-private boolean rawBankConfirmed;
-private boolean bankInterfaceOpen;
-private boolean bankReachedForRestock;
-private final BankRoutes bankRoutes=new BankRoutes();
-private int[]cachedWornItemIdentityState=new int[0];
-private boolean cachedWornItemIdentityKnown;
-private int[]cachedInventoryContainerState=new int[0];
-private boolean cachedInventoryContainerStateKnown;
-private int infernoItem=-1;
-private boolean infernoLoaded;
-private final Set<Integer>helms=new LinkedHashSet<>();
-private boolean helmSnapshotLoaded;
-private final Set<Integer>seekingArrowIds=new LinkedHashSet<>();
-private final Map<Integer,Integer>seekingPlaceholderClassificationCache=new LinkedHashMap<>();
-private int quiverId=-1;
-private int extraQuiverQty;
-private int bankDizanaId=-1;
-private boolean scanned;
-private Recommendation recommendation;
-private KitPlan currentLoadout=KitPlan.empty();
-private PreparationCatalog.PreparationPlan preparation=PreparationCatalog.PreparationPlan.none();
-private String preparationContext="";
-private boolean readinessOverlayAdded;
-private BankTagLayout layoutService;
-private ShortestPathBridge shortestPathBridge;
-private int master;
-private String assignment="";
-private String devPreviewTask="";
-private TaskVariant taskVar=TaskVariant.STANDARD_TASK;
-private Recommendation cachedGuidedTargetRecommendation;
-private String cachedGuidedTargetTaskName="";
-private TaskVariant cachedGuidedTargetVariant;
-private Target cachedGuidedTaskTarget;
-private int seenRemaining=-1;
-private String observedTaskName="";
-private int observedNormalTaskStreak=-1;
-private String pendingChatTaskName="";
-private int pendingChatTaskRemaining=-1;
-private int pendingChatStreak=-1;
-private int pendingChatPoints=-1;
-private long pendingChatTaskExpiresAfterTick=-1L;
-private boolean boostSyncPending;
-private int boostStreakBefore=-1;
-private int lastMaster;
-private boolean layoutCreated;
-private String lastWrittenBankTagState="";
-private boolean slayerRefreshQueued;
-boolean loadoutRefreshPending;
-private String loadoutContext="";
-private long pendingRefreshDeadlineTick;
-private boolean bankOpenedRefreshPending;
-private boolean settingsRefresh;
-private boolean travelHighlightActive;
-private boolean routeNeedsTravelItem=true;
-private boolean spiderTeleportPending;
-private boolean spiderTeleportArrived;
-private Set<Integer>cachedTravelCandidateIds=Collections.emptySet();
-private String cachedRoutePathKey="";
-private List<WorldPoint>cachedRoutePath=Collections.emptyList();
-private long tick;
-@Override protected void startUp(){migrateRemovedPlaystyle();
-slayerService=findExistingSlayerService(pluginManager.getPlugins());
-portraitRenderer=new PlayerPortraitRenderer(client);
-portraitLoaded=portraitRenderer.loadCal(configs.getConfiguration(SlayerPlusConfig.GROUP,PORTRAIT_CALIBRATION_KEY));
-recommendationEngine=new SlayerRecommendationEngine(client,config);
-analyzer=new SlayerLoadoutAnalyzer(itemManager);
-layoutService=new BankTagLayout(client,tagManager,layoutManager,bankTagsService,configs);
-shortestPathBridge=new ShortestPathBridge(eventBus);
-panel=new SlayerPlusPanel(()->clientThread.invokeLater(this::createRecommendedBankTag),variant->clientThread.invokeLater(()->selectBankTagVariant(variant)),this::toggleTravelHighlight,config,configs);
-panel.setDevPreviewOptions(devPreviewTaskNames(),taskName->clientThread.invokeLater(()->selectDevPreviewTask(taskName)));
-BufferedImage icon=loadPluginIcon();
-navigationButton=NavigationButton.builder().tooltip("SlayerPlus").icon(icon).priority(6).panel(panel).build();
-clientToolbar.addNavigation(navigationButton);
-if(overlayManager!=null&&travelItemOverlay!=null){overlayManager.add(travelItemOverlay);
-}if(client.getGameState()==GameState.LOGGED_IN){portraitPending=true;
-portraitRetry=0;
-clientThread.invokeLater(()->{loadInfernoTravelItemSnapshot();
-loadOwnedSlayerHelmetSnapshot();
-cacheBankContainer(client.getItemContainer(InventoryID.BANK));
-refreshBraceletChargeInfoBox();
-refreshSlayerData();
-});
-}}
-// Multiple PluginDependency annotations reinstall dependency modules and can split Bank Tags' singleton state.
-// Read Slayer's service from its existing injector; never install or rebind that plugin here.
-static SlayerPluginService findExistingSlayerService(Collection<Plugin>plugins){for(Plugin plugin:plugins){if(plugin instanceof SlayerPlugin&&plugin.getInjector()!=null){return plugin.getInjector().getInstance(SlayerPluginService.class);
-}}return null;
-}private static BufferedImage loadPluginIcon(){try{return ImageUtil.loadImageResource(SlayerPlusPlugin.class,text(592));
-}catch(RuntimeException ignored){BufferedImage fallback=new BufferedImage(32,32,BufferedImage.TYPE_INT_ARGB);
-Graphics2D graphics=fallback.createGraphics();
-try{graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-graphics.setColor(new Color(42,38,30,245));
-graphics.fillRoundRect(1,1,30,30,7,7);
-graphics.setColor(new Color(218,176,70));
-graphics.drawRoundRect(1,1,29,29,7,7);
-graphics.setFont(new Font("SansSerif",Font.BOLD,19));
-graphics.drawString("S",9,23);
-}finally{graphics.dispose();
-}return fallback;
-}}@Override protected void shutDown(){removeBraceletChargeInfoBox();
-if(layoutService!=null){layoutService.closeIfActive();
+
+@PluginDescriptor(
+    name = "SlayerPlus",
+    description = "Plan Slayer tasks, loadouts, and locations.",
+    tags = {"slayer", "gear", "loadout"})
+@PluginDependency(BankTagsPlugin.class)
+public class SlayerPlusPlugin extends Plugin {
+  private static final Logger log = LoggerFactory.getLogger(SlayerPlusPlugin.class);
+  private static final int KRYSTILIA = 7;
+  private static final int KONAR_MASTER_ID = 8;
+  private static final Color TRAVEL_ITEM_HIGHLIGHT_COLOR = new Color(0, 255, 80);
+  private static final String RUNELITE_SLAYER_CONFIG_GROUP = "slayer";
+  private static final String RUNELITE_SLAYER_TASK_NAME_KEY = "assignment";
+  private static final String RUNELITE_SLAYER_AMOUNT_KEY = "amount";
+  private static final String RUNELITE_SLAYER_INITIAL_AMOUNT_KEY = "initialAmount";
+  private static final String RUNELITE_SLAYER_LOCATION_KEY = "taskLocation";
+  private static final String RUNELITE_SLAYER_STREAK_KEY = "streak";
+  private static final String RUNELITE_SLAYER_POINTS_KEY = "points";
+  private static final String LAST_SLAYER_MASTER_SNAPSHOT_KEY = "lastSlayerMasterIdV1";
+  private static final String PORTRAIT_CALIBRATION_KEY = "portraitCalibrationV1";
+  private static final String PLAYSTYLE_KEY = "playstyle";
+  private static final String EASY_TELEPORTS_CONFIG_GROUP = "easypharaohsceptre";
+  private static final String INFERNO_TRAVEL_SNAPSHOT_KEY = "infernoTravelItemSnapshotV1";
+  private static final String OWNED_SLAYER_HELMETS_SNAPSHOT_KEY = "ownedSlayerHelmetItemIdsV1";
+  private static final int TRAVEL_BANK_SOURCE_SCORE = 2000;
+  private static final int TRAVEL_INVENTORY_SOURCE_SCORE = 3000;
+  private static final int TRAVEL_WORN_SOURCE_SCORE = 2900;
+  private static final int SPELLBOOK_VARBIT = VarbitID.SPELLBOOK;
+  private static final int EXTRA_QUIVER_SAFETY_POLL_TICKS = 5;
+  private static final int REFRESH_DEBOUNCE_TICKS = 5;
+  private static final int PORTRAIT_APPEARANCE_POLL_TICKS = 5;
+  private static final int PORTRAIT_CACHE_SIZE = 8;
+  private static final int[] INFERNO_PREPARATION_TRAVEL_ITEM_IDS = {
+    ItemID.CA_OFFHAND_GRANDMASTER,
+    ItemID.INFERNAL_DEFENDER_GHOMMAL_6,
+    ItemID.INFERNAL_DEFENDER_GHOMMAL_6_TROUVER,
+    ItemID.CA_OFFHAND_MASTER,
+    ItemID.INFERNAL_DEFENDER_GHOMMAL_5,
+    ItemID.INFERNAL_DEFENDER_GHOMMAL_5_TROUVER,
+    ItemID.CA_OFFHAND_ELITE
+  };
+
+  private static final class Target {
+    private final String assignment;
+    private final String location;
+    private final boolean bossEncounter;
+
+    private Target(String assignment, String location, boolean bossEncounter) {
+      this.assignment = assignment == null ? "" : assignment.trim();
+      this.location = location == null ? "" : location.trim();
+      this.bossEncounter = bossEncounter;
+    }
+
+    private boolean isBoss() {
+      return bossEncounter;
+    }
+  }
+
+  @Inject private Client client;
+  @Inject private ClientThread clientThread;
+  @Inject private ClientToolbar clientToolbar;
+  @Inject private SlayerPlusConfig config;
+  @Inject private ConfigManager configs;
+  @Inject private ItemManager itemManager;
+  @Inject private TagManager tagManager;
+  @Inject private LayoutManager layoutManager;
+  @Inject private BankTagsService bankTagsService;
+  @Inject private OverlayManager overlayManager;
+  @Inject private InfoBoxManager infoBoxManager;
+  @Inject private PluginManager pluginManager;
+  private SlayerPluginService slayerService;
+  @Inject private SlayerTaskReadinessOverlay readinessOverlay;
+  @Inject private SlayerTravelItemOverlay travelItemOverlay;
+  @Inject private EventBus eventBus;
+  private PlayerPortraitRenderer portraitRenderer;
+  private SlayerRecommendationEngine recommendationEngine;
+  private SlayerLoadoutAnalyzer analyzer;
+  private SlayerAchievementDiarySnapshot diaries = SlayerAchievementDiarySnapshot.empty();
+  private SlayerPlusPanel panel;
+  private NavigationButton navigationButton;
+  private SlayerBraceletChargeInfoBox chargeBox;
+  private int braceletChargeInfoBoxItemId = -1;
+  private boolean braceletAbsentAfterDepletion;
+  private int lastAppearanceHash = Integer.MIN_VALUE;
+  private boolean portraitPending;
+  private long portraitRetry;
+  private boolean portraitLoaded;
+  private String lastAccountName = "";
+  private final Map<Integer, BufferedImage> portraitCache =
+      new LinkedHashMap<Integer, BufferedImage>(PORTRAIT_CACHE_SIZE, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Integer, BufferedImage> entry) {
+          return size() > PORTRAIT_CACHE_SIZE;
+        }
+      };
+  private final Map<Integer, Integer> bank = new LinkedHashMap<>();
+  private int[] rawBankState = new int[0];
+  private boolean rawBankConfirmed;
+  private boolean bankInterfaceOpen;
+  private boolean bankReachedForRestock;
+  private final BankRoutes bankRoutes = new BankRoutes();
+  private int[] cachedWornItemIdentityState = new int[0];
+  private boolean cachedWornItemIdentityKnown;
+  private int[] cachedInventoryContainerState = new int[0];
+  private boolean cachedInventoryContainerStateKnown;
+  private int infernoItem = -1;
+  private boolean infernoLoaded;
+  private final Set<Integer> helms = new LinkedHashSet<>();
+  private boolean helmSnapshotLoaded;
+  private final Set<Integer> seekingArrowIds = new LinkedHashSet<>();
+  private final Map<Integer, Integer> seekingPlaceholderClassificationCache = new LinkedHashMap<>();
+  private int quiverId = -1;
+  private int extraQuiverQty;
+  private int bankDizanaId = -1;
+  private boolean scanned;
+  private Recommendation recommendation;
+  private KitPlan currentLoadout = KitPlan.empty();
+  private PreparationCatalog.PreparationPlan preparation =
+      PreparationCatalog.PreparationPlan.none();
+  private String preparationContext = "";
+  private boolean readinessOverlayAdded;
+  private BankTagLayout layoutService;
+  private ShortestPathBridge shortestPathBridge;
+  private int master;
+  private String assignment = "";
+  private String devPreviewTask = "";
+  private TaskVariant taskVar = TaskVariant.STANDARD_TASK;
+  private Recommendation cachedGuidedTargetRecommendation;
+  private String cachedGuidedTargetTaskName = "";
+  private TaskVariant cachedGuidedTargetVariant;
+  private Target cachedGuidedTaskTarget;
+  private int seenRemaining = -1;
+  private String observedTaskName = "";
+  private int observedNormalTaskStreak = -1;
+  private String pendingChatTaskName = "";
+  private int pendingChatTaskRemaining = -1;
+  private int pendingChatStreak = -1;
+  private int pendingChatPoints = -1;
+  private long pendingChatTaskExpiresAfterTick = -1L;
+  private boolean boostSyncPending;
+  private int boostStreakBefore = -1;
+  private int lastMaster;
+  private boolean layoutCreated;
+  private String lastWrittenBankTagState = "";
+  private boolean slayerRefreshQueued;
+  boolean loadoutRefreshPending;
+  private String loadoutContext = "";
+  private long pendingRefreshDeadlineTick;
+  private boolean bankOpenedRefreshPending;
+  private boolean settingsRefresh;
+  private boolean travelHighlightActive;
+  private boolean routeNeedsTravelItem = true;
+  private boolean spiderTeleportPending;
+  private boolean spiderTeleportArrived;
+  private Set<Integer> cachedTravelCandidateIds = Collections.emptySet();
+  private String cachedRoutePathKey = "";
+  private List<WorldPoint> cachedRoutePath = Collections.emptyList();
+  private long tick;
+
+  @Override
+  protected void startUp() {
+    migrateRemovedPlaystyle();
+    slayerService = findExistingSlayerService(pluginManager.getPlugins());
+    portraitRenderer = new PlayerPortraitRenderer(client);
+    portraitLoaded =
+        portraitRenderer.loadCalibration(
+            configs.getConfiguration(SlayerPlusConfig.GROUP, PORTRAIT_CALIBRATION_KEY));
+    recommendationEngine = new SlayerRecommendationEngine(client, config);
+    analyzer = new SlayerLoadoutAnalyzer(itemManager);
+    layoutService = new BankTagLayout(client, tagManager, layoutManager, bankTagsService, configs);
+    shortestPathBridge = new ShortestPathBridge(eventBus);
+    panel =
+        new SlayerPlusPanel(
+            () -> clientThread.invokeLater(this::createRecommendedBankTag),
+            variant -> clientThread.invokeLater(() -> selectBankTagVariant(variant)),
+            this::toggleTravelHighlight,
+            config,
+            configs);
+    panel.setDevPreviewOptions(
+        devPreviewTaskNames(),
+        taskName -> clientThread.invokeLater(() -> selectDevPreviewTask(taskName)));
+    BufferedImage icon = loadPluginIcon();
+    navigationButton =
+        NavigationButton.builder()
+            .tooltip("SlayerPlus")
+            .icon(icon)
+            .priority(6)
+            .panel(panel)
+            .build();
+    clientToolbar.addNavigation(navigationButton);
+    if (overlayManager != null && travelItemOverlay != null) {
+      overlayManager.add(travelItemOverlay);
+    }
+    if (client.getGameState() == GameState.LOGGED_IN) {
+      portraitPending = true;
+      portraitRetry = 0;
+      clientThread.invokeLater(
+          () -> {
+            loadInfernoTravelItemSnapshot();
+            loadOwnedSlayerHelmetSnapshot();
+            cacheBankContainer(client.getItemContainer(InventoryID.BANK));
+            refreshBraceletChargeInfoBox();
+            refreshSlayerData();
+          });
+    }
+  }
+
+  // Multiple PluginDependency annotations reinstall dependency modules and can split Bank Tags'
+  // singleton state.
+  // Read Slayer's service from its existing injector; never install or rebind that plugin here.
+  static SlayerPluginService findExistingSlayerService(Collection<Plugin> plugins) {
+    for (Plugin plugin : plugins) {
+      if (plugin instanceof SlayerPlugin && plugin.getInjector() != null) {
+        return plugin.getInjector().getInstance(SlayerPluginService.class);
+      }
+    }
+    return null;
+  }
+
+  private static BufferedImage loadPluginIcon() {
+    try {
+      return ImageUtil.loadImageResource(SlayerPlusPlugin.class, "slayerplus_sidebar_v2.png");
+    } catch (RuntimeException ignored) {
+      BufferedImage fallback = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
+      Graphics2D graphics = fallback.createGraphics();
+      try {
+        graphics.setRenderingHint(
+            RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics.setColor(new Color(42, 38, 30, 245));
+        graphics.fillRoundRect(1, 1, 30, 30, 7, 7);
+        graphics.setColor(new Color(218, 176, 70));
+        graphics.drawRoundRect(1, 1, 29, 29, 7, 7);
+        graphics.setFont(new Font("SansSerif", Font.BOLD, 19));
+        graphics.drawString("S", 9, 23);
+      } finally {
+        graphics.dispose();
+      }
+      return fallback;
+    }
+  }
+
+  @Override
+  protected void shutDown() {
+    removeBraceletChargeInfoBox();
+    if (layoutService != null) {
+      layoutService.closeIfActive();
+    }
+    if (overlayManager != null && travelItemOverlay != null) {
+      overlayManager.remove(travelItemOverlay);
+    }
+    if (panel != null) {
+      panel.disposeResources();
+    }
+    if (navigationButton != null) {
+      clientToolbar.removeNavigation(navigationButton);
+    }
+    navigationButton = null;
+    panel = null;
+    portraitRenderer = null;
+    recommendationEngine = null;
+    analyzer = null;
+    layoutService = null;
+    slayerService = null;
+    resetSessionState();
+    shortestPathBridge = null;
+  }
+
+  private void resetSessionState() {
+    travelHighlightActive = false;
+    spiderTeleportPending = false;
+    spiderTeleportArrived = false;
+    cachedTravelCandidateIds = Collections.emptySet();
+    cachedRoutePathKey = "";
+    cachedRoutePath = Collections.emptyList();
+    if (shortestPathBridge != null) {
+      shortestPathBridge.clear();
+    }
+    layoutCreated = false;
+    lastWrittenBankTagState = "";
+    currentLoadout = KitPlan.empty();
+    recommendation = null;
+    clearCachedGuidedTaskTarget();
+    preparation = PreparationCatalog.PreparationPlan.none();
+    preparationContext = "";
+    updateReadinessOverlay();
+    master = 0;
+    assignment = "";
+    taskVar = TaskVariant.STANDARD_TASK;
+    bank.clear();
+    rawBankState = new int[0];
+    rawBankConfirmed = false;
+    bankInterfaceOpen = false;
+    bankReachedForRestock = false;
+    cachedWornItemIdentityState = new int[0];
+    cachedWornItemIdentityKnown = false;
+    cachedInventoryContainerState = new int[0];
+    cachedInventoryContainerStateKnown = false;
+    infernoItem = -1;
+    infernoLoaded = false;
+    helms.clear();
+    helmSnapshotLoaded = false;
+    seekingArrowIds.clear();
+    seekingPlaceholderClassificationCache.clear();
+    bankDizanaId = -1;
+    scanned = false;
+    clearExtraQuiverAmmoSnapshot();
+    lastAppearanceHash = Integer.MIN_VALUE;
+    portraitPending = false;
+    portraitRetry = 0;
+    portraitLoaded = false;
+    portraitCache.clear();
+    lastAccountName = "";
+    seenRemaining = -1;
+    observedTaskName = "";
+    observedNormalTaskStreak = -1;
+    boostSyncPending = false;
+    boostStreakBefore = -1;
+    lastMaster = 0;
+    slayerRefreshQueued = false;
+    loadoutRefreshPending = false;
+    loadoutContext = "";
+    pendingRefreshDeadlineTick = 0;
+    bankOpenedRefreshPending = false;
+    settingsRefresh = false;
+    tick = 0;
+  }
+
+  @Subscribe
+  public void onGameTick(GameTick event) {
+    tick++;
+    refreshPortrait();
+    if (assignment.isEmpty() && slayerService != null && slayerService.getRemainingAmount() > 0) {
+      scheduleRefresh(false);
+    }
+    if (shouldPollExtraQuiverSnapshotForTest(tick) && refreshQuiverAmmo()) {
+      scheduleRefresh(false);
+    }
+    if (slayerRefreshQueued && tick >= pendingRefreshDeadlineTick) {
+      runQueuedRefresh();
+    }
+    reconcileBankInterfaceState();
+    if (travelHighlightActive) {
+      updateShortestPathRoute();
+    }
+  }
+
+  @Subscribe
+  public void onChatMessage(ChatMessage event) {
+    if (event.getType() != ChatMessageType.GAMEMESSAGE && event.getType() != ChatMessageType.SPAM) {
+      return;
+    }
+    String message = Text.removeTags(event.getMessage());
+    SlayerTaskChatUpdate taskUpdate = SlayerTaskChatUpdate.parse(message);
+    if (taskUpdate != null) {
+      pendingChatTaskExpiresAfterTick = tick + 5L;
+      if (taskUpdate.getRemaining() > 0 && !taskUpdate.getTaskName().isEmpty()) {
+        pendingChatTaskName = taskUpdate.getTaskName();
+        pendingChatTaskRemaining = taskUpdate.getRemaining();
+      }
+      if (taskUpdate.getStreak() >= 0) {
+        pendingChatStreak = taskUpdate.getStreak();
+      }
+      if (taskUpdate.getPoints() >= 0) {
+        pendingChatPoints = taskUpdate.getPoints();
+      }
+      scheduleRefresh(false);
+    }
+    SlayerBraceletChargeTracker.Update braceletUpdate = SlayerBraceletChargeTracker.parse(message);
+    if (braceletUpdate != null) {
+      configs.setRSProfileConfiguration(
+          SlayerBraceletChargeTracker.CONFIG_GROUP,
+          braceletUpdate.getConfigKey(),
+          braceletUpdate.getCharges());
+      if (braceletUpdate.getCharges() == 0) {
+        showDepletedBraceletChargeInfoBox(braceletUpdate.getItemId());
+      } else {
+        refreshBraceletChargeInfoBox();
+      }
+    }
+  }
+
+  static boolean shouldPollExtraQuiverSnapshotForTest(long gameTick) {
+    return gameTick > 0 && gameTick % EXTRA_QUIVER_SAFETY_POLL_TICKS == 0;
+  }
+
+  @Subscribe
+  public void onGameStateChanged(GameStateChanged event) {
+    if (event.getGameState() == GameState.LOGGED_IN) {
+      portraitPending = true;
+      portraitRetry = 0;
+      clientThread.invokeLater(
+          () -> {
+            loadInfernoTravelItemSnapshot();
+            loadOwnedSlayerHelmetSnapshot();
+            cacheBankContainer(client.getItemContainer(InventoryID.BANK));
+            refreshSlayerData();
+            updateReadinessOverlay();
+          });
+    } else {
+      hideReadinessOverlay();
+      if (shouldInvalidateTaskObservationForGameState(event.getGameState())) {
+        seenRemaining = -1;
+        observedTaskName = "";
+        observedNormalTaskStreak = -1;
+      }
+      if (event.getGameState() != GameState.LOGIN_SCREEN || panel == null) {
+        return;
+      }
+      resetSessionState();
+      SwingUtilities.invokeLater(
+          () -> {
+            panel.showLoggedOut();
+            panel.showTravelHighlightState(false);
+          });
+    }
+  }
+
+  static boolean shouldInvalidateTaskObservationForGameState(GameState gameState) {
+    return gameState == GameState.HOPPING
+        || gameState == GameState.CONNECTION_LOST
+        || gameState == GameState.LOGGING_IN;
+  }
+
+  private void migrateRemovedPlaystyle() {
+    String stored = configs.getConfiguration(SlayerPlusConfig.GROUP, PLAYSTYLE_KEY);
+    if (stored == null || stored.trim().isEmpty()) {
+      return;
+    }
+    String normalized =
+        stored.trim().toUpperCase(Locale.ENGLISH).replace('-', '_').replace(' ', '_');
+    if (normalized.equals("BALANCED")
+        || normalized.equals("KONAR_FOCUSED")
+        || normalized.equals("AFK")) {
+      configs.setConfiguration(
+          SlayerPlusConfig.GROUP, PLAYSTYLE_KEY, Preference.Playstyle.FAST_XP.name());
+    }
+  }
+
+  @Subscribe
+  public void onConfigChanged(ConfigChanged event) {
+    if (event == null
+        || EASY_TELEPORTS_CONFIG_GROUP.equals(event.getGroup())
+        || !SlayerPlusConfig.GROUP.equals(event.getGroup())) {
+      return;
+    }
+    String changedKey = event.getKey();
+    if (PORTRAIT_CALIBRATION_KEY.equals(changedKey)
+        || SlayerOptionalPins.CONFIG_KEY.equals(changedKey)
+        || BankRoutes.CONFIG_KEY.equals(changedKey)) {
+      return;
+    }
+    clientThread.invokeLater(
+        () -> {
+          preparationContext = "";
+          settingsRefresh = true;
+          scheduleRefresh(false);
+        });
+  }
+
+  @Subscribe
+  public void onVarbitChanged(VarbitChanged event) {
+    int varpId = event.getVarpId();
+    int varbitId = event.getVarbitId();
+    if (isProgressOnlyVarChange(varpId, varbitId)) {
+      if (shouldRefreshProgress(varpId, preparation.isReady())) {
+        scheduleProgressRefresh();
+      }
+      return;
+    }
+    if (varpId == VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO
+        || varpId == VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO_AMOUNT) {
+      if (refreshQuiverAmmo()) {
+        scheduleRefresh(false);
+      }
+      return;
+    }
+    if (varpId == VarPlayerID.SLAYER_COUNT_ORIGINAL
+        || varpId == VarPlayerID.SLAYER_TARGET
+        || varpId == VarPlayerID.SLAYER_AREA
+        || varbitId == VarbitID.SLAYER_TARGET_BOSSID
+        || varbitId == VarbitID.SLAYER_POINTS
+        || varbitId == VarbitID.SLAYER_MASTER
+        || varbitId == VarbitID.SLAYER_TASKS_COMPLETED
+        || varbitId == VarbitID.SLAYER_WILDERNESS_TASKS_COMPLETED
+        || varbitId == SPELLBOOK_VARBIT
+        || varbitId == VarbitID.RUNE_POUCH_TYPE_1
+        || varbitId == VarbitID.RUNE_POUCH_TYPE_2
+        || varbitId == VarbitID.RUNE_POUCH_TYPE_3
+        || varbitId == VarbitID.RUNE_POUCH_TYPE_4
+        || varbitId == VarbitID.RUNE_POUCH_TYPE_5
+        || varbitId == VarbitID.RUNE_POUCH_TYPE_6) {
+      scheduleRefresh(false);
+    }
+  }
+
+  @Subscribe
+  public void onItemContainerChanged(ItemContainerChanged event) {
+    int containerId = event.getContainerId();
+    if (containerId == InventoryID.WORN) {
+      refreshBraceletChargeInfoBox();
+    }
+    if (containerId == InventoryID.DIZANAS_QUIVER_AMMO) {
+      if (refreshQuiverAmmo()) {
+        scheduleRefresh(false);
+      }
+      return;
+    }
+    boolean bankChanged = containerId == InventoryID.BANK;
+    if (bankChanged) {
+      if (!cacheBankContainer(event.getItemContainer())) {
+        return;
+      }
+    } else if (containerId == InventoryID.WORN) {
+      if (!captureWornIdentityChange(event.getItemContainer())) {
+        return;
+      }
+      portraitPending = true;
+      portraitRetry = 0;
+    } else if (containerId == InventoryID.INV) {
+      if (!bankInterfaceOpen) {
+        if (!preparation.isReady()) {
+          scheduleProgressRefresh();
+        }
+        return;
+      }
+      if (!captureInventoryChange(event.getItemContainer())) {
+        return;
+      }
+    } else {
+      return;
+    }
+    if (bankChanged || bankInterfaceOpen) {
+      scheduleRefresh(bankChanged);
+    } else if (!preparation.isReady()) {
+      scheduleProgressRefresh();
+    }
+  }
+
+  private void refreshBraceletChargeInfoBox() {
+    if (infoBoxManager == null || itemManager == null || client == null) {
+      return;
+    }
+    ItemContainer worn = client.getItemContainer(InventoryID.WORN);
+    Item gloves = worn == null ? null : worn.getItem(EquipmentInventorySlot.GLOVES.getSlotIdx());
+    int itemId = gloves == null ? -1 : gloves.getId();
+    String configKey = SlayerBraceletChargeTracker.configKey(itemId);
+    if (configKey.isEmpty()) {
+      if (chargeBox != null && chargeBox.isDepleted()) {
+        braceletAbsentAfterDepletion = true;
+        return;
+      }
+      removeBraceletChargeInfoBox();
+      return;
+    }
+    Integer charges =
+        configs.getRSProfileConfiguration(
+            SlayerBraceletChargeTracker.CONFIG_GROUP, configKey, Integer.class);
+    if (charges == null) {
+      charges =
+          configs.getConfiguration(
+              SlayerBraceletChargeTracker.CONFIG_GROUP, configKey, Integer.class);
+      if (charges != null) {
+        configs.unsetConfiguration(SlayerBraceletChargeTracker.CONFIG_GROUP, configKey);
+        configs.setRSProfileConfiguration(
+            SlayerBraceletChargeTracker.CONFIG_GROUP, configKey, charges);
+      }
+    }
+    if (braceletAbsentAfterDepletion) {
+      charges = SlayerBraceletChargeTracker.MAX_CHARGES;
+      configs.setRSProfileConfiguration(
+          SlayerBraceletChargeTracker.CONFIG_GROUP, configKey, charges);
+      braceletAbsentAfterDepletion = false;
+    }
+    int displayedCharges = charges == null ? -1 : charges;
+    if (chargeBox == null
+        || braceletChargeInfoBoxItemId != itemId
+        || chargeBox.isDepleted() != (displayedCharges == 0)) {
+      removeBraceletChargeInfoBox();
+      braceletChargeInfoBoxItemId = itemId;
+      chargeBox =
+          new SlayerBraceletChargeInfoBox(
+              itemManager.getImage(itemId),
+              this,
+              itemId == ItemID.BRACELET_OF_SLAUGHTER
+                  ? "Bracelet of slaughter"
+                  : "Expeditious bracelet",
+              displayedCharges);
+      infoBoxManager.addInfoBox(chargeBox);
+      return;
+    }
+    chargeBox.setCharges(displayedCharges);
+  }
+
+  private void showDepletedBraceletChargeInfoBox(int itemId) {
+    if (infoBoxManager == null || itemManager == null || itemId <= 0) {
+      return;
+    }
+    removeBraceletChargeInfoBox();
+    braceletChargeInfoBoxItemId = itemId;
+    chargeBox =
+        new SlayerBraceletChargeInfoBox(
+            itemManager.getImage(itemId),
+            this,
+            itemId == ItemID.BRACELET_OF_SLAUGHTER
+                ? "Bracelet of slaughter"
+                : "Expeditious bracelet",
+            0);
+    infoBoxManager.addInfoBox(chargeBox);
+  }
+
+  private void removeBraceletChargeInfoBox() {
+    if (chargeBox != null && infoBoxManager != null) {
+      infoBoxManager.removeInfoBox(chargeBox);
+    }
+    chargeBox = null;
+    braceletChargeInfoBoxItemId = -1;
+    braceletAbsentAfterDepletion = false;
+  }
+
+  private boolean captureWornIdentityChange(ItemContainer container) {
+    Item[] items = container == null ? null : container.getItems();
+    if (items == null) {
+      return false;
+    }
+    boolean changed =
+        !cachedWornItemIdentityKnown
+            || !matchesItemIdentityState(cachedWornItemIdentityState, items);
+    if (changed) {
+      cachedWornItemIdentityState = snapshotItemIdentityState(items);
+      cachedWornItemIdentityKnown = true;
+    }
+    return changed;
+  }
+
+  private boolean captureInventoryChange(ItemContainer container) {
+    Item[] items = container == null ? null : container.getItems();
+    if (items == null) {
+      return false;
+    }
+    boolean changed =
+        !cachedInventoryContainerStateKnown
+            || hasRelevantInventoryChange(
+                cachedInventoryContainerState, items, quantitySensitiveInventoryItemIds());
+    cachedInventoryContainerState = snapshotExactItemState(items);
+    cachedInventoryContainerStateKnown = true;
+    return changed;
+  }
+
+  private Set<Integer> quantitySensitiveInventoryItemIds() {
+    Set<Integer> ids = new HashSet<>();
+    addPlanItemIds(ids, currentLoadout == null ? null : currentLoadout.getEquipmentItems());
+    addPlanItemIds(ids, currentLoadout == null ? null : currentLoadout.getInventoryItems());
+    addPlanItemIds(ids, currentLoadout == null ? null : currentLoadout.getOptionalItems());
+    if (preparation != null) {
+      ids.addAll(preparation.getTagIds());
+    }
+    return ids;
+  }
+
+  private static void addPlanItemIds(Set<Integer> ids, List<KitItem> items) {
+    if (items == null) {
+      return;
+    }
+    for (KitItem item : items) {
+      if (item != null && item.hasItemId()) {
+        ids.add(item.getItemId());
+      }
+    }
+  }
+
+  private static boolean hasRelevantInventoryChange(
+      int[] cachedState, Item[] items, Set<Integer> quantitySensitiveIds) {
+    if (cachedState == null || cachedState.length != items.length * 2) {
+      return true;
+    }
+    for (int slot = 0; slot < items.length; slot++) {
+      Item item = items[slot];
+      int offset = slot * 2;
+      int itemId = item == null ? -1 : item.getId();
+      int quantity = item == null ? 0 : item.getQuantity();
+      if (cachedState[offset] != itemId) {
+        return true;
+      }
+      if (cachedState[offset + 1] != quantity && quantitySensitiveIds.contains(itemId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean matchesItemIdentityState(int[] cachedState, Item[] items) {
+    if (cachedState == null || cachedState.length != items.length) {
+      return false;
+    }
+    for (int slot = 0; slot < items.length; slot++) {
+      Item item = items[slot];
+      if (cachedState[slot] != (item == null ? -1 : item.getId())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static int[] snapshotItemIdentityState(Item[] items) {
+    int[] state = new int[items.length];
+    for (int slot = 0; slot < items.length; slot++) {
+      state[slot] = items[slot] == null ? -1 : items[slot].getId();
+    }
+    return state;
+  }
+
+  private static int[] snapshotExactItemState(Item[] items) {
+    int[] state = new int[items.length * 2];
+    for (int slot = 0; slot < items.length; slot++) {
+      Item item = items[slot];
+      int offset = slot * 2;
+      state[offset] = item == null ? -1 : item.getId();
+      state[offset + 1] = item == null ? 0 : item.getQuantity();
+    }
+    return state;
+  }
+
+  void scheduleRefresh(boolean bankOpened) {
+    loadoutRefreshPending |= bankOpened || bankInterfaceOpen || settingsRefresh;
+    bankOpenedRefreshPending |= bankOpened;
+    scheduleProgressRefresh();
+  }
+
+  void scheduleProgressRefresh() {
+    if (slayerRefreshQueued) {
+      return;
+    }
+    slayerRefreshQueued = true;
+    pendingRefreshDeadlineTick = tick + REFRESH_DEBOUNCE_TICKS;
+  }
+
+  private void runQueuedRefresh() {
+    boolean handleBank = bankOpenedRefreshPending;
+    boolean refreshBankTag = settingsRefresh;
+    boolean rebuildLoadout = loadoutRefreshPending;
+    loadoutRefreshPending = false;
+    bankOpenedRefreshPending = false;
+    settingsRefresh = false;
+    slayerRefreshQueued = false;
+    if (handleBank) {
+      ItemContainer liveBank = client.getItemContainer(InventoryID.BANK);
+      if (liveBank != null) {
+        cacheBankContainer(liveBank);
+        rememberOpenBank();
+      }
+    }
+    refreshSlayerData(rebuildLoadout);
+    if (refreshBankTag && shouldRefreshExistingBankTag(layoutCreated, isSlayerPlusBankTagOpen())) {
+      createBankTagNow();
+    }
+  }
+
+  static boolean shouldRefreshExistingBankTag(boolean layoutCreated, boolean tagOpen) {
+    return layoutCreated || tagOpen;
+  }
+
+  @Subscribe
+  public void onWidgetLoaded(WidgetLoaded event) {
+    if (event.getGroupId() == InterfaceID.BANKMAIN) {
+      if (!shouldHandleBankWidgetLoadForTest(bankInterfaceOpen, event.getGroupId())) {
+        return;
+      }
+      bankInterfaceOpen = true;
+      scheduleRefresh(true);
+      return;
+    }
+    if (isQuiverRelevantInterfaceGroupForTest(event.getGroupId()) && refreshQuiverAmmo()) {
+      scheduleRefresh(false);
+    }
+  }
+
+  @Subscribe
+  public void onWidgetClosed(WidgetClosed event) {
+    if (event != null && event.getGroupId() == InterfaceID.BANKMAIN) {
+      handleBankClosed();
+    }
+  }
+
+  static boolean shouldHandleBankWidgetLoadForTest(boolean bankAlreadyOpen, int groupId) {
+    return groupId == InterfaceID.BANKMAIN && !bankAlreadyOpen;
+  }
+
+  private void reconcileBankInterfaceState() {
+    Widget bank = client.getWidget(InterfaceID.Bankmain.ITEMS_CONTAINER);
+    boolean visiblyOpen = bank != null && !bank.isHidden();
+    if (!shouldReconcileBankVisibilityForTest(bankInterfaceOpen, visiblyOpen)) {
+      return;
+    }
+    if (visiblyOpen) {
+      bankInterfaceOpen = true;
+      scheduleRefresh(true);
+    } else {
+      handleBankClosed();
+    }
+  }
+
+  void handleBankClosed() {
+    bankInterfaceOpen = false;
+    spiderTeleportArrived = false;
+    bankReachedForRestock = true;
+    scheduleRefresh(false);
+    pendingRefreshDeadlineTick = tick;
+  }
+
+  static boolean shouldReconcileBankVisibilityForTest(boolean recordedOpen, boolean visiblyOpen) {
+    return recordedOpen != visiblyOpen;
+  }
+
+  private BankRoutes accountBankRoutes() {
+    String profile = configs.getRSProfileKey();
+    bankRoutes.useProfile(
+        profile,
+        () -> configs.getRSProfileConfiguration(SlayerPlusConfig.GROUP, BankRoutes.CONFIG_KEY));
+    return bankRoutes;
+  }
+
+  private void rememberOpenBank() {
+    Widget bankWidget = client.getWidget(InterfaceID.Bankmain.ITEMS_CONTAINER);
+    Player player = client.getLocalPlayer();
+    if (client.getGameState() != GameState.LOGGED_IN
+        || bankWidget == null
+        || bankWidget.isHidden()
+        || player == null) {
+      return;
+    }
+    bankReachedForRestock = true;
+    BankRoutes routes = accountBankRoutes();
+    if (routes.remember(player.getWorldLocation(), client.isInInstancedRegion())) {
+      configs.setRSProfileConfiguration(
+          SlayerPlusConfig.GROUP, BankRoutes.CONFIG_KEY, routes.serialize());
+    }
+  }
+
+  static boolean isQuiverRelevantInterfaceGroupForTest(int groupId) {
+    return groupId == InterfaceID.EQUIPMENT
+        || groupId == InterfaceID.EQUIPMENT_SIDE
+        || groupId == InterfaceID.WORNITEMS
+        || groupId == InterfaceID.DIZANAS_QUIVER;
+  }
+
+  private void refreshPortrait() {
+    SlayerPlusPanel ui = panel;
+    if (ui == null || portraitRenderer == null || client.getGameState() != GameState.LOGGED_IN) {
+      return;
+    }
+    if (!shouldCheckPortraitForTest(tick, portraitPending, portraitRetry)) {
+      return;
+    }
+    Player player = client.getLocalPlayer();
+    if (player == null) {
+      return;
+    }
+    String playerName = player.getName();
+    if (playerName != null
+        && !playerName.trim().isEmpty()
+        && !playerName.trim().equals(lastAccountName)) {
+      lastAccountName = playerName.trim();
+      String accountName = lastAccountName;
+      SwingUtilities.invokeLater(() -> ui.showAccountName(accountName));
+    }
+    PlayerComposition composition = player.getPlayerComposition();
+    if (composition == null) {
+      return;
+    }
+    int appearanceHash = Arrays.hashCode(composition.getEquipmentIds());
+    appearanceHash = 31 * appearanceHash + Arrays.hashCode(composition.getColors());
+    appearanceHash = 31 * appearanceHash + composition.getGender();
+    if (appearanceHash != lastAppearanceHash) {
+      lastAppearanceHash = appearanceHash;
+      portraitPending = true;
+      portraitRetry = 0;
+    }
+    if (!portraitPending) {
+      return;
+    }
+    if (!ui.isShowing()) {
+      deferPortraitRetry();
+      return;
+    }
+    BufferedImage cachedPortrait = portraitCache.get(appearanceHash);
+    if (cachedPortrait != null) {
+      portraitPending = false;
+      portraitRetry = 0;
+      SwingUtilities.invokeLater(() -> ui.setPortrait(cachedPortrait));
+      return;
+    }
+    if (player.getAnimation() != -1 || player.getPoseAnimation() != player.getIdlePoseAnimation()) {
+      return;
+    }
+    int originalPoseFrame = player.getPoseAnimationFrame();
+    try {
+      player.setPoseAnimationFrame(0);
+      int[] equipmentIds = composition.getEquipmentIds();
+      int weaponIndex = KitType.WEAPON.getIndex();
+      int torsoIndex = KitType.TORSO.getIndex();
+      boolean weaponEquipped =
+          weaponIndex >= 0
+              && weaponIndex < equipmentIds.length
+              && equipmentIds[weaponIndex] >= PlayerComposition.ITEM_OFFSET;
+      int originalWeapon = weaponEquipped ? equipmentIds[weaponIndex] : 0;
+      Model bodyModel;
+      if (weaponEquipped) {
+        equipmentIds[weaponIndex] = 0;
+        composition.setHash();
+        try {
+          bodyModel = player.getModel();
+        } finally {
+          equipmentIds[weaponIndex] = originalWeapon;
+          composition.setHash();
+        }
+      } else {
+        bodyModel = player.getModel();
+      }
+      if (bodyModel == null) {
+        deferPortraitRetry();
+        return;
+      }
+      Model displayModel = player.getModel();
+      if (displayModel == null) {
+        deferPortraitRetry();
+        return;
+      }
+      boolean torsoArmourEquipped =
+          torsoIndex >= 0
+              && torsoIndex < equipmentIds.length
+              && equipmentIds[torsoIndex] >= PlayerComposition.ITEM_OFFSET;
+      boolean allowCalibration = !portraitLoaded && !weaponEquipped && torsoArmourEquipped;
+      BufferedImage portrait =
+          portraitRenderer.render(displayModel, bodyModel, portraitLoaded || allowCalibration);
+      if (portrait != null) {
+        if (!portraitLoaded && portraitRenderer.hasCalibration()) {
+          String calibration = portraitRenderer.exportCalibration();
+          if (calibration != null) {
+            configs.setConfiguration(SlayerPlusConfig.GROUP, PORTRAIT_CALIBRATION_KEY, calibration);
+            portraitLoaded = true;
+          }
+        }
+        portraitPending = false;
+        portraitRetry = 0;
+        portraitCache.put(appearanceHash, portrait);
+        SwingUtilities.invokeLater(() -> ui.setPortrait(portrait));
+      } else {
+        deferPortraitRetry();
+      }
+    } catch (RuntimeException ex) {
+      log.debug("Unable to capture SlayerPlus portrait; retrying later", ex);
+      deferPortraitRetry();
+    } finally {
+      try {
+        player.setPoseAnimationFrame(originalPoseFrame);
+      } catch (RuntimeException ex) {
+        log.debug("Unable to restore portrait pose after scene transition", ex);
+      }
+    }
+  }
+
+  static boolean shouldCheckPortraitForTest(long tick, boolean pending, long retryAfterTick) {
+    if (pending) {
+      return tick >= retryAfterTick;
+    }
+    return tick % PORTRAIT_APPEARANCE_POLL_TICKS == 0;
+  }
+
+  private void deferPortraitRetry() {
+    portraitRetry = tick + PORTRAIT_APPEARANCE_POLL_TICKS;
+  }
+
+  private void refreshSlayerData() {
+    refreshSlayerData(true);
+  }
+
+  private List<String> refreshLoadoutInputs() {
+    analyzer.setHelmetPreference(
+        configs.getConfiguration(SlayerPlusConfig.GROUP, HelmetPreference.CONFIG_KEY));
+    analyzer.setDesertEliteDiaryComplete(
+        client.getVarbitValue(VarbitID.DESERT_DIARY_ELITE_COMPLETE) > 0);
+    diaries = SlayerAchievementDiarySnapshot.capture(client);
+    analyzer.setAchievementDiaries(diaries);
+    if (!helmSnapshotLoaded) {
+      loadOwnedSlayerHelmetSnapshot();
+    }
+    Set<String> ownedHelms = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+    ownedHelms.addAll(
+        analyzer.ownedHelms(
+            client.getItemContainer(InventoryID.INV),
+            client.getItemContainer(InventoryID.WORN),
+            bank));
+    ownedHelms.addAll(analyzer.slayerHelmetNamesForItemIds(helms));
+    return new ArrayList<>(ownedHelms);
+  }
+
+  private void refreshSlayerData(boolean requestedRebuild) {
+    SlayerPlusPanel ui = panel;
+    if (ui == null || client.getGameState() != GameState.LOGGED_IN) {
+      return;
+    }
+    refreshQuiverAmmo();
+    int previousRemaining = seenRemaining;
+    String previousTaskName = observedTaskName;
+    String accountName = getAccountName();
+    boolean whileGuthixSleepsFinished =
+        Quest.WHILE_GUTHIX_SLEEPS.getState(client) == QuestState.FINISHED;
+    boolean monkeyMadness2Finished =
+        Quest.MONKEY_MADNESS_II.getState(client) == QuestState.FINISHED;
+    int serviceRemaining = slayerService == null ? 0 : slayerService.getRemainingAmount();
+    int serviceInitialAmount = slayerService == null ? 0 : slayerService.getInitialAmount();
+    String serviceTaskName =
+        slayerService == null || slayerService.getTask() == null
+            ? ""
+            : slayerService.getTask().trim();
+    String serviceTaskLocation =
+        slayerService == null || slayerService.getTaskLocation() == null
+            ? ""
+            : slayerService.getTaskLocation().trim();
+    int liveRemaining = client.getVarpValue(VarPlayerID.SLAYER_COUNT);
+    int profileRemaining = readRuneLiteSlayerProfileInt(RUNELITE_SLAYER_AMOUNT_KEY);
+    boolean chatUpdatePending = tick <= pendingChatTaskExpiresAfterTick;
+    boolean chatAssignmentPending = pendingChatTaskRemaining > 0 && chatUpdatePending;
+    int rawRemaining =
+        resolveTaskRemainingForTest(
+            seenRemaining,
+            serviceRemaining,
+            liveRemaining,
+            profileRemaining,
+            chatAssignmentPending ? pendingChatTaskRemaining : -1);
+    int remaining = devPreviewTask.isEmpty() ? rawRemaining : Math.max(rawRemaining, 50);
+    int liveInitialAmount = client.getVarpValue(VarPlayerID.SLAYER_COUNT_ORIGINAL);
+    int profileInitialAmount = readRuneLiteSlayerProfileInt(RUNELITE_SLAYER_INITIAL_AMOUNT_KEY);
+    int initialAmount =
+        Math.max(
+            remaining,
+            firstPositive(
+                serviceInitialAmount,
+                liveInitialAmount,
+                profileInitialAmount,
+                chatAssignmentPending ? pendingChatTaskRemaining : -1));
+    int liveMasterId = client.getVarbitValue(VarbitID.SLAYER_MASTER);
+    int inferredMasterId = remaining > 0 && liveMasterId <= 0 ? inferNearbySlayerMasterId() : 0;
+    int storedMasterId = readSlayerPlusProfileInt(LAST_SLAYER_MASTER_SNAPSHOT_KEY);
+    int masterId = firstPositive(liveMasterId, inferredMasterId, storedMasterId);
+    if (!devPreviewTask.isEmpty() && masterId <= 0) {
+      masterId = BoostCoordinator.TURAEL_AYA_MASTER_ID;
+    }
+    int livePoints = client.getVarbitValue(VarbitID.SLAYER_POINTS);
+    int points =
+        preferLiveOrProfileValue(
+            livePoints,
+            readRuneLiteSlayerProfileInt(RUNELITE_SLAYER_POINTS_KEY),
+            chatUpdatePending ? pendingChatPoints : -1);
+    int normalStreak = client.getVarbitValue(VarbitID.SLAYER_TASKS_COMPLETED);
+    int resolvedStreak =
+        preferLiveOrProfileValue(
+            normalStreak,
+            readRuneLiteSlayerProfileInt(RUNELITE_SLAYER_STREAK_KEY),
+            chatUpdatePending ? pendingChatStreak : -1);
+    int streak =
+        masterId == KRYSTILIA
+            ? client.getVarbitValue(VarbitID.SLAYER_WILDERNESS_TASKS_COMPLETED)
+            : resolvedStreak;
+    int previousNormalStreak = observedNormalTaskStreak;
+    master = masterId;
+    if (masterId > 0) {
+      lastMaster = masterId;
+      storeLastSlayerMasterId(masterId);
+    }
+    if (remaining <= 0) {
+      loadoutContext = "";
+      recommendation = null;
+      clearCachedGuidedTaskTarget();
+      currentLoadout = KitPlan.empty();
+      preparation = PreparationCatalog.PreparationPlan.none();
+      preparationContext = "";
+      updateReadinessOverlay();
+      assignment = "";
+      taskVar = TaskVariant.STANDARD_TASK;
+      seenRemaining = 0;
+      observedTaskName = "";
+      observedNormalTaskStreak = resolvedStreak;
+      String pointBoostStatus = pointBoostPanelStatus(resolvedStreak, false, masterId);
+      String nextMasterName =
+          masterDisplayNameForTest(
+              masterForNextAssignment(resolvedStreak),
+              whileGuthixSleepsFinished,
+              monkeyMadness2Finished);
+      List<String> ownedSlayerHelmets =
+          requestedRebuild ? refreshLoadoutInputs() : Collections.emptyList();
+      SwingUtilities.invokeLater(
+          () ->
+              ui.runBatchedUpdate(
+                  () -> {
+                    if (requestedRebuild) {
+                      ui.configureOwnedSlayerHelmets(ownedSlayerHelmets);
+                    }
+                    ui.showAccountName(accountName);
+                    ui.showNoTask(points, streak, nextMasterName);
+                    ui.showPointBoostStatus(pointBoostStatus);
+                    ui.showPreparation(preparation);
+                  }));
+      cachedTravelCandidateIds = travelCandidateItemIds();
+      return;
+    }
+    String profileTaskName = readRuneLiteSlayerProfileString(RUNELITE_SLAYER_TASK_NAME_KEY);
+    String rawDetectedTask =
+        serviceRemaining > 0 && !serviceTaskName.isEmpty()
+            ? formatName(serviceTaskName)
+            : liveRemaining > 0
+                ? readTaskName()
+                : !profileTaskName.isEmpty() && profileRemaining > 0
+                    ? formatName(profileTaskName)
+                    : chatAssignmentPending ? pendingChatTaskName : "Unknown task";
+    String detectedTask = devPreviewTask.isEmpty() ? rawDetectedTask : devPreviewTask;
+    if (isPointBoosting()
+        && masterId == BoostCoordinator.TURAEL_AYA_MASTER_ID
+        && TuraelBoost.find(detectedTask) != null) {
+      taskVar = TaskVariant.STANDARD_TASK;
+    } else if (!sameTask(assignment, detectedTask)) {
+      taskVar = VariantCatalog.getDefaultVariant(detectedTask);
+    }
+    assignment = detectedTask == null ? "" : detectedTask.trim();
+    if (!VariantCatalog.getAvailableVariants(detectedTask).contains(taskVar)) {
+      taskVar = VariantCatalog.getDefaultVariant(detectedTask);
+    }
+    boolean konarAssignment = masterId == KONAR_MASTER_ID;
+    String rawAssignedLocation =
+        konarAssignment
+            ? !serviceTaskLocation.isEmpty()
+                ? serviceTaskLocation
+                : liveRemaining > 0 ? readAssignedLocation() : profileSlayerLocation()
+            : "Not restricted";
+    String assignedLocation = devPreviewTask.isEmpty() ? rawAssignedLocation : "Not restricted";
+    String context = assignment + '|' + masterId + '|' + assignedLocation + '|' + taskVar;
+    boolean rebuildLoadout =
+        shouldRebuildLoadout(
+            requestedRebuild,
+            recommendation != null,
+            loadoutContext,
+            context,
+            previousRemaining,
+            remaining);
+    List<String> ownedSlayerHelmets =
+        rebuildLoadout ? refreshLoadoutInputs() : Collections.emptyList();
+    if (rebuildLoadout) {
+      recommendation =
+          recommendationEngine == null
+              ? null
+              : recommendationEngine.recommend(detectedTask, masterId, assignedLocation);
+      if (recommendation != null && analyzer != null) {
+        recommendation =
+            analyzer.resolveOwnedAutomaticRecommendation(
+                detectedTask,
+                recommendation,
+                client.getItemContainer(InventoryID.INV),
+                client.getItemContainer(InventoryID.WORN),
+                bank,
+                scanned,
+                taskVar,
+                config);
+      }
+    }
+    Recommendation resolvedTask = recommendation;
+    KitPlan loadout = currentLoadout.withRemainingFinishers(remaining);
+    if (rebuildLoadout) {
+      if (!config.showLoadoutRecommendations()) {
+        loadout = KitPlan.hidden();
+      } else if (analyzer == null) {
+        loadout =
+            new KitPlan(
+                "Loadout scanner unavailable",
+                "Loadout scanner unavailable",
+                "No item scan available");
+      } else {
+        loadout =
+            analyzer.analyze(
+                detectedTask,
+                resolvedTask,
+                client.getItemContainer(InventoryID.INV),
+                client.getItemContainer(InventoryID.WORN),
+                bank,
+                scanned,
+                taskVar,
+                config,
+                remaining,
+                quiverId,
+                extraQuiverQty);
+      }
+      loadoutContext = context;
+    }
+    boolean loadoutChanged = loadout != currentLoadout;
+    currentLoadout = loadout;
+    VariantCatalog.ResolvedTarget preparationTarget =
+        VariantCatalog.resolve(assignment, taskVar, resolvedTask, config);
+    String preparationEncounter =
+        preparationTarget == null ? assignment : preparationTarget.getTaskName();
+    String preparationLocation =
+        preparationTarget == null ? resolvedTask.getLocation() : preparationTarget.getLocation();
+    TaskStrategy preparationStrategy =
+        preparationTarget == null ? resolvedTask.getStrategy() : preparationTarget.getStrategy();
+    int preparationWeaponId = PoweredMagic.weaponId(loadout.getEquipmentItems());
+    String setupContext =
+        context
+            + '|'
+            + initialAmount
+            + '|'
+            + resolvedStreak
+            + '|'
+            + preparationEncounter
+            + '|'
+            + preparationLocation
+            + '|'
+            + preparationWeaponId
+            + '|'
+            + (preparationStrategy == null
+                ? ""
+                : preparationStrategy.getMethod() + preparationStrategy.getStyle());
+    if (shouldRefreshPreparation(
+        preparation.isReady(), preparationContext, setupContext, previousRemaining, remaining)) {
+      preparation =
+          shouldResolvePreparationForTask(preparationEncounter)
+              ? PreparationCatalog.resolve(
+                  preparationEncounter,
+                  preparationLocation,
+                  preparationStrategy,
+                  client,
+                  client.getItemContainer(InventoryID.INV),
+                  client.getItemContainer(InventoryID.WORN),
+                  bank,
+                  preparationWeaponId)
+              : PreparationCatalog.PreparationPlan.none();
+      preparationContext = setupContext;
+      updateReadinessOverlay();
+    }
+    seenRemaining = remaining;
+    observedTaskName = assignment;
+    observedNormalTaskStreak = resolvedStreak;
+    String displayedTaskName = detectedTask;
+    String pointBoostStatus = pointBoostPanelStatus(resolvedStreak, true, masterId);
+    String masterName =
+        masterDisplayNameForTest(masterId, whileGuthixSleepsFinished, monkeyMadness2Finished);
+    KitPlan displayedLoadout = loadout;
+    PreparationCatalog.PreparationPlan displayedPreparation = preparation;
+    TaskVariant displayedVariant = taskVar;
+    SwingUtilities.invokeLater(
+        () ->
+            ui.runBatchedUpdate(
+                () -> {
+                  if (rebuildLoadout) {
+                    ui.configureOwnedSlayerHelmets(ownedSlayerHelmets);
+                    ui.configureTaskVariants(detectedTask, displayedVariant);
+                  }
+                  if (rebuildLoadout || loadoutChanged) {
+                    ui.showRecommendation(resolvedTask, displayedLoadout);
+                  }
+                  ui.showAccountName(accountName);
+                  ui.showTask(
+                      displayedTaskName,
+                      remaining,
+                      initialAmount,
+                      masterName,
+                      assignedLocation,
+                      points,
+                      streak,
+                      konarAssignment);
+                  ui.showPointBoostStatus(pointBoostStatus);
+                  ui.showPreparation(displayedPreparation);
+                }));
+    if (rebuildLoadout) {
+      cachedTravelCandidateIds = travelCandidateItemIds();
+    }
+  }
+
+  private void updateReadinessOverlay() {
+    if (readinessOverlay == null || overlayManager == null) {
+      return;
+    }
+    boolean show = preparation.isActive() && !preparation.isReady();
+    if (!show) {
+      hideReadinessOverlay();
+      return;
+    }
+    readinessOverlay.update(preparation);
+    if (!readinessOverlayAdded) {
+      overlayManager.add(readinessOverlay);
+    }
+    readinessOverlayAdded = true;
+  }
+
+  private void hideReadinessOverlay() {
+    if (readinessOverlayAdded && overlayManager != null && readinessOverlay != null) {
+      overlayManager.remove(readinessOverlay);
+      readinessOverlay.update(PreparationCatalog.PreparationPlan.none());
+    }
+    readinessOverlayAdded = false;
+  }
+
+  static boolean shouldRefreshPreparation(
+      boolean ready, String previousContext, String context, int previousRemaining, int remaining) {
+    return !ready
+        || !Objects.equals(previousContext, context)
+        || (previousRemaining >= 0 && remaining > previousRemaining);
+  }
+
+  static boolean shouldRebuildLoadout(
+      boolean requested,
+      boolean hasRecommendation,
+      String previousContext,
+      String context,
+      int previousRemaining,
+      int remaining) {
+    return requested
+        || !hasRecommendation
+        || !Objects.equals(previousContext, context)
+        || remaining > previousRemaining;
+  }
+
+  static boolean shouldRefreshProgress(int varpId, boolean preparationReady) {
+    return varpId == VarPlayerID.SLAYER_COUNT || !preparationReady;
+  }
+
+  static boolean isProgressOnlyVarChange(int varpId, int varbitId) {
+    return varpId == VarPlayerID.SLAYER_COUNT
+        || varbitId == VarbitID.RUNE_POUCH_QUANTITY_1
+        || varbitId == VarbitID.RUNE_POUCH_QUANTITY_2
+        || varbitId == VarbitID.RUNE_POUCH_QUANTITY_3
+        || varbitId == VarbitID.RUNE_POUCH_QUANTITY_4
+        || varbitId == VarbitID.RUNE_POUCH_QUANTITY_5
+        || varbitId == VarbitID.RUNE_POUCH_QUANTITY_6;
+  }
+
+  private static List<String> devPreviewTaskNames() {
+    Set<String> names = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+    names.addAll(TaskResearch.getReviewedTaskNames());
+    for (VariantCatalog.EncounterDefinition boss : VariantCatalog.getBossDefinitions()) {
+      names.add(boss.getEncounter());
+    }
+    for (VariantCatalog.EncounterDefinition boss : VariantCatalog.getDirectBossDefinitions()) {
+      names.add(boss.getEncounter());
+    }
+    return new ArrayList<>(names);
+  }
+
+  private void selectDevPreviewTask(String taskName) {
+    devPreviewTask = taskName == null ? "" : taskName.trim();
+    if (!devPreviewTask.isEmpty()) {
+      seenRemaining = 0;
+    }
+    refreshSlayerData();
+  }
+
+  private void selectBankTagVariant(TaskVariant variant) {
+    boolean refreshOpenBankTag = isSlayerPlusBankTagOpen();
+    TaskVariant requested = variant == null ? TaskVariant.STANDARD_TASK : variant;
+    if (!VariantCatalog.getAvailableVariants(assignment).contains(requested)) {
+      taskVar = VariantCatalog.getDefaultVariant(assignment);
+    } else {
+      taskVar = requested;
+    }
+    refreshSlayerData();
+    if (refreshOpenBankTag) {
+      createRecommendedBankTag();
+    }
+  }
+
+  private boolean isSlayerPlusBankTagOpen() {
+    if (bankTagsService == null || client.getItemContainer(InventoryID.BANK) == null) {
+      return false;
+    }
+    String activeTag = bankTagsService.getActiveTag();
+    return activeTag != null
+        && Text.standardize(activeTag).equals(Text.standardize(BankTagLayout.TAG_NAME));
+  }
+
+  private Target resolveTaskTarget() {
+    Recommendation selected = recommendation;
+    if (selected == null) {
+      clearCachedGuidedTaskTarget();
+      return null;
+    }
+    if (selected == cachedGuidedTargetRecommendation
+        && sameTask(assignment, cachedGuidedTargetTaskName)
+        && taskVar == cachedGuidedTargetVariant) {
+      return cachedGuidedTaskTarget;
+    }
+    VariantCatalog.ResolvedTarget resolvedTarget =
+        VariantCatalog.resolve(assignment, taskVar, selected, config);
+    if (resolvedTarget == null || !resolvedTarget.isValid()) {
+      return null;
+    }
+    Target target =
+        new Target(
+            resolvedTarget.getTaskName(), resolvedTarget.getLocation(), resolvedTarget.isBoss());
+    cachedGuidedTargetRecommendation = selected;
+    cachedGuidedTargetTaskName = assignment;
+    cachedGuidedTargetVariant = taskVar;
+    cachedGuidedTaskTarget = target;
+    return target;
+  }
+
+  private void clearCachedGuidedTaskTarget() {
+    cachedGuidedTargetRecommendation = null;
+    cachedGuidedTargetTaskName = "";
+    cachedGuidedTargetVariant = null;
+    cachedGuidedTaskTarget = null;
+  }
+
+  private static boolean sameTask(String first, String second) {
+    String left = first == null ? "" : first.trim();
+    String right = second == null ? "" : second.trim();
+    return left.equalsIgnoreCase(right);
+  }
+
+  private boolean refreshQuiverAmmo() {
+    if (client == null || client.getGameState() != GameState.LOGGED_IN) {
+      return false;
+    }
+    boolean wearingQuiver = isWearingUsableDizana();
+    int carriedQuiverItemId =
+        findUsableDizanaVariantInContainer(client.getItemContainer(InventoryID.INV));
+    if (!wearingQuiver && carriedQuiverItemId <= 0 && bankDizanaId <= 0) {
+      boolean changed = quiverId > 0 || extraQuiverQty > 0;
+      clearExtraQuiverAmmoSnapshot();
+      return changed;
+    }
+    int[] storedAmmo = readStoredExtraQuiverAmmoFromContainer();
+    int varpItemId =
+        QuiverAmmo.restoreSeekingIdentityFromPlaceholders(
+            normalizeAmmoId(client.getVarpValue(VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO)),
+            seekingArrowIds);
+    int varpQuantity = client.getVarpValue(VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO_AMOUNT);
+    int[] widgetAmmo = readLiveExtraQuiverAmmoFromWidgets();
+    QuiverAmmo.Snapshot snapshot =
+        QuiverAmmo.restoreHiddenBankedSeekingAmmo(
+            bankDizanaId > 0,
+            QuiverAmmo.resolveSnapshot(
+                wearingQuiver,
+                storedAmmo == null
+                    ? -1
+                    : QuiverAmmo.restoreSeekingIdentityFromPlaceholders(
+                        storedAmmo[0], seekingArrowIds),
+                storedAmmo == null ? 0 : storedAmmo[1],
+                widgetAmmo == null
+                    ? -1
+                    : QuiverAmmo.restoreSeekingIdentityFromPlaceholders(
+                        widgetAmmo[0], seekingArrowIds),
+                widgetAmmo == null ? 0 : widgetAmmo[1],
+                canonicalCompatibleQuiverAmmoItemId(varpItemId),
+                varpQuantity,
+                quiverId),
+            seekingArrowIds);
+    int itemId = snapshot.getItemId();
+    int quantity = snapshot.getQuantity();
+    boolean identityChanged = quiverId != itemId;
+    boolean presenceChanged = (extraQuiverQty > 0) != (quantity > 0);
+    quiverId = itemId;
+    extraQuiverQty = quantity;
+    return identityChanged || presenceChanged;
+  }
+
+  private int canonicalCompatibleQuiverAmmoItemId(int raw) {
+    int itemId = canonicalizeQuiverAmmoItemId(raw);
+    return isQuiverCompatibleAmmoItemId(itemId) ? itemId : -1;
+  }
+
+  private int canonicalizeQuiverAmmoItemId(int raw) {
+    if (raw <= 0) {
+      return -1;
+    }
+    int normalizedRaw = normalizeAmmoId(raw);
+    if (isSeekingArrowDisplayItemId(normalizedRaw)) {
+      return normalizedRaw;
+    }
+    int itemId = raw;
+    try {
+      if (itemManager != null) {
+        itemId = itemManager.canonicalize(itemId);
+      } else if (client != null) {
+        ItemComposition composition = client.getItemDefinition(itemId);
+        if (composition != null) {
+          if (composition.getNote() != -1) {
+            itemId = composition.getLinkedNoteId();
+          }
+          if (composition.getPlaceholderTemplateId() != -1) {
+            itemId = composition.getPlaceholderId();
+          }
+        }
+      }
+    } catch (RuntimeException ignored) {
+    }
+    return normalizeAmmoId(itemId);
+  }
+
+  private boolean isQuiverCompatibleAmmoItemId(int raw) {
+    int itemId = canonicalizeQuiverAmmoItemId(raw);
+    if (itemId <= 0) {
+      return false;
+    }
+    if (isSeekingArrowDisplayItemId(itemId)) {
+      return true;
+    }
+    if (client == null) {
+      return false;
+    }
+    try {
+      ItemComposition composition = client.getItemDefinition(itemId);
+      if (composition == null || composition.getName() == null) {
+        return false;
+      }
+      String name =
+          Text.removeTags(composition.getName())
+              .toLowerCase(Locale.ENGLISH)
+              .replace('’', '\'')
+              .trim();
+      if (name.contains("arrowtip") || name.contains("bolt tip")) {
+        return false;
+      }
+      return name.contains("arrow") || name.contains("bolt") || name.contains("grapple");
+    } catch (RuntimeException ignored) {
+      return false;
+    }
+  }
+
+  private int[] readLiveExtraQuiverAmmoFromWidgets() {
+    int[] itemComponents = {
+      InterfaceID.DizanasQuiver.AMMO_OBJ,
+      InterfaceID.Wornitems.EXTRA_QUIVER_AMMO,
+      InterfaceID.Equipment.EXTRA_QUIVER_AMMO,
+      InterfaceID.Bankmain.EXTRA_QUIVER_AMMO
+    };
+    int[] best = null;
+    for (int componentId : itemComponents) {
+      best =
+          betterQuiverWidgetCandidate(best, quiverWidgetCandidate(client.getWidget(componentId)));
+    }
+    return best;
+  }
+
+  private int[] readStoredExtraQuiverAmmoFromContainer() {
+    ItemContainer container = client.getItemContainer(InventoryID.DIZANAS_QUIVER_AMMO);
+    if (container == null) {
+      return null;
+    }
+    int[] best = new int[] {-1, 0};
+    for (Item item : container.getItems()) {
+      if (item == null || item.getQuantity() <= 0) {
+        continue;
+      }
+      int itemId = canonicalCompatibleQuiverAmmoItemId(item.getId());
+      if (itemId <= 0) {
+        continue;
+      }
+      if (best[0] <= 0
+          || QuiverAmmo.infernoPreference(itemId) < QuiverAmmo.infernoPreference(best[0])) {
+        best = new int[] {itemId, item.getQuantity()};
+      }
+    }
+    return best;
+  }
+
+  private int[] quiverWidgetCandidate(Widget widget) {
+    if (widget == null) {
+      return null;
+    }
+    int raw = widget.getItemId();
+    if (raw <= 0) {
+      return null;
+    }
+    int itemId = canonicalizeQuiverAmmoItemId(raw);
+    if (!isQuiverCompatibleAmmoItemId(itemId)) {
+      return null;
+    }
+    int quantity = widget.getItemQuantity();
+    if (quantity <= 0) {
+      quantity = client.getVarpValue(VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO_AMOUNT);
+    }
+    if (quantity <= 0) {
+      return null;
+    }
+    return new int[] {itemId, quantity};
+  }
+
+  private static int[] betterQuiverWidgetCandidate(int[] current, int[] candidate) {
+    if (candidate == null) {
+      return current;
+    }
+    if (current == null) {
+      return candidate;
+    }
+    boolean candidateSeeking = isSeekingArrowDisplayItemId(candidate[0]);
+    boolean currentSeeking = isSeekingArrowDisplayItemId(current[0]);
+    return candidateSeeking && !currentSeeking ? candidate : current;
+  }
+
+  private static int normalizeAmmoId(int raw) {
+    return QuiverAmmo.arrow(raw);
+  }
+
+  private static boolean isSeekingArrowDisplayItemId(int itemId) {
+    return QuiverAmmo.isSeekingArrow(itemId);
+  }
+
+  private boolean isWearingUsableDizana() {
+    ItemContainer equipment = client.getItemContainer(InventoryID.WORN);
+    if (equipment == null) {
+      return false;
+    }
+    Item cape = equipment.getItem(EquipmentInventorySlot.CAPE.getSlotIdx());
+    return cape != null && cape.getQuantity() > 0 && isUsableDizanaItemId(cape.getId());
+  }
+
+  private static boolean isUsableDizanaItemId(int raw) {
+    return QuiverAmmo.isUsableDizanaVariant(raw);
+  }
+
+  private static int findUsableDizanaVariantInContainer(ItemContainer container) {
+    if (container == null) {
+      return -1;
+    }
+    int bestItemId = -1;
+    for (Item item : container.getItems()) {
+      if (item == null || item.getQuantity() <= 0) {
+        continue;
+      }
+      bestItemId = QuiverAmmo.preferUsableDizanaVariant(bestItemId, item.getId());
+    }
+    return bestItemId;
+  }
+
+  private void clearExtraQuiverAmmoSnapshot() {
+    quiverId = -1;
+    extraQuiverQty = 0;
+  }
+
+  private boolean cacheBankContainer(ItemContainer bankContainer) {
+    Widget bank = client == null ? null : client.getWidget(InterfaceID.Bankmain.ITEMS_CONTAINER);
+    return cacheBankContainer(bankContainer, bank != null);
+  }
+
+  private boolean cacheBankContainer(ItemContainer bankContainer, boolean confirmedBankScan) {
+    if (bankContainer == null || analyzer == null) {
+      return false;
+    }
+    boolean rawStateMatches = matchesCachedBankContainerState(bankContainer);
+    if (shouldSkipUnchangedBankScanForTest(scanned, rawStateMatches)) {
+      if (confirmedBankScan && !rawBankConfirmed) {
+        rawBankConfirmed = true;
+        persistInfernoTravelItemSnapshot();
+        persistOwnedSlayerHelmetSnapshot();
+      }
+      return false;
+    }
+    rawBankState = snapshotRawBankContainerState(bankContainer);
+    rawBankConfirmed = confirmedBankScan;
+    boolean previouslyScanned = scanned;
+    int previousQuiverId = bankDizanaId;
+    Map<Integer, Integer> previousBankItems = new LinkedHashMap<>(bank);
+    Set<Integer> previousSeekingIds = new LinkedHashSet<>(seekingArrowIds);
+    int previousExtraAmmoId = quiverId;
+    bankDizanaId = findUsableDizanaVariantInContainer(bankContainer);
+    cacheSeekingArrowPlaceholders(bankContainer);
+    bank.clear();
+    bank.putAll(analyzer.snapshotItems(bankContainer));
+    scanned = true;
+    if (confirmedBankScan) {
+      persistInfernoTravelItemSnapshot();
+      persistOwnedSlayerHelmetSnapshot();
+    }
+    boolean extraAmmoChanged = refreshQuiverAmmo();
+    return !previouslyScanned
+        || previousQuiverId != bankDizanaId
+        || !previousBankItems.equals(bank)
+        || !previousSeekingIds.equals(seekingArrowIds)
+        || previousExtraAmmoId != quiverId
+        || extraAmmoChanged;
+  }
+
+  private boolean matchesCachedBankContainerState(ItemContainer bankContainer) {
+    Item[] items = bankContainer.getItems();
+    if (items == null || rawBankState.length != items.length * 2) {
+      return false;
+    }
+    for (int slot = 0; slot < items.length; slot++) {
+      Item item = items[slot];
+      int offset = slot * 2;
+      int itemId = item == null ? -1 : item.getId();
+      int quantity = item == null ? 0 : item.getQuantity();
+      if (rawBankState[offset] != itemId || rawBankState[offset + 1] != quantity) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static int[] snapshotRawBankContainerState(ItemContainer bankContainer) {
+    Item[] items = bankContainer.getItems();
+    if (items == null || items.length == 0) {
+      return new int[0];
+    }
+    int[] state = new int[items.length * 2];
+    for (int slot = 0; slot < items.length; slot++) {
+      Item item = items[slot];
+      int offset = slot * 2;
+      state[offset] = item == null ? -1 : item.getId();
+      state[offset + 1] = item == null ? 0 : item.getQuantity();
+    }
+    return state;
+  }
+
+  static boolean shouldSkipUnchangedBankScanForTest(boolean scanned, boolean rawStateMatches) {
+    return scanned && rawStateMatches;
+  }
+
+  private void persistOwnedSlayerHelmetSnapshot() {
+    Set<Integer> discovered =
+        analyzer.ownedSlayerHelmetItemIds(
+            client.getItemContainer(InventoryID.INV),
+            client.getItemContainer(InventoryID.WORN),
+            bank);
+    boolean snapshotChanged = shouldPersistSnapshotForTest(helmSnapshotLoaded, helms, discovered);
+    helms.clear();
+    helms.addAll(discovered);
+    helmSnapshotLoaded = true;
+    try {
+      if (configs.getRSProfileKey() == null) {
+        return;
+      }
+      if (!snapshotChanged) {
+        return;
+      }
+      configs.setRSProfileConfiguration(
+          SlayerPlusConfig.GROUP, OWNED_SLAYER_HELMETS_SNAPSHOT_KEY, serializeItemIds(discovered));
+      log.debug("Saved {} owned Slayer helmet variants", discovered.size());
+    } catch (RuntimeException ex) {
+      log.debug("Unable to save owned Slayer helmet snapshot", ex);
+    }
+  }
+
+  private void loadOwnedSlayerHelmetSnapshot() {
+    helms.clear();
+    helmSnapshotLoaded = false;
+    try {
+      if (configs.getRSProfileKey() == null) {
+        return;
+      }
+      helms.addAll(
+          parseItemIds(
+              configs.getRSProfileConfiguration(
+                  SlayerPlusConfig.GROUP, OWNED_SLAYER_HELMETS_SNAPSHOT_KEY)));
+      helmSnapshotLoaded = true;
+      log.debug("Loaded {} owned Slayer helmet variants", helms.size());
+    } catch (RuntimeException ex) {
+      log.debug("Unable to load owned Slayer helmet snapshot", ex);
+    }
+  }
+
+  static String serializeItemIds(Iterable<Integer> itemIds) {
+    StringBuilder serialized = new StringBuilder();
+    if (itemIds != null) {
+      for (Integer itemId : itemIds) {
+        if (itemId == null || itemId <= 0) {
+          continue;
+        }
+        if (serialized.length() > 0) {
+          serialized.append(',');
+        }
+        serialized.append(itemId);
+      }
+    }
+    return serialized.toString();
+  }
+
+  static Set<Integer> parseItemIds(String serialized) {
+    Set<Integer> itemIds = new LinkedHashSet<>();
+    if (serialized == null || serialized.trim().isEmpty()) {
+      return itemIds;
+    }
+    for (String token : serialized.split(",")) {
+      try {
+        int itemId = Integer.parseInt(token.trim());
+        if (itemId > 0) {
+          itemIds.add(itemId);
+        }
+      } catch (NumberFormatException ignored) {
+        log.debug("Ignoring invalid Slayer helmet snapshot item id: {}", token);
+      }
+    }
+    return itemIds;
+  }
+
+  private void persistInfernoTravelItemSnapshot() {
+    int bestItemId = preferredInfernoTravelItemId(bank.keySet());
+    int nextItemId = Math.max(0, bestItemId);
+    boolean snapshotChanged = shouldPersistSnapshotForTest(infernoLoaded, infernoItem, nextItemId);
+    infernoItem = nextItemId;
+    infernoLoaded = true;
+    try {
+      if (configs.getRSProfileKey() == null) {
+        infernoLoaded = false;
+        return;
+      }
+      if (!snapshotChanged) {
+        return;
+      }
+      configs.setRSProfileConfiguration(
+          SlayerPlusConfig.GROUP, INFERNO_TRAVEL_SNAPSHOT_KEY, infernoItem);
+      log.debug("Saved Inferno travel-item bank snapshot: {}", infernoItem);
+    } catch (RuntimeException ex) {
+      infernoLoaded = false;
+      log.debug("Unable to save Inferno travel-item bank snapshot", ex);
+    }
+  }
+
+  static boolean shouldPersistSnapshotForTest(
+      boolean snapshotLoaded, Object previousValue, Object nextValue) {
+    return !snapshotLoaded || !Objects.equals(previousValue, nextValue);
+  }
+
+  private void loadInfernoTravelItemSnapshot() {
+    infernoItem = -1;
+    infernoLoaded = false;
+    try {
+      if (configs.getRSProfileKey() == null) {
+        return;
+      }
+      String stored =
+          configs.getRSProfileConfiguration(SlayerPlusConfig.GROUP, INFERNO_TRAVEL_SNAPSHOT_KEY);
+      if (stored != null) {
+        int storedItemId = Integer.parseInt(stored.trim());
+        infernoItem =
+            storedItemId == 0 || isInfernoPreparationTravelItemId(storedItemId) ? storedItemId : 0;
+        infernoLoaded = true;
+        log.debug("Loaded Inferno travel-item bank snapshot: {}", infernoItem);
+        return;
+      }
+      int migratedItemId = infernoTravelItemFromSavedLayout();
+      if (migratedItemId > 0) {
+        infernoItem = migratedItemId;
+        configs.setRSProfileConfiguration(
+            SlayerPlusConfig.GROUP, INFERNO_TRAVEL_SNAPSHOT_KEY, migratedItemId);
+        log.debug(
+            "Migrated Inferno travel-item snapshot from SlayerPlus layout: {}", migratedItemId);
+      } else {
+        infernoItem = 0;
+        configs.setRSProfileConfiguration(SlayerPlusConfig.GROUP, INFERNO_TRAVEL_SNAPSHOT_KEY, 0);
+      }
+      infernoLoaded = true;
+    } catch (NumberFormatException ex) {
+      infernoItem = 0;
+      infernoLoaded = true;
+      log.debug("Ignoring invalid Inferno travel-item bank snapshot", ex);
+    } catch (RuntimeException ex) {
+      log.debug("Unable to load Inferno travel-item bank snapshot", ex);
+    }
+  }
+
+  private int infernoTravelItemFromSavedLayout() {
+    if (layoutManager == null) {
+      return -1;
+    }
+    Layout layout = layoutManager.loadLayout(BankTagLayout.TAG_NAME);
+    if (layout == null || layout.getLayout() == null) {
+      return -1;
+    }
+    Set<Integer> layoutItemIds = new LinkedHashSet<>();
+    for (int itemId : layout.getLayout()) {
+      if (itemId > 0) {
+        layoutItemIds.add(itemId);
+      }
+    }
+    return preferredInfernoTravelItemId(layoutItemIds);
+  }
+
+  static int preferredInfernoTravelItemId(Iterable<Integer> candidateItemIds) {
+    if (candidateItemIds == null) {
+      return -1;
+    }
+    Set<Integer> candidates = new HashSet<>();
+    for (Integer itemId : candidateItemIds) {
+      if (itemId != null) {
+        candidates.add(itemId);
+      }
+    }
+    for (int supportedItemId : INFERNO_PREPARATION_TRAVEL_ITEM_IDS) {
+      if (candidates.contains(supportedItemId)) {
+        return supportedItemId;
+      }
+    }
+    return -1;
+  }
+
+  private static boolean isInfernoPreparationTravelItemId(int itemId) {
+    for (int supportedItemId : INFERNO_PREPARATION_TRAVEL_ITEM_IDS) {
+      if (itemId == supportedItemId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void cacheSeekingArrowPlaceholders(ItemContainer bankContainer) {
+    seekingArrowIds.clear();
+    if (bankContainer == null || itemManager == null) {
+      cacheSeekingArrowBankTagIdentityHints();
+      return;
+    }
+    for (Item item : bankContainer.getItems()) {
+      if (item == null || item.getId() <= 0) {
+        continue;
+      }
+      Integer cachedClassification = seekingPlaceholderClassificationCache.get(item.getId());
+      if (cachedClassification != null) {
+        if (cachedClassification > 0) {
+          seekingArrowIds.add(cachedClassification);
+        }
+        continue;
+      }
+      int classification = -1;
+      try {
+        ItemComposition composition = itemManager.getItemComposition(item.getId());
+        if (composition != null
+            && composition.getPlaceholderTemplateId() >= 0
+            && composition.getPlaceholderId() >= 0) {
+          int canonicalItemId = normalizeAmmoId(itemManager.canonicalize(item.getId()));
+          if (isSeekingArrowDisplayItemId(canonicalItemId)) {
+            classification = canonicalItemId;
+          }
+        }
+      } catch (RuntimeException ignored) {
+      }
+      seekingPlaceholderClassificationCache.put(item.getId(), classification);
+      if (classification > 0) {
+        seekingArrowIds.add(classification);
+      }
+    }
+    cacheSeekingArrowBankTagIdentityHints();
+  }
+
+  private void cacheSeekingArrowBankTagIdentityHints() {
+    if (configs == null) {
+      return;
+    }
+    String prefix = BankTagsPlugin.CONFIG_GROUP + ".item_";
+    for (String key : configs.getConfigurationKeys(prefix)) {
+      if (key == null || !key.startsWith(prefix)) {
+        continue;
+      }
+      try {
+        int taggedItemId = Integer.parseInt(key.substring(prefix.length()));
+        if (taggedItemId <= 0) {
+          continue;
+        }
+        int normalizedItemId = normalizeAmmoId(taggedItemId);
+        if (isSeekingArrowDisplayItemId(normalizedItemId)) {
+          seekingArrowIds.add(normalizedItemId);
+        }
+      } catch (NumberFormatException ignored) {
+      }
+    }
+  }
+
+  static boolean shouldResolvePreparationForTask(String encounter) {
+    return !"unknown task".equals(trip(encounter));
+  }
+
+  private ItemMatch ownedTravel(String family) {
+    String key = trip(family);
+    if (key.isEmpty()) {
+      return null;
+    }
+    ItemMatch best = null;
+    for (Map.Entry<Integer, Integer> entry : bank.entrySet()) {
+      if (entry.getKey() == null
+          || entry.getKey() <= 0
+          || entry.getValue() == null
+          || entry.getValue() <= 0) {
+        continue;
+      }
+      best = betterTravelItem(best, matchTravelItem(entry.getKey(), key, TRAVEL_BANK_SOURCE_SCORE));
+    }
+    best =
+        findOwnedTravelItemInContainer(
+            client.getItemContainer(InventoryID.INV), key, TRAVEL_INVENTORY_SOURCE_SCORE, best);
+    best =
+        findOwnedTravelItemInContainer(
+            client.getItemContainer(InventoryID.WORN), key, TRAVEL_WORN_SOURCE_SCORE, best);
+    return best;
+  }
+
+  private ItemMatch findOwnedTravelItemInContainer(
+      ItemContainer container, String family, int sourceBonus, ItemMatch currentBest) {
+    ItemMatch best = currentBest;
+    if (container == null) {
+      return best;
+    }
+    for (Item item : container.getItems()) {
+      if (item == null || item.getId() <= 0 || item.getQuantity() <= 0) {
+        continue;
+      }
+      best = betterTravelItem(best, matchTravelItem(item.getId(), family, sourceBonus));
+    }
+    return best;
+  }
+
+  private ItemMatch matchTravelItem(int itemId, String family, int sourceBonus) {
+    if (itemManager == null || itemId <= 0) {
+      return null;
+    }
+    ItemComposition composition;
+    try {
+      composition = itemManager.getItemComposition(itemId);
+    } catch (RuntimeException ignored) {
+      return null;
+    }
+    if (composition == null
+        || composition.getName() == null
+        || composition.getName().trim().isEmpty()
+        || "null".equalsIgnoreCase(composition.getName().trim())) {
+      return null;
+    }
+    String displayName = composition.getName().trim();
+    String normalizedItem = trip(displayName);
+    if (!SlayerTravelItemPolicy.isUsableDisplayName(displayName)) {
+      return null;
+    }
+    String withoutTablet =
+        family.endsWith(" tablet")
+            ? family.substring(0, family.length() - " tablet".length()).trim()
+            : family;
+    int quality = travelNameMatchQuality(normalizedItem, family, withoutTablet);
+    if (quality <= 0) {
+      return null;
+    }
+    return new ItemMatch(
+        itemId, displayName, sourceBonus + quality + largestNumber(normalizedItem));
+  }
+
+  private static int travelNameMatchQuality(
+      String itemName, String family, String alternateFamily) {
+    int quality = travelNameMatchQuality(itemName, family);
+    if (!alternateFamily.equals(family)) {
+      quality = Math.max(quality, travelNameMatchQuality(itemName, alternateFamily));
+    }
+    return quality;
+  }
+
+  private static int travelNameMatchQuality(String itemName, String family) {
+    if (itemName.isEmpty() || family.isEmpty()) {
+      return 0;
+    }
+    if (itemName.equals(family)) {
+      return 1000;
+    }
+    if (itemName.startsWith(family + " ")) {
+      return 900;
+    }
+    String chargeFreeItem = itemName.replaceFirst("\\s+[a-z]?\\d+$", "").trim();
+    if (chargeFreeItem.equals(family)) {
+      return 850;
+    }
+    String equivalentItem = stripTravelVariantModifiers(chargeFreeItem);
+    String equivalentFamily = stripTravelVariantModifiers(family);
+    if (!equivalentItem.isEmpty() && equivalentItem.equals(equivalentFamily)) {
+      if (containsTravelWord(chargeFreeItem, "eternal") && containsTravelWord(family, "eternal")) {
+        return 875;
+      }
+      return 825;
+    }
+    if (family.startsWith(chargeFreeItem + " ") && chargeFreeItem.length() >= 8) {
+      return 700;
+    }
+    return 0;
+  }
+
+  private static boolean containsTravelWord(String value, String word) {
+    return (" " + value + " ").contains(" " + word + " ");
+  }
+
+  private static String stripTravelVariantModifiers(String value) {
+    if (value == null || value.trim().isEmpty()) {
+      return "";
+    }
+    return value.replaceAll("\\beternal\\b", " ").trim().replaceAll("\\s+", " ");
+  }
+
+  private static ItemMatch betterTravelItem(ItemMatch first, ItemMatch second) {
+    if (second == null) {
+      return first;
+    }
+    return first == null || second.score > first.score ? second : first;
+  }
+
+  private static int largestNumber(String value) {
+    int largest = 0;
+    int current = 0;
+    boolean reading = false;
+    for (int index = 0; index < value.length(); index++) {
+      char character = value.charAt(index);
+      if (Character.isDigit(character)) {
+        reading = true;
+        current = current * 10 + character - '0';
+      } else if (reading) {
+        largest = Math.max(largest, current);
+        current = 0;
+        reading = false;
+      }
+    }
+    return reading ? Math.max(largest, current) : largest;
+  }
+
+  private static String trip(String value) {
+    if (value == null) {
+      return "";
+    }
+    return value
+        .toLowerCase(Locale.ENGLISH)
+        .replace('’', '\'')
+        .replaceAll("[^a-z0-9]+", " ")
+        .trim()
+        .replaceAll("\\s+", " ");
+  }
+
+  private void toggleTravelHighlight() {
+    travelHighlightActive = !travelHighlightActive;
+    if (!travelHighlightActive && layoutService != null) {
+      layoutService.closeIfActive();
+    }
+    SlayerPlusPanel ui = panel;
+    if (ui != null) {
+      boolean active = travelHighlightActive;
+      SwingUtilities.invokeLater(() -> ui.showTravelHighlightState(active));
+    }
+    updateShortestPathRoute();
+  }
+
+  private void updateShortestPathRoute() {
+    spiderTeleportPending = false;
+    if (shortestPathBridge == null) {
+      return;
+    }
+    if (!travelHighlightActive) {
+      shortestPathBridge.clear();
+      return;
+    }
+    if (bankInterfaceOpen) {
+      return;
+    }
+    if (taskRemaining() <= 0) {
+      MasterRoutes.MasterRoute route = MasterRoutes.find(getPostTaskReturnMasterId());
+      if (route == null) {
+        shortestPathBridge.clear();
+        return;
+      }
+      shortestPathBridge.routeTo(route.getDestination(), false);
+      return;
+    }
+    if (shouldRouteToBank(needsBankRestock())) {
+      Player player = client.getLocalPlayer();
+      WorldPoint here = player == null ? null : player.getWorldLocation();
+      WorldPoint nearestBank = here == null ? null : accountBankRoutes().nearest(here);
+      if (nearestBank == null) {
+        MasterRoutes.MasterRoute route = MasterRoutes.find(getRoutingMasterId());
+        nearestBank = route == null ? null : route.getBank();
+      }
+      if (nearestBank == null) {
+        shortestPathBridge.clear();
+        return;
+      }
+      shortestPathBridge.routeTo(nearestBank, false);
+      return;
+    }
+    Target target = resolveTaskTarget();
+    if (target == null) {
+      shortestPathBridge.clear();
+      return;
+    }
+    int agilityLevel = client.getRealSkillLevel(Skill.AGILITY);
+    Player localPlayer = client.getLocalPlayer();
+    int combatLevel = localPlayer == null ? 0 : localPlayer.getCombatLevel();
+    KitItem travelItem = selectedTravelItem();
+    String routePathKey =
+        target.assignment
+            + '|'
+            + target.location
+            + '|'
+            + agilityLevel
+            + '|'
+            + combatLevel
+            + '|'
+            + (travelItem == null ? -1 : travelItem.getItemId());
+    List<WorldPoint> path;
+    if (routePathKey.equals(cachedRoutePathKey)) {
+      path = cachedRoutePath;
+    } else {
+      path =
+          prioritizeTravelArrival(
+              SlayerTaskWaypoints.findPath(
+                  target.assignment, target.location, agilityLevel, combatLevel),
+              target.location,
+              travelItem == null ? "" : travelItem.getDisplayName());
+      cachedRoutePathKey = routePathKey;
+      cachedRoutePath = path;
+    }
+    WorldPoint waypoint = nextUnreachedStage(path);
+    if (waypoint == null) {
+      shortestPathBridge.clear();
+      return;
+    }
+    routeNeedsTravelItem = waypoint.equals(path.get(0));
+    if (travelItem != null && travelItem.getItemId() == ItemID.TELEPORTSCROLL_SPIDERCAVE) {
+      WorldPoint here = localPlayer == null ? null : localPlayer.getWorldLocation();
+      boolean away = needsSpiderTeleport(here, waypoint, path.get(0));
+      spiderTeleportPending = updateSpiderTeleportTrip(here != null, away);
+      routeNeedsTravelItem = spiderTeleportPending;
+      if (away) {
+        shortestPathBridge.clear();
+        return;
+      }
+    }
+    shortestPathBridge.routeTo(waypoint, false, routeNeedsTravelItem);
+  }
+
+  static boolean needsSpiderTeleport(WorldPoint here, WorldPoint waypoint, WorldPoint entrance) {
+    return here != null
+        && waypoint.equals(entrance)
+        && (here.getPlane() != entrance.getPlane() || chebyshevDistance(here, entrance) > 64);
+  }
+
+  boolean updateSpiderTeleportTrip(boolean locationKnown, boolean away) {
+    if (locationKnown && !away) {
+      spiderTeleportArrived = true;
+    }
+    return locationKnown && away && !spiderTeleportArrived;
+  }
+
+  boolean showSpiderTeleportInstruction() {
+    return spiderTeleportPending && travelHighlightActive && !bankInterfaceOpen;
+  }
+
+  static List<WorldPoint> prioritizeTravelArrival(
+      List<WorldPoint> path, String location, String item) {
+    if (!trip(location).equals("fremennik slayer dungeon") || !trip(item).contains("slayer ring")) {
+      return path;
+    }
+    List<WorldPoint> result = new ArrayList<>();
+    result.add(new WorldPoint(2802, 9999, 0));
+    for (WorldPoint point : path) {
+      if (point.getY() >= 9000 && !result.contains(point)) {
+        result.add(point);
+      }
+    }
+    return Collections.unmodifiableList(result);
+  }
+
+  private static final int DUNGEON_ENTRANCE_ARRIVAL_RADIUS = 3;
+
+  private WorldPoint nextUnreachedStage(List<WorldPoint> path) {
+    if (path == null || path.isEmpty()) {
+      return null;
+    }
+    Player player = client.getLocalPlayer();
+    WorldPoint here = player == null ? null : player.getWorldLocation();
+    return nextUnreachedStage(here, path);
+  }
+
+  static WorldPoint nextUnreachedStage(WorldPoint here, List<WorldPoint> path) {
+    if (path == null || path.isEmpty()) {
+      return null;
+    }
+    if (here == null) {
+      return path.get(0);
+    }
+    int reached = -1, nearest = -1, nearestDistance = Integer.MAX_VALUE;
+    for (int index = 0; index < path.size(); index++) {
+      WorldPoint stage = path.get(index);
+      if (here.getPlane() != stage.getPlane()) {
+        continue;
+      }
+      int distance = chebyshevDistance(here, stage);
+      if (distance < nearestDistance) {
+        nearest = index;
+        nearestDistance = distance;
+      }
+      if (distance <= DUNGEON_ENTRANCE_ARRIVAL_RADIUS) {
+        reached = index;
+      }
+    }
+    if (reached >= 0
+        && reached + 1 < path.size()
+        && chebyshevDistance(path.get(reached), path.get(reached + 1)) > 64) {
+      return path.get(reached);
+    }
+    return path.get(
+        reached >= 0
+            ? Math.min(reached + 1, path.size() - 1)
+            : nearestDistance <= 64 ? nearest : 0);
+  }
+
+  private static int chebyshevDistance(WorldPoint a, WorldPoint b) {
+    return Math.max(Math.abs(a.getX() - b.getX()), Math.abs(a.getY() - b.getY()));
+  }
+
+  boolean shouldRouteToBank(boolean needsRestock) {
+    return needsRestock && !bankReachedForRestock;
+  }
+
+  private boolean needsBankRestock() {
+    KitPlan plan = currentLoadout;
+    return plan != null && !plan.getBankWithdrawalItems().isEmpty();
+  }
+
+  int getTravelItemIdForOverlay() {
+    if (!travelHighlightActive || !routeNeedsTravelItem) {
+      return -1;
+    }
+    KitItem item = selectedTravelItem();
+    return item == null ? -1 : item.getItemId();
+  }
+
+  private KitItem selectedTravelItem() {
+    KitPlan plan = currentLoadout;
+    if (plan == null) {
+      return null;
+    }
+    for (KitItem item : plan.getInventoryItems()) {
+      if (item != null
+          && item.getInventoryGroup() == MethodRules.InventoryGroup.TRAVEL
+          && item.hasItemId()) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  private static final Set<String> GENERIC_TRAVEL_DESTINATIONS =
+      Collections.unmodifiableSet(
+          new LinkedHashSet<>(
+              Arrays.asList(
+                  "standard slayer location",
+                  "assigned slayer area",
+                  "assigned area",
+                  "not restricted",
+                  "unknown task",
+                  "assigned area required")));
+
+  private String travelDestination() {
+    Recommendation selected = recommendation;
+    String fromTravelText =
+        trip(destinationFromTravelText(selected == null ? "" : selected.getTravel()));
+    if (!fromTravelText.isEmpty() && !GENERIC_TRAVEL_DESTINATIONS.contains(fromTravelText)) {
+      return fromTravelText;
+    }
+    Target target = resolveTaskTarget();
+    String fromLocation = target == null ? "" : trip(target.location);
+    return GENERIC_TRAVEL_DESTINATIONS.contains(fromLocation) ? "" : fromLocation;
+  }
+
+  private static String destinationFromTravelText(String travel) {
+    if (travel == null || travel.isEmpty()) {
+      return "";
+    }
+    String lower = travel.toLowerCase(Locale.ENGLISH);
+    int marker = lower.lastIndexOf(" to ");
+    int markerLength = 4;
+    if (marker < 0) {
+      marker = lower.lastIndexOf(" enter ");
+      markerLength = 7;
+    }
+    if (marker < 0) {
+      return "";
+    }
+    String after = travel.substring(marker + markerLength);
+    int cut = after.length();
+    for (char stop : new char[] {',', '.', ';'}) {
+      int index = after.indexOf(stop);
+      if (index >= 0 && index < cut) {
+        cut = index;
+      }
+    }
+    return after.substring(0, cut).trim();
+  }
+
+  private static final Set<String> TRAVEL_ACTION_VERBS =
+      Collections.unmodifiableSet(
+          new LinkedHashSet<>(Arrays.asList("break", "rub", "teleport", "teleports", "empty")));
+
+  private Set<Integer> travelCandidateItemIds() {
+    Set<Integer> ids = new LinkedHashSet<>();
+    List<String> fragments =
+        Arrays.asList(
+            "giantsoul amulet",
+            "dramen staff",
+            "lunar staff",
+            "cowbell amulet",
+            "guthixian temple teleport",
+            "games necklace",
+            "key master teleport",
+            "barrows teleport",
+            "morytania legs 3",
+            "morytania legs 4",
+            "ring of shadows",
+            "burning amulet",
+            "royal seed pod",
+            "seed pod",
+            "digsite pendant",
+            "drakan s medallion",
+            "varrock teleport",
+            "varrock tablet",
+            "amulet of glory",
+            "ring of dueling",
+            "skills necklace",
+            "combat bracelet",
+            "ectophial",
+            "mort ton teleport",
+            "pollnivneach teleport",
+            "zul andra teleport",
+            "xeric s talisman",
+            "rada s blessing",
+            "slayer ring",
+            "max cape",
+            "construction cape",
+            "teleport to house",
+            "house tab");
+    for (Integer itemId : bank.keySet()) {
+      addTravelCandidateIfMatch(ids, fragments, itemId);
+    }
+    addTravelCandidatesFromContainer(ids, fragments, client.getItemContainer(InventoryID.INV));
+    addTravelCandidatesFromContainer(ids, fragments, client.getItemContainer(InventoryID.WORN));
+    return ids;
+  }
+
+  private void addTravelCandidatesFromContainer(
+      Set<Integer> ids, List<String> fragments, ItemContainer container) {
+    if (container == null) {
+      return;
+    }
+    for (Item item : container.getItems()) {
+      if (item != null && item.getQuantity() > 0) {
+        addTravelCandidateIfMatch(ids, fragments, item.getId());
+      }
+    }
+  }
+
+  private void addTravelCandidateIfMatch(Set<Integer> ids, List<String> fragments, int itemId) {
+    if (itemId <= 0 || itemManager == null || ids.contains(itemId)) {
+      return;
+    }
+    try {
+      ItemComposition composition = itemManager.getItemComposition(itemId);
+      if (composition == null || composition.getName() == null) {
+        return;
+      }
+      String name = trip(composition.getName());
+      for (String fragment : fragments) {
+        if (name.contains(fragment)) {
+          ids.add(itemId);
+          return;
+        }
+      }
+    } catch (RuntimeException ignored) {
+    }
+  }
+
+  @Subscribe
+  public void onBeforeMenuRender(BeforeMenuRender event) {
+    if (event == null || !travelHighlightActive) {
+      return;
+    }
+    int primaryItemId = getTravelItemIdForOverlay();
+    Set<Integer> candidateIds = cachedTravelCandidateIds;
+    if (primaryItemId <= 0 && candidateIds.isEmpty()) {
+      return;
+    }
+    String destination = travelDestination();
+    Menu menu = client.getMenu();
+    MenuEntry[] entries = menu == null ? null : menu.getMenuEntries();
+    if (entries == null) {
+      return;
+    }
+    destination = resolveTravelMenuDestination(entries, destination);
+    for (MenuEntry entry : entries) {
+      highlightTravelDestination(entry, primaryItemId, candidateIds, destination, false, false);
+    }
+  }
+
+  private String resolveTravelMenuDestination(MenuEntry[] entries, String destination) {
+    Recommendation selected = recommendation;
+    TravelMenuMatch match = new TravelMenuMatch();
+    scanTravelMenu(
+        entries, destination, trip(selected == null ? "" : selected.getTravel()), false, match);
+    return match.exact
+        ? destination
+        : !match.instruction.isEmpty() ? match.instruction : match.maxCape ? "home" : destination;
+  }
+
+  private static void scanTravelMenu(
+      MenuEntry[] entries,
+      String destination,
+      String instructions,
+      boolean insideTravelMenu,
+      TravelMenuMatch match) {
+    if (entries == null) {
+      return;
+    }
+    for (MenuEntry entry : entries) {
+      if (entry == null) {
+        continue;
+      }
+      match.maxCape |= trip(Text.removeTags(entry.getTarget())).contains("max cape");
+      Menu subMenu = entry.getSubMenu();
+      boolean childTravelMenu =
+          insideTravelMenu || subMenu != null && isTravelActionVerb(entry.getOption());
+      if (subMenu != null) {
+        scanTravelMenu(subMenu.getMenuEntries(), destination, instructions, childTravelMenu, match);
+      } else if (insideTravelMenu) {
+        if (matchesTravelDestination(entry, destination)) {
+          match.exact = true;
+        }
+        String option = trip(Text.removeTags(entry.getOption()));
+        int index = option.length() < 3 ? -1 : instructions.indexOf(option);
+        if (index >= 0 && index < match.instructionIndex) {
+          match.instruction = option;
+          match.instructionIndex = index;
+        }
+      }
+    }
+  }
+
+  private static final class TravelMenuMatch {
+    private boolean exact, maxCape;
+    private String instruction = "";
+    private int instructionIndex = Integer.MAX_VALUE;
+  }
+
+  private boolean highlightTravelDestination(
+      MenuEntry entry,
+      int primaryItemId,
+      Set<Integer> candidateIds,
+      String destination,
+      boolean inheritedTravelItem,
+      boolean insideTravelMenu) {
+    if (entry == null) {
+      return false;
+    }
+    boolean travelItem =
+        inheritedTravelItem
+            || (primaryItemId > 0 && entry.getItemId() == primaryItemId)
+            || candidateIds.contains(entry.getItemId());
+    boolean childMatched = false;
+    Menu subMenu = entry.getSubMenu();
+    MenuEntry[] children = subMenu == null ? null : subMenu.getMenuEntries();
+    boolean childTravelMenu =
+        insideTravelMenu || children != null && isTravelActionVerb(entry.getOption());
+    if (children != null) {
+      for (MenuEntry child : children) {
+        if (highlightTravelDestination(
+            child, primaryItemId, candidateIds, destination, travelItem, childTravelMenu)) {
+          childMatched = true;
+        }
+      }
+    }
+    boolean leafMatch =
+        travelItem && insideTravelMenu && matchesTravelDestination(entry, destination);
+    boolean directHome =
+        travelItem
+            && !insideTravelMenu
+            && (children == null || children.length == 0)
+            && trip(Text.removeTags(entry.getOption())).equals("home")
+            && destination.equals("home");
+    boolean unambiguousAction =
+        primaryItemId > 0
+            && entry.getItemId() == primaryItemId
+            && (children == null || children.length == 0)
+            && isTravelActionVerb(entry.getOption());
+    if (!childMatched && !leafMatch && !directHome && !unambiguousAction) {
+      return false;
+    }
+    String option = entry.getOption();
+    if (option != null && !option.isEmpty()) {
+      entry.setOption(
+          ColorUtil.wrapWithColorTag(Text.removeTags(option), TRAVEL_ITEM_HIGHLIGHT_COLOR));
+    }
+    return true;
+  }
+
+  private static boolean isTravelActionVerb(String option) {
+    return TRAVEL_ACTION_VERBS.contains(trip(Text.removeTags(option)));
+  }
+
+  private static boolean matchesTravelDestination(MenuEntry entry, String destination) {
+    if (destination.isEmpty()) {
+      return false;
+    }
+    String option = trip(Text.removeTags(entry.getOption()));
+    String target = trip(Text.removeTags(entry.getTarget()));
+    return travelDestinationNamesMatch(option, destination)
+        || travelDestinationNamesMatch(target, destination);
+  }
+
+  static boolean travelDestinationNamesMatch(String menuText, String destination) {
+    String menuName = canonicalTravelDestination(menuText);
+    String destinationName = canonicalTravelDestination(destination);
+    return menuName.length() >= 3
+        && (menuName.contains(destinationName) || destinationName.contains(menuName));
+  }
+
+  private static String canonicalTravelDestination(String value) {
+    return trip(value).replaceAll("\\bslayer\\b", " ").replaceAll("\\s+", " ").trim();
+  }
+
+  private void createRecommendedBankTag() {
+    if (panel == null || layoutService == null) {
+      return;
+    }
+    if (!travelHighlightActive) {
+      travelHighlightActive = true;
+      SlayerPlusPanel ui = panel;
+      SwingUtilities.invokeLater(() -> ui.showTravelHighlightState(true));
+    }
+    if (analyzer.rerollRandomSlayerHelmet()) {
+      refreshSlayerData();
+    }
+    createBankTagNow(true);
+  }
+
+  @Subscribe
+  public void onMenuEntryAdded(MenuEntryAdded event) {
+    if (event == null
+        || event.getActionParam1() != InterfaceID.Bankmain.ITEMS
+        || bankTagsService == null) {
+      return;
+    }
+    ItemContainer bank = client.getItemContainer(InventoryID.BANK);
+    if (bank == null
+        || !SlayerOptionalPins.isMenuTrigger(event.getOption(), bank.contains(event.getItemId()))) {
+      return;
+    }
+    Widget items = client.getWidget(InterfaceID.Bankmain.ITEMS);
+    Widget item =
+        items == null || event.getActionParam0() < 0
+            ? null
+            : items.getChild(event.getActionParam0());
+    if (item == null || items.isHidden()) {
+      return;
+    }
+    String activeTag = bankTagsService.getActiveTag();
+    if (!SlayerOptionalPins.allowsMenu(
+        activeTag,
+        event.getActionParam1(),
+        item.getItemId(),
+        client.isKeyPressed(KeyCode.KC_SHIFT))) {
+      return;
+    }
+    String profile = configs.getRSProfileKey();
+    if (profile == null) {
+      return;
+    }
+    int itemId = itemManager.canonicalize(item.getItemId());
+    if (itemId <= 0) {
+      return;
+    }
+    boolean pinned = readOptionalPins().contains(itemId);
+    client
+        .createMenuEntry("Examine".equals(event.getOption()) ? -1 : -2)
+        .setOption(pinned ? "Unpin from SlayerPlus optional row" : "Pin to SlayerPlus optional row")
+        .setParam0(event.getActionParam0())
+        .setParam1(event.getActionParam1())
+        .setIdentifier(event.getIdentifier())
+        .setTarget(event.getTarget())
+        .setType(MenuAction.RUNELITE)
+        .setItemId(itemId)
+        .onClick(clicked -> changeOptionalPin(itemId, !pinned, profile, activeTag));
+  }
+
+  private Set<Integer> readOptionalPins() {
+    return SlayerOptionalPins.read(
+        configs.getRSProfileKey() == null
+            ? null
+            : configs.getRSProfileConfiguration(
+                SlayerPlusConfig.GROUP, SlayerOptionalPins.CONFIG_KEY));
+  }
+
+  private void changeOptionalPin(int itemId, boolean pin, String profile, String activeTag) {
+    Widget items = client.getWidget(InterfaceID.Bankmain.ITEMS);
+    if (client.getGameState() != GameState.LOGGED_IN
+        || items == null
+        || items.isHidden()
+        || !profile.equals(configs.getRSProfileKey())
+        || !Objects.equals(activeTag, bankTagsService.getActiveTag())) {
+      return;
+    }
+    Set<Integer> pins = readOptionalPins();
+    if (pin && !pins.contains(itemId) && pins.size() >= SlayerOptionalPins.LIMIT) {
+      client.addChatMessage(
+          ChatMessageType.GAMEMESSAGE,
+          "",
+          "SlayerPlus: The optional row has eight pins. Unpin an item first.",
+          null);
+      return;
+    }
+    boolean changed = pin ? pins.add(itemId) : pins.remove(itemId);
+    if (!changed) {
+      return;
+    }
+    configs.setRSProfileConfiguration(
+        SlayerPlusConfig.GROUP, SlayerOptionalPins.CONFIG_KEY, serializeItemIds(pins));
+    lastWrittenBankTagState = "";
+    if (isSlayerPlusBankTagOpen()) {
+      createBankTagNow(true);
+    } else {
+      client.addChatMessage(
+          ChatMessageType.GAMEMESSAGE,
+          "",
+          "SlayerPlus: Pin saved. Use Create or update bank tag to apply it.",
+          null);
+    }
+  }
+
+  private void createBankTagNow() {
+    createBankTagNow(false);
+  }
+
+  private void createBankTagNow(boolean forceWrite) {
+    SlayerPlusPanel ui = panel;
+    if (ui == null || layoutService == null) {
+      return;
+    }
+    cacheSeekingArrowPlaceholders(client.getItemContainer(InventoryID.BANK));
+    if (refreshQuiverAmmo()) {
+      refreshSlayerData();
+    }
+    Target target = resolveTaskTarget();
+    boolean infernoTarget = isInfernoTarget(target);
+    KitPlan bankTagPlan;
+    if (!shouldAddPersistentReturnTeleports(infernoTarget)) {
+      bankTagPlan = currentLoadout;
+    } else {
+      bankTagPlan =
+          withOwnedPointBoostTravelKit(
+              withOwnedMasterReturnTeleport(withOwnedBankTeleport(currentLoadout)));
+    }
+    Set<Integer> pinnedIds = readOptionalPins();
+    List<KitItem> pinnedItems = new ArrayList<>();
+    for (int id : pinnedIds) {
+      pinnedItems.add(
+          new KitItem(itemManager.getItemComposition(id).getName(), id, 1, KitItem.Status.UNKNOWN));
+    }
+    bankTagPlan = SlayerOptionalPins.prepend(bankTagPlan, pinnedItems);
+    String bankTagState =
+        serializeItemIds(pinnedIds)
+            + ":"
+            + bankTagStateFingerprint(
+                bankTagPlan, preparation.getTagIds(), !infernoTarget, quiverId);
+    boolean sameWrittenState = bankTagState.equals(lastWrittenBankTagState);
+    if (!forceWrite && sameWrittenState) {
+      return;
+    }
+    boolean reopenedWithoutRewrite =
+        forceWrite && sameWrittenState && layoutService.reopenLastSavedLayoutIfUnchanged();
+    BankTagLayout.Result result =
+        reopenedWithoutRewrite
+            ? BankTagLayout.Result.success(
+                "Opened the existing SlayerPlus Current layout without rebuilding it.")
+            : layoutService.createOrUpdate(
+                bankTagPlan, preparation.getTagIds(), !infernoTarget, quiverId, pinnedIds);
+    if (result.isSuccess()) {
+      layoutCreated = true;
+      lastWrittenBankTagState = bankTagState;
+    }
+    SwingUtilities.invokeLater(() -> ui.showBankTagStatus(result.getMessage()));
+  }
+
+  private KitPlan withOwnedMasterReturnTeleport(KitPlan plan) {
+    if (plan == null) {
+      return null;
+    }
+    MasterRoutes.MasterRoute master = MasterRoutes.find(getPostTaskReturnMasterId());
+    if (master == null) {
+      return plan;
+    }
+    for (String family : master.getReturnItemFamilies()) {
+      if (!diaries.allowsTravelItem(family)) {
+        continue;
+      }
+      ItemMatch match = ownedTravel(family);
+      if (match == null) {
+        continue;
+      }
+      return appendMasterReturnTeleportForTest(plan, match.itemId, match.displayName);
+    }
+    return plan;
+  }
+
+  static boolean shouldAddPersistentReturnTeleports(boolean infernoTarget) {
+    return !infernoTarget;
+  }
+
+  private KitPlan withOwnedBankTeleport(KitPlan plan) {
+    if (plan == null) {
+      return null;
+    }
+    String[] bankFamilies = {
+      "max cape", "crafting cape", "amulet of eternal glory", "ring of dueling", "amulet of glory"
+    };
+    for (String family : bankFamilies) {
+      if (!diaries.allowsTravelItem(family)) {
+        continue;
+      }
+      ItemMatch match = ownedTravel(family);
+      if (match == null) {
+        continue;
+      }
+      return appendMasterReturnTeleportForTest(plan, match.itemId, match.displayName);
+    }
+    return plan;
+  }
+
+  private KitPlan withOwnedPointBoostTravelKit(KitPlan plan) {
+    if (plan == null
+        || !isPointBoosting()
+        || master != BoostCoordinator.TURAEL_AYA_MASTER_ID
+        || TuraelBoost.find(assignment) == null) {
+      return plan;
+    }
+    String[][] travelFamilies = {
+      {"max cape", "construct cape"},
+      {"eternal slayer ring", "slayer ring"},
+      {"digsite pendant"},
+      {"ring of dueling"},
+      {"amulet of glory"},
+      {"games necklace"}
+    };
+    KitPlan result = plan;
+    int additions = 0;
+    for (String[] equivalentGroup : travelFamilies) {
+      ItemMatch owned = null;
+      for (String family : equivalentGroup) {
+        if (!diaries.allowsTravelItem(family)) {
+          continue;
+        }
+        owned = ownedTravel(family);
+        if (owned != null) {
+          break;
+        }
+      }
+      if (owned == null) {
+        continue;
+      }
+      KitPlan updated = appendMasterReturnTeleportForTest(result, owned.itemId, owned.displayName);
+      if (updated != result) {
+        result = updated;
+        additions++;
+        if (additions >= 4) {
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
+  static KitPlan appendMasterReturnTeleportForTest(KitPlan plan, int itemId, String displayName) {
+    if (plan == null || itemId <= 0) {
+      return plan;
+    }
+    List<KitItem> inventory = new ArrayList<>(plan.getInventoryItems());
+    for (KitItem item : inventory) {
+      if (item != null && item.getItemId() == itemId) {
+        return plan;
+      }
+    }
+    for (KitItem item : plan.getEquipmentItems()) {
+      if (item != null && item.getItemId() == itemId) {
+        return plan;
+      }
+    }
+    KitItem masterReturn =
+        new KitItem(displayName, itemId, 1, KitItem.Status.BANK)
+            .withInventoryGroup(MethodRules.InventoryGroup.UTILITY);
+    if (inventory.size() < 28) {
+      inventory.add(masterReturn);
+    } else {
+      int replaceIndex = lastInventoryGroupIndex(inventory, MethodRules.InventoryGroup.FOOD);
+      if (replaceIndex < 0) {
+        replaceIndex =
+            lastDuplicateInventoryGroupIndex(inventory, MethodRules.InventoryGroup.RESTORE);
+      }
+      if (replaceIndex < 0) {
+        return plan;
+      }
+      inventory.set(replaceIndex, masterReturn);
+    }
+    return new KitPlan(
+        plan.getEquipment(),
+        plan.getInventory(),
+        plan.getOwnedStatus(),
+        plan.getLayoutTitle(),
+        plan.getEquipmentItems(),
+        inventory,
+        plan.getOptionalItems());
+  }
+
+  private static int lastInventoryGroupIndex(
+      List<KitItem> inventory, MethodRules.InventoryGroup group) {
+    for (int index = Math.min(28, inventory.size()) - 1; index >= 0; index--) {
+      KitItem item = inventory.get(index);
+      if (item != null && item.getInventoryGroup() == group) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  private static int lastDuplicateInventoryGroupIndex(
+      List<KitItem> inventory, MethodRules.InventoryGroup group) {
+    int count = 0;
+    for (int index = 0; index < Math.min(28, inventory.size()); index++) {
+      KitItem item = inventory.get(index);
+      if (item != null && item.getInventoryGroup() == group) {
+        count++;
+      }
+    }
+    if (count > 1) {
+      return lastInventoryGroupIndex(inventory, group);
+    }
+    return -1;
+  }
+
+  static String bankTagStateFingerprint(
+      KitPlan plan,
+      List<Integer> preparationItemIds,
+      boolean analyzerSourceZeroIsTravel,
+      int extraQuiverAmmoItemId) {
+    StringBuilder value = new StringBuilder(512);
+    value.append(plan == null ? "" : plan.getLayoutTitle()).append('|');
+    appendBankTagItems(
+        value, 'E', plan == null ? Collections.emptyList() : plan.getEquipmentItems());
+    appendBankTagItems(
+        value, 'I', plan == null ? Collections.emptyList() : plan.getInventoryItems());
+    appendBankTagItems(
+        value, 'O', plan == null ? Collections.emptyList() : plan.getOptionalItems());
+    value
+        .append("P=")
+        .append(preparationItemIds)
+        .append('|')
+        .append(analyzerSourceZeroIsTravel)
+        .append('|')
+        .append("Q=")
+        .append(extraQuiverAmmoItemId)
+        .append('|');
+    return value.toString();
+  }
+
+  private static void appendBankTagItems(StringBuilder value, char section, List<KitItem> items) {
+    value.append(section).append('=');
+    for (KitItem item : items) {
+      if (item == null) {
+        value.append("null;");
+        continue;
+      }
+      value
+          .append(item.getItemId())
+          .append(',')
+          .append(item.getDisplayName())
+          .append(',')
+          .append(item.isEquipmentSwitch())
+          .append(',')
+          .append(item.getSwitchStyle())
+          .append(',')
+          .append(item.getInventoryGroup())
+          .append(';');
+    }
+    value.append('|');
+  }
+
+  private boolean isInfernoTarget(Target target) {
+    return target != null && "inferno".equalsIgnoreCase(target.location);
+  }
+
+  private boolean isPointBoosting() {
+    return config != null && config.slayerWorkflow() == Preference.Workflow.TURAEL_POINT_BOOST;
+  }
+
+  private BoostCoordinator.Decision pointBoostDecision(int completedStreak) {
+    return BoostCoordinator.nextAssignment(
+        completedStreak,
+        config == null ? Preference.BonusMaster.KONAR : config.pointBoostBonusMaster());
+  }
+
+  private String pointBoostPanelStatus(
+      int completedStreak, boolean hasActiveTask, int assigningMasterId) {
+    if (!isPointBoosting()) {
+      return "";
+    }
+    BoostCoordinator.Decision decision = pointBoostDecision(completedStreak);
+    if (hasActiveTask && assigningMasterId != decision.getMasterId()) {
+      return "Point boosting resumes after this existing assignment.";
+    }
+    return hasActiveTask
+        ? "Point boost: " + decision.getProgressText()
+        : "Next: "
+            + MasterRoutes.getName(decision.getMasterId())
+            + " — "
+            + decision.getProgressText();
+  }
+
+  private int masterForNextAssignment(int normalStreak) {
+    if (isPointBoosting()) {
+      return pointBoostDecision(normalStreak).getMasterId();
+    }
+    return lastMaster > 0 ? lastMaster : master;
+  }
+
+  private int getPostTaskReturnMasterId() {
+    if (!isPointBoosting()) {
+      return getRoutingMasterId();
+    }
+    int completedStreak = client.getVarbitValue(VarbitID.SLAYER_TASKS_COMPLETED);
+    int predictedPostTaskStreak = completedStreak + (taskRemaining() > 0 ? 1 : 0);
+    return pointBoostDecision(predictedPostTaskStreak).getMasterId();
+  }
+
+  private int getRoutingMasterId() {
+    if (taskRemaining() > 0 && master > 0) {
+      return master;
+    }
+    if (isPointBoosting()) {
+      return pointBoostDecision(client.getVarbitValue(VarbitID.SLAYER_TASKS_COMPLETED))
+          .getMasterId();
+    }
+    return lastMaster > 0 ? lastMaster : master;
+  }
+
+  private int taskRemaining() {
+    return effectiveTaskRemainingForTest(
+        seenRemaining, client.getVarpValue(VarPlayerID.SLAYER_COUNT));
+  }
+
+  static int effectiveTaskRemainingForTest(int resolvedRemaining, int liveRemaining) {
+    return resolvedRemaining >= 0 ? resolvedRemaining : Math.max(0, liveRemaining);
+  }
+
+  private int readRuneLiteSlayerProfileInt(String key) {
+    try {
+      Integer value =
+          configs.getRSProfileConfiguration(RUNELITE_SLAYER_CONFIG_GROUP, key, Integer.class);
+      return value == null ? -1 : value;
+    } catch (RuntimeException ex) {
+      log.debug("Unable to read RuneLite Slayer profile key {}", key, ex);
+      return -1;
+    }
+  }
+
+  private String readRuneLiteSlayerProfileString(String key) {
+    try {
+      String value = configs.getRSProfileConfiguration(RUNELITE_SLAYER_CONFIG_GROUP, key);
+      return value == null ? "" : value.trim();
+    } catch (RuntimeException ex) {
+      log.debug("Unable to read RuneLite Slayer profile key {}", key, ex);
+      return "";
+    }
+  }
+
+  private int readSlayerPlusProfileInt(String key) {
+    try {
+      Integer value = configs.getRSProfileConfiguration(SlayerPlusConfig.GROUP, key, Integer.class);
+      return value == null ? -1 : value;
+    } catch (RuntimeException ex) {
+      log.debug("Unable to read SlayerPlus profile key {}", key, ex);
+      return -1;
+    }
+  }
+
+  private void storeLastSlayerMasterId(int masterId) {
+    if (masterId <= 0 || masterId == readSlayerPlusProfileInt(LAST_SLAYER_MASTER_SNAPSHOT_KEY)) {
+      return;
+    }
+    try {
+      configs.setRSProfileConfiguration(
+          SlayerPlusConfig.GROUP, LAST_SLAYER_MASTER_SNAPSHOT_KEY, masterId);
+    } catch (RuntimeException ex) {
+      log.debug("Unable to store the last Slayer master", ex);
+    }
+  }
+
+  private String profileSlayerLocation() {
+    String location = readRuneLiteSlayerProfileString(RUNELITE_SLAYER_LOCATION_KEY);
+    return location.isEmpty() ? "Assigned area" : location;
+  }
+
+  private int inferNearbySlayerMasterId() {
+    Player player = client.getLocalPlayer();
+    WorldPoint here = player == null ? null : player.getWorldLocation();
+    if (here == null) {
+      return 0;
+    }
+    int nearestId = 0;
+    int nearestDistance = Integer.MAX_VALUE;
+    for (int masterId = 1; masterId <= 10; masterId++) {
+      MasterRoutes.MasterRoute route = MasterRoutes.find(masterId);
+      if (route == null || route.getDestination().getPlane() != here.getPlane()) {
+        continue;
+      }
+      int distance = here.distanceTo2D(route.getDestination());
+      if (distance <= 20 && distance < nearestDistance) {
+        nearestId = masterId;
+        nearestDistance = distance;
+      }
+    }
+    return nearestId;
+  }
+
+  static int firstPositive(int... values) {
+    if (values != null) {
+      for (int value : values) {
+        if (value > 0) {
+          return value;
+        }
+      }
+    }
+    return 0;
+  }
+
+  static int resolveTaskRemainingForTest(
+      int previouslyObservedRemaining,
+      int serviceRemaining,
+      int liveRemaining,
+      int profileRemaining,
+      int chatRemaining) {
+    if (previouslyObservedRemaining > 0 && liveRemaining <= 0) {
+      return 0;
+    }
+    return firstPositive(liveRemaining, serviceRemaining, profileRemaining, chatRemaining);
+  }
+
+  static int preferLiveOrProfileValue(int liveValue, int profileValue, int chatValue) {
+    if (liveValue > 0) {
+      return liveValue;
+    }
+    if (profileValue > 0) {
+      return profileValue;
+    }
+    if (chatValue >= 0) {
+      return chatValue;
+    }
+    return Math.max(0, Math.max(liveValue, profileValue));
+  }
+
+  private String readTaskName() {
+    try {
+      int taskId = client.getVarpValue(VarPlayerID.SLAYER_TARGET);
+      int taskRow;
+      if (taskId == 98) {
+        List<Integer> bossRows =
+            client.getDBRowsByValue(
+                DBTableID.SlayerTaskSublist.ID,
+                DBTableID.SlayerTaskSublist.COL_TASK_SUBTABLE_ID,
+                0,
+                client.getVarbitValue(VarbitID.SLAYER_TARGET_BOSSID));
+        if (bossRows == null || bossRows.isEmpty()) {
+          return "Unknown task";
+        }
+        Object[] taskFields =
+            client.getDBTableField(bossRows.get(0), DBTableID.SlayerTaskSublist.COL_TASK, 0);
+        if (taskFields == null || taskFields.length == 0 || !(taskFields[0] instanceof Integer)) {
+          return "Unknown task";
+        }
+        taskRow = (Integer) taskFields[0];
+      } else {
+        List<Integer> taskRows =
+            client.getDBRowsByValue(
+                DBTableID.SlayerTask.ID, DBTableID.SlayerTask.COL_ID, 0, taskId);
+        if (taskRows == null || taskRows.isEmpty()) {
+          return "Unknown task";
+        }
+        taskRow = taskRows.get(0);
+      }
+      Object[] fields = client.getDBTableField(taskRow, DBTableID.SlayerTask.COL_NAME_UPPERCASE, 0);
+      return fields != null && fields.length > 0 && fields[0] instanceof String
+          ? formatName((String) fields[0])
+          : "Unknown task";
+    } catch (RuntimeException ex) {
+      log.debug("Unable to read Slayer task from the game database", ex);
+      return "Unknown task";
+    }
+  }
+
+  private String readAssignedLocation() {
+    try {
+      int areaId = client.getVarpValue(VarPlayerID.SLAYER_AREA);
+      if (areaId <= 0) {
+        return "Not restricted";
+      }
+      List<Integer> areaRows =
+          client.getDBRowsByValue(
+              DBTableID.SlayerArea.ID, DBTableID.SlayerArea.COL_AREA_ID, 0, areaId);
+      if (areaRows == null || areaRows.isEmpty()) {
+        return "Assigned area";
+      }
+      Object[] fields =
+          client.getDBTableField(areaRows.get(0), DBTableID.SlayerArea.COL_AREA_NAME_IN_HELPER, 0);
+      return fields != null && fields.length > 0 && fields[0] instanceof String
+          ? (String) fields[0]
+          : "Assigned area";
+    } catch (RuntimeException ex) {
+      log.debug("Unable to read Slayer area from the game database", ex);
+      return "Assigned area";
+    }
+  }
+
+  private String getAccountName() {
+    Player player = client.getLocalPlayer();
+    if (player == null || player.getName() == null || player.getName().trim().isEmpty()) {
+      return "ACCOUNT LOADING";
+    }
+    return player.getName().trim();
+  }
+
+  static String masterDisplayNameForTest(
+      int masterId, boolean whileGuthixSleepsFinished, boolean monkeyMadness2Finished) {
+    if (masterId == 5 && whileGuthixSleepsFinished) {
+      return "Kuradal";
+    }
+    if (masterId == 6 && monkeyMadness2Finished) {
+      return "Steve";
+    }
+    return MasterRoutes.getName(masterId);
+  }
+
+  private static String formatName(String value) {
+    if (value == null || value.isEmpty()) {
+      return "Unknown task";
+    }
+    String lower = value.toLowerCase();
+    return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+  }
+
+  private static final class ItemMatch {
+    private final int itemId;
+    private final String displayName;
+    private final int score;
+
+    private ItemMatch(int itemId, String displayName, int score) {
+      this.itemId = itemId;
+      this.displayName = displayName;
+      this.score = score;
+    }
+  }
+
+  @Provides
+  SlayerPlusConfig provideConfig(ConfigManager configs) {
+    return configs.getConfig(SlayerPlusConfig.class);
+  }
 }
-if(overlayManager!=null&&travelItemOverlay!=null){overlayManager.remove(travelItemOverlay);
-}if(panel!=null){panel.disposeResources();
-}if(navigationButton!=null){clientToolbar.removeNavigation(navigationButton);
-}navigationButton=null;
-panel=null;
-portraitRenderer=null;
-recommendationEngine=null;
-analyzer=null;
-layoutService=null;
-slayerService=null;
-resetSessionState();
-shortestPathBridge=null;
-}private void resetSessionState(){travelHighlightActive=false;
-spiderTeleportPending=false;
-spiderTeleportArrived=false;
-cachedTravelCandidateIds=Collections.emptySet();
-cachedRoutePathKey="";
-cachedRoutePath=Collections.emptyList();
-if(shortestPathBridge!=null){shortestPathBridge.clear();
-}layoutCreated=false;
-lastWrittenBankTagState="";
-currentLoadout=KitPlan.empty();
-recommendation=null;
-clearCachedGuidedTaskTarget();
-preparation=PreparationCatalog.PreparationPlan.none();
-preparationContext="";
-updateReadinessOverlay();
-master=0;
-assignment="";
-taskVar=TaskVariant.STANDARD_TASK;
-bank.clear();
-rawBankState=new int[0];
-rawBankConfirmed=false;
-bankInterfaceOpen=false;
-bankReachedForRestock=false;
-cachedWornItemIdentityState=new int[0];
-cachedWornItemIdentityKnown=false;
-cachedInventoryContainerState=new int[0];
-cachedInventoryContainerStateKnown=false;
-infernoItem=-1;
-infernoLoaded=false;
-helms.clear();
-helmSnapshotLoaded=false;
-seekingArrowIds.clear();
-seekingPlaceholderClassificationCache.clear();
-bankDizanaId=-1;
-scanned=false;
-clearExtraQuiverAmmoSnapshot();
-lastAppearanceHash=Integer.MIN_VALUE;
-portraitPending=false;
-portraitRetry=0;
-portraitLoaded=false;
-portraitCache.clear();
-lastAccountName="";
-seenRemaining=-1;
-observedTaskName="";
-observedNormalTaskStreak=-1;
-boostSyncPending=false;
-boostStreakBefore=-1;
-lastMaster=0;
-slayerRefreshQueued=false;
-loadoutRefreshPending=false;
-loadoutContext="";
-pendingRefreshDeadlineTick=0;
-bankOpenedRefreshPending=false;
-settingsRefresh=false;
-tick=0;
-}@Subscribe public void onGameTick(GameTick event){tick++;
-refreshPortrait();
-if(assignment.isEmpty()&&slayerService!=null&&slayerService.getRemainingAmount()>0){scheduleRefresh(false);
-}if(shouldPollExtraQuiverSnapshotForTest(tick)&&refreshQuiverAmmo()){scheduleRefresh(false);
-}if(slayerRefreshQueued&&tick>=pendingRefreshDeadlineTick){runQueuedRefresh();
-}reconcileBankInterfaceState();
-if(travelHighlightActive){updateShortestPathRoute();
-}
-}@Subscribe public void onChatMessage(ChatMessage event){if(event.getType()!=ChatMessageType.GAMEMESSAGE&&event.getType()!=ChatMessageType.SPAM){return;
-}String message=Text.removeTags(event.getMessage());
-SlayerTaskChatUpdate taskUpdate=SlayerTaskChatUpdate.parse(message);
-if(taskUpdate!=null){pendingChatTaskExpiresAfterTick=tick+5L;
-if(taskUpdate.getRemaining()>0&&!taskUpdate.getTaskName().isEmpty()){pendingChatTaskName=taskUpdate.getTaskName();
-pendingChatTaskRemaining=taskUpdate.getRemaining();
-}if(taskUpdate.getStreak()>=0){pendingChatStreak=taskUpdate.getStreak();
-}if(taskUpdate.getPoints()>=0){pendingChatPoints=taskUpdate.getPoints();
-}scheduleRefresh(false);
-}SlayerBraceletChargeTracker.Update braceletUpdate=SlayerBraceletChargeTracker.parse(message);
-if(braceletUpdate!=null){configs.setRSProfileConfiguration(SlayerBraceletChargeTracker.CONFIG_GROUP,braceletUpdate.getConfigKey(),braceletUpdate.getCharges());
-if(braceletUpdate.getCharges()==0){showDepletedBraceletChargeInfoBox(braceletUpdate.getItemId());
-}else{refreshBraceletChargeInfoBox();
-}}}static boolean shouldPollExtraQuiverSnapshotForTest(long gameTick){return gameTick>0&&gameTick%EXTRA_QUIVER_SAFETY_POLL_TICKS==0;
-}@Subscribe public void onGameStateChanged(GameStateChanged event){if(event.getGameState()==GameState.LOGGED_IN){portraitPending=true;
-portraitRetry=0;
-clientThread.invokeLater(()->{loadInfernoTravelItemSnapshot();
-loadOwnedSlayerHelmetSnapshot();
-cacheBankContainer(client.getItemContainer(InventoryID.BANK));
-refreshSlayerData();
-updateReadinessOverlay();
-});
-}else{hideReadinessOverlay();
-if(shouldInvalidateTaskObservationForGameState(event.getGameState())){seenRemaining=-1;
-observedTaskName="";
-observedNormalTaskStreak=-1;
-}if(event.getGameState()!=GameState.LOGIN_SCREEN||panel==null){return;
-}resetSessionState();
-SwingUtilities.invokeLater(()->{panel.showLoggedOut();
-panel.showTravelHighlightState(false);
-});
-}}static boolean shouldInvalidateTaskObservationForGameState(GameState gameState){return gameState==GameState.HOPPING||gameState==GameState.CONNECTION_LOST||gameState==GameState.LOGGING_IN;
-}private void migrateRemovedPlaystyle(){String stored=configs.getConfiguration(SlayerPlusConfig.GROUP,PLAYSTYLE_KEY);
-if(stored==null||stored.trim().isEmpty()){return;
-}String normalized=stored.trim().toUpperCase(Locale.ENGLISH).replace('-','_').replace(' ','_');
-if(normalized.equals("BALANCED")||normalized.equals(text(598))||normalized.equals("AFK")){configs.setConfiguration(SlayerPlusConfig.GROUP,PLAYSTYLE_KEY,Preference.Playstyle.FAST_XP.name());
-}}@Subscribe public void onConfigChanged(ConfigChanged event){if(event==null||EASY_TELEPORTS_CONFIG_GROUP.equals(event.getGroup())||!SlayerPlusConfig.GROUP.equals(event.getGroup())){return;
-}String changedKey=event.getKey();
-if(PORTRAIT_CALIBRATION_KEY.equals(changedKey)||SlayerOptionalPins.CONFIG_KEY.equals(changedKey)||BankRoutes.CONFIG_KEY.equals(changedKey)){return;
-}clientThread.invokeLater(()->{preparationContext="";
-settingsRefresh=true;
-scheduleRefresh(false);
-});
-}@Subscribe public void onVarbitChanged(VarbitChanged event){int varpId=event.getVarpId();
-int varbitId=event.getVarbitId();
-if(isProgressOnlyVarChange(varpId,varbitId)){if(shouldRefreshProgress(varpId,preparation.isReady())){scheduleProgressRefresh();
-}
-return;
-}
-if(varpId==VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO||varpId==VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO_AMOUNT){if(refreshQuiverAmmo()){scheduleRefresh(false);
-}return;
-}if(varpId==VarPlayerID.SLAYER_COUNT_ORIGINAL||varpId==VarPlayerID.SLAYER_TARGET||varpId==VarPlayerID.SLAYER_AREA||varbitId==VarbitID.SLAYER_TARGET_BOSSID||varbitId==VarbitID.SLAYER_POINTS||varbitId==VarbitID.SLAYER_MASTER||varbitId==VarbitID.SLAYER_TASKS_COMPLETED||varbitId==VarbitID.SLAYER_WILDERNESS_TASKS_COMPLETED||varbitId==SPELLBOOK_VARBIT||varbitId==VarbitID.RUNE_POUCH_TYPE_1||varbitId==VarbitID.RUNE_POUCH_TYPE_2||varbitId==VarbitID.RUNE_POUCH_TYPE_3||varbitId==VarbitID.RUNE_POUCH_TYPE_4||varbitId==VarbitID.RUNE_POUCH_TYPE_5||varbitId==VarbitID.RUNE_POUCH_TYPE_6){scheduleRefresh(false);
-}}@Subscribe public void onItemContainerChanged(ItemContainerChanged event){int containerId=event.getContainerId();
-if(containerId==InventoryID.WORN){refreshBraceletChargeInfoBox();
-}if(containerId==InventoryID.DIZANAS_QUIVER_AMMO){if(refreshQuiverAmmo()){scheduleRefresh(false);
-}return;
-}boolean bankChanged=containerId==InventoryID.BANK;
-if(bankChanged){if(!cacheBankContainer(event.getItemContainer())){return;
-}}else if(containerId==InventoryID.WORN){if(!captureWornIdentityChange(event.getItemContainer())){return;
-}portraitPending=true;
-portraitRetry=0;
-}else if(containerId==InventoryID.INV){if(!bankInterfaceOpen){if(!preparation.isReady()){scheduleProgressRefresh();
-}return;
-}if(!captureInventoryChange(event.getItemContainer())){return;
-}}else{return;
-}if(bankChanged||bankInterfaceOpen){scheduleRefresh(bankChanged);
-}else if(!preparation.isReady()){scheduleProgressRefresh();
-}
-}private void refreshBraceletChargeInfoBox(){if(infoBoxManager==null||itemManager==null||client==null){return;
-}ItemContainer worn=client.getItemContainer(InventoryID.WORN);
-Item gloves=worn==null?null:worn.getItem(EquipmentInventorySlot.GLOVES.getSlotIdx());
-int itemId=gloves==null?-1:gloves.getId();
-String configKey=SlayerBraceletChargeTracker.configKey(itemId);
-if(configKey.isEmpty()){if(chargeBox!=null&&chargeBox.isDepleted()){braceletAbsentAfterDepletion=true;
-return;
-}removeBraceletChargeInfoBox();
-return;
-}Integer charges=configs.getRSProfileConfiguration(SlayerBraceletChargeTracker.CONFIG_GROUP,configKey,Integer.class);
-if(charges==null){charges=configs.getConfiguration(SlayerBraceletChargeTracker.CONFIG_GROUP,configKey,Integer.class);
-if(charges!=null){configs.unsetConfiguration(SlayerBraceletChargeTracker.CONFIG_GROUP,configKey);
-configs.setRSProfileConfiguration(SlayerBraceletChargeTracker.CONFIG_GROUP,configKey,charges);
-}}if(braceletAbsentAfterDepletion){charges=SlayerBraceletChargeTracker.MAX_CHARGES;
-configs.setRSProfileConfiguration(SlayerBraceletChargeTracker.CONFIG_GROUP,configKey,charges);
-braceletAbsentAfterDepletion=false;
-}int displayedCharges=charges==null?-1:charges;
-if(chargeBox==null||braceletChargeInfoBoxItemId!=itemId||chargeBox.isDepleted()!=(displayedCharges==0)){removeBraceletChargeInfoBox();
-braceletChargeInfoBoxItemId=itemId;
-chargeBox=new SlayerBraceletChargeInfoBox(itemManager.getImage(itemId),this,itemId==ItemID.BRACELET_OF_SLAUGHTER?text(600):text(601),displayedCharges);
-infoBoxManager.addInfoBox(chargeBox);
-return;
-}chargeBox.setCharges(displayedCharges);
-}private void showDepletedBraceletChargeInfoBox(int itemId){if(infoBoxManager==null||itemManager==null||itemId<=0){return;
-}removeBraceletChargeInfoBox();
-braceletChargeInfoBoxItemId=itemId;
-chargeBox=new SlayerBraceletChargeInfoBox(itemManager.getImage(itemId),this,itemId==ItemID.BRACELET_OF_SLAUGHTER?text(600):text(601),0);
-infoBoxManager.addInfoBox(chargeBox);
-}private void removeBraceletChargeInfoBox(){if(chargeBox!=null&&infoBoxManager!=null){infoBoxManager.removeInfoBox(chargeBox);
-}chargeBox=null;
-braceletChargeInfoBoxItemId=-1;
-braceletAbsentAfterDepletion=false;
-}private boolean captureWornIdentityChange(ItemContainer container){Item[]items=container==null?null:container.getItems();
-if(items==null){return false;
-}boolean changed=!cachedWornItemIdentityKnown||!matchesItemIdentityState(cachedWornItemIdentityState,items);
-if(changed){cachedWornItemIdentityState=snapshotItemIdentityState(items);
-cachedWornItemIdentityKnown=true;
-}return changed;
-}private boolean captureInventoryChange(ItemContainer container){Item[]items=container==null?null:container.getItems();
-if(items==null){return false;
-}boolean changed=!cachedInventoryContainerStateKnown||hasRelevantInventoryChange(cachedInventoryContainerState,items,quantitySensitiveInventoryItemIds());
-cachedInventoryContainerState=snapshotExactItemState(items);
-cachedInventoryContainerStateKnown=true;
-return changed;
-}private Set<Integer>quantitySensitiveInventoryItemIds(){Set<Integer>ids=new HashSet<>();
-addPlanItemIds(ids,currentLoadout==null?null:currentLoadout.getEquipmentItems());
-addPlanItemIds(ids,currentLoadout==null?null:currentLoadout.getInventoryItems());
-addPlanItemIds(ids,currentLoadout==null?null:currentLoadout.getOptionalItems());
-if(preparation!=null){ids.addAll(preparation.getTagIds());
-}return ids;
-}private static void addPlanItemIds(Set<Integer>ids,List<KitItem>items){if(items==null){return;
-}for(KitItem item:items){if(item!=null&&item.hasItemId()){ids.add(item.getItemId());
-}}
-}private static boolean hasRelevantInventoryChange(int[]cachedState,Item[]items,Set<Integer>quantitySensitiveIds){if(cachedState==null||cachedState.length!=items.length*2){return true;
-}for(int slot=0;slot<items.length;slot++){Item item=items[slot];
-int offset=slot*2;
-int itemId=item==null?-1:item.getId();
-int quantity=item==null?0:item.getQuantity();
-if(cachedState[offset]!=itemId){return true;
-}if(cachedState[offset+1]!=quantity&&quantitySensitiveIds.contains(itemId)){return true;
-}}return false;
-}private static boolean matchesItemIdentityState(int[]cachedState,Item[]items){if(cachedState==null||cachedState.length!=items.length){return false;
-}for(int slot=0;
-slot<items.length;
-slot++){Item item=items[slot];
-if(cachedState[slot]!=(item==null?-1:item.getId())){return false;
-}}return true;
-}private static int[]snapshotItemIdentityState(Item[]items){int[]state=new int[items.length];
-for(int slot=0;
-slot<items.length;
-slot++){state[slot]=items[slot]==null?-1:items[slot].getId();
-}return state;
-}private static boolean matchesExactItemState(int[]cachedState,Item[]items){if(cachedState==null||cachedState.length!=items.length*2){return false;
-}for(int slot=0;
-slot<items.length;
-slot++){Item item=items[slot];
-int offset=slot*2;
-if(cachedState[offset]!=(item==null?-1:item.getId())||cachedState[offset+1]!=(item==null?0:item.getQuantity())){return false;
-}}return true;
-}private static int[]snapshotExactItemState(Item[]items){int[]state=new int[items.length*2];
-for(int slot=0;
-slot<items.length;
-slot++){Item item=items[slot];
-int offset=slot*2;
-state[offset]=item==null?-1:item.getId();
-state[offset+1]=item==null?0:item.getQuantity();
-}return state;
-}void scheduleRefresh(boolean bankOpened){loadoutRefreshPending|=bankOpened||bankInterfaceOpen||settingsRefresh;
-bankOpenedRefreshPending|=bankOpened;
-scheduleProgressRefresh();
-}void scheduleProgressRefresh(){
-if(slayerRefreshQueued){return;
-}slayerRefreshQueued=true;
-pendingRefreshDeadlineTick=tick+REFRESH_DEBOUNCE_TICKS;
-}private void runQueuedRefresh(){boolean handleBank=bankOpenedRefreshPending;
-boolean refreshBankTag=settingsRefresh;
-boolean rebuildLoadout=loadoutRefreshPending;
-loadoutRefreshPending=false;
-bankOpenedRefreshPending=false;
-settingsRefresh=false;
-slayerRefreshQueued=false;
-if(handleBank){ItemContainer liveBank=client.getItemContainer(InventoryID.BANK);
-if(liveBank!=null){cacheBankContainer(liveBank);
-rememberOpenBank();
-}}refreshSlayerData(rebuildLoadout);
-if(refreshBankTag&&shouldRefreshExistingBankTag(layoutCreated,isSlayerPlusBankTagOpen())){createBankTagNow();
-}}static boolean shouldRefreshExistingBankTag(boolean layoutCreated,boolean tagOpen){return layoutCreated||tagOpen;
-}@Subscribe public void onWidgetLoaded(WidgetLoaded event){if(event.getGroupId()==InterfaceID.BANKMAIN){if(!shouldHandleBankWidgetLoadForTest(bankInterfaceOpen,event.getGroupId())){return;
-}bankInterfaceOpen=true;
-scheduleRefresh(true);
-return;
-}if(isQuiverRelevantInterfaceGroupForTest(event.getGroupId())&&refreshQuiverAmmo()){scheduleRefresh(false);
-}}@Subscribe public void onWidgetClosed(WidgetClosed event){if(event!=null&&event.getGroupId()==InterfaceID.BANKMAIN){handleBankClosed();
-}}static boolean shouldHandleBankWidgetLoadForTest(boolean bankAlreadyOpen,int groupId){return groupId==InterfaceID.BANKMAIN&&!bankAlreadyOpen;
-}private void reconcileBankInterfaceState(){Widget bank=client.getWidget(InterfaceID.Bankmain.ITEMS_CONTAINER);
-boolean visiblyOpen=bank!=null&&!bank.isHidden();
-if(!shouldReconcileBankVisibilityForTest(bankInterfaceOpen,visiblyOpen)){return;
-}if(visiblyOpen){bankInterfaceOpen=true;
-scheduleRefresh(true);
-}else{handleBankClosed();
-}}void handleBankClosed(){bankInterfaceOpen=false;
-spiderTeleportArrived=false;
-bankReachedForRestock=true;
-scheduleRefresh(false);
-pendingRefreshDeadlineTick=tick;
-}static boolean shouldReconcileBankVisibilityForTest(boolean recordedOpen,boolean visiblyOpen){return recordedOpen!=visiblyOpen;
-}private BankRoutes accountBankRoutes(){String profile=configs.getRSProfileKey();
-bankRoutes.useProfile(profile,()->configs.getRSProfileConfiguration(SlayerPlusConfig.GROUP,BankRoutes.CONFIG_KEY));
-return bankRoutes;
-}private void rememberOpenBank(){Widget bankWidget=client.getWidget(InterfaceID.Bankmain.ITEMS_CONTAINER);
-Player player=client.getLocalPlayer();
-if(client.getGameState()!=GameState.LOGGED_IN||bankWidget==null||bankWidget.isHidden()||player==null){return;
-}bankReachedForRestock=true;
-BankRoutes routes=accountBankRoutes();
-if(routes.remember(player.getWorldLocation(),client.isInInstancedRegion())){
-configs.setRSProfileConfiguration(SlayerPlusConfig.GROUP,BankRoutes.CONFIG_KEY,routes.serialize());
-}
-}static boolean isQuiverRelevantInterfaceGroupForTest(int groupId){return groupId==InterfaceID.EQUIPMENT||groupId==InterfaceID.EQUIPMENT_SIDE||groupId==InterfaceID.WORNITEMS||groupId==InterfaceID.DIZANAS_QUIVER;
-}private void refreshPortrait(){SlayerPlusPanel ui=panel;
-if(ui==null||portraitRenderer==null||client.getGameState()!=GameState.LOGGED_IN){return;
-}if(!shouldCheckPortraitForTest(tick,portraitPending,portraitRetry)){return;
-}Player player=client.getLocalPlayer();
-if(player==null){return;
-}String playerName=player.getName();
-if(playerName!=null&&!playerName.trim().isEmpty()&&!playerName.trim().equals(lastAccountName)){lastAccountName=playerName.trim();
-String accountName=lastAccountName;
-SwingUtilities.invokeLater(()->ui.showAccountName(accountName));
-}PlayerComposition composition=player.getPlayerComposition();
-if(composition==null){return;
-}int appearanceHash=Arrays.hashCode(composition.getEquipmentIds());
-appearanceHash=31*appearanceHash+Arrays.hashCode(composition.getColors());
-appearanceHash=31*appearanceHash+composition.getGender();
-if(appearanceHash!=lastAppearanceHash){lastAppearanceHash=appearanceHash;
-portraitPending=true;
-portraitRetry=0;
-}if(!portraitPending){return;
-}if(!ui.isShowing()){deferPortraitRetry();
-return;
-}BufferedImage cachedPortrait=portraitCache.get(appearanceHash);
-if(cachedPortrait!=null){portraitPending=false;
-portraitRetry=0;
-SwingUtilities.invokeLater(()->ui.setPortrait(cachedPortrait));
-return;
-}if(player.getAnimation()!=-1||player.getPoseAnimation()!=player.getIdlePoseAnimation()){return;
-}int originalPoseFrame=player.getPoseAnimationFrame();
-try{player.setPoseAnimationFrame(0);
-int[]equipmentIds=composition.getEquipmentIds();
-int weaponIndex=KitType.WEAPON.getIndex();
-int torsoIndex=KitType.TORSO.getIndex();
-boolean weaponEquipped=weaponIndex>=0&&weaponIndex<equipmentIds.length&&equipmentIds[weaponIndex]>=PlayerComposition.ITEM_OFFSET;
-int originalWeapon=weaponEquipped?equipmentIds[weaponIndex]:0;
-Model bodyModel;
-if(weaponEquipped){equipmentIds[weaponIndex]=0;
-composition.setHash();
-try{bodyModel=player.getModel();
-}finally{equipmentIds[weaponIndex]=originalWeapon;
-composition.setHash();
-}}else{bodyModel=player.getModel();
-}if(bodyModel==null){deferPortraitRetry();
-return;
-}Model displayModel=player.getModel();
-if(displayModel==null){deferPortraitRetry();
-return;
-}boolean torsoArmourEquipped=torsoIndex>=0&&torsoIndex<equipmentIds.length&&equipmentIds[torsoIndex]>=PlayerComposition.ITEM_OFFSET;
-boolean allowCalibration=!portraitLoaded&&!weaponEquipped&&torsoArmourEquipped;
-BufferedImage portrait=portraitRenderer.render(displayModel,bodyModel,portraitLoaded||allowCalibration);
-if(portrait!=null){if(!portraitLoaded&&portraitRenderer.hasCal()){String calibration=portraitRenderer.exportCal();
-if(calibration!=null){configs.setConfiguration(SlayerPlusConfig.GROUP,PORTRAIT_CALIBRATION_KEY,calibration);
-portraitLoaded=true;
-}}portraitPending=false;
-portraitRetry=0;
-portraitCache.put(appearanceHash,portrait);
-SwingUtilities.invokeLater(()->ui.setPortrait(portrait));
-}else{deferPortraitRetry();
-}}catch(RuntimeException ex){log.debug(text(606),ex);
-deferPortraitRetry();
-}finally{try{player.setPoseAnimationFrame(originalPoseFrame);
-}catch(RuntimeException ex){log.debug(text(607),ex);
-}}}static boolean shouldCheckPortraitForTest(long tick,boolean pending,long retryAfterTick){if(pending){return tick>=retryAfterTick;
-}return tick%PORTRAIT_APPEARANCE_POLL_TICKS==0;
-}private void deferPortraitRetry(){portraitRetry=tick+PORTRAIT_APPEARANCE_POLL_TICKS;
-}private void refreshSlayerData(){refreshSlayerData(true);
-}private List<String>refreshLoadoutInputs(){
-analyzer.setHelmetPreference(configs.getConfiguration(SlayerPlusConfig.GROUP,HelmetPreference.CONFIG_KEY));
-analyzer.setDesertEliteDiaryComplete(client.getVarbitValue(VarbitID.DESERT_DIARY_ELITE_COMPLETE)>0);
-diaries=SlayerAchievementDiarySnapshot.capture(client);
-analyzer.setAchievementDiaries(diaries);
-if(!helmSnapshotLoaded){loadOwnedSlayerHelmetSnapshot();
-}Set<String>ownedHelms=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-ownedHelms.addAll(analyzer.ownedHelms(client.getItemContainer(InventoryID.INV),client.getItemContainer(InventoryID.WORN),bank));
-ownedHelms.addAll(analyzer.slayerHelmetNamesForItemIds(helms));
-return new ArrayList<>(ownedHelms);
-}private void refreshSlayerData(boolean requestedRebuild){SlayerPlusPanel ui=panel;
-if(ui==null||client.getGameState()!=GameState.LOGGED_IN){return;
-}refreshQuiverAmmo();
-int previousRemaining=seenRemaining;
-String previousTaskName=observedTaskName;
-String accountName=getAccountName();
-boolean whileGuthixSleepsFinished=Quest.WHILE_GUTHIX_SLEEPS.getState(client)==QuestState.FINISHED;
-boolean monkeyMadness2Finished=Quest.MONKEY_MADNESS_II.getState(client)==QuestState.FINISHED;
-int serviceRemaining=slayerService==null?0:slayerService.getRemainingAmount();
-int serviceInitialAmount=slayerService==null?0:slayerService.getInitialAmount();
-String serviceTaskName=slayerService==null||slayerService.getTask()==null?"":slayerService.getTask().trim();
-String serviceTaskLocation=slayerService==null||slayerService.getTaskLocation()==null?"":slayerService.getTaskLocation().trim();
-int liveRemaining=client.getVarpValue(VarPlayerID.SLAYER_COUNT);
-int profileRemaining=readRuneLiteSlayerProfileInt(RUNELITE_SLAYER_AMOUNT_KEY);
-boolean chatUpdatePending=tick<=pendingChatTaskExpiresAfterTick;
-boolean chatAssignmentPending=pendingChatTaskRemaining>0&&chatUpdatePending;
-int rawRemaining=resolveTaskRemainingForTest(seenRemaining,serviceRemaining,liveRemaining,profileRemaining,chatAssignmentPending?pendingChatTaskRemaining:-1);
-int remaining=devPreviewTask.isEmpty()?rawRemaining:Math.max(rawRemaining,50);
-int liveInitialAmount=client.getVarpValue(VarPlayerID.SLAYER_COUNT_ORIGINAL);
-int profileInitialAmount=readRuneLiteSlayerProfileInt(RUNELITE_SLAYER_INITIAL_AMOUNT_KEY);
-int initialAmount=Math.max(remaining,firstPositive(serviceInitialAmount,liveInitialAmount,profileInitialAmount,chatAssignmentPending?pendingChatTaskRemaining:-1));
-int liveMasterId=client.getVarbitValue(VarbitID.SLAYER_MASTER);
-int inferredMasterId=remaining>0&&liveMasterId<=0?inferNearbySlayerMasterId():0;
-int storedMasterId=readSlayerPlusProfileInt(LAST_SLAYER_MASTER_SNAPSHOT_KEY);
-int masterId=firstPositive(liveMasterId,inferredMasterId,storedMasterId);
-if(!devPreviewTask.isEmpty()&&masterId<=0){masterId=BoostCoordinator.TURAEL_AYA_MASTER_ID;
-}int livePoints=client.getVarbitValue(VarbitID.SLAYER_POINTS);
-int points=preferLiveOrProfileValue(livePoints,readRuneLiteSlayerProfileInt(RUNELITE_SLAYER_POINTS_KEY),chatUpdatePending?pendingChatPoints:-1);
-int normalStreak=client.getVarbitValue(VarbitID.SLAYER_TASKS_COMPLETED);
-int resolvedStreak=preferLiveOrProfileValue(normalStreak,readRuneLiteSlayerProfileInt(RUNELITE_SLAYER_STREAK_KEY),chatUpdatePending?pendingChatStreak:-1);
-int streak=masterId==KRYSTILIA?client.getVarbitValue(VarbitID.SLAYER_WILDERNESS_TASKS_COMPLETED):resolvedStreak;
-int previousNormalStreak=observedNormalTaskStreak;
-master=masterId;
-if(masterId>0){lastMaster=masterId;
-storeLastSlayerMasterId(masterId);
-}if(remaining<=0){loadoutContext="";
-recommendation=null;
-clearCachedGuidedTaskTarget();
-currentLoadout=KitPlan.empty();
-preparation=PreparationCatalog.PreparationPlan.none();
-preparationContext="";
-updateReadinessOverlay();
-assignment="";
-taskVar=TaskVariant.STANDARD_TASK;
-seenRemaining=0;
-observedTaskName="";
-observedNormalTaskStreak=resolvedStreak;
-String pointBoostStatus=pointBoostPanelStatus(resolvedStreak,false,masterId);
-String nextMasterName=masterDisplayNameForTest(masterForNextAssignment(resolvedStreak),whileGuthixSleepsFinished,monkeyMadness2Finished);
-List<String>ownedSlayerHelmets=requestedRebuild?refreshLoadoutInputs():Collections.emptyList();
-SwingUtilities.invokeLater(()->ui.runBatchedUpdate(()->{
-if(requestedRebuild){ui.configureOwnedSlayerHelmets(ownedSlayerHelmets);}
-ui.showAccountName(accountName);
-ui.showNoTask(points,streak,nextMasterName);
-ui.showPointBoostStatus(pointBoostStatus);
-ui.showPreparation(preparation);
-}));
-cachedTravelCandidateIds=travelCandidateItemIds();
-return;
-}String profileTaskName=readRuneLiteSlayerProfileString(RUNELITE_SLAYER_TASK_NAME_KEY);
-String rawDetectedTask=serviceRemaining>0&&!serviceTaskName.isEmpty()?formatName(serviceTaskName):liveRemaining>0?readTaskName():!profileTaskName.isEmpty()&&profileRemaining>0?formatName(profileTaskName):chatAssignmentPending?pendingChatTaskName:"Unknown task";
-String detectedTask=devPreviewTask.isEmpty()?rawDetectedTask:devPreviewTask;
-if(isPointBoosting()&&masterId==BoostCoordinator.TURAEL_AYA_MASTER_ID&&TuraelBoost.find(detectedTask)!=null){taskVar=TaskVariant.STANDARD_TASK;
-}else if(!sameTask(assignment,detectedTask)){taskVar=VariantCatalog.getDefaultVariant(detectedTask);
-}assignment=detectedTask==null?"":detectedTask.trim();
-if(!VariantCatalog.getAvailableVariants(detectedTask).contains(taskVar)){taskVar=VariantCatalog.getDefaultVariant(detectedTask);
-}boolean konarAssignment=masterId==KONAR_MASTER_ID;
-String rawAssignedLocation=konarAssignment?!serviceTaskLocation.isEmpty()?serviceTaskLocation:liveRemaining>0?readAssignedLocation():profileSlayerLocation():"Not restricted";
-String assignedLocation=devPreviewTask.isEmpty()?rawAssignedLocation:"Not restricted";
-String context=assignment+'|'+masterId+'|'+assignedLocation+'|'+taskVar;
-boolean rebuildLoadout=shouldRebuildLoadout(requestedRebuild,recommendation!=null,loadoutContext,context,previousRemaining,remaining);
-List<String>ownedSlayerHelmets=rebuildLoadout?refreshLoadoutInputs():Collections.emptyList();
-if(rebuildLoadout){
-recommendation=recommendationEngine==null?null:recommendationEngine.recommend(detectedTask,masterId,assignedLocation);
-if(recommendation!=null&&analyzer!=null){recommendation=analyzer.resolveOwnedAutomaticRecommendation(detectedTask,recommendation,client.getItemContainer(InventoryID.INV),client.getItemContainer(InventoryID.WORN),bank,scanned,taskVar,config);
-}}
-Recommendation resolvedTask=recommendation;
-KitPlan loadout=currentLoadout.withRemainingFinishers(remaining);
-if(rebuildLoadout){
-if(!config.showLoadoutRecommendations()){loadout=KitPlan.hidden();
-}else if(analyzer==null){loadout=new KitPlan(text(608),text(608),"No item scan available");
-}else{loadout=analyzer.analyze(detectedTask,resolvedTask,client.getItemContainer(InventoryID.INV),client.getItemContainer(InventoryID.WORN),bank,scanned,taskVar,config,remaining,quiverId,extraQuiverQty);
-}loadoutContext=context;
-}
-boolean loadoutChanged=loadout!=currentLoadout;
-currentLoadout=loadout;
-VariantCatalog.ResolvedTarget preparationTarget=VariantCatalog.resolve(assignment,taskVar,resolvedTask,config);
-String preparationEncounter=preparationTarget==null?assignment:preparationTarget.getTaskName();
-String preparationLocation=preparationTarget==null?resolvedTask.getLocation():preparationTarget.getLocation();
-TaskStrategy preparationStrategy=preparationTarget==null?resolvedTask.getStrategy():preparationTarget.getStrategy();
-int preparationWeaponId=PoweredMagic.weaponId(loadout.getEquipmentItems());
-String setupContext=context+'|'+initialAmount+'|'+resolvedStreak+'|'+preparationEncounter+'|'+preparationLocation+'|'+preparationWeaponId+'|'+(preparationStrategy==null?"":preparationStrategy.getMethod()+preparationStrategy.getStyle());
-if(shouldRefreshPreparation(preparation.isReady(),preparationContext,setupContext,previousRemaining,remaining)){
-preparation=shouldResolvePreparationForTask(preparationEncounter)?PreparationCatalog.resolve(preparationEncounter,preparationLocation,preparationStrategy,client,client.getItemContainer(InventoryID.INV),client.getItemContainer(InventoryID.WORN),bank,preparationWeaponId):PreparationCatalog.PreparationPlan.none();
-preparationContext=setupContext;
-updateReadinessOverlay();
-}
-seenRemaining=remaining;
-observedTaskName=assignment;
-observedNormalTaskStreak=resolvedStreak;
-String displayedTaskName=detectedTask;
-String pointBoostStatus=pointBoostPanelStatus(resolvedStreak,true,masterId);
-String masterName=masterDisplayNameForTest(masterId,whileGuthixSleepsFinished,monkeyMadness2Finished);
-KitPlan displayedLoadout=loadout;
-PreparationCatalog.PreparationPlan displayedPreparation=preparation;
-TaskVariant displayedVariant=taskVar;
-SwingUtilities.invokeLater(()->ui.runBatchedUpdate(()->{if(rebuildLoadout){ui.configureOwnedSlayerHelmets(ownedSlayerHelmets);
-ui.configureTaskVariants(detectedTask,displayedVariant);
-}
-if(rebuildLoadout||loadoutChanged){ui.showRecommendation(resolvedTask,displayedLoadout);}
-ui.showAccountName(accountName);
-ui.showTask(displayedTaskName,remaining,initialAmount,masterName,assignedLocation,points,streak,konarAssignment);
-ui.showPointBoostStatus(pointBoostStatus);
-ui.showPreparation(displayedPreparation);
-}));
-if(rebuildLoadout){cachedTravelCandidateIds=travelCandidateItemIds();
-}
-}private void updateReadinessOverlay(){if(readinessOverlay==null||overlayManager==null){return;
-}boolean show=preparation.isActive()&&!preparation.isReady();
-if(!show){hideReadinessOverlay();
-return;
-}
-readinessOverlay.update(preparation);
-if(!readinessOverlayAdded){overlayManager.add(readinessOverlay);
-}readinessOverlayAdded=true;
-}private void hideReadinessOverlay(){if(readinessOverlayAdded&&overlayManager!=null&&readinessOverlay!=null){overlayManager.remove(readinessOverlay);
-readinessOverlay.update(PreparationCatalog.PreparationPlan.none());
-}readinessOverlayAdded=false;
-}static boolean shouldRefreshPreparation(boolean ready,String previousContext,String context,int previousRemaining,int remaining){return!ready||!Objects.equals(previousContext,context)||(previousRemaining>=0&&remaining>previousRemaining);
-}static boolean shouldRebuildLoadout(boolean requested,boolean hasRecommendation,String previousContext,String context,int previousRemaining,int remaining){return requested||!hasRecommendation||!Objects.equals(previousContext,context)||remaining>previousRemaining;
-}static boolean shouldRefreshProgress(int varpId,boolean preparationReady){return varpId==VarPlayerID.SLAYER_COUNT||!preparationReady;
-}static boolean isProgressOnlyVarChange(int varpId,int varbitId){return varpId==VarPlayerID.SLAYER_COUNT||varbitId==VarbitID.RUNE_POUCH_QUANTITY_1||varbitId==VarbitID.RUNE_POUCH_QUANTITY_2||varbitId==VarbitID.RUNE_POUCH_QUANTITY_3||varbitId==VarbitID.RUNE_POUCH_QUANTITY_4||varbitId==VarbitID.RUNE_POUCH_QUANTITY_5||varbitId==VarbitID.RUNE_POUCH_QUANTITY_6;
-}private static List<String>devPreviewTaskNames(){Set<String>names=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-names.addAll(TaskResearch.getReviewedTaskNames());
-for(VariantCatalog.EncounterDefinition boss:VariantCatalog.getBossDefinitions()){names.add(boss.getEncounter());
-}for(VariantCatalog.EncounterDefinition boss:VariantCatalog.getDirectBossDefinitions()){names.add(boss.getEncounter());
-}return new ArrayList<>(names);
-}private void selectDevPreviewTask(String taskName){devPreviewTask=taskName==null?"":taskName.trim();
-if(!devPreviewTask.isEmpty()){seenRemaining=0;
-}refreshSlayerData();
-}private void selectBankTagVariant(TaskVariant variant){boolean refreshOpenBankTag=isSlayerPlusBankTagOpen();
-TaskVariant requested=variant==null?TaskVariant.STANDARD_TASK:variant;
-if(!VariantCatalog.getAvailableVariants(assignment).contains(requested)){taskVar=VariantCatalog.getDefaultVariant(assignment);
-}else{taskVar=requested;
-}refreshSlayerData();
-if(refreshOpenBankTag){createRecommendedBankTag();
-}}private boolean isSlayerPlusBankTagOpen(){if(bankTagsService==null||client.getItemContainer(InventoryID.BANK)==null){return false;
-}String activeTag=bankTagsService.getActiveTag();
-return activeTag!=null&&Text.standardize(activeTag).equals(Text.standardize(BankTagLayout.TAG_NAME));
-}private Target resolveTaskTarget(){Recommendation selected=recommendation;
-if(selected==null){clearCachedGuidedTaskTarget();
-return null;
-}if(selected==cachedGuidedTargetRecommendation&&sameTask(assignment,cachedGuidedTargetTaskName)&&taskVar==cachedGuidedTargetVariant){return cachedGuidedTaskTarget;
-}VariantCatalog.ResolvedTarget resolvedTarget=VariantCatalog.resolve(assignment,taskVar,selected,config);
-if(resolvedTarget==null||!resolvedTarget.isValid()){return null;
-}Target target=new Target(resolvedTarget.getTaskName(),resolvedTarget.getLocation(),resolvedTarget.isBoss());
-cachedGuidedTargetRecommendation=selected;
-cachedGuidedTargetTaskName=assignment;
-cachedGuidedTargetVariant=taskVar;
-cachedGuidedTaskTarget=target;
-return target;
-}private void clearCachedGuidedTaskTarget(){cachedGuidedTargetRecommendation=null;
-cachedGuidedTargetTaskName="";
-cachedGuidedTargetVariant=null;
-cachedGuidedTaskTarget=null;
-}private static boolean sameTask(String first,String second){String left=first==null?"":first.trim();
-String right=second==null?"":second.trim();
-return left.equalsIgnoreCase(right);
-}private boolean refreshQuiverAmmo(){if(client==null||client.getGameState()!=GameState.LOGGED_IN){return false;
-}boolean wearingQuiver=isWearingUsableDizana();
-int carriedQuiverItemId=findUsableDizanaVariantInContainer(client.getItemContainer(InventoryID.INV));
-if(!wearingQuiver&&carriedQuiverItemId<=0&&bankDizanaId<=0){boolean changed=quiverId>0||extraQuiverQty>0;
-clearExtraQuiverAmmoSnapshot();
-return changed;
-}int[]storedAmmo=readStoredExtraQuiverAmmoFromContainer();
-int varpItemId=QuiverAmmo.restoreSeekingIdentityFromPlaceholders(normalizeAmmoId(client.getVarpValue(VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO)),seekingArrowIds);
-int varpQuantity=client.getVarpValue(VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO_AMOUNT);
-int[]widgetAmmo=readLiveExtraQuiverAmmoFromWidgets();
-QuiverAmmo.Snapshot snapshot=QuiverAmmo.restoreHiddenBankedSeekingAmmo(bankDizanaId>0,QuiverAmmo.resolveSnapshot(wearingQuiver,storedAmmo==null?-1:QuiverAmmo.restoreSeekingIdentityFromPlaceholders(storedAmmo[0],seekingArrowIds),storedAmmo==null?0:storedAmmo[1],widgetAmmo==null?-1:QuiverAmmo.restoreSeekingIdentityFromPlaceholders(widgetAmmo[0],seekingArrowIds),widgetAmmo==null?0:widgetAmmo[1],canonicalCompatibleQuiverAmmoItemId(varpItemId),varpQuantity,quiverId),seekingArrowIds);
-int itemId=snapshot.getItemId();
-int quantity=snapshot.getQuantity();
-boolean identityChanged=quiverId!=itemId;
-boolean presenceChanged=(extraQuiverQty>0)!=(quantity>0);
-quiverId=itemId;
-extraQuiverQty=quantity;
-return identityChanged||presenceChanged;
-}private int canonicalCompatibleQuiverAmmoItemId(int raw){int itemId=canonicalizeQuiverAmmoItemId(raw);
-return isQuiverCompatibleAmmoItemId(itemId)?itemId:-1;
-}private int canonicalizeQuiverAmmoItemId(int raw){if(raw<=0){return-1;
-}int normalizedRaw=normalizeAmmoId(raw);
-if(isSeekingArrowDisplayItemId(normalizedRaw)){return normalizedRaw;
-}int itemId=raw;
-try{if(itemManager!=null){itemId=itemManager.canonicalize(itemId);
-}else if(client!=null){ItemComposition composition=client.getItemDefinition(itemId);
-if(composition!=null){if(composition.getNote()!=-1){itemId=composition.getLinkedNoteId();
-}if(composition.getPlaceholderTemplateId()!=-1){itemId=composition.getPlaceholderId();
-}}}}catch(RuntimeException ignored){}return normalizeAmmoId(itemId);
-}private boolean isQuiverCompatibleAmmoItemId(int raw){int itemId=canonicalizeQuiverAmmoItemId(raw);
-if(itemId<=0){return false;
-}if(isSeekingArrowDisplayItemId(itemId)){return true;
-}if(client==null){return false;
-}try{ItemComposition composition=client.getItemDefinition(itemId);
-if(composition==null||composition.getName()==null){return false;
-}String name=Text.removeTags(composition.getName()).toLowerCase(Locale.ENGLISH).replace('’','\'').trim();
-if(name.contains("arrowtip")||name.contains("bolt tip")){return false;
-}return name.contains("arrow")||name.contains("bolt")||name.contains("grapple");
-}catch(RuntimeException ignored){return false;
-}}private int[]readLiveExtraQuiverAmmoFromWidgets(){int[]itemComponents={InterfaceID.DizanasQuiver.AMMO_OBJ,InterfaceID.Wornitems.EXTRA_QUIVER_AMMO,InterfaceID.Equipment.EXTRA_QUIVER_AMMO,InterfaceID.Bankmain.EXTRA_QUIVER_AMMO};
-int[]best=null;
-for(int componentId:itemComponents){best=betterQuiverWidgetCandidate(best,quiverWidgetCandidate(client.getWidget(componentId)));
-}return best;
-}private int[]readStoredExtraQuiverAmmoFromContainer(){ItemContainer container=client.getItemContainer(InventoryID.DIZANAS_QUIVER_AMMO);
-if(container==null){return null;
-}int[]best=new int[]{-1,0};
-for(Item item:container.getItems()){if(item==null||item.getQuantity()<=0){continue;
-}int itemId=canonicalCompatibleQuiverAmmoItemId(item.getId());
-if(itemId<=0){continue;
-}if(best[0]<=0||QuiverAmmo.infernoPreference(itemId)<QuiverAmmo.infernoPreference(best[0])){best=new int[]{itemId,item.getQuantity()};
-}}return best;
-}private int[]quiverWidgetCandidate(Widget widget){if(widget==null){return null;
-}int raw=widget.getItemId();
-if(raw<=0){return null;
-}int itemId=canonicalizeQuiverAmmoItemId(raw);
-if(!isQuiverCompatibleAmmoItemId(itemId)){return null;
-}int quantity=widget.getItemQuantity();
-if(quantity<=0){quantity=client.getVarpValue(VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO_AMOUNT);
-}if(quantity<=0){return null;
-}return new int[]{itemId,quantity};
-}private static int[]betterQuiverWidgetCandidate(int[]current,int[]candidate){if(candidate==null){return current;
-}if(current==null){return candidate;
-}boolean candidateSeeking=isSeekingArrowDisplayItemId(candidate[0]);
-boolean currentSeeking=isSeekingArrowDisplayItemId(current[0]);
-return candidateSeeking&&!currentSeeking?candidate:current;
-}private static int normalizeAmmoId(int raw){return QuiverAmmo.arrow(raw);
-}private static boolean isSeekingArrowDisplayItemId(int itemId){return QuiverAmmo.isSeekingArrow(itemId);
-}private boolean isWearingUsableDizana(){ItemContainer equipment=client.getItemContainer(InventoryID.WORN);
-if(equipment==null){return false;
-}Item cape=equipment.getItem(EquipmentInventorySlot.CAPE.getSlotIdx());
-return cape!=null&&cape.getQuantity()>0&&isUsableDizanaItemId(cape.getId());
-}private static boolean isUsableDizanaItemId(int raw){return QuiverAmmo.isUsableDizanaVariant(raw);
-}private static int findUsableDizanaVariantInContainer(ItemContainer container){if(container==null){return-1;
-}int bestItemId=-1;
-for(Item item:container.getItems()){if(item==null||item.getQuantity()<=0){continue;
-}bestItemId=QuiverAmmo.preferUsableDizanaVariant(bestItemId,item.getId());
-}return bestItemId;
-}private void clearExtraQuiverAmmoSnapshot(){quiverId=-1;
-extraQuiverQty=0;
-}private boolean cacheBankContainer(ItemContainer bankContainer){Widget bank=client==null?null:client.getWidget(InterfaceID.Bankmain.ITEMS_CONTAINER);
-return cacheBankContainer(bankContainer,bank!=null);
-}private boolean cacheBankContainer(ItemContainer bankContainer,boolean confirmedBankScan){if(bankContainer==null||analyzer==null){return false;
-}boolean rawStateMatches=matchesCachedBankContainerState(bankContainer);
-if(shouldSkipUnchangedBankScanForTest(scanned,rawStateMatches)){if(confirmedBankScan&&!rawBankConfirmed){rawBankConfirmed=true;
-persistInfernoTravelItemSnapshot();
-persistOwnedSlayerHelmetSnapshot();
-}return false;
-}rawBankState=snapshotRawBankContainerState(bankContainer);
-rawBankConfirmed=confirmedBankScan;
-boolean previouslyScanned=scanned;
-int previousQuiverId=bankDizanaId;
-Map<Integer,Integer>previousBankItems=new LinkedHashMap<>(bank);
-Set<Integer>previousSeekingIds=new LinkedHashSet<>(seekingArrowIds);
-int previousExtraAmmoId=quiverId;
-bankDizanaId=findUsableDizanaVariantInContainer(bankContainer);
-cacheSeekingArrowPlaceholders(bankContainer);
-bank.clear();
-bank.putAll(analyzer.snapshotItems(bankContainer));
-scanned=true;
-if(confirmedBankScan){persistInfernoTravelItemSnapshot();
-persistOwnedSlayerHelmetSnapshot();
-}boolean extraAmmoChanged=refreshQuiverAmmo();
-return!previouslyScanned||previousQuiverId!=bankDizanaId||!previousBankItems.equals(bank)||!previousSeekingIds.equals(seekingArrowIds)||previousExtraAmmoId!=quiverId||extraAmmoChanged;
-}private boolean matchesCachedBankContainerState(ItemContainer bankContainer){Item[]items=bankContainer.getItems();
-if(items==null||rawBankState.length!=items.length*2){return false;
-}for(int slot=0;
-slot<items.length;
-slot++){Item item=items[slot];
-int offset=slot*2;
-int itemId=item==null?-1:item.getId();
-int quantity=item==null?0:item.getQuantity();
-if(rawBankState[offset]!=itemId||rawBankState[offset+1]!=quantity){return false;
-}}return true;
-}private static int[]snapshotRawBankContainerState(ItemContainer bankContainer){Item[]items=bankContainer.getItems();
-if(items==null||items.length==0){return new int[0];
-}int[]state=new int[items.length*2];
-for(int slot=0;
-slot<items.length;
-slot++){Item item=items[slot];
-int offset=slot*2;
-state[offset]=item==null?-1:item.getId();
-state[offset+1]=item==null?0:item.getQuantity();
-}return state;
-}static boolean shouldSkipUnchangedBankScanForTest(boolean scanned,boolean rawStateMatches){return scanned&&rawStateMatches;
-}private void persistOwnedSlayerHelmetSnapshot(){Set<Integer>discovered=analyzer.ownedSlayerHelmetItemIds(client.getItemContainer(InventoryID.INV),client.getItemContainer(InventoryID.WORN),bank);
-boolean snapshotChanged=shouldPersistSnapshotForTest(helmSnapshotLoaded,helms,discovered);
-helms.clear();
-helms.addAll(discovered);
-helmSnapshotLoaded=true;
-try{if(configs.getRSProfileKey()==null){return;
-}if(!snapshotChanged){return;
-}configs.setRSProfileConfiguration(SlayerPlusConfig.GROUP,OWNED_SLAYER_HELMETS_SNAPSHOT_KEY,serializeItemIds(discovered));
-log.debug(text(610),discovered.size());
-}catch(RuntimeException ex){log.debug(text(611),ex);
-}}private void loadOwnedSlayerHelmetSnapshot(){helms.clear();
-helmSnapshotLoaded=false;
-try{if(configs.getRSProfileKey()==null){return;
-}helms.addAll(parseItemIds(configs.getRSProfileConfiguration(SlayerPlusConfig.GROUP,OWNED_SLAYER_HELMETS_SNAPSHOT_KEY)));
-helmSnapshotLoaded=true;
-log.debug(text(612),helms.size());
-}catch(RuntimeException ex){log.debug(text(613),ex);
-}}static String serializeItemIds(Iterable<Integer>itemIds){StringBuilder serialized=new StringBuilder();
-if(itemIds!=null){for(Integer itemId:itemIds){if(itemId==null||itemId<=0){continue;
-}if(serialized.length()>0){serialized.append(',');
-}serialized.append(itemId);
-}}return serialized.toString();
-}static Set<Integer>parseItemIds(String serialized){Set<Integer>itemIds=new LinkedHashSet<>();
-if(serialized==null||serialized.trim().isEmpty()){return itemIds;
-}for(String token:serialized.split(",")){try{int itemId=Integer.parseInt(token.trim());
-if(itemId>0){itemIds.add(itemId);
-}}catch(NumberFormatException ignored){log.debug(text(614),token);
-}}return itemIds;
-}private void persistInfernoTravelItemSnapshot(){int bestItemId=preferredInfernoTravelItemId(bank.keySet());
-int nextItemId=Math.max(0,bestItemId);
-boolean snapshotChanged=shouldPersistSnapshotForTest(infernoLoaded,infernoItem,nextItemId);
-infernoItem=nextItemId;
-infernoLoaded=true;
-try{if(configs.getRSProfileKey()==null){infernoLoaded=false;
-return;
-}if(!snapshotChanged){return;
-}configs.setRSProfileConfiguration(SlayerPlusConfig.GROUP,INFERNO_TRAVEL_SNAPSHOT_KEY,infernoItem);
-log.debug(text(615),infernoItem);
-}catch(RuntimeException ex){infernoLoaded=false;
-log.debug(text(616),ex);
-}}static boolean shouldPersistSnapshotForTest(boolean snapshotLoaded,Object previousValue,Object nextValue){return!snapshotLoaded||!Objects.equals(previousValue,nextValue);
-}private void loadInfernoTravelItemSnapshot(){infernoItem=-1;
-infernoLoaded=false;
-try{if(configs.getRSProfileKey()==null){return;
-}String stored=configs.getRSProfileConfiguration(SlayerPlusConfig.GROUP,INFERNO_TRAVEL_SNAPSHOT_KEY);
-if(stored!=null){int storedItemId=Integer.parseInt(stored.trim());
-infernoItem=storedItemId==0||isInfernoPreparationTravelItemId(storedItemId)?storedItemId:0;
-infernoLoaded=true;
-log.debug(text(617),infernoItem);
-return;
-}int migratedItemId=infernoTravelItemFromSavedLayout();
-if(migratedItemId>0){infernoItem=migratedItemId;
-configs.setRSProfileConfiguration(SlayerPlusConfig.GROUP,INFERNO_TRAVEL_SNAPSHOT_KEY,migratedItemId);
-log.debug(text(618),migratedItemId);
-}else{infernoItem=0;
-configs.setRSProfileConfiguration(SlayerPlusConfig.GROUP,INFERNO_TRAVEL_SNAPSHOT_KEY,0);
-}infernoLoaded=true;
-}catch(NumberFormatException ex){infernoItem=0;
-infernoLoaded=true;
-log.debug(text(619),ex);
-}catch(RuntimeException ex){log.debug(text(620),ex);
-}}private int infernoTravelItemFromSavedLayout(){if(layoutManager==null){return-1;
-}Layout layout=layoutManager.loadLayout(BankTagLayout.TAG_NAME);
-if(layout==null||layout.getLayout()==null){return-1;
-}Set<Integer>layoutItemIds=new LinkedHashSet<>();
-for(int itemId:layout.getLayout()){if(itemId>0){layoutItemIds.add(itemId);
-}}return preferredInfernoTravelItemId(layoutItemIds);
-}static int preferredInfernoTravelItemId(Iterable<Integer>candidateItemIds){if(candidateItemIds==null){return-1;
-}Set<Integer>candidates=new HashSet<>();
-for(Integer itemId:candidateItemIds){if(itemId!=null){candidates.add(itemId);
-}}for(int supportedItemId:INFERNO_PREPARATION_TRAVEL_ITEM_IDS){if(candidates.contains(supportedItemId)){return supportedItemId;
-}}return-1;
-}private static boolean isInfernoPreparationTravelItemId(int itemId){for(int supportedItemId:INFERNO_PREPARATION_TRAVEL_ITEM_IDS){if(itemId==supportedItemId){return true;
-}}return false;
-}private void cacheSeekingArrowPlaceholders(ItemContainer bankContainer){seekingArrowIds.clear();
-if(bankContainer==null||itemManager==null){cacheSeekingArrowBankTagIdentityHints();
-return;
-}for(Item item:bankContainer.getItems()){if(item==null||item.getId()<=0){continue;
-}Integer cachedClassification=seekingPlaceholderClassificationCache.get(item.getId());
-if(cachedClassification!=null){if(cachedClassification>0){seekingArrowIds.add(cachedClassification);
-}continue;
-}int classification=-1;
-try{ItemComposition composition=itemManager.getItemComposition(item.getId());
-if(composition!=null&&composition.getPlaceholderTemplateId()>=0&&composition.getPlaceholderId()>=0){int canonicalItemId=normalizeAmmoId(itemManager.canonicalize(item.getId()));
-if(isSeekingArrowDisplayItemId(canonicalItemId)){classification=canonicalItemId;
-}}}catch(RuntimeException ignored){}seekingPlaceholderClassificationCache.put(item.getId(),classification);
-if(classification>0){seekingArrowIds.add(classification);
-}}cacheSeekingArrowBankTagIdentityHints();
-}private void cacheSeekingArrowBankTagIdentityHints(){if(configs==null){return;
-}String prefix=BankTagsPlugin.CONFIG_GROUP+".item_";
-for(String key:configs.getConfigurationKeys(prefix)){if(key==null||!key.startsWith(prefix)){continue;
-}try{int taggedItemId=Integer.parseInt(key.substring(prefix.length()));
-if(taggedItemId<=0){continue;
-}int normalizedItemId=normalizeAmmoId(taggedItemId);
-if(isSeekingArrowDisplayItemId(normalizedItemId)){seekingArrowIds.add(normalizedItemId);
-}}catch(NumberFormatException ignored){}}}static boolean shouldResolvePreparationForTask(String encounter){return!"unknown task".equals(trip(encounter));
-}private ItemMatch ownedTravel(String family){String key=trip(family);
-if(key.isEmpty()){return null;
-}ItemMatch best=null;
-for(Map.Entry<Integer,Integer>entry:bank.entrySet()){if(entry.getKey()==null||entry.getKey()<=0||entry.getValue()==null||entry.getValue()<=0){continue;
-}best=betterTravelItem(best,matchTravelItem(entry.getKey(),key,TRAVEL_BANK_SOURCE_SCORE));
-}best=findOwnedTravelItemInContainer(client.getItemContainer(InventoryID.INV),key,TRAVEL_INVENTORY_SOURCE_SCORE,best);
-best=findOwnedTravelItemInContainer(client.getItemContainer(InventoryID.WORN),key,TRAVEL_WORN_SOURCE_SCORE,best);
-return best;
-}private ItemMatch findOwnedTravelItemInContainer(ItemContainer container,String family,int sourceBonus,ItemMatch currentBest){ItemMatch best=currentBest;
-if(container==null){return best;
-}for(Item item:container.getItems()){if(item==null||item.getId()<=0||item.getQuantity()<=0){continue;
-}best=betterTravelItem(best,matchTravelItem(item.getId(),family,sourceBonus));
-}return best;
-}private ItemMatch matchTravelItem(int itemId,String family,int sourceBonus){if(itemManager==null||itemId<=0){return null;
-}ItemComposition composition;
-try{composition=itemManager.getItemComposition(itemId);
-}catch(RuntimeException ignored){return null;
-}if(composition==null||composition.getName()==null||composition.getName().trim().isEmpty()||"null".equalsIgnoreCase(composition.getName().trim())){return null;
-}String displayName=composition.getName().trim();
-String normalizedItem=trip(displayName);
-if(!SlayerTravelItemPolicy.isUsableDisplayName(displayName)){return null;
-}String withoutTablet=family.endsWith(" tablet")?family.substring(0,family.length()-" tablet".length()).trim():family;
-int quality=travelNameMatchQuality(normalizedItem,family,withoutTablet);
-if(quality<=0){return null;
-}return new ItemMatch(itemId,displayName,sourceBonus+quality+largestNumber(normalizedItem));
-}private static int travelNameMatchQuality(String itemName,String family,String alternateFamily){int quality=travelNameMatchQuality(itemName,family);
-if(!alternateFamily.equals(family)){quality=Math.max(quality,travelNameMatchQuality(itemName,alternateFamily));
-}return quality;
-}private static int travelNameMatchQuality(String itemName,String family){if(itemName.isEmpty()||family.isEmpty()){return 0;
-}if(itemName.equals(family)){return 1000;
-}if(itemName.startsWith(family+" ")){return 900;
-}String chargeFreeItem=itemName.replaceFirst("\\s+[a-z]?\\d+$","").trim();
-if(chargeFreeItem.equals(family)){return 850;
-}String equivalentItem=stripTravelVariantModifiers(chargeFreeItem);
-String equivalentFamily=stripTravelVariantModifiers(family);
-if(!equivalentItem.isEmpty()&&equivalentItem.equals(equivalentFamily)){if(containsTravelWord(chargeFreeItem,"eternal")&&containsTravelWord(family,"eternal")){return 875;
-}return 825;
-}if(family.startsWith(chargeFreeItem+" ")&&chargeFreeItem.length()>=8){return 700;
-}return 0;
-}private static boolean containsTravelWord(String value,String word){return(" "+value+" ").contains(" "+word+" ");
-}private static String stripTravelVariantModifiers(String value){if(value==null||value.trim().isEmpty()){return "";
-}return value.replaceAll("\\beternal\\b"," ").trim().replaceAll("\\s+"," ");
-}private static ItemMatch betterTravelItem(ItemMatch first,ItemMatch second){if(second==null){return first;
-}return first==null||second.score>first.score?second:first;
-}private static int largestNumber(String value){int largest=0;
-int current=0;
-boolean reading=false;
-for(int index=0;
-index<value.length();
-index++){char character=value.charAt(index);
-if(Character.isDigit(character)){reading=true;
-current=current*10+character-'0';
-}else if(reading){largest=Math.max(largest,current);
-current=0;
-reading=false;
-}}return reading?Math.max(largest,current):largest;
-}private static String trip(String value){if(value==null){return "";
-}return value.toLowerCase(Locale.ENGLISH).replace('’','\'').replaceAll(text(9)," ").trim().replaceAll("\\s+"," ");
-}private void toggleTravelHighlight(){travelHighlightActive=!travelHighlightActive;
-if(!travelHighlightActive&&layoutService!=null){layoutService.closeIfActive();
-}
-SlayerPlusPanel ui=panel;
-if(ui!=null){boolean active=travelHighlightActive;
-SwingUtilities.invokeLater(()->ui.showTravelHighlightState(active));
-}updateShortestPathRoute();
-}private void updateShortestPathRoute(){spiderTeleportPending=false;
-if(shortestPathBridge==null){return;
-}if(!travelHighlightActive){shortestPathBridge.clear();
-return;
-}if(bankInterfaceOpen){return;
-}if(taskRemaining()<=0){MasterRoutes.MasterRoute route=MasterRoutes.find(getPostTaskReturnMasterId());
-if(route==null){shortestPathBridge.clear();
-return;
-}shortestPathBridge.routeTo(route.getDestination(),false);
-return;
-}if(shouldRouteToBank(needsBankRestock())){
-Player player=client.getLocalPlayer();
-WorldPoint here=player==null?null:player.getWorldLocation();
-WorldPoint nearestBank=here==null?null:accountBankRoutes().nearest(here);
-if(nearestBank==null){MasterRoutes.MasterRoute route=MasterRoutes.find(getRoutingMasterId());
-nearestBank=route==null?null:route.getBank();
-}if(nearestBank==null){shortestPathBridge.clear();
-return;
-}shortestPathBridge.routeTo(nearestBank,false);
-return;
-}Target target=resolveTaskTarget();
-if(target==null){shortestPathBridge.clear();
-return;
-}int agilityLevel=client.getRealSkillLevel(Skill.AGILITY);
-Player localPlayer=client.getLocalPlayer();
-int combatLevel=localPlayer==null?0:localPlayer.getCombatLevel();
-KitItem travelItem=selectedTravelItem();
-String routePathKey=target.assignment+'|'+target.location+'|'+agilityLevel+'|'+combatLevel+'|'+(travelItem==null?-1:travelItem.getItemId());
-List<WorldPoint>path;
-if(routePathKey.equals(cachedRoutePathKey)){path=cachedRoutePath;
-}else{path=prioritizeTravelArrival(SlayerTaskWaypoints.findPath(target.assignment,target.location,agilityLevel,combatLevel),target.location,travelItem==null?"":travelItem.getDisplayName());
-cachedRoutePathKey=routePathKey;
-cachedRoutePath=path;
-}
-WorldPoint waypoint=nextUnreachedStage(path);
-if(waypoint==null){shortestPathBridge.clear();
-return;
-}routeNeedsTravelItem=waypoint.equals(path.get(0));
-if(travelItem!=null&&travelItem.getItemId()==ItemID.TELEPORTSCROLL_SPIDERCAVE){
-WorldPoint here=localPlayer==null?null:localPlayer.getWorldLocation();
-boolean away=needsSpiderTeleport(here,waypoint,path.get(0));
-spiderTeleportPending=updateSpiderTeleportTrip(here!=null,away);
-routeNeedsTravelItem=spiderTeleportPending;
-if(away){shortestPathBridge.clear();
-return;
-}}
-shortestPathBridge.routeTo(waypoint,false,routeNeedsTravelItem);
-}static boolean needsSpiderTeleport(WorldPoint here,WorldPoint waypoint,WorldPoint entrance){return here!=null&&waypoint.equals(entrance)&&(here.getPlane()!=entrance.getPlane()||chebyshevDistance(here,entrance)>64);
-}boolean updateSpiderTeleportTrip(boolean locationKnown,boolean away){if(locationKnown&&!away){spiderTeleportArrived=true;
-}return locationKnown&&away&&!spiderTeleportArrived;
-}boolean showSpiderTeleportInstruction(){return spiderTeleportPending&&travelHighlightActive&&!bankInterfaceOpen;
-}static List<WorldPoint>prioritizeTravelArrival(List<WorldPoint>path,String location,String item){if(!trip(location).equals("fremennik slayer dungeon")||!trip(item).contains("slayer ring")){return path;
-}List<WorldPoint>result=new ArrayList<>();
-result.add(new WorldPoint(2802,9999,0));
-for(WorldPoint point:path){if(point.getY()>=9000&&!result.contains(point)){result.add(point);
-}}return Collections.unmodifiableList(result);
-}private static final int DUNGEON_ENTRANCE_ARRIVAL_RADIUS=3;
-private WorldPoint nextUnreachedStage(List<WorldPoint>path){if(path==null||path.isEmpty()){return null;
-}Player player=client.getLocalPlayer();
-WorldPoint here=player==null?null:player.getWorldLocation();
-return nextUnreachedStage(here,path);
-}static WorldPoint nextUnreachedStage(WorldPoint here,List<WorldPoint>path){if(path==null||path.isEmpty()){return null;
-}if(here==null){return path.get(0);
-}int reached=-1,nearest=-1,nearestDistance=Integer.MAX_VALUE;
-for(int index=0;index<path.size();index++){WorldPoint stage=path.get(index);
-if(here.getPlane()!=stage.getPlane()){continue;
-}int distance=chebyshevDistance(here,stage);
-if(distance<nearestDistance){nearest=index;
-nearestDistance=distance;
-}if(distance<=DUNGEON_ENTRANCE_ARRIVAL_RADIUS){reached=index;
-}}if(reached>=0&&reached+1<path.size()&&chebyshevDistance(path.get(reached),path.get(reached+1))>64){return path.get(reached);
-}return path.get(reached>=0?Math.min(reached+1,path.size()-1):nearestDistance<=64?nearest:0);
-}private static boolean hasReachedStage(WorldPoint here,WorldPoint stage){return here.getPlane()==stage.getPlane()&&chebyshevDistance(here,stage)<=DUNGEON_ENTRANCE_ARRIVAL_RADIUS;
-}private static int chebyshevDistance(WorldPoint a,WorldPoint b){return Math.max(Math.abs(a.getX()-b.getX()),Math.abs(a.getY()-b.getY()));
-}boolean shouldRouteToBank(boolean needsRestock){return needsRestock&&!bankReachedForRestock;
-}private boolean needsBankRestock(){KitPlan plan=currentLoadout;
-return plan!=null&&!plan.getBankWithdrawalItems().isEmpty();
-}int getTravelItemIdForOverlay(){if(!travelHighlightActive||!routeNeedsTravelItem){return-1;
-}KitItem item=selectedTravelItem();
-return item==null?-1:item.getItemId();
-}private KitItem selectedTravelItem(){KitPlan plan=currentLoadout;
-if(plan==null){return null;
-}for(KitItem item:plan.getInventoryItems()){if(item!=null&&item.getInventoryGroup()==MethodRules.InventoryGroup.TRAVEL&&item.hasItemId()){return item;
-}}return null;
-}private static final Set<String>GENERIC_TRAVEL_DESTINATIONS=Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("standard slayer location","assigned slayer area","assigned area","not restricted","unknown task","assigned area required")));
-private String travelDestination(){Recommendation selected=recommendation;
-String fromTravelText=trip(destinationFromTravelText(selected==null?"":selected.getTravel()));
-if(!fromTravelText.isEmpty()&&!GENERIC_TRAVEL_DESTINATIONS.contains(fromTravelText)){return fromTravelText;
-}Target target=resolveTaskTarget();
-String fromLocation=target==null?"":trip(target.location);
-return GENERIC_TRAVEL_DESTINATIONS.contains(fromLocation)?"":fromLocation;
-}private static String destinationFromTravelText(String travel){if(travel==null||travel.isEmpty()){return "";
-}String lower=travel.toLowerCase(Locale.ENGLISH);
-int marker=lower.lastIndexOf(" to ");
-int markerLength=4;
-if(marker<0){marker=lower.lastIndexOf(" enter ");
-markerLength=7;
-}if(marker<0){return "";
-}String after=travel.substring(marker+markerLength);
-int cut=after.length();
-for(char stop:new char[]{',','.',';'}){int index=after.indexOf(stop);
-if(index>=0&&index<cut){cut=index;
-}}return after.substring(0,cut).trim();
-}private static final Set<String>TRAVEL_ACTION_VERBS=Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("break","rub","teleport","teleports","empty")));
-private static List<String>list(String key){List<String>values=LOADOUT_LISTS.get(key);
-if(values==null){throw new IllegalStateException("Unknown list: "+key);
-}return values;
-}private static Map<String,List<String>>loadLists(){Map<String,List<String>>values=new LinkedHashMap<>();
-for(String[]row:ResourceTable.rows("slayer-loadout-lists.tsv",2)){List<String>entries=row[1].isEmpty()?Collections.emptyList():Arrays.asList(row[1].split("\\|",-1));
-values.put(row[0],Collections.unmodifiableList(new ArrayList<>(entries)));
-}return Collections.unmodifiableMap(values);
-}private Set<Integer>travelCandidateItemIds(){Set<Integer>ids=new LinkedHashSet<>();
-List<String>fragments=list("l091");
-for(Integer itemId:bank.keySet()){addTravelCandidateIfMatch(ids,fragments,itemId);
-}addTravelCandidatesFromContainer(ids,fragments,client.getItemContainer(InventoryID.INV));
-addTravelCandidatesFromContainer(ids,fragments,client.getItemContainer(InventoryID.WORN));
-return ids;
-}private void addTravelCandidatesFromContainer(Set<Integer>ids,List<String>fragments,ItemContainer container){if(container==null){return;
-}for(Item item:container.getItems()){if(item!=null&&item.getQuantity()>0){addTravelCandidateIfMatch(ids,fragments,item.getId());
-}}}private void addTravelCandidateIfMatch(Set<Integer>ids,List<String>fragments,int itemId){if(itemId<=0||itemManager==null||ids.contains(itemId)){return;
-}try{ItemComposition composition=itemManager.getItemComposition(itemId);
-if(composition==null||composition.getName()==null){return;
-}String name=trip(composition.getName());
-for(String fragment:fragments){if(name.contains(fragment)){ids.add(itemId);
-return;
-}}}catch(RuntimeException ignored){}}@Subscribe public void onBeforeMenuRender(BeforeMenuRender event){if(event==null||!travelHighlightActive){return;
-}int primaryItemId=getTravelItemIdForOverlay();
-Set<Integer>candidateIds=cachedTravelCandidateIds;
-if(primaryItemId<=0&&candidateIds.isEmpty()){return;
-}String destination=travelDestination();
-Menu menu=client.getMenu();
-MenuEntry[]entries=menu==null?null:menu.getMenuEntries();
-if(entries==null){return;
-}destination=resolveTravelMenuDestination(entries,destination);
-for(MenuEntry entry:entries){highlightTravelDestination(entry,primaryItemId,candidateIds,destination,false,false);
-}}private String resolveTravelMenuDestination(MenuEntry[]entries,String destination){Recommendation selected=recommendation;
-TravelMenuMatch match=new TravelMenuMatch();
-scanTravelMenu(entries,destination,trip(selected==null?"":selected.getTravel()),false,match);
-return match.exact?destination:!match.instruction.isEmpty()?match.instruction:match.maxCape?"home":destination;
-}private static void scanTravelMenu(MenuEntry[]entries,String destination,String instructions,boolean insideTravelMenu,TravelMenuMatch match){if(entries==null){return;
-}for(MenuEntry entry:entries){if(entry==null){continue;
-}match.maxCape|=trip(Text.removeTags(entry.getTarget())).contains("max cape");
-Menu subMenu=entry.getSubMenu();
-boolean childTravelMenu=insideTravelMenu||subMenu!=null&&isTravelActionVerb(entry.getOption());
-if(subMenu!=null){scanTravelMenu(subMenu.getMenuEntries(),destination,instructions,childTravelMenu,match);
-}else if(insideTravelMenu){if(matchesTravelDestination(entry,destination)){match.exact=true;
-}String option=trip(Text.removeTags(entry.getOption()));
-int index=option.length()<3?-1:instructions.indexOf(option);
-if(index>=0&&index<match.instructionIndex){match.instruction=option;
-match.instructionIndex=index;
-}}}
-}private static final class TravelMenuMatch{private boolean exact,maxCape;
-private String instruction="";
-private int instructionIndex=Integer.MAX_VALUE;
-}private boolean highlightTravelDestination(MenuEntry entry,int primaryItemId,Set<Integer>candidateIds,String destination,boolean inheritedTravelItem,boolean insideTravelMenu){if(entry==null){return false;
-}boolean travelItem=inheritedTravelItem||(primaryItemId>0&&entry.getItemId()==primaryItemId)||candidateIds.contains(entry.getItemId());
-boolean childMatched=false;
-Menu subMenu=entry.getSubMenu();
-MenuEntry[]children=subMenu==null?null:subMenu.getMenuEntries();
-boolean childTravelMenu=insideTravelMenu||children!=null&&isTravelActionVerb(entry.getOption());
-if(children!=null){for(MenuEntry child:children){if(highlightTravelDestination(child,primaryItemId,candidateIds,destination,travelItem,childTravelMenu)){childMatched=true;
-}}}boolean leafMatch=travelItem&&insideTravelMenu&&matchesTravelDestination(entry,destination);
-boolean directHome=travelItem&&!insideTravelMenu&&(children==null||children.length==0)&&trip(Text.removeTags(entry.getOption())).equals("home")&&destination.equals("home");
-boolean unambiguousAction=primaryItemId>0&&entry.getItemId()==primaryItemId&&(children==null||children.length==0)&&isTravelActionVerb(entry.getOption());
-if(!childMatched&&!leafMatch&&!directHome&&!unambiguousAction){return false;
-}String option=entry.getOption();
-if(option!=null&&!option.isEmpty()){entry.setOption(ColorUtil.wrapWithColorTag(Text.removeTags(option),TRAVEL_ITEM_HIGHLIGHT_COLOR));
-}return true;
-}private static boolean isTravelActionVerb(String option){return TRAVEL_ACTION_VERBS.contains(trip(Text.removeTags(option)));
-}private static boolean matchesTravelDestination(MenuEntry entry,String destination){if(destination.isEmpty()){return false;
-}String option=trip(Text.removeTags(entry.getOption()));
-String target=trip(Text.removeTags(entry.getTarget()));
-return travelDestinationNamesMatch(option,destination)||travelDestinationNamesMatch(target,destination);
-}static boolean travelDestinationNamesMatch(String menuText,String destination){String menuName=canonicalTravelDestination(menuText);
-String destinationName=canonicalTravelDestination(destination);
-return menuName.length()>=3&&(menuName.contains(destinationName)||destinationName.contains(menuName));
-}private static String canonicalTravelDestination(String value){return trip(value).replaceAll("\\bslayer\\b"," ").replaceAll("\\s+"," ").trim();
-}private void createRecommendedBankTag(){if(panel==null||layoutService==null){return;
-}if(!travelHighlightActive){travelHighlightActive=true;
-SlayerPlusPanel ui=panel;
-SwingUtilities.invokeLater(()->ui.showTravelHighlightState(true));
-}if(analyzer.rerollRandomSlayerHelmet()){refreshSlayerData();
-}createBankTagNow(true);
-}@Subscribe public void onMenuEntryAdded(MenuEntryAdded event){if(event==null||event.getActionParam1()!=InterfaceID.Bankmain.ITEMS||bankTagsService==null){return;
-}ItemContainer bank=client.getItemContainer(InventoryID.BANK);
-if(bank==null||!SlayerOptionalPins.isMenuTrigger(event.getOption(),bank.contains(event.getItemId()))){return;
-}Widget items=client.getWidget(InterfaceID.Bankmain.ITEMS);
-Widget item=items==null||event.getActionParam0()<0?null:items.getChild(event.getActionParam0());
-if(item==null||items.isHidden()){return;
-}String activeTag=bankTagsService.getActiveTag();
-if(!SlayerOptionalPins.allowsMenu(activeTag,event.getActionParam1(),item.getItemId(),client.isKeyPressed(KeyCode.KC_SHIFT))){return;
-}String profile=configs.getRSProfileKey();
-if(profile==null){return;
-}int itemId=itemManager.canonicalize(item.getItemId());
-if(itemId<=0){return;
-}boolean pinned=readOptionalPins().contains(itemId);
-client.createMenuEntry("Examine".equals(event.getOption())?-1:-2)
-.setOption(pinned?"Unpin from SlayerPlus optional row":"Pin to SlayerPlus optional row")
-.setParam0(event.getActionParam0()).setParam1(event.getActionParam1()).setIdentifier(event.getIdentifier())
-.setTarget(event.getTarget()).setType(MenuAction.RUNELITE).setItemId(itemId)
-.onClick(clicked->changeOptionalPin(itemId,!pinned,profile,activeTag));
-}private Set<Integer>readOptionalPins(){return SlayerOptionalPins.read(configs.getRSProfileKey()==null?null:configs.getRSProfileConfiguration(SlayerPlusConfig.GROUP,SlayerOptionalPins.CONFIG_KEY));
-}private void changeOptionalPin(int itemId,boolean pin,String profile,String activeTag){Widget items=client.getWidget(InterfaceID.Bankmain.ITEMS);
-if(client.getGameState()!=GameState.LOGGED_IN||items==null||items.isHidden()||!profile.equals(configs.getRSProfileKey())||!Objects.equals(activeTag,bankTagsService.getActiveTag())){return;
-}Set<Integer>pins=readOptionalPins();
-if(pin&&!pins.contains(itemId)&&pins.size()>=SlayerOptionalPins.LIMIT){client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","SlayerPlus: The optional row has eight pins. Unpin an item first.",null);
-return;
-}boolean changed=pin?pins.add(itemId):pins.remove(itemId);
-if(!changed){return;
-}configs.setRSProfileConfiguration(SlayerPlusConfig.GROUP,SlayerOptionalPins.CONFIG_KEY,serializeItemIds(pins));
-lastWrittenBankTagState="";
-if(isSlayerPlusBankTagOpen()){createBankTagNow(true);
-}else{client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","SlayerPlus: Pin saved. Use Create or update bank tag to apply it.",null);
-}}private void createBankTagNow(){createBankTagNow(false);
-}private void createBankTagNow(boolean forceWrite){SlayerPlusPanel ui=panel;
-if(ui==null||layoutService==null){return;
-}cacheSeekingArrowPlaceholders(client.getItemContainer(InventoryID.BANK));
-if(refreshQuiverAmmo()){refreshSlayerData();
-}Target target=resolveTaskTarget();
-boolean infernoTarget=isInfernoTarget(target);
-KitPlan bankTagPlan;
-if(!shouldAddPersistentReturnTeleports(infernoTarget)){bankTagPlan=currentLoadout;
-}else{bankTagPlan=withOwnedPointBoostTravelKit(withOwnedMasterReturnTeleport(withOwnedBankTeleport(currentLoadout)));
-}Set<Integer>pinnedIds=readOptionalPins();
-List<KitItem>pinnedItems=new ArrayList<>();
-for(int id:pinnedIds){pinnedItems.add(new KitItem(itemManager.getItemComposition(id).getName(),id,1,KitItem.Status.UNKNOWN));
-}bankTagPlan=SlayerOptionalPins.prepend(bankTagPlan,pinnedItems);
-String bankTagState=serializeItemIds(pinnedIds)+":"+bankTagStateFingerprint(bankTagPlan,preparation.getTagIds(),!infernoTarget,quiverId);
-boolean sameWrittenState=bankTagState.equals(lastWrittenBankTagState);
-if(!forceWrite&&sameWrittenState){return;
-}boolean reopenedWithoutRewrite=forceWrite&&sameWrittenState&&layoutService.reopenLastSavedLayoutIfUnchanged();
-BankTagLayout.Result result=reopenedWithoutRewrite?BankTagLayout.Result.success(text(639)):layoutService.createOrUpdate(bankTagPlan,preparation.getTagIds(),!infernoTarget,quiverId,pinnedIds);
-if(result.isSuccess()){layoutCreated=true;
-lastWrittenBankTagState=bankTagState;
-}SwingUtilities.invokeLater(()->ui.showBankTagStatus(result.getMessage()));
-}private KitPlan withOwnedMasterReturnTeleport(KitPlan plan){if(plan==null){return null;
-}MasterRoutes.MasterRoute master=MasterRoutes.find(getPostTaskReturnMasterId());
-if(master==null){return plan;
-}for(String family:master.getReturnItemFamilies()){if(!diaries.allowsTravelItem(family)){continue;
-}ItemMatch match=ownedTravel(family);
-if(match==null){continue;
-}return appendMasterReturnTeleportForTest(plan,match.itemId,match.displayName);
-}return plan;
-}static boolean shouldAddPersistentReturnTeleports(boolean infernoTarget){return!infernoTarget;
-}private KitPlan withOwnedBankTeleport(KitPlan plan){if(plan==null){return null;
-}String[]bankFamilies={"max cape","crafting cape",text(29),text(381),text(30)};
-for(String family:bankFamilies){if(!diaries.allowsTravelItem(family)){continue;
-}ItemMatch match=ownedTravel(family);
-if(match==null){continue;
-}return appendMasterReturnTeleportForTest(plan,match.itemId,match.displayName);
-}return plan;
-}private KitPlan withOwnedPointBoostTravelKit(KitPlan plan){if(plan==null||!isPointBoosting()||master!=BoostCoordinator.TURAEL_AYA_MASTER_ID||TuraelBoost.find(assignment)==null){return plan;
-}String[][]travelFamilies={{"max cape","construct cape"},{text(28),"slayer ring"},{"digsite pendant"},{text(381)},{text(30)},{"games necklace"}};
-KitPlan result=plan;
-int additions=0;
-for(String[]equivalentGroup:travelFamilies){ItemMatch owned=null;
-for(String family:equivalentGroup){if(!diaries.allowsTravelItem(family)){continue;
-}owned=ownedTravel(family);
-if(owned!=null){break;
-}}if(owned==null){continue;
-}KitPlan updated=appendMasterReturnTeleportForTest(result,owned.itemId,owned.displayName);
-if(updated!=result){result=updated;
-additions++;
-if(additions>=4){break;
-}}}return result;
-}static KitPlan appendMasterReturnTeleportForTest(KitPlan plan,int itemId,String displayName){if(plan==null||itemId<=0){return plan;
-}List<KitItem>inventory=new ArrayList<>(plan.getInventoryItems());
-for(KitItem item:inventory){if(item!=null&&item.getItemId()==itemId){return plan;
-}}for(KitItem item:plan.getEquipmentItems()){if(item!=null&&item.getItemId()==itemId){return plan;
-}}KitItem masterReturn=new KitItem(displayName,itemId,1,KitItem.Status.BANK).withInventoryGroup(MethodRules.InventoryGroup.UTILITY);
-if(inventory.size()<28){inventory.add(masterReturn);
-}else{int replaceIndex=lastInventoryGroupIndex(inventory,MethodRules.InventoryGroup.FOOD);
-if(replaceIndex<0){replaceIndex=lastDuplicateInventoryGroupIndex(inventory,MethodRules.InventoryGroup.RESTORE);
-}if(replaceIndex<0){return plan;
-}inventory.set(replaceIndex,masterReturn);
-}return new KitPlan(plan.getEquipment(),plan.getInventory(),plan.getOwnedStatus(),plan.getLayoutTitle(),plan.getEquipmentItems(),inventory,plan.getOptionalItems());
-}private static int lastInventoryGroupIndex(List<KitItem>inventory,MethodRules.InventoryGroup group){for(int index=Math.min(28,inventory.size())-1;
-index>=0;
-index--){KitItem item=inventory.get(index);
-if(item!=null&&item.getInventoryGroup()==group){return index;
-}}return-1;
-}private static int lastDuplicateInventoryGroupIndex(List<KitItem>inventory,MethodRules.InventoryGroup group){int count=0;
-for(int index=0;
-index<Math.min(28,inventory.size());
-index++){KitItem item=inventory.get(index);
-if(item!=null&&item.getInventoryGroup()==group){count++;
-}}if(count>1){return lastInventoryGroupIndex(inventory,group);
-}return-1;
-}static String bankTagStateFingerprint(KitPlan plan,List<Integer>preparationItemIds,boolean analyzerSourceZeroIsTravel,int extraQuiverAmmoItemId){StringBuilder value=new StringBuilder(512);
-value.append(plan==null?"":plan.getLayoutTitle()).append('|');
-appendBankTagItems(value,'E',plan==null?Collections.emptyList():plan.getEquipmentItems());
-appendBankTagItems(value,'I',plan==null?Collections.emptyList():plan.getInventoryItems());
-appendBankTagItems(value,'O',plan==null?Collections.emptyList():plan.getOptionalItems());
-value.append("P=").append(preparationItemIds).append('|').append(analyzerSourceZeroIsTravel).append('|').append("Q=").append(extraQuiverAmmoItemId).append('|');
-return value.toString();
-}private static void appendBankTagItems(StringBuilder value,char section,List<KitItem>items){value.append(section).append('=');
-for(KitItem item:items){if(item==null){value.append("null;");
-continue;
-}value.append(item.getItemId()).append(',').append(item.getDisplayName()).append(',').append(item.isEquipmentSwitch()).append(',').append(item.getSwitchStyle()).append(',').append(item.getInventoryGroup()).append(';');
-}value.append('|');
-}private boolean isInfernoTarget(Target target){return target!=null&&"inferno".equalsIgnoreCase(target.location);
-}private boolean isPointBoosting(){return config!=null&&config.slayerWorkflow()==Preference.Workflow.TURAEL_POINT_BOOST;
-}private BoostCoordinator.Decision pointBoostDecision(int completedStreak){return BoostCoordinator.nextAssignment(completedStreak,config==null?Preference.BonusMaster.KONAR:config.pointBoostBonusMaster());
-}private String pointBoostPanelStatus(int completedStreak,boolean hasActiveTask,int assigningMasterId){if(!isPointBoosting()){return "";
-}BoostCoordinator.Decision decision=pointBoostDecision(completedStreak);
-if(hasActiveTask&&assigningMasterId!=decision.getMasterId()){return text(843);
-}return hasActiveTask?"Point boost: "+decision.getProgressText():"Next: "+MasterRoutes.getName(decision.getMasterId())+" — "+decision.getProgressText();
-}private int masterForNextAssignment(int normalStreak){if(isPointBoosting()){return pointBoostDecision(normalStreak).getMasterId();
-}return lastMaster>0?lastMaster:master;
-}private int getPostTaskReturnMasterId(){if(!isPointBoosting()){return getRoutingMasterId();
-}int completedStreak=client.getVarbitValue(VarbitID.SLAYER_TASKS_COMPLETED);
-int predictedPostTaskStreak=completedStreak+(taskRemaining()>0?1:0);
-return pointBoostDecision(predictedPostTaskStreak).getMasterId();
-}private int getRoutingMasterId(){if(taskRemaining()>0&&master>0){return master;
-}if(isPointBoosting()){return pointBoostDecision(client.getVarbitValue(VarbitID.SLAYER_TASKS_COMPLETED)).getMasterId();
-}return lastMaster>0?lastMaster:master;
-}private int taskRemaining(){return effectiveTaskRemainingForTest(seenRemaining,client.getVarpValue(VarPlayerID.SLAYER_COUNT));
-}static int effectiveTaskRemainingForTest(int resolvedRemaining,int liveRemaining){return resolvedRemaining>=0?resolvedRemaining:Math.max(0,liveRemaining);
-}private int readRuneLiteSlayerProfileInt(String key){try{Integer value=configs.getRSProfileConfiguration(RUNELITE_SLAYER_CONFIG_GROUP,key,Integer.class);
-return value==null?-1:value;
-}catch(RuntimeException ex){log.debug(text(847),key,ex);
-return-1;
-}}private String readRuneLiteSlayerProfileString(String key){try{String value=configs.getRSProfileConfiguration(RUNELITE_SLAYER_CONFIG_GROUP,key);
-return value==null?"":value.trim();
-}catch(RuntimeException ex){log.debug(text(847),key,ex);
-return "";
-}}private int readSlayerPlusProfileInt(String key){try{Integer value=configs.getRSProfileConfiguration(SlayerPlusConfig.GROUP,key,Integer.class);
-return value==null?-1:value;
-}catch(RuntimeException ex){log.debug(text(848),key,ex);
-return-1;
-}}private void storeLastSlayerMasterId(int masterId){if(masterId<=0||masterId==readSlayerPlusProfileInt(LAST_SLAYER_MASTER_SNAPSHOT_KEY)){return;
-}try{configs.setRSProfileConfiguration(SlayerPlusConfig.GROUP,LAST_SLAYER_MASTER_SNAPSHOT_KEY,masterId);
-}catch(RuntimeException ex){log.debug(text(849),ex);
-}}private String profileSlayerLocation(){String location=readRuneLiteSlayerProfileString(RUNELITE_SLAYER_LOCATION_KEY);
-return location.isEmpty()?"Assigned area":location;
-}private int inferNearbySlayerMasterId(){Player player=client.getLocalPlayer();
-WorldPoint here=player==null?null:player.getWorldLocation();
-if(here==null){return 0;
-}int nearestId=0;
-int nearestDistance=Integer.MAX_VALUE;
-for(int masterId=1;
-masterId<=10;
-masterId++){MasterRoutes.MasterRoute route=MasterRoutes.find(masterId);
-if(route==null||route.getDestination().getPlane()!=here.getPlane()){continue;
-}int distance=here.distanceTo2D(route.getDestination());
-if(distance<=20&&distance<nearestDistance){nearestId=masterId;
-nearestDistance=distance;
-}}return nearestId;
-}static int firstPositive(int...values){if(values!=null){for(int value:values){if(value>0){return value;
-}}}return 0;
-}static int resolveTaskRemainingForTest(int previouslyObservedRemaining,int serviceRemaining,int liveRemaining,int profileRemaining,int chatRemaining){if(previouslyObservedRemaining>0&&liveRemaining<=0){return 0;
-}return firstPositive(liveRemaining,serviceRemaining,profileRemaining,chatRemaining);
-}static int preferLiveOrProfileValue(int liveValue,int profileValue,int chatValue){if(liveValue>0){return liveValue;
-}if(profileValue>0){return profileValue;
-}if(chatValue>=0){return chatValue;
-}return Math.max(0,Math.max(liveValue,profileValue));
-}private String readTaskName(){try{int taskId=client.getVarpValue(VarPlayerID.SLAYER_TARGET);
-int taskRow;
-if(taskId==98){List<Integer>bossRows=client.getDBRowsByValue(DBTableID.SlayerTaskSublist.ID,DBTableID.SlayerTaskSublist.COL_TASK_SUBTABLE_ID,0,client.getVarbitValue(VarbitID.SLAYER_TARGET_BOSSID));
-if(bossRows==null||bossRows.isEmpty()){return "Unknown task";
-}Object[]taskFields=client.getDBTableField(bossRows.get(0),DBTableID.SlayerTaskSublist.COL_TASK,0);
-if(taskFields==null||taskFields.length==0||!(taskFields[0]instanceof Integer)){return "Unknown task";
-}taskRow=(Integer)taskFields[0];
-}else{List<Integer>taskRows=client.getDBRowsByValue(DBTableID.SlayerTask.ID,DBTableID.SlayerTask.COL_ID,0,taskId);
-if(taskRows==null||taskRows.isEmpty()){return "Unknown task";
-}taskRow=taskRows.get(0);
-}Object[]fields=client.getDBTableField(taskRow,DBTableID.SlayerTask.COL_NAME_UPPERCASE,0);
-return fields!=null&&fields.length>0&&fields[0]instanceof String?formatName((String)fields[0]):"Unknown task";
-}catch(RuntimeException ex){log.debug(text(850),ex);
-return "Unknown task";
-}}private String readAssignedLocation(){try{int areaId=client.getVarpValue(VarPlayerID.SLAYER_AREA);
-if(areaId<=0){return "Not restricted";
-}List<Integer>areaRows=client.getDBRowsByValue(DBTableID.SlayerArea.ID,DBTableID.SlayerArea.COL_AREA_ID,0,areaId);
-if(areaRows==null||areaRows.isEmpty()){return "Assigned area";
-}Object[]fields=client.getDBTableField(areaRows.get(0),DBTableID.SlayerArea.COL_AREA_NAME_IN_HELPER,0);
-return fields!=null&&fields.length>0&&fields[0]instanceof String?(String)fields[0]:"Assigned area";
-}catch(RuntimeException ex){log.debug(text(851),ex);
-return "Assigned area";
-}}private String getAccountName(){Player player=client.getLocalPlayer();
-if(player==null||player.getName()==null||player.getName().trim().isEmpty()){return "ACCOUNT LOADING";
-}return player.getName().trim();
-}static String masterDisplayNameForTest(int masterId,boolean whileGuthixSleepsFinished,boolean monkeyMadness2Finished){if(masterId==5&&whileGuthixSleepsFinished){return "Kuradal";
-}if(masterId==6&&monkeyMadness2Finished){return "Steve";
-}return MasterRoutes.getName(masterId);
-}private static String formatName(String value){if(value==null||value.isEmpty()){return "Unknown task";
-}String lower=value.toLowerCase();
-return Character.toUpperCase(lower.charAt(0))+lower.substring(1);
-}private static final class ItemMatch{private final int itemId;
-private final String displayName;
-private final int score;
-private ItemMatch(int itemId,String displayName,int score){this.itemId=itemId;
-this.displayName=displayName;
-this.score=score;
-}}@Provides SlayerPlusConfig provideConfig(ConfigManager configs){return configs.getConfig(SlayerPlusConfig.class);
-}}

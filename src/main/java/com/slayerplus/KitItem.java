@@ -1,27 +1,91 @@
 package com.slayerplus;
+
 import lombok.Getter;
-@Getter public final class KitItem{public enum SwitchStyle{MAGIC,RANGED,MELEE,OTHER}public enum Status{EQUIPPED("Equipped"),INVENTORY("In inventory"),BANK("In bank"),MISSING("Missing"),UNKNOWN("Bank not scanned");
-private final String label;
-Status(String label){this.label=label;
-}public String getLabel(){return label;
-}}private final String displayName;
-private final int itemId;
-private final int quantity;
-private final Status status;
-private final boolean equipmentSwitch;
-private final SwitchStyle switchStyle;
-private final MethodRules.InventoryGroup inventoryGroup;
-public KitItem(String displayName,int itemId,int quantity,Status status){this(displayName,itemId,quantity,status,false,SwitchStyle.OTHER,MethodRules.InventoryGroup.OTHER);
-}private KitItem(String displayName,int itemId,int quantity,Status status,boolean equipmentSwitch,SwitchStyle switchStyle,MethodRules.InventoryGroup inventoryGroup){this.displayName=displayName==null||displayName.trim().isEmpty()?"Recommended item":displayName.trim();
-this.itemId=itemId;
-this.quantity=Math.max(1,quantity);
-this.status=status==null?Status.UNKNOWN:status;
-this.equipmentSwitch=equipmentSwitch;
-this.switchStyle=switchStyle==null?SwitchStyle.OTHER:switchStyle;
-this.inventoryGroup=inventoryGroup==null?MethodRules.InventoryGroup.OTHER:inventoryGroup;
-}public KitItem asEquipmentSwitch(SwitchStyle style){return new KitItem(displayName,itemId,quantity,status,true,style,inventoryGroup);
-}public KitItem withInventoryGroup(MethodRules.InventoryGroup group){return new KitItem(displayName,itemId,quantity,status,equipmentSwitch,switchStyle,group);
-}KitItem withQuantity(int value){return new KitItem(displayName,itemId,value,status,equipmentSwitch,switchStyle,inventoryGroup);
-}public boolean hasItemId(){return itemId>0;
-}public boolean isBanked(){return status==Status.BANK;
-}}
+
+@Getter
+public final class KitItem {
+  public enum SwitchStyle {
+    MAGIC,
+    RANGED,
+    MELEE,
+    OTHER
+  }
+
+  public enum Status {
+    EQUIPPED("Equipped"),
+    INVENTORY("In inventory"),
+    BANK("In bank"),
+    MISSING("Missing"),
+    UNKNOWN("Bank not scanned");
+    private final String label;
+
+    Status(String label) {
+      this.label = label;
+    }
+
+    public String getLabel() {
+      return label;
+    }
+  }
+
+  private final String displayName;
+  private final int itemId;
+  private final int quantity;
+  private final Status status;
+  private final boolean equipmentSwitch;
+  private final SwitchStyle switchStyle;
+  private final MethodRules.InventoryGroup inventoryGroup;
+
+  public KitItem(String displayName, int itemId, int quantity, Status status) {
+    this(
+        displayName,
+        itemId,
+        quantity,
+        status,
+        false,
+        SwitchStyle.OTHER,
+        MethodRules.InventoryGroup.OTHER);
+  }
+
+  private KitItem(
+      String displayName,
+      int itemId,
+      int quantity,
+      Status status,
+      boolean equipmentSwitch,
+      SwitchStyle switchStyle,
+      MethodRules.InventoryGroup inventoryGroup) {
+    this.displayName =
+        displayName == null || displayName.trim().isEmpty()
+            ? "Recommended item"
+            : displayName.trim();
+    this.itemId = itemId;
+    this.quantity = Math.max(1, quantity);
+    this.status = status == null ? Status.UNKNOWN : status;
+    this.equipmentSwitch = equipmentSwitch;
+    this.switchStyle = switchStyle == null ? SwitchStyle.OTHER : switchStyle;
+    this.inventoryGroup =
+        inventoryGroup == null ? MethodRules.InventoryGroup.OTHER : inventoryGroup;
+  }
+
+  public KitItem asEquipmentSwitch(SwitchStyle style) {
+    return new KitItem(displayName, itemId, quantity, status, true, style, inventoryGroup);
+  }
+
+  public KitItem withInventoryGroup(MethodRules.InventoryGroup group) {
+    return new KitItem(displayName, itemId, quantity, status, equipmentSwitch, switchStyle, group);
+  }
+
+  KitItem withQuantity(int value) {
+    return new KitItem(
+        displayName, itemId, value, status, equipmentSwitch, switchStyle, inventoryGroup);
+  }
+
+  public boolean hasItemId() {
+    return itemId > 0;
+  }
+
+  public boolean isBanked() {
+    return status == Status.BANK;
+  }
+}

@@ -1,1334 +1,4888 @@
 package com.slayerplus;
-import static com.slayerplus.Text.text;
+
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import net.runelite.api.*;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.client.game.*;
-public final class SlayerLoadoutAnalyzer{private static final Map<String,List<String>>LOADOUT_LISTS=loadLists(text(287));
-private static final Map<String,String[]>LOADOUT_ARRAYS=loadArrays(text(288));
-private static final List<RequirementRule>REQUIREMENT_RULES=loadRequirementRules();
-private static final int EXTRA_QUIVER_AMMO_SLOT=14;
-private static final String[]STRONGEST_STANDARD_ARROW_PRIORITY=array("a026");
-private static final String[]STRONGEST_NON_DRAGON_ARROW_PRIORITY=array("a025");
-private static final String[]EFFICIENT_REGULAR_ARROW_PRIORITY=array("a024");
-private static final String[]EFFICIENT_BOSS_ARROW_PRIORITY=array("a023");
-private static final String[]INFERNO_ARROW_PRIORITY=array("a022");
-private final ItemManager itemManager;
-private Map<Integer,Integer>cachedBankSnapshotSource=Collections.emptyMap();
-private List<OwnedItem>bankOwnedItems=Collections.emptyList();
-private int[]cachedInventoryOwnedState=new int[0];
-private int[]cachedEquipmentOwnedState=new int[0];
-private List<OwnedItem>cachedInventoryOwnedItems=Collections.emptyList();
-private List<OwnedItem>cachedEquipmentOwnedItems=Collections.emptyList();
-private final Map<Integer,String>itemNameCache=new HashMap<>();
-private final Map<Integer,ItemEquipmentStats>equipmentStatsCache=new HashMap<>();
-private final Map<Integer,Set<String>>matchNamesCache=new HashMap<>();
-private final Map<Integer,Boolean>realItemCache=new HashMap<>();
-private String helmetPreference=HelmetPreference.COMBAT_ACHIEVEMENT;
-private int randomHelmId=-1;
-private int randomSlayerHelmetPoolSignature;
-private boolean helmetRerollPending;
-private boolean desertElite;
-private SlayerAchievementDiarySnapshot diaries=SlayerAchievementDiarySnapshot.empty();
-public SlayerLoadoutAnalyzer(ItemManager itemManager){this.itemManager=itemManager;
-}public void setHelmetPreference(String preference){String normalized=HelmetPreference.normalize(preference);
-if(!normalized.equals(helmetPreference)){helmetPreference=normalized;
-randomHelmId=-1;
-randomSlayerHelmetPoolSignature=0;
-helmetRerollPending=false;
-}}public void setDesertEliteDiaryComplete(boolean complete){desertElite=complete;
-}public void setAchievementDiaries(SlayerAchievementDiarySnapshot snapshot){diaries=snapshot==null?SlayerAchievementDiarySnapshot.empty():snapshot;
-}public boolean rerollRandomSlayerHelmet(){if(!HelmetPreference.isRandom(helmetPreference)){return false;
-}helmetRerollPending=true;
-return true;
-}public List<String>ownedHelms(ItemContainer inventory,ItemContainer equipment,Map<Integer,Integer>bank){List<OwnedItem>owned=new ArrayList<>();
-owned.addAll(snapshotOwned(equipment,KitItem.Status.EQUIPPED,true));
-owned.addAll(snapshotOwned(inventory,KitItem.Status.INVENTORY,false));
-owned.addAll(snapshotBank(bank));
-Set<String>names=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-for(OwnedItem item:owned){if(isSlayerHelmet(item)){names.add(item.displayName);
-}}return new ArrayList<>(names);
-}public Set<Integer>ownedSlayerHelmetItemIds(ItemContainer inventory,ItemContainer equipment,Map<Integer,Integer>bank){List<OwnedItem>owned=new ArrayList<>();
-owned.addAll(snapshotOwned(equipment,KitItem.Status.EQUIPPED,true));
-owned.addAll(snapshotOwned(inventory,KitItem.Status.INVENTORY,false));
-owned.addAll(snapshotBank(bank));
-Set<Integer>itemIds=new LinkedHashSet<>();
-for(OwnedItem item:owned){if(isSlayerHelmet(item)){itemIds.add(item.itemId);
-}}return itemIds;
-}public List<String>slayerHelmetNamesForItemIds(Iterable<Integer>itemIds){Set<String>names=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-if(itemIds==null||itemManager==null){return new ArrayList<>(names);
-}for(Integer itemId:itemIds){if(itemId==null||itemId<=0){continue;
-}String displayName=itemManager.getItemComposition(itemId).getName();
-if(normalize(displayName).contains("slayer helmet")){names.add(displayName);
-}}return new ArrayList<>(names);
-}public Recommendation resolveOwnedAutomaticRecommendation(String assignment,Recommendation recommendation,ItemContainer inventory,ItemContainer equipment,Map<Integer,Integer>bank,boolean scanned,TaskVariant taskVariant,SlayerPlusConfig config){if(recommendation==null||!recommendation.hasTaskStrategy()||config==null||config.combatStylePreference()!=Preference.CombatStyle.AUTOMATIC||!scanned){return recommendation;
-}VariantCatalog.ResolvedTarget effectiveTarget=VariantCatalog.resolve(assignment,taskVariant,recommendation,config);
-if(effectiveTarget==null||!effectiveTarget.isValid()||effectiveTarget.getStrategy()==null){return recommendation;
-}String effectiveTask=effectiveTarget.getTaskName();
-String effectiveLocation=effectiveTarget.getLocation();
-TaskStrategy effectiveStrategy=effectiveTarget.getStrategy();
-List<OwnedItem>pool=new ArrayList<>();
-pool.addAll(snapshotOwned(equipment,KitItem.Status.EQUIPPED,true));
-pool.addAll(snapshotOwned(inventory,KitItem.Status.INVENTORY,false));
-pool.addAll(snapshotBank(bank));
-boolean wilderness=isWildernessLoadout(normalize(effectiveLocation),normalize(effectiveTarget.getRestriction()));
-List<StrategyCandidate>candidates=new ArrayList<>();
-addStrategyCandidate(candidates,effectiveStrategy,pool,effectiveTask,effectiveLocation,config.playstyle(),true);
-boolean automaticStyleLocked=effectiveStrategy.hasTag(TaskStrategy.MethodTag.AUTOMATIC_STYLE_LOCKED);
-if(!automaticStyleLocked){for(Preference.CombatStyle preference:new Preference.CombatStyle[]{Preference.CombatStyle.PREFER_MELEE,Preference.CombatStyle.PREFER_RANGED,Preference.CombatStyle.PREFER_MAGIC}){TaskStrategy candidate=SlayerTaskStrategyCatalog.resolve(effectiveTask,config.playstyle(),config.cannonPreference(),config.burstPreference(),preference,effectiveLocation,wilderness);
-addStrategyCandidate(candidates,candidate,pool,effectiveTask,effectiveLocation,config.playstyle(),false);
-}}StrategyCandidate best=null;
-for(StrategyCandidate candidate:candidates){if(best==null||candidate.score>best.score){best=candidate;
-}}if(best==null){return recommendation;
-}String ownedReason=text(289)+text(290)+best.weapon.displayName+text(291);
-TaskStrategy selectedStrategy=effectiveStrategy.hasTag(TaskStrategy.MethodTag.TURAEL_POINT_BOOST)?best.strategy.withAdditionalTags(TaskStrategy.MethodTag.TURAEL_POINT_BOOST):best.strategy;
-String resolvedMethod=SlayerMethodRuleCatalog.resolve(effectiveTask,effectiveLocation,selectedStrategy).getMethod();
-return new Recommendation(effectiveLocation,resolvedMethod,ownedReason+best.strategy.getRationale(),effectiveTarget.getTravel(),effectiveTarget.getCannon(),recommendation.getRequirements(),effectiveTarget.getRestriction(),selectedStrategy);
-}private static void addStrategyCandidate(List<StrategyCandidate>candidates,TaskStrategy strategy,List<OwnedItem>pool,String encounter,String location,Preference.Playstyle playstyle,boolean originalAutomatic){if(strategy==null||!strategy.isReviewed()){return;
-}for(StrategyCandidate existing:candidates){if(sameStrategy(existing.strategy,strategy)){return;
-}}List<String>priorities=strategy.weapons().isEmpty()?strategy.getWeapons():strategy.weapons();
-OwnedItem weapon=preferredEquipmentAllowed(pool,EquipmentInventorySlot.WEAPON,false,priorities,strategy);
-if(weapon==null){return;
-}int rank=matchingPriorityIndex(weapon,priorities);
-if(rank<0||!hasRequiredRangedAmmo(strategy,weapon,pool)){return;
-}int score=Math.max(10,125-rank*18);
-score+=ownedCoreEquipmentCoverage(strategy,pool)*12;
-if(ownsBoostPotion(style(strategy),strategy.getCostPolicy(),pool)){score+=10;
-}score+=suppliesScore(strategy,weapon,encounter,location,pool);
-if(normalize(encounter).equals("vorkath")&&!hasCompleteVorkathCore(strategy,weapon,pool)){return;
-}if(originalAutomatic){score+=4;
-}if(strategy.hasTag(TaskStrategy.MethodTag.CANNON)){score+=28;
-}if(strategy.hasTag(TaskStrategy.MethodTag.MULTI_COMBAT)){score+=8;
-}if(strategy.hasTag(TaskStrategy.MethodTag.VENATOR)&&weapon.named("venator bow")){score+=42;
-}if(strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)){score+=36;
-}Preference.Playstyle resolvedPlaystyle=playstyle==null?Preference.Playstyle.FAST_XP:playstyle;
-switch(resolvedPlaystyle){case PROFIT:if(strategy.getCostPolicy()==TaskStrategy.CostPolicy.EFFICIENT){score+=18;
-}score-=operatingCostPenalty(weapon);
-break;
-case FAST_XP:default:if(strategy.getCostPolicy()==TaskStrategy.CostPolicy.MAX_DPS){score+=14;
-}if(strategy.getArmourFocus()==TaskStrategy.ArmourFocus.DAMAGE){score+=8;
-}break;
-}candidates.add(new StrategyCandidate(strategy,weapon,score));
-}private static boolean sameStrategy(TaskStrategy left,TaskStrategy right){return left==right||(left!=null&&right!=null&&left.getStyle()==right.getStyle()&&normalize(left.getMethod()).equals(normalize(right.getMethod())));
-}private static boolean ownsBoostPotion(CombatStyle style,TaskStrategy.CostPolicy costPolicy,List<OwnedItem>pool){if(style==CombatStyle.MAGIC){return containsAnyOwned(pool,PotionPolicy.magicBoostAlternatives());
-}if(style==CombatStyle.RANGED){return containsAnyOwned(pool,PotionPolicy.rangedBoostAlternatives(costPolicy));
-}if(style==CombatStyle.MELEE){return containsAnyOwned(pool,PotionPolicy.meleeBoostAlternatives(costPolicy));
-}return false;
-}private static int suppliesScore(TaskStrategy strategy,OwnedItem weapon,String task,String location,List<OwnedItem>pool){MethodRules methodRules=SlayerMethodRuleCatalog.resolve(task,location,strategy);
-Map<Integer,Integer>ownedQuantities=ownedItemQuantities(pool);
-CombatStyle style=style(strategy);
-int score=0;
-if(style==CombatStyle.MAGIC&&!methodRules.getPouchRunes().isEmpty()){RunePolicy.Resolution runes=RunePolicy.resolve(methodRules.getPouchRunes(),ownedQuantities);
-boolean sufficient=runes.getUnownedRequirements().isEmpty();
-for(RunePolicy.ResolvedRune rune:runes.getRunes()){if(ownedQuantities.getOrDefault(rune.getItemId(),0)<rune.getMinimumQuantity()){sufficient=false;
-}}score+=sufficient?15:-15;
-}if(style==CombatStyle.RANGED&&!isSelfContainedRangedWeapon(weapon)){KitItem ammo=buildAmmoItem(style,weapon,strategy,pool,true);
-score+=ammo.hasItemId()&&ammo.getQuantity()>=minimumSufficientAmmo(weapon)?15:-15;
-}if(methodRules.resolveFoodSlots(strategy,strategy.getRecommendedFoodSlots(1))>0){score+=containsAnyOwned(pool,methodRules.getFoodAlternatives().toArray(new String[0]))?5:-12;
-}return score;
-}private static boolean isSelfContainedRangedWeapon(OwnedItem weapon){return weapon!=null&&(weapon.named("blowpipe")||weapon.named("bow of faerdhinen")||weapon.named("crystal bow")||weapon.named("webweaver bow")||weapon.named("craw s bow")||weapon.named("chinchompa"));
-}private static int minimumSufficientAmmo(OwnedItem weapon){if(weapon==null){return 250;
-}if(weapon.named("ballista")||weapon.named("atlatl")){return 75;
-}if(weapon.named("hunters sunlight crossbow")){return 100;
-}if(weapon.named("crossbow")){return 150;
-}return 250;
-}private static int ownedCoreEquipmentCoverage(TaskStrategy strategy,List<OwnedItem>pool){CombatStyle style=style(strategy);
-int coverage=0;
-for(EquipmentInventorySlot slot:new EquipmentInventorySlot[]{EquipmentInventorySlot.HEAD,EquipmentInventorySlot.CAPE,EquipmentInventorySlot.AMULET,EquipmentInventorySlot.BODY,EquipmentInventorySlot.LEGS,EquipmentInventorySlot.GLOVES,EquipmentInventorySlot.BOOTS,EquipmentInventorySlot.RING}){if(findBestEquipment(pool,slot,strategy,style,false)!=null){coverage++;
-}}return coverage;
-}private static boolean hasCompleteVorkathCore(TaskStrategy strategy,OwnedItem weapon,List<OwnedItem>pool){if(strategy==null||weapon==null){return false;
-}CombatStyle style=style(strategy);
-boolean ranged=style==CombatStyle.RANGED;
-OwnedItem slayerHead=findPreferredVorkathSlayerHead(pool,ranged);
-boolean slayerPackage=slayerHead!=null&&containsAnyOwned(pool,ranged?text(292):text(293),ranged?text(294):text(295),text(294));
-boolean salvePackage=containsAnyOwned(pool,ranged?text(296):text(297),ranged?text(298):text(296));
-boolean head=preferredEquipment(pool,EquipmentInventorySlot.HEAD,false,ranged?list("l001"):list("l002"))!=null;
-boolean body=preferredEquipment(pool,EquipmentInventorySlot.BODY,false,ranged?list("l003"):list("l004"))!=null;
-boolean legs=preferredEquipment(pool,EquipmentInventorySlot.LEGS,false,ranged?list("l005"):list("l006"))!=null;
-boolean offHand=weapon.isTwoHanded()||preferredEquipment(pool,EquipmentInventorySlot.SHIELD,false,ranged?list("l007"):list("l008"))!=null;
-return(slayerPackage||salvePackage)&&head&&body&&legs&&offHand;
-}private static OwnedItem findPreferredVorkathSlayerHead(List<OwnedItem>pool,boolean ranged){return preferredEquipment(pool,EquipmentInventorySlot.HEAD,false,ranged?list("l009"):list("l010"));
-}private static int matchingPriorityIndex(OwnedItem weapon,List<String>priorities){for(int index=0;
-index<priorities.size();
-index++){String fragment=normalize(priorities.get(index));
-if(!fragment.isEmpty()&&weapon.named(fragment)){return index;
-}}return-1;
-}private static boolean hasRequiredRangedAmmo(TaskStrategy strategy,OwnedItem weapon,List<OwnedItem>pool){if(strategy.getStyle()!=TaskStrategy.CombatStyle.RANGED){return true;
-}if(weapon.named("blowpipe")||weapon.named(text(265))||weapon.named("crystal bow")||weapon.named(text(299))||weapon.named("craw s bow")||weapon.named(text(300))||weapon.named(" dart")||weapon.nameKey.endsWith("dart")||weapon.named(" knife")||weapon.nameKey.endsWith("knife")){return true;
-}if(weapon.named("ballista")){return containsAnyOwned(pool,"dragon javelin",text(301),text(302));
-}if(weapon.named("atlatl")){return containsAnyOwned(pool,text(303));
-}if(weapon.named(text(304))){return containsAnyOwned(pool,text(305),text(306));
-}if(weapon.named("crossbow")){return containsAnyOwned(pool,text(307),text(308),text(309),text(310),"dragon bolts",text(311),"runite bolts","broad bolts");
-}return containsAnyOwned(pool,"dragon arrow","amethyst arrow","rune arrow","broad arrow");
-}private static boolean containsAnyOwned(List<OwnedItem>pool,String...fragments){for(OwnedItem item:pool){for(String fragment:fragments){if(item.named(fragment)){return true;
-}}}return false;
-}private static Map<Integer,Integer>ownedItemQuantities(List<OwnedItem>pool){Map<Integer,Integer>quantities=new LinkedHashMap<>();
-if(pool==null){return quantities;
-}for(OwnedItem item:pool){if(item!=null&&item.itemId>0&&item.quantity>0){quantities.merge(item.itemId,item.quantity,Integer::sum);
-}}return quantities;
-}private static int operatingCostPenalty(OwnedItem weapon){if(weapon.named(text(312))){return 60;
-}if(weapon.named(text(313))||weapon.named(text(314))||weapon.named(text(270))){return 34;
-}if(weapon.named("arclight")||weapon.named("crystal bow")||weapon.named(text(265))){return 12;
-}return 0;
-}public KitPlan analyze(String assignment,Recommendation recommendation,ItemContainer inventory,ItemContainer equipment,Map<Integer,Integer>bank,boolean scanned,TaskVariant taskVariant,SlayerPlusConfig config,int remainingKills,int extraQuiverAmmoItemId,int extraQuiverAmmoQuantity){List<OwnedItem>inventoryItems=snapshotOwned(inventory,KitItem.Status.INVENTORY,false);
-List<OwnedItem>equipmentItems=snapshotOwned(equipment,KitItem.Status.EQUIPPED,true);
-List<OwnedItem>bankOwned=snapshotBank(bank);
-List<OwnedItem>pool=new ArrayList<>();
-pool.addAll(equipmentItems);
-pool.addAll(inventoryItems);
-pool.addAll(bankOwned);
-OwnedItem extraQuiverAmmo=snapshotExtraQuiverAmmo(extraQuiverAmmoItemId,extraQuiverAmmoQuantity);
-if(extraQuiverAmmo!=null){pool.add(extraQuiverAmmo);
-}Set<String>inventoryNames=namesOf(inventoryItems);
-Set<String>equipmentNames=namesOf(equipmentItems);
-Set<String>bankNames=namesOf(bankOwned);
-VariantCatalog.ResolvedTarget target=VariantCatalog.resolve(assignment,taskVariant,recommendation,config);
-String task=normalize(target.getTaskName());
-String location=normalize(target.getLocation());
-String method=target.getStrategy()==null?"":normalize(target.getStrategy().getMethod());
-String cannon=normalize(target.getCannon());
-String travel=normalize(target.getTravel());
-String restriction=normalize(target.getRestriction());
-boolean wildernessLoadout=isWildernessLoadout(location,restriction);
-List<OwnedItem>recommendationOwned=filterRecommendationItems(pool,wildernessLoadout);
-TaskStrategy strategy=target.getStrategy();
-if(strategy==null||!strategy.isReviewed()){return KitPlan.researchPending(target.getDisplayName());
-}CombatStyle style=style(strategy);
-List<Requirement>requirements=requirementsFor(task,location,style,remainingKills,desertElite);
-boolean cannonSuggested=isCannonSuggested(cannon);
-int foodSlots=strategy.getRecommendedFoodSlots(remainingKills);
-OwnedItem weapon=selectRecommendedWeapon(task,strategy,style,requirements,equipmentItems,recommendationOwned);
-List<KitItem>equipmentLayout=applyHelmetPreference(buildEquipmentLayout(task,strategy,style,requirements,equipmentItems,recommendationOwned,scanned,weapon),pool,style);
-return new KitPlan(buildEquipmentText(strategy,style,requirements),buildInventoryText(strategy,style,requirements,cannonSuggested,foodSlots),buildOwnedText(style,requirements,cannonSuggested,inventoryNames,equipmentNames,bankNames,scanned),buildLayoutTitle(target.getDisplayName(),target.getLocation()),equipmentLayout,buildInventoryLayout(task,strategy,location,travel,style,requirements,cannonSuggested,foodSlots,recommendationOwned,scanned,equipmentLayout),buildOptionalLayout(task,strategy,recommendationOwned,weapon));
-}private List<KitItem>applyHelmetPreference(List<KitItem>layout,List<OwnedItem>pool,CombatStyle style){if(layout==null||layout.isEmpty()){return layout;
-}Map<String,OwnedItem>helmetsByName=new LinkedHashMap<>();
-for(OwnedItem item:pool){if(isSlayerHelmet(item)&&isSlayerHelmetValidForStyle(item,style)){helmetsByName.putIfAbsent(item.nameKey,item);
-}}List<OwnedItem>helmets=new ArrayList<>(helmetsByName.values());
-if(helmets.isEmpty()){return layout;
-}helmets.sort((left,right)->Integer.compare(left.itemId,right.itemId));
-OwnedItem selected=null;
-if(HelmetPreference.isCombatAchievement(helmetPreference)){selected=firstCombatAchievementHelmet(helmets);
-}else if(HelmetPreference.isRandom(helmetPreference)){int signature=1;
-for(OwnedItem helmet:helmets){signature=31*signature+helmet.itemId;
-}if(signature!=randomSlayerHelmetPoolSignature){randomSlayerHelmetPoolSignature=signature;
-}for(OwnedItem helmet:helmets){if(helmet.itemId==randomHelmId){selected=helmet;
-break;
-}}if(selected==null||helmetRerollPending){List<OwnedItem>eligible=new ArrayList<>(helmets);
-if(helmetRerollPending&&eligible.size()>1){eligible.removeIf(helmet->helmet.itemId==randomHelmId);
-}selected=eligible.get(ThreadLocalRandom.current().nextInt(eligible.size()));
-randomHelmId=selected.itemId;
-helmetRerollPending=false;
-}}else{for(OwnedItem helmet:helmets){if(helmet.matchesDisplay(helmetPreference)){selected=helmet;
-break;
-}}}if(selected==null){return layout;
-}for(int index=0;
-index<layout.size();
-index++){KitItem current=layout.get(index);
-String name=normalize(current.getDisplayName());
-if(name.contains("slayer helmet")||name.contains("black mask")){layout.set(index,selected.toItem(1));
-break;
-}}return layout;
-}private static OwnedItem firstCombatAchievementHelmet(List<OwnedItem>helmets){OwnedItem selected=null;
-int selectedTier=0;
-for(OwnedItem helmet:helmets){int tier=combatAchievementHelmetTierForTest(helmet.displayName);
-if(tier>selectedTier){selected=helmet;
-selectedTier=tier;
-}}return selected;
-}static int combatAchievementHelmetTierForTest(String itemName){String name=normalize(itemName);
-if(name.startsWith(text(315)))return 3;
-if(name.startsWith(text(316)))return 2;
-if(name.startsWith(text(317)))return 1;
-return 0;
-}private static boolean isSlayerHelmet(OwnedItem item){return item!=null&&item.nameKey.contains("slayer helmet")&&(item.equipmentSlot<0||item.equipmentSlot==EquipmentInventorySlot.HEAD.getSlotIdx());
-}private static boolean isSlayerHelmetValidForStyle(OwnedItem item,CombatStyle style){if(item==null||style==CombatStyle.MELEE||style==CombatStyle.FLEXIBLE){return item!=null;
-}return item.nameKey.endsWith(" i")||item.nameKey.contains(" i uncharged");
-}public Set<String>snapshotNames(ItemContainer container){if(container==null||itemManager==null){return Collections.emptySet();
-}Set<String>names=new HashSet<>();
-for(Item item:container.getItems()){if(!isRealOwnedItem(item,false)){continue;
-}try{int canonicalId=itemManager.canonicalize(item.getId());
-ItemComposition composition=itemManager.getItemComposition(canonicalId);
-if(composition!=null){names.addAll(getMatchNames(canonicalId,composition.getName()));
-}}catch(RuntimeException ignored){}}return names;
-}public Map<Integer,Integer>snapshotItems(ItemContainer container){if(container==null||itemManager==null){return Collections.emptyMap();
-}Map<Integer,Integer>items=new LinkedHashMap<>();
-for(Item item:container.getItems()){if(!isRealOwnedItem(item,true)){continue;
-}int itemId=item.getId();
-int quantity=item.getQuantity();
-items.put(itemId,items.getOrDefault(itemId,0)+quantity);
-}return items;
-}private List<OwnedItem>snapshotOwned(ItemContainer container,KitItem.Status status,boolean equipmentContainer){if(container==null||itemManager==null){return Collections.emptyList();
-}List<OwnedItem>items=new ArrayList<>();
-Item[]containerItems=container.getItems();
-int[]state=snapshotOwnedState(containerItems);
-if(equipmentContainer&&Arrays.equals(state,cachedEquipmentOwnedState)){return cachedEquipmentOwnedItems;
-}if(!equipmentContainer&&Arrays.equals(state,cachedInventoryOwnedState)){return cachedInventoryOwnedItems;
+
+public final class SlayerLoadoutAnalyzer {
+  private static final List<RequirementRule> REQUIREMENT_RULES = loadRequirementRules();
+  private static final int EXTRA_QUIVER_AMMO_SLOT = 14;
+  private static final String[] STRONGEST_STANDARD_ARROW_PRIORITY =
+      new String[] {
+        "seeking dragon arrow",
+        "dragon arrow",
+        "seeking amethyst arrow",
+        "amethyst arrow",
+        "seeking rune arrow",
+        "rune arrow",
+        "seeking adamant arrow",
+        "adamant arrow",
+        "seeking broad arrow",
+        "broad arrow",
+        "seeking mithril arrow",
+        "mithril arrow",
+        "seeking steel arrow",
+        "steel arrow",
+        "seeking iron arrow",
+        "iron arrow",
+        "seeking bronze arrow",
+        "bronze arrow"
+      };
+  private static final String[] STRONGEST_NON_DRAGON_ARROW_PRIORITY =
+      new String[] {
+        "seeking amethyst arrow",
+        "amethyst arrow",
+        "seeking rune arrow",
+        "rune arrow",
+        "seeking adamant arrow",
+        "adamant arrow",
+        "seeking broad arrow",
+        "broad arrow",
+        "seeking mithril arrow",
+        "mithril arrow",
+        "seeking steel arrow",
+        "steel arrow",
+        "seeking iron arrow",
+        "iron arrow",
+        "seeking bronze arrow",
+        "bronze arrow"
+      };
+  private static final String[] EFFICIENT_REGULAR_ARROW_PRIORITY =
+      new String[] {
+        "rune arrow",
+        "seeking rune arrow",
+        "amethyst arrow",
+        "seeking amethyst arrow",
+        "dragon arrow",
+        "seeking dragon arrow",
+        "adamant arrow",
+        "seeking adamant arrow",
+        "broad arrow",
+        "seeking broad arrow",
+        "mithril arrow",
+        "seeking mithril arrow",
+        "steel arrow",
+        "seeking steel arrow",
+        "iron arrow",
+        "seeking iron arrow",
+        "bronze arrow",
+        "seeking bronze arrow"
+      };
+  private static final String[] EFFICIENT_BOSS_ARROW_PRIORITY =
+      new String[] {
+        "amethyst arrow",
+        "seeking amethyst arrow",
+        "rune arrow",
+        "seeking rune arrow",
+        "dragon arrow",
+        "seeking dragon arrow",
+        "adamant arrow",
+        "seeking adamant arrow",
+        "broad arrow",
+        "seeking broad arrow",
+        "mithril arrow",
+        "seeking mithril arrow",
+        "steel arrow",
+        "seeking steel arrow",
+        "iron arrow",
+        "seeking iron arrow",
+        "bronze arrow",
+        "seeking bronze arrow"
+      };
+  private static final String[] INFERNO_ARROW_PRIORITY =
+      new String[] {
+        "seeking dragon arrow",
+        "seeking amethyst arrow",
+        "dragon arrow",
+        "seeking rune arrow",
+        "amethyst arrow",
+        "rune arrow",
+        "seeking adamant arrow",
+        "seeking broad arrow",
+        "adamant arrow",
+        "seeking mithril arrow",
+        "broad arrow",
+        "seeking steel arrow",
+        "mithril arrow",
+        "seeking iron arrow",
+        "steel arrow",
+        "seeking bronze arrow",
+        "iron arrow",
+        "bronze arrow"
+      };
+  private final ItemManager itemManager;
+  private Map<Integer, Integer> cachedBankSnapshotSource = Collections.emptyMap();
+  private List<OwnedItem> bankOwnedItems = Collections.emptyList();
+  private int[] cachedInventoryOwnedState = new int[0];
+  private int[] cachedEquipmentOwnedState = new int[0];
+  private List<OwnedItem> cachedInventoryOwnedItems = Collections.emptyList();
+  private List<OwnedItem> cachedEquipmentOwnedItems = Collections.emptyList();
+  private final Map<Integer, String> itemNameCache = new HashMap<>();
+  private final Map<Integer, ItemEquipmentStats> equipmentStatsCache = new HashMap<>();
+  private final Map<Integer, Set<String>> matchNamesCache = new HashMap<>();
+  private final Map<Integer, Boolean> realItemCache = new HashMap<>();
+  private String helmetPreference = HelmetPreference.COMBAT_ACHIEVEMENT;
+  private int randomHelmId = -1;
+  private int randomSlayerHelmetPoolSignature;
+  private boolean helmetRerollPending;
+  private boolean desertElite;
+  private SlayerAchievementDiarySnapshot diaries = SlayerAchievementDiarySnapshot.empty();
+
+  public SlayerLoadoutAnalyzer(ItemManager itemManager) {
+    this.itemManager = itemManager;
+  }
+
+  public void setHelmetPreference(String preference) {
+    String normalized = HelmetPreference.normalize(preference);
+    if (!normalized.equals(helmetPreference)) {
+      helmetPreference = normalized;
+      randomHelmId = -1;
+      randomSlayerHelmetPoolSignature = 0;
+      helmetRerollPending = false;
+    }
+  }
+
+  public void setDesertEliteDiaryComplete(boolean complete) {
+    desertElite = complete;
+  }
+
+  public void setAchievementDiaries(SlayerAchievementDiarySnapshot snapshot) {
+    diaries = snapshot == null ? SlayerAchievementDiarySnapshot.empty() : snapshot;
+  }
+
+  public boolean rerollRandomSlayerHelmet() {
+    if (!HelmetPreference.isRandom(helmetPreference)) {
+      return false;
+    }
+    helmetRerollPending = true;
+    return true;
+  }
+
+  public List<String> ownedHelms(
+      ItemContainer inventory, ItemContainer equipment, Map<Integer, Integer> bank) {
+    List<OwnedItem> owned = new ArrayList<>();
+    owned.addAll(snapshotOwned(equipment, KitItem.Status.EQUIPPED, true));
+    owned.addAll(snapshotOwned(inventory, KitItem.Status.INVENTORY, false));
+    owned.addAll(snapshotBank(bank));
+    Set<String> names = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+    for (OwnedItem item : owned) {
+      if (isSlayerHelmet(item)) {
+        names.add(item.displayName);
+      }
+    }
+    return new ArrayList<>(names);
+  }
+
+  public Set<Integer> ownedSlayerHelmetItemIds(
+      ItemContainer inventory, ItemContainer equipment, Map<Integer, Integer> bank) {
+    List<OwnedItem> owned = new ArrayList<>();
+    owned.addAll(snapshotOwned(equipment, KitItem.Status.EQUIPPED, true));
+    owned.addAll(snapshotOwned(inventory, KitItem.Status.INVENTORY, false));
+    owned.addAll(snapshotBank(bank));
+    Set<Integer> itemIds = new LinkedHashSet<>();
+    for (OwnedItem item : owned) {
+      if (isSlayerHelmet(item)) {
+        itemIds.add(item.itemId);
+      }
+    }
+    return itemIds;
+  }
+
+  public List<String> slayerHelmetNamesForItemIds(Iterable<Integer> itemIds) {
+    Set<String> names = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+    if (itemIds == null || itemManager == null) {
+      return new ArrayList<>(names);
+    }
+    for (Integer itemId : itemIds) {
+      if (itemId == null || itemId <= 0) {
+        continue;
+      }
+      String displayName = itemManager.getItemComposition(itemId).getName();
+      if (normalize(displayName).contains("slayer helmet")) {
+        names.add(displayName);
+      }
+    }
+    return new ArrayList<>(names);
+  }
+
+  public Recommendation resolveOwnedAutomaticRecommendation(
+      String assignment,
+      Recommendation recommendation,
+      ItemContainer inventory,
+      ItemContainer equipment,
+      Map<Integer, Integer> bank,
+      boolean scanned,
+      TaskVariant taskVariant,
+      SlayerPlusConfig config) {
+    if (recommendation == null
+        || !recommendation.hasTaskStrategy()
+        || config == null
+        || config.combatStylePreference() != Preference.CombatStyle.AUTOMATIC
+        || !scanned) {
+      return recommendation;
+    }
+    VariantCatalog.ResolvedTarget effectiveTarget =
+        VariantCatalog.resolve(assignment, taskVariant, recommendation, config);
+    if (effectiveTarget == null
+        || !effectiveTarget.isValid()
+        || effectiveTarget.getStrategy() == null) {
+      return recommendation;
+    }
+    String effectiveTask = effectiveTarget.getTaskName();
+    String effectiveLocation = effectiveTarget.getLocation();
+    TaskStrategy effectiveStrategy = effectiveTarget.getStrategy();
+    List<OwnedItem> pool = new ArrayList<>();
+    pool.addAll(snapshotOwned(equipment, KitItem.Status.EQUIPPED, true));
+    pool.addAll(snapshotOwned(inventory, KitItem.Status.INVENTORY, false));
+    pool.addAll(snapshotBank(bank));
+    boolean wilderness =
+        isWildernessLoadout(
+            normalize(effectiveLocation), normalize(effectiveTarget.getRestriction()));
+    List<StrategyCandidate> candidates = new ArrayList<>();
+    addStrategyCandidate(
+        candidates,
+        effectiveStrategy,
+        pool,
+        effectiveTask,
+        effectiveLocation,
+        config.playstyle(),
+        true);
+    boolean automaticStyleLocked =
+        effectiveStrategy.hasTag(TaskStrategy.MethodTag.AUTOMATIC_STYLE_LOCKED);
+    if (!automaticStyleLocked) {
+      for (Preference.CombatStyle preference :
+          new Preference.CombatStyle[] {
+            Preference.CombatStyle.PREFER_MELEE,
+            Preference.CombatStyle.PREFER_RANGED,
+            Preference.CombatStyle.PREFER_MAGIC
+          }) {
+        TaskStrategy candidate =
+            SlayerTaskStrategyCatalog.resolve(
+                effectiveTask,
+                config.playstyle(),
+                config.cannonPreference(),
+                config.burstPreference(),
+                preference,
+                effectiveLocation,
+                wilderness);
+        addStrategyCandidate(
+            candidates,
+            candidate,
+            pool,
+            effectiveTask,
+            effectiveLocation,
+            config.playstyle(),
+            false);
+      }
+    }
+    StrategyCandidate best = null;
+    for (StrategyCandidate candidate : candidates) {
+      if (best == null || candidate.score > best.score) {
+        best = candidate;
+      }
+    }
+    if (best == null) {
+      return recommendation;
+    }
+    String ownedReason =
+        "Automatic compared the reviewed viable combat styles against "
+            + "your real bank, inventory, and equipped items. "
+            + best.weapon.displayName
+            + " produced the strongest owned setup for this method. ";
+    TaskStrategy selectedStrategy =
+        effectiveStrategy.hasTag(TaskStrategy.MethodTag.TURAEL_POINT_BOOST)
+            ? best.strategy.withAdditionalTags(TaskStrategy.MethodTag.TURAEL_POINT_BOOST)
+            : best.strategy;
+    String resolvedMethod =
+        SlayerMethodRuleCatalog.resolve(effectiveTask, effectiveLocation, selectedStrategy)
+            .getMethod();
+    return new Recommendation(
+        effectiveLocation,
+        resolvedMethod,
+        ownedReason + best.strategy.getRationale(),
+        effectiveTarget.getTravel(),
+        effectiveTarget.getCannon(),
+        recommendation.getRequirements(),
+        effectiveTarget.getRestriction(),
+        selectedStrategy);
+  }
+
+  private static void addStrategyCandidate(
+      List<StrategyCandidate> candidates,
+      TaskStrategy strategy,
+      List<OwnedItem> pool,
+      String encounter,
+      String location,
+      Preference.Playstyle playstyle,
+      boolean originalAutomatic) {
+    if (strategy == null || !strategy.isReviewed()) {
+      return;
+    }
+    for (StrategyCandidate existing : candidates) {
+      if (sameStrategy(existing.strategy, strategy)) {
+        return;
+      }
+    }
+    List<String> priorities =
+        strategy.weapons().isEmpty() ? strategy.getWeapons() : strategy.weapons();
+    OwnedItem weapon =
+        preferredEquipmentAllowed(pool, EquipmentInventorySlot.WEAPON, false, priorities, strategy);
+    if (weapon == null) {
+      return;
+    }
+    int rank = matchingPriorityIndex(weapon, priorities);
+    if (rank < 0 || !hasRequiredRangedAmmo(strategy, weapon, pool)) {
+      return;
+    }
+    int score = Math.max(10, 125 - rank * 18);
+    score += ownedCoreEquipmentCoverage(strategy, pool) * 12;
+    if (ownsBoostPotion(style(strategy), strategy.getCostPolicy(), pool)) {
+      score += 10;
+    }
+    score += suppliesScore(strategy, weapon, encounter, location, pool);
+    if (normalize(encounter).equals("vorkath") && !hasCompleteVorkathCore(strategy, weapon, pool)) {
+      return;
+    }
+    if (originalAutomatic) {
+      score += 4;
+    }
+    if (strategy.hasTag(TaskStrategy.MethodTag.CANNON)) {
+      score += 28;
+    }
+    if (strategy.hasTag(TaskStrategy.MethodTag.MULTI_COMBAT)) {
+      score += 8;
+    }
+    if (strategy.hasTag(TaskStrategy.MethodTag.VENATOR) && weapon.named("venator bow")) {
+      score += 42;
+    }
+    if (strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)) {
+      score += 36;
+    }
+    Preference.Playstyle resolvedPlaystyle =
+        playstyle == null ? Preference.Playstyle.FAST_XP : playstyle;
+    switch (resolvedPlaystyle) {
+      case PROFIT:
+        if (strategy.getCostPolicy() == TaskStrategy.CostPolicy.EFFICIENT) {
+          score += 18;
+        }
+        score -= operatingCostPenalty(weapon);
+        break;
+      case FAST_XP:
+      default:
+        if (strategy.getCostPolicy() == TaskStrategy.CostPolicy.MAX_DPS) {
+          score += 14;
+        }
+        if (strategy.getArmourFocus() == TaskStrategy.ArmourFocus.DAMAGE) {
+          score += 8;
+        }
+        break;
+    }
+    candidates.add(new StrategyCandidate(strategy, weapon, score));
+  }
+
+  private static boolean sameStrategy(TaskStrategy left, TaskStrategy right) {
+    return left == right
+        || (left != null
+            && right != null
+            && left.getStyle() == right.getStyle()
+            && normalize(left.getMethod()).equals(normalize(right.getMethod())));
+  }
+
+  private static boolean ownsBoostPotion(
+      CombatStyle style, TaskStrategy.CostPolicy costPolicy, List<OwnedItem> pool) {
+    if (style == CombatStyle.MAGIC) {
+      return containsAnyOwned(pool, PotionPolicy.magicBoostAlternatives());
+    }
+    if (style == CombatStyle.RANGED) {
+      return containsAnyOwned(pool, PotionPolicy.rangedBoostAlternatives(costPolicy));
+    }
+    if (style == CombatStyle.MELEE) {
+      return containsAnyOwned(pool, PotionPolicy.meleeBoostAlternatives(costPolicy));
+    }
+    return false;
+  }
+
+  private static int suppliesScore(
+      TaskStrategy strategy, OwnedItem weapon, String task, String location, List<OwnedItem> pool) {
+    MethodRules methodRules = SlayerMethodRuleCatalog.resolve(task, location, strategy);
+    Map<Integer, Integer> ownedQuantities = ownedItemQuantities(pool);
+    CombatStyle style = style(strategy);
+    int score = 0;
+    if (style == CombatStyle.MAGIC && !methodRules.getPouchRunes().isEmpty()) {
+      RunePolicy.Resolution runes =
+          RunePolicy.resolve(methodRules.getPouchRunes(), ownedQuantities);
+      boolean sufficient = runes.getUnownedRequirements().isEmpty();
+      for (RunePolicy.ResolvedRune rune : runes.getRunes()) {
+        if (ownedQuantities.getOrDefault(rune.getItemId(), 0) < rune.getMinimumQuantity()) {
+          sufficient = false;
+        }
+      }
+      score += sufficient ? 15 : -15;
+    }
+    if (style == CombatStyle.RANGED && !isSelfContainedRangedWeapon(weapon)) {
+      KitItem ammo = buildAmmoItem(style, weapon, strategy, pool, true);
+      score += ammo.hasItemId() && ammo.getQuantity() >= minimumSufficientAmmo(weapon) ? 15 : -15;
+    }
+    if (methodRules.resolveFoodSlots(strategy, strategy.getRecommendedFoodSlots(1)) > 0) {
+      score +=
+          containsAnyOwned(pool, methodRules.getFoodAlternatives().toArray(new String[0]))
+              ? 5
+              : -12;
+    }
+    return score;
+  }
+
+  private static boolean isSelfContainedRangedWeapon(OwnedItem weapon) {
+    return weapon != null
+        && (weapon.named("blowpipe")
+            || weapon.named("bow of faerdhinen")
+            || weapon.named("crystal bow")
+            || weapon.named("webweaver bow")
+            || weapon.named("craw s bow")
+            || weapon.named("chinchompa"));
+  }
+
+  private static int minimumSufficientAmmo(OwnedItem weapon) {
+    if (weapon == null) {
+      return 250;
+    }
+    if (weapon.named("ballista") || weapon.named("atlatl")) {
+      return 75;
+    }
+    if (weapon.named("hunters sunlight crossbow")) {
+      return 100;
+    }
+    if (weapon.named("crossbow")) {
+      return 150;
+    }
+    return 250;
+  }
+
+  private static int ownedCoreEquipmentCoverage(TaskStrategy strategy, List<OwnedItem> pool) {
+    CombatStyle style = style(strategy);
+    int coverage = 0;
+    for (EquipmentInventorySlot slot :
+        new EquipmentInventorySlot[] {
+          EquipmentInventorySlot.HEAD,
+          EquipmentInventorySlot.CAPE,
+          EquipmentInventorySlot.AMULET,
+          EquipmentInventorySlot.BODY,
+          EquipmentInventorySlot.LEGS,
+          EquipmentInventorySlot.GLOVES,
+          EquipmentInventorySlot.BOOTS,
+          EquipmentInventorySlot.RING
+        }) {
+      if (findBestEquipment(pool, slot, strategy, style, false) != null) {
+        coverage++;
+      }
+    }
+    return coverage;
+  }
+
+  private static boolean hasCompleteVorkathCore(
+      TaskStrategy strategy, OwnedItem weapon, List<OwnedItem> pool) {
+    if (strategy == null || weapon == null) {
+      return false;
+    }
+    CombatStyle style = style(strategy);
+    boolean ranged = style == CombatStyle.RANGED;
+    OwnedItem slayerHead = findPreferredVorkathSlayerHead(pool, ranged);
+    boolean slayerPackage =
+        slayerHead != null
+            && containsAnyOwned(
+                pool,
+                ranged ? "necklace of anguish" : "amulet of rancour",
+                ranged ? "amulet of fury" : "amulet of torture",
+                "amulet of fury");
+    boolean salvePackage =
+        containsAnyOwned(
+            pool,
+            ranged ? "salve amulet ei" : "salve amulet e",
+            ranged ? "salve amulet i" : "salve amulet ei");
+    boolean head =
+        preferredEquipment(
+                pool,
+                EquipmentInventorySlot.HEAD,
+                false,
+                ranged
+                    ? Arrays.asList(
+                        "masori mask",
+                        "void ranger helm",
+                        "slayer helmet i",
+                        "crystal helm",
+                        "serpentine helm",
+                        "blessed coif")
+                    : Arrays.asList(
+                        "torva full helm",
+                        "slayer helmet i",
+                        "neitiznot faceguard",
+                        "serpentine helm",
+                        "oathplate helm",
+                        "justiciar faceguard",
+                        "blood moon helm",
+                        "helm of neitiznot",
+                        "barrows helm"))
+            != null;
+    boolean body =
+        preferredEquipment(
+                pool,
+                EquipmentInventorySlot.BODY,
+                false,
+                ranged
+                    ? Arrays.asList(
+                        "masori body",
+                        "elite void top",
+                        "void knight top",
+                        "crystal body",
+                        "karil s leathertop",
+                        "blessed body",
+                        "black d hide body")
+                    : Arrays.asList(
+                        "torva platebody",
+                        "bandos chestplate",
+                        "oathplate chest",
+                        "justiciar chestguard",
+                        "blood moon chestplate",
+                        "barrows platebody",
+                        "fighter torso",
+                        "obsidian platebody"))
+            != null;
+    boolean legs =
+        preferredEquipment(
+                pool,
+                EquipmentInventorySlot.LEGS,
+                false,
+                ranged
+                    ? Arrays.asList(
+                        "masori chaps",
+                        "elite void robe",
+                        "void knight robe",
+                        "crystal legs",
+                        "karil s leatherskirt",
+                        "blessed chaps",
+                        "black d hide chaps")
+                    : Arrays.asList(
+                        "torva platelegs",
+                        "bandos tassets",
+                        "oathplate legs",
+                        "justiciar legguards",
+                        "blood moon tassets",
+                        "barrows platelegs",
+                        "obsidian platelegs"))
+            != null;
+    boolean offHand =
+        weapon.isTwoHanded()
+            || preferredEquipment(
+                    pool,
+                    EquipmentInventorySlot.SHIELD,
+                    false,
+                    ranged
+                        ? Arrays.asList("dragonfire ward", "anti dragon shield")
+                        : Arrays.asList(
+                            "avernic defender",
+                            "dragon defender",
+                            "rune defender",
+                            "toktz ket xil",
+                            "rune kiteshield"))
+                != null;
+    return (slayerPackage || salvePackage) && head && body && legs && offHand;
+  }
+
+  private static OwnedItem findPreferredVorkathSlayerHead(List<OwnedItem> pool, boolean ranged) {
+    return preferredEquipment(
+        pool,
+        EquipmentInventorySlot.HEAD,
+        false,
+        ranged
+            ? Arrays.asList("slayer helmet i", "black mask i")
+            : Arrays.asList("slayer helmet i", "black mask i", "slayer helmet", "black mask"));
+  }
+
+  private static int matchingPriorityIndex(OwnedItem weapon, List<String> priorities) {
+    for (int index = 0; index < priorities.size(); index++) {
+      String fragment = normalize(priorities.get(index));
+      if (!fragment.isEmpty() && weapon.named(fragment)) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  private static boolean hasRequiredRangedAmmo(
+      TaskStrategy strategy, OwnedItem weapon, List<OwnedItem> pool) {
+    if (strategy.getStyle() != TaskStrategy.CombatStyle.RANGED) {
+      return true;
+    }
+    if (weapon.named("blowpipe")
+        || weapon.named("bow of faerdhinen")
+        || weapon.named("crystal bow")
+        || weapon.named("webweaver bow")
+        || weapon.named("craw s bow")
+        || weapon.named("chinchompa")
+        || weapon.named(" dart")
+        || weapon.nameKey.endsWith("dart")
+        || weapon.named(" knife")
+        || weapon.nameKey.endsWith("knife")) {
+      return true;
+    }
+    if (weapon.named("ballista")) {
+      return containsAnyOwned(pool, "dragon javelin", "amethyst javelin", "rune javelin");
+    }
+    if (weapon.named("atlatl")) {
+      return containsAnyOwned(pool, "atlatl dart");
+    }
+    if (weapon.named("hunters sunlight crossbow")) {
+      return containsAnyOwned(pool, "moonlight antler bolts", "sunlight antler bolts");
+    }
+    if (weapon.named("crossbow")) {
+      return containsAnyOwned(
+          pool,
+          "dragonstone dragon bolts e",
+          "dragonstone bolts e",
+          "ruby dragon bolts e",
+          "diamond dragon bolts e",
+          "dragon bolts",
+          "amethyst broad bolts",
+          "runite bolts",
+          "broad bolts");
+    }
+    return containsAnyOwned(pool, "dragon arrow", "amethyst arrow", "rune arrow", "broad arrow");
+  }
+
+  private static boolean containsAnyOwned(List<OwnedItem> pool, String... fragments) {
+    for (OwnedItem item : pool) {
+      for (String fragment : fragments) {
+        if (item.named(fragment)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private static Map<Integer, Integer> ownedItemQuantities(List<OwnedItem> pool) {
+    Map<Integer, Integer> quantities = new LinkedHashMap<>();
+    if (pool == null) {
+      return quantities;
+    }
+    for (OwnedItem item : pool) {
+      if (item != null && item.itemId > 0 && item.quantity > 0) {
+        quantities.merge(item.itemId, item.quantity, Integer::sum);
+      }
+    }
+    return quantities;
+  }
+
+  private static int operatingCostPenalty(OwnedItem weapon) {
+    if (weapon.named("scythe of vitur")) {
+      return 60;
+    }
+    if (weapon.named("toxic blowpipe")
+        || weapon.named("sanguinesti staff")
+        || weapon.named("tumeken s shadow")) {
+      return 34;
+    }
+    if (weapon.named("arclight")
+        || weapon.named("crystal bow")
+        || weapon.named("bow of faerdhinen")) {
+      return 12;
+    }
+    return 0;
+  }
+
+  public KitPlan analyze(
+      String assignment,
+      Recommendation recommendation,
+      ItemContainer inventory,
+      ItemContainer equipment,
+      Map<Integer, Integer> bank,
+      boolean scanned,
+      TaskVariant taskVariant,
+      SlayerPlusConfig config,
+      int remainingKills,
+      int extraQuiverAmmoItemId,
+      int extraQuiverAmmoQuantity) {
+    List<OwnedItem> inventoryItems = snapshotOwned(inventory, KitItem.Status.INVENTORY, false);
+    List<OwnedItem> equipmentItems = snapshotOwned(equipment, KitItem.Status.EQUIPPED, true);
+    List<OwnedItem> bankOwned = snapshotBank(bank);
+    List<OwnedItem> pool = new ArrayList<>();
+    pool.addAll(equipmentItems);
+    pool.addAll(inventoryItems);
+    pool.addAll(bankOwned);
+    OwnedItem extraQuiverAmmo =
+        snapshotExtraQuiverAmmo(extraQuiverAmmoItemId, extraQuiverAmmoQuantity);
+    if (extraQuiverAmmo != null) {
+      pool.add(extraQuiverAmmo);
+    }
+    Set<String> inventoryNames = namesOf(inventoryItems);
+    Set<String> equipmentNames = namesOf(equipmentItems);
+    Set<String> bankNames = namesOf(bankOwned);
+    VariantCatalog.ResolvedTarget target =
+        VariantCatalog.resolve(assignment, taskVariant, recommendation, config);
+    String task = normalize(target.getTaskName());
+    String location = normalize(target.getLocation());
+    String method = target.getStrategy() == null ? "" : normalize(target.getStrategy().getMethod());
+    String cannon = normalize(target.getCannon());
+    String travel = normalize(target.getTravel());
+    String restriction = normalize(target.getRestriction());
+    boolean wildernessLoadout = isWildernessLoadout(location, restriction);
+    List<OwnedItem> recommendationOwned = filterRecommendationItems(pool, wildernessLoadout);
+    TaskStrategy strategy = target.getStrategy();
+    if (strategy == null || !strategy.isReviewed()) {
+      return KitPlan.researchPending(target.getDisplayName());
+    }
+    CombatStyle style = style(strategy);
+    List<Requirement> requirements =
+        requirementsFor(task, location, style, remainingKills, desertElite);
+    boolean cannonSuggested = isCannonSuggested(cannon);
+    int foodSlots = strategy.getRecommendedFoodSlots(remainingKills);
+    OwnedItem weapon =
+        selectRecommendedWeapon(
+            task, strategy, style, requirements, equipmentItems, recommendationOwned);
+    List<KitItem> equipmentLayout =
+        applyHelmetPreference(
+            buildEquipmentLayout(
+                task,
+                strategy,
+                style,
+                requirements,
+                equipmentItems,
+                recommendationOwned,
+                scanned,
+                weapon),
+            pool,
+            style);
+    return new KitPlan(
+        buildEquipmentText(strategy, style, requirements),
+        buildInventoryText(strategy, style, requirements, cannonSuggested, foodSlots),
+        buildOwnedText(
+            style,
+            requirements,
+            cannonSuggested,
+            inventoryNames,
+            equipmentNames,
+            bankNames,
+            scanned),
+        buildLayoutTitle(target.getDisplayName(), target.getLocation()),
+        equipmentLayout,
+        buildInventoryLayout(
+            task,
+            strategy,
+            location,
+            travel,
+            style,
+            requirements,
+            cannonSuggested,
+            foodSlots,
+            recommendationOwned,
+            scanned,
+            equipmentLayout),
+        buildOptionalLayout(task, strategy, recommendationOwned, weapon));
+  }
+
+  private List<KitItem> applyHelmetPreference(
+      List<KitItem> layout, List<OwnedItem> pool, CombatStyle style) {
+    if (layout == null || layout.isEmpty()) {
+      return layout;
+    }
+    Map<String, OwnedItem> helmetsByName = new LinkedHashMap<>();
+    for (OwnedItem item : pool) {
+      if (isSlayerHelmet(item) && isSlayerHelmetValidForStyle(item, style)) {
+        helmetsByName.putIfAbsent(item.nameKey, item);
+      }
+    }
+    List<OwnedItem> helmets = new ArrayList<>(helmetsByName.values());
+    if (helmets.isEmpty()) {
+      return layout;
+    }
+    helmets.sort((left, right) -> Integer.compare(left.itemId, right.itemId));
+    OwnedItem selected = null;
+    if (HelmetPreference.isCombatAchievement(helmetPreference)) {
+      selected = firstCombatAchievementHelmet(helmets);
+    } else if (HelmetPreference.isRandom(helmetPreference)) {
+      int signature = 1;
+      for (OwnedItem helmet : helmets) {
+        signature = 31 * signature + helmet.itemId;
+      }
+      if (signature != randomSlayerHelmetPoolSignature) {
+        randomSlayerHelmetPoolSignature = signature;
+      }
+      for (OwnedItem helmet : helmets) {
+        if (helmet.itemId == randomHelmId) {
+          selected = helmet;
+          break;
+        }
+      }
+      if (selected == null || helmetRerollPending) {
+        List<OwnedItem> eligible = new ArrayList<>(helmets);
+        if (helmetRerollPending && eligible.size() > 1) {
+          eligible.removeIf(helmet -> helmet.itemId == randomHelmId);
+        }
+        selected = eligible.get(ThreadLocalRandom.current().nextInt(eligible.size()));
+        randomHelmId = selected.itemId;
+        helmetRerollPending = false;
+      }
+    } else {
+      for (OwnedItem helmet : helmets) {
+        if (helmet.matchesDisplay(helmetPreference)) {
+          selected = helmet;
+          break;
+        }
+      }
+    }
+    if (selected == null) {
+      return layout;
+    }
+    for (int index = 0; index < layout.size(); index++) {
+      KitItem current = layout.get(index);
+      String name = normalize(current.getDisplayName());
+      if (name.contains("slayer helmet") || name.contains("black mask")) {
+        layout.set(index, selected.toItem(1));
+        break;
+      }
+    }
+    return layout;
+  }
+
+  private static OwnedItem firstCombatAchievementHelmet(List<OwnedItem> helmets) {
+    OwnedItem selected = null;
+    int selectedTier = 0;
+    for (OwnedItem helmet : helmets) {
+      int tier = combatAchievementHelmetTierForTest(helmet.displayName);
+      if (tier > selectedTier) {
+        selected = helmet;
+        selectedTier = tier;
+      }
+    }
+    return selected;
+  }
+
+  static int combatAchievementHelmetTierForTest(String itemName) {
+    String name = normalize(itemName);
+    if (name.startsWith("tzkal slayer helmet")) return 3;
+    if (name.startsWith("vampyric slayer helmet")) return 2;
+    if (name.startsWith("tztok slayer helmet")) return 1;
+    return 0;
+  }
+
+  private static boolean isSlayerHelmet(OwnedItem item) {
+    return item != null
+        && item.nameKey.contains("slayer helmet")
+        && (item.equipmentSlot < 0
+            || item.equipmentSlot == EquipmentInventorySlot.HEAD.getSlotIdx());
+  }
+
+  private static boolean isSlayerHelmetValidForStyle(OwnedItem item, CombatStyle style) {
+    if (item == null || style == CombatStyle.MELEE || style == CombatStyle.FLEXIBLE) {
+      return item != null;
+    }
+    return item.nameKey.endsWith(" i") || item.nameKey.contains(" i uncharged");
+  }
+
+  public Set<String> snapshotNames(ItemContainer container) {
+    if (container == null || itemManager == null) {
+      return Collections.emptySet();
+    }
+    Set<String> names = new HashSet<>();
+    for (Item item : container.getItems()) {
+      if (!isRealOwnedItem(item, false)) {
+        continue;
+      }
+      try {
+        int canonicalId = itemManager.canonicalize(item.getId());
+        ItemComposition composition = itemManager.getItemComposition(canonicalId);
+        if (composition != null) {
+          names.addAll(getMatchNames(canonicalId, composition.getName()));
+        }
+      } catch (RuntimeException ignored) {
+      }
+    }
+    return names;
+  }
+
+  public Map<Integer, Integer> snapshotItems(ItemContainer container) {
+    if (container == null || itemManager == null) {
+      return Collections.emptyMap();
+    }
+    Map<Integer, Integer> items = new LinkedHashMap<>();
+    for (Item item : container.getItems()) {
+      if (!isRealOwnedItem(item, true)) {
+        continue;
+      }
+      int itemId = item.getId();
+      int quantity = item.getQuantity();
+      items.put(itemId, items.getOrDefault(itemId, 0) + quantity);
+    }
+    return items;
+  }
+
+  private List<OwnedItem> snapshotOwned(
+      ItemContainer container, KitItem.Status status, boolean equipmentContainer) {
+    if (container == null || itemManager == null) {
+      return Collections.emptyList();
+    }
+    List<OwnedItem> items = new ArrayList<>();
+    Item[] containerItems = container.getItems();
+    int[] state = snapshotOwnedState(containerItems);
+    if (equipmentContainer && Arrays.equals(state, cachedEquipmentOwnedState)) {
+      return cachedEquipmentOwnedItems;
+    }
+    if (!equipmentContainer && Arrays.equals(state, cachedInventoryOwnedState)) {
+      return cachedInventoryOwnedItems;
+    }
+    for (int index = 0; index < containerItems.length; index++) {
+      Item item = containerItems[index];
+      if (!isRealOwnedItem(item, false)) {
+        continue;
+      }
+      int itemId = item.getId();
+      String name = getItemName(itemId);
+      if (name.isEmpty()) {
+        continue;
+      }
+      items.add(
+          new OwnedItem(
+              itemId,
+              name,
+              item.getQuantity(),
+              status,
+              equipmentContainer ? index : -1,
+              getEquipmentStats(itemId),
+              getMatchNames(itemId, name)));
+    }
+    List<OwnedItem> snapshot = Collections.unmodifiableList(items);
+    if (equipmentContainer) {
+      cachedEquipmentOwnedState = state;
+      cachedEquipmentOwnedItems = snapshot;
+    } else {
+      cachedInventoryOwnedState = state;
+      cachedInventoryOwnedItems = snapshot;
+    }
+    return snapshot;
+  }
+
+  private static int[] snapshotOwnedState(Item[] items) {
+    if (items == null || items.length == 0) {
+      return new int[0];
+    }
+    int[] state = new int[items.length * 2];
+    for (int index = 0; index < items.length; index++) {
+      Item item = items[index];
+      state[index * 2] = item == null ? -1 : item.getId();
+      state[index * 2 + 1] = item == null ? 0 : item.getQuantity();
+    }
+    return state;
+  }
+
+  private OwnedItem snapshotExtraQuiverAmmo(int itemId, int quantity) {
+    if (itemId <= 0 || quantity <= 0 || itemManager == null) {
+      return null;
+    }
+    int normalizedItemId = QuiverAmmo.arrow(itemId);
+    String name = getItemName(normalizedItemId);
+    if (name.isEmpty()) {
+      name = QuiverAmmo.seekingArrowMatchName(normalizedItemId);
+    }
+    if (name.isEmpty()) {
+      return null;
+    }
+    return new OwnedItem(
+        normalizedItemId,
+        name,
+        quantity,
+        KitItem.Status.EQUIPPED,
+        EXTRA_QUIVER_AMMO_SLOT,
+        getEquipmentStats(normalizedItemId),
+        getMatchNames(normalizedItemId, name));
+  }
+
+  private List<OwnedItem> snapshotBank(Map<Integer, Integer> bank) {
+    if (bank == null || bank.isEmpty() || itemManager == null) {
+      return Collections.emptyList();
+    }
+    if (cachedBankSnapshotSource.equals(bank)) {
+      return bankOwnedItems;
+    }
+    List<OwnedItem> items = new ArrayList<>();
+    for (Map.Entry<Integer, Integer> entry : bank.entrySet()) {
+      if (entry.getKey() == null
+          || entry.getKey() <= 0
+          || entry.getValue() == null
+          || entry.getValue() <= 0) {
+        continue;
+      }
+      int itemId = entry.getKey();
+      String name = getItemName(itemId);
+      if (name.isEmpty()) {
+        continue;
+      }
+      items.add(
+          new OwnedItem(
+              itemId,
+              name,
+              entry.getValue(),
+              KitItem.Status.BANK,
+              -1,
+              getEquipmentStats(itemId),
+              getMatchNames(itemId, name)));
+    }
+    cachedBankSnapshotSource = Collections.unmodifiableMap(new LinkedHashMap<>(bank));
+    bankOwnedItems = Collections.unmodifiableList(items);
+    return bankOwnedItems;
+  }
+
+  private boolean isRealOwnedItem(Item item, boolean requireDefinition) {
+    if (item == null || item.getId() <= 0 || item.getQuantity() <= 0) {
+      return false;
+    }
+    Boolean cached = realItemCache.get(item.getId());
+    if (cached != null) {
+      return cached;
+    }
+    try {
+      ItemComposition composition = itemManager.getItemComposition(item.getId());
+      if (composition == null) {
+        return !requireDefinition;
+      }
+      boolean real = composition.getPlaceholderTemplateId() == -1;
+      realItemCache.put(item.getId(), real);
+      return real;
+    } catch (RuntimeException ignored) {
+      return !requireDefinition;
+    }
+  }
+
+  private Set<String> getMatchNames(int itemId, String displayName) {
+    Set<String> cached = matchNamesCache.get(itemId);
+    if (cached != null) {
+      return cached;
+    }
+    Set<String> names = new LinkedHashSet<>();
+    addMatchName(names, displayName);
+    addSeekingQuiverMatchName(names, itemId);
+    try {
+      int variationBase = ItemVariationMapping.map(itemId);
+      addMatchName(names, getItemName(variationBase));
+    } catch (RuntimeException ignored) {
+    }
+    try {
+      Collection<ItemMapping> mappings = ItemMapping.map(itemId);
+      if (mappings != null) {
+        for (ItemMapping mapping : mappings) {
+          addMatchName(names, getItemName(mapping.getTradeableItem()));
+        }
+      }
+    } catch (RuntimeException ignored) {
+    }
+    Set<String> result = Collections.unmodifiableSet(names);
+    matchNamesCache.put(itemId, result);
+    return result;
+  }
+
+  private static void addSeekingQuiverMatchName(Set<String> names, int itemId) {
+    addMatchName(names, QuiverAmmo.seekingArrowMatchName(itemId));
+  }
+
+  private static void addMatchName(Set<String> names, String candidate) {
+    String normalized = normalize(candidate);
+    if (!normalized.isEmpty() && !normalized.equals("null")) {
+      names.add(normalized);
+    }
+  }
+
+  private String getItemName(int itemId) {
+    if (itemNameCache.containsKey(itemId)) {
+      return itemNameCache.get(itemId);
+    }
+    try {
+      ItemComposition composition = itemManager.getItemComposition(itemId);
+      if (composition == null
+          || composition.getName() == null
+          || composition.getName().equalsIgnoreCase("null")) {
+        return "";
+      }
+      String name = composition.getName().trim();
+      itemNameCache.put(itemId, name);
+      return name;
+    } catch (RuntimeException ignored) {
+      return "";
+    }
+  }
+
+  private ItemEquipmentStats getEquipmentStats(int itemId) {
+    if (equipmentStatsCache.containsKey(itemId)) {
+      return equipmentStatsCache.get(itemId);
+    }
+    try {
+      ItemStats stats = itemManager.getItemStats(itemId);
+      ItemEquipmentStats equipment =
+          stats == null || !stats.isEquipable() ? null : stats.getEquipment();
+      equipmentStatsCache.put(itemId, equipment);
+      return equipment;
+    } catch (RuntimeException ignored) {
+      return null;
+    }
+  }
+
+  private static boolean isWildernessLoadout(String location, String restriction) {
+    if (restriction.contains("non wilderness")) {
+      return false;
+    }
+    return location.contains("wilderness")
+        || restriction.contains("wilderness allowed")
+        || restriction.contains("krystilia");
+  }
+
+  private static List<OwnedItem> filterRecommendationItems(
+      List<OwnedItem> pool, boolean wildernessLoadout) {
+    if (wildernessLoadout) {
+      return pool;
+    }
+    List<OwnedItem> filtered = new ArrayList<>();
+    for (OwnedItem item : pool) {
+      if (!item.nameKey.contains("blighted")) {
+        filtered.add(item);
+      }
+    }
+    return filtered;
+  }
+
+  private static Set<String> namesOf(List<OwnedItem> items) {
+    Set<String> names = new HashSet<>();
+    for (OwnedItem item : items) {
+      names.addAll(item.normalizedNames);
+    }
+    return names;
+  }
+
+  private static String buildLayoutTitle(String assignment, String location) {
+    String safeTask =
+        assignment == null || assignment.trim().isEmpty() ? "Recommended setup" : assignment.trim();
+    if (location == null || location.trim().isEmpty()) {
+      return safeTask;
+    }
+    return safeTask + " \u2022 " + location.trim();
+  }
+
+  static OwnedItem selectRecommendedWeapon(
+      String assignment,
+      TaskStrategy strategy,
+      CombatStyle style,
+      List<Requirement> requirements,
+      List<OwnedItem> equipped,
+      List<OwnedItem> pool) {
+    Requirement weaponRequirement = requirementForSlot(requirements, EquipmentInventorySlot.WEAPON);
+    Requirement shieldRequirement = requirementForSlot(requirements, EquipmentInventorySlot.SHIELD);
+    String[] weapons = weaponProgression(assignment, strategy, style).toArray(new String[0]);
+    return selectEquipmentOwned(
+        EquipmentInventorySlot.WEAPON,
+        weaponRequirement,
+        strategy,
+        style,
+        equipped,
+        pool,
+        shieldRequirement != null,
+        weapons);
+  }
+
+  private static List<String> weaponProgression(
+      String assignment, TaskStrategy strategy, CombatStyle style) {
+    List<String> progression = new ArrayList<>();
+    if (strategy != null) {
+      progression.addAll(strategy.weapons());
+      if (!strategy.isStrictWeaponProfile()) {
+        for (String fallback : SlayerEquipmentAuditCatalog.weaponProgression(strategy)) {
+          if (!progression.contains(fallback)) {
+            progression.add(fallback);
+          }
+        }
+      }
+    }
+    if (progression.isEmpty()) {
+      Collections.addAll(progression, weaponFragments(style));
+    }
+    progression.removeIf(weapon -> !SlayerTargetFootprintCatalog.allowsWeapon(assignment, weapon));
+    return progression;
+  }
+
+  static List<String> weaponProgressionForTest(String assignment, TaskStrategy strategy) {
+    return Collections.unmodifiableList(weaponProgression(assignment, strategy, style(strategy)));
+  }
+
+  static List<String> weaponProgressionForTest(TaskStrategy strategy) {
+    return weaponProgressionForTest("", strategy);
+  }
+
+  static List<KitItem> buildEquipmentLayout(
+      String task,
+      TaskStrategy strategy,
+      CombatStyle style,
+      List<Requirement> requirements,
+      List<OwnedItem> equipped,
+      List<OwnedItem> pool,
+      boolean scanned,
+      OwnedItem weapon) {
+    String normalizedTask = normalize(task);
+    List<KitItem> layout = new ArrayList<>();
+    Requirement headRequirement = requirementForSlot(requirements, EquipmentInventorySlot.HEAD);
+    Requirement weaponRequirement = requirementForSlot(requirements, EquipmentInventorySlot.WEAPON);
+    Requirement shieldRequirement = requirementForSlot(requirements, EquipmentInventorySlot.SHIELD);
+    Requirement ammoRequirement = requirementForSlot(requirements, EquipmentInventorySlot.AMMO);
+    layout.add(
+        auditEquipment(
+            task,
+            EquipmentInventorySlot.HEAD,
+            headRequirement,
+            "Slayer helmet / black mask",
+            strategy,
+            style,
+            equipped,
+            pool,
+            scanned,
+            false,
+            weapon));
+    layout.add(auditedCapeEquipmentItem(task, strategy, style, pool, scanned, weapon));
+    layout.add(
+        auditEquipment(
+            task,
+            EquipmentInventorySlot.AMULET,
+            requirementForSlot(requirements, EquipmentInventorySlot.AMULET),
+            styleLabel(style, "Magic amulet", "Ranged amulet", "Strength amulet"),
+            strategy,
+            style,
+            equipped,
+            pool,
+            scanned,
+            false,
+            weapon));
+    layout.add(
+        ammoRequirement != null
+            ? requiredAmmoItem(ammoRequirement, weapon, pool, scanned)
+            : normalizedTask.equals("araxxor")
+                ? buildAraxxorSwitchAmmoItem(style, weapon, strategy, pool, scanned)
+                : normalizedTask.equals("tzkal zuk")
+                    ? infernoAmmo(weapon, strategy, pool, scanned)
+                    : (normalizedTask.equals("blue dragon")
+                                || normalizedTask.equals("blue dragons"))
+                            && style == CombatStyle.MAGIC
+                        ? passiveAmmo(weapon, strategy, pool, scanned)
+                        : buildAmmoItem(style, weapon, strategy, pool, scanned));
+    layout.add(
+        toEquipmentItem(
+            weapon,
+            weaponRequirement == null
+                ? strategy != null
+                    ? strategy.getMethod()
+                    : styleLabel(style, "Magic weapon", "Ranged weapon", "Melee weapon")
+                : weaponRequirement.displayName,
+            scanned));
+    layout.add(
+        auditEquipment(
+            task,
+            EquipmentInventorySlot.BODY,
+            null,
+            styleLabel(style, "Magic body", "Ranged body", "Melee body"),
+            strategy,
+            style,
+            equipped,
+            pool,
+            scanned,
+            false,
+            weapon));
+    if (weapon == null) {
+      layout.add(missingItem("No off-hand selected until a compatible weapon is found", scanned));
+    } else if (weapon.isTwoHanded() && shieldRequirement == null) {
+      layout.add(new KitItem("Two-handed weapon — no off-hand", -1, 1, KitItem.Status.EQUIPPED));
+    } else {
+      layout.add(
+          auditEquipment(
+              task,
+              EquipmentInventorySlot.SHIELD,
+              shieldRequirement,
+              styleLabel(style, "Magic off-hand", "Ranged off-hand", "Defender / shield"),
+              strategy,
+              style,
+              equipped,
+              pool,
+              scanned,
+              false,
+              weapon));
+    }
+    layout.add(
+        auditEquipment(
+            task,
+            EquipmentInventorySlot.LEGS,
+            null,
+            styleLabel(style, "Magic legs", "Ranged legs", "Melee legs"),
+            strategy,
+            style,
+            equipped,
+            pool,
+            scanned,
+            false,
+            weapon));
+    layout.add(
+        auditEquipment(
+            task,
+            EquipmentInventorySlot.GLOVES,
+            requirementForSlot(requirements, EquipmentInventorySlot.GLOVES),
+            "Combat gloves",
+            strategy,
+            style,
+            equipped,
+            pool,
+            scanned,
+            false,
+            weapon));
+    layout.add(
+        auditEquipment(
+            task,
+            EquipmentInventorySlot.BOOTS,
+            requirementForSlot(requirements, EquipmentInventorySlot.BOOTS),
+            styleLabel(style, "Magic boots", "Ranged boots", "Melee boots"),
+            strategy,
+            style,
+            equipped,
+            pool,
+            scanned,
+            false,
+            weapon));
+    layout.add(
+        auditEquipment(
+            task,
+            EquipmentInventorySlot.RING,
+            null,
+            styleLabel(style, "Magic ring", "Ranged ring", "Melee ring"),
+            strategy,
+            style,
+            equipped,
+            pool,
+            scanned,
+            false,
+            weapon));
+    KitItem extraQuiverAmmo =
+        ammoRequirement == null
+            ? buildDizanaExtraAmmoItem(false, style, weapon, strategy, pool, scanned)
+            : null;
+    if (extraQuiverAmmo != null) {
+      layout.add(extraQuiverAmmo);
+    }
+    return layout;
+  }
+
+  private static KitItem requiredAmmoItem(
+      Requirement requirement, OwnedItem weapon, List<OwnedItem> pool, boolean scanned) {
+    if (weapon == null) {
+      return missingItem(requirement.displayName, scanned);
+    }
+    String type = weapon.named("crossbow") ? "bolt" : "arrow";
+    List<String> compatible = new ArrayList<>();
+    for (String alternative : requirement.alternatives) {
+      if (alternative.contains(type)) {
+        compatible.add(alternative);
+      }
+    }
+    return strictAmmoItem(
+        requirement.displayName, pool, scanned, compatible.toArray(new String[0]));
+  }
+
+  private static KitItem infernoAmmo(
+      OwnedItem weapon, TaskStrategy strategy, List<OwnedItem> pool, boolean scanned) {
+    return infernoAmmo(weapon, strategy, pool, scanned, true);
+  }
+
+  private static KitItem infernoAmmo(
+      OwnedItem weapon,
+      TaskStrategy strategy,
+      List<OwnedItem> pool,
+      boolean scanned,
+      boolean reserveAmmo) {
+    String fallbackName =
+        strategy != null && !strategy.weapons().isEmpty()
+            ? normalize(strategy.weapons().get(0))
+            : "";
+    if (reserveAmmo && hasUsableDizanaCape(pool) && canUseDizanaExtraAmmo(weapon, fallbackName)) {
+      return passiveAmmo(weapon, strategy, pool, scanned);
+    }
+    if (matchesWeaponName(weapon, fallbackName, "bow of faerdhinen")
+        || matchesWeaponName(weapon, fallbackName, "toxic blowpipe")) {
+      return passiveAmmo(weapon, strategy, pool, scanned);
+    }
+    if (matchesWeaponName(weapon, fallbackName, "crossbow")) {
+      return recommendedAmmo(
+          !reserveAmmo,
+          "Ruby dragon bolts (e)",
+          pool,
+          scanned,
+          "ruby dragon bolts e",
+          "ruby bolts e",
+          "diamond dragon bolts e",
+          "diamond bolts e");
+    }
+    return bestOwnedInfernoArrow(!reserveAmmo, pool, scanned);
+  }
+
+  private static KitItem buildAmmoItem(
+      CombatStyle style,
+      OwnedItem weapon,
+      TaskStrategy strategy,
+      List<OwnedItem> pool,
+      boolean scanned) {
+    return buildAmmoItem(style, weapon, strategy, pool, scanned, true);
+  }
+
+  private static KitItem buildAraxxorSwitchAmmoItem(
+      CombatStyle style,
+      OwnedItem weapon,
+      TaskStrategy strategy,
+      List<OwnedItem> pool,
+      boolean scanned) {
+    OwnedItem safeWeapon = preferredInventory(pool, araxxorSafeWeaponAlternatives(), true);
+    List<String> ammunition =
+        araxxorSafeAmmunitionAlternatives(safeWeapon == null ? "" : safeWeapon.nameKey);
+    if (ammunition.isEmpty()) {
+      return buildAmmoItem(style, weapon, strategy, pool, scanned);
+    }
+    return strictAmmoItem(
+        "Safe araxyte ammunition", pool, scanned, ammunition.toArray(new String[0]));
+  }
+
+  private static KitItem buildAmmoItem(
+      CombatStyle style,
+      OwnedItem weapon,
+      TaskStrategy strategy,
+      List<OwnedItem> pool,
+      boolean scanned,
+      boolean reserveAmmo) {
+    if (style != CombatStyle.RANGED) {
+      return passiveAmmo(weapon, strategy, pool, scanned);
+    }
+    String key =
+        weapon != null
+            ? weapon.nameKey
+            : strategy != null && !strategy.weapons().isEmpty()
+                ? normalize(strategy.weapons().get(0))
+                : "";
+    if (reserveAmmo && hasUsableDizanaCape(pool) && canUseDizanaExtraAmmo(weapon, key)) {
+      return passiveAmmo(weapon, strategy, pool, scanned);
+    }
+    if (matchesWeaponName(weapon, key, "blowpipe")
+        || matchesWeaponName(weapon, key, "bow of faerdhinen")
+        || matchesWeaponName(weapon, key, "crystal bow")
+        || matchesWeaponName(weapon, key, "webweaver bow")
+        || matchesWeaponName(weapon, key, "craw s bow")
+        || matchesWeaponName(weapon, key, "chinchompa")) {
+      return passiveAmmo(weapon, strategy, pool, scanned);
+    }
+    if (matchesWeaponName(weapon, key, "ballista")) {
+      return strictAmmoItem(
+          "Javelins", pool, scanned, "dragon javelin", "amethyst javelin", "rune javelin");
+    }
+    if (matchesWeaponName(weapon, key, "atlatl")) {
+      return strictAmmoItem("Atlatl darts", pool, scanned, "atlatl dart");
+    }
+    if (matchesWeaponName(weapon, key, "hunters sunlight crossbow")) {
+      return recommendedAmmo(
+          !reserveAmmo,
+          "Antler bolts",
+          pool,
+          scanned,
+          "moonlight antler bolts",
+          "sunlight antler bolts");
+    }
+    if (matchesWeaponName(weapon, key, "crossbow")) {
+      String method =
+          strategy == null ? "" : normalize(strategy.getMethod() + " " + strategy.getRationale());
+      if (method.contains("dragonstone bolt")) {
+        return recommendedAmmo(
+            !reserveAmmo,
+            "Enchanted dragonstone bolts",
+            pool,
+            scanned,
+            "dragonstone dragon bolts e",
+            "dragonstone bolts e",
+            "ruby dragon bolts e",
+            "diamond dragon bolts e",
+            "dragon bolts",
+            "runite bolts",
+            "broad bolts");
+      }
+      return recommendedAmmo(
+          !reserveAmmo,
+          "Compatible bolts",
+          pool,
+          scanned,
+          "ruby dragon bolts e",
+          "diamond dragon bolts e",
+          "dragon bolts",
+          "amethyst broad bolts",
+          "runite bolts",
+          "broad bolts");
+    }
+    return bestOwnedStandardArrow(!reserveAmmo, weapon, key, strategy, pool, scanned);
+  }
+
+  private static KitItem bestOwnedStandardArrow(
+      boolean extraQuiverSlot,
+      OwnedItem weapon,
+      String fallbackWeaponName,
+      TaskStrategy strategy,
+      List<OwnedItem> pool,
+      boolean scanned) {
+    String[] priorities =
+        standardArrowPriorityForPolicy(strategy, supportsDragonArrows(weapon, fallbackWeaponName));
+    return recommendedAmmo(
+        extraQuiverSlot,
+        strategy != null && strategy.getCostPolicy() == TaskStrategy.CostPolicy.EFFICIENT
+            ? "Cost-efficient owned arrows"
+            : "Best owned arrows",
+        pool,
+        scanned,
+        priorities);
+  }
+
+  private static String[] standardArrowPriorityForPolicy(
+      TaskStrategy strategy, boolean dragonCompatible) {
+    if (strategy != null && strategy.getCostPolicy() == TaskStrategy.CostPolicy.EFFICIENT) {
+      return removeDragonArrowsIfUnsupported(
+          strategy.isBoss() ? EFFICIENT_BOSS_ARROW_PRIORITY : EFFICIENT_REGULAR_ARROW_PRIORITY,
+          dragonCompatible);
+    }
+    return dragonCompatible
+        ? STRONGEST_STANDARD_ARROW_PRIORITY
+        : STRONGEST_NON_DRAGON_ARROW_PRIORITY;
+  }
+
+  private static String[] removeDragonArrowsIfUnsupported(
+      String[] priorities, boolean dragonCompatible) {
+    if (dragonCompatible) {
+      return priorities;
+    }
+    List<String> compatible = new ArrayList<>();
+    for (String priority : priorities) {
+      if (!normalize(priority).contains("dragon arrow")) {
+        compatible.add(priority);
+      }
+    }
+    return compatible.toArray(new String[0]);
+  }
+
+  private static boolean supportsDragonArrows(OwnedItem weapon, String fallbackWeaponName) {
+    String key = weapon == null ? normalize(fallbackWeaponName) : weapon.nameKey;
+    return key.contains("twisted bow")
+        || key.contains("venator bow")
+        || key.contains("scorching bow")
+        || key.contains("dark bow")
+        || key.contains("3rd age bow");
+  }
+
+  private static KitItem bestOwnedInfernoArrow(
+      boolean extraQuiverSlot, List<OwnedItem> pool, boolean scanned) {
+    OwnedItem selected = null;
+    int selectedRank = Integer.MAX_VALUE;
+    for (OwnedItem item : pool) {
+      if (item == null || (!extraQuiverSlot && item.equipmentSlot == EXTRA_QUIVER_AMMO_SLOT)) {
+        continue;
+      }
+      int rank = QuiverAmmo.infernoPreference(item.itemId);
+      if (rank < selectedRank
+          || (rank == selectedRank
+              && item.equipmentSlot == EXTRA_QUIVER_AMMO_SLOT
+              && selected != null
+              && selected.equipmentSlot != EXTRA_QUIVER_AMMO_SLOT)) {
+        selected = item;
+        selectedRank = rank;
+      }
+    }
+    if (selected != null && selectedRank < Integer.MAX_VALUE) {
+      return selected.toItem(ownedItemQuantities(pool).getOrDefault(selected.itemId, 1));
+    }
+    return recommendedAmmo(
+        extraQuiverSlot,
+        "Best owned arrows for the Inferno",
+        pool,
+        scanned,
+        INFERNO_ARROW_PRIORITY);
+  }
+
+  private static KitItem buildDizanaExtraAmmoItem(
+      boolean inferno,
+      CombatStyle style,
+      OwnedItem weapon,
+      TaskStrategy strategy,
+      List<OwnedItem> pool,
+      boolean scanned) {
+    if (style != CombatStyle.RANGED || !hasUsableDizanaCape(pool)) {
+      return null;
+    }
+    String fallbackName =
+        weapon != null
+            ? weapon.nameKey
+            : strategy != null && !strategy.weapons().isEmpty()
+                ? normalize(strategy.weapons().get(0))
+                : "";
+    if (!canUseDizanaExtraAmmo(weapon, fallbackName)) {
+      return null;
+    }
+    return inferno
+        ? infernoAmmo(weapon, strategy, pool, scanned, false)
+        : buildAmmoItem(style, weapon, strategy, pool, scanned, false);
+  }
+
+  private static boolean canUseDizanaExtraAmmo(OwnedItem weapon, String fallbackWeaponName) {
+    String key = weapon != null ? weapon.nameKey : normalize(fallbackWeaponName);
+    if (key.isEmpty()) {
+      return false;
+    }
+    if (key.contains("crossbow")) {
+      return true;
+    }
+    if (!key.contains("bow")) {
+      return false;
+    }
+    return !key.contains("bow of faerdhinen")
+        && !key.contains("crystal bow")
+        && !key.contains("webweaver bow")
+        && !key.contains("craw s bow");
+  }
+
+  private static boolean matchesWeaponName(OwnedItem weapon, String fallbackName, String fragment) {
+    return weapon != null
+        ? weapon.named(fragment)
+        : normalize(fallbackName).contains(normalize(fragment));
+  }
+
+  private static KitItem passiveAmmo(
+      OwnedItem weapon, TaskStrategy strategy, List<OwnedItem> pool, boolean scanned) {
+    if (strategy != null
+        && strategy.getCostPolicy() == TaskStrategy.CostPolicy.EFFICIENT
+        && benefitsFromLuckyPenny(weapon)) {
+      return strictAmmoItem(
+          "Ghommal's lucky penny", pool, scanned, "ghommal s lucky penny", "ghommals lucky penny");
+    }
+    return strictAmmoItem(
+        "Prayer blessing",
+        pool,
+        scanned,
+        "rada s blessing 4",
+        "rada s blessing 3",
+        "rada s blessing 2",
+        "rada s blessing 1",
+        "holy blessing",
+        "unholy blessing",
+        "war blessing",
+        "peaceful blessing",
+        "honourable blessing",
+        "blessing");
+  }
+
+  private static boolean benefitsFromLuckyPenny(OwnedItem weapon) {
+    if (weapon == null) {
+      return false;
+    }
+    return weapon.named("scythe of vitur");
+  }
+
+  private static OwnedItem findPreferredUsableDizanaCape(List<OwnedItem> pool) {
+    if (pool == null) {
+      return null;
+    }
+    OwnedItem best = null;
+    int bestScore = Integer.MIN_VALUE;
+    for (OwnedItem item : pool) {
+      int score = dizanaCapePreferenceScore(item);
+      if (score > bestScore) {
+        best = item;
+        bestScore = score;
+      }
+    }
+    return bestScore > 0 ? best : null;
+  }
+
+  private static int dizanaCapePreferenceScore(OwnedItem item) {
+    if (item == null) {
+      return -1;
+    }
+    switch (Math.abs(item.itemId)) {
+      case ItemID.SKILLCAPE_MAX_DIZANAS:
+      case ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER:
+        return 400;
+      case ItemID.DIZANAS_QUIVER_INFINITE:
+      case ItemID.DIZANAS_QUIVER_INFINITE_TROUVER:
+        return 300;
+      case ItemID.DIZANAS_QUIVER_CHARGED:
+      case ItemID.DIZANAS_QUIVER_CHARGED_TROUVER:
+        return 200;
+      case ItemID.DIZANAS_QUIVER_UNCHARGED:
+      case ItemID.DIZANAS_QUIVER_UNCHARGED_TROUVER:
+        return 100;
+      case ItemID.DIZANAS_QUIVER_BROKEN:
+      case ItemID.DIZANAS_QUIVER_INFINITE_BROKEN:
+      case ItemID.SKILLCAPE_MAX_DIZANAS_BROKEN:
+      case ItemID.DIZANAS_QUIVER_TROUVER_BROKEN:
+      case ItemID.DIZANAS_QUIVER_TROUVER_MANGLED:
+      case ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_BROKEN:
+      case ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_MANGLED:
+      case ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_BROKEN:
+      case ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_MANGLED:
+        return -1;
+      default:
+        break;
+    }
+    String name = item.nameKey;
+    if (!name.contains("dizana")
+        || (!name.contains("quiver") && !name.contains("max cape"))
+        || name.contains("max hood")
+        || name.contains("broken")
+        || name.contains("mangled")) {
+      return -1;
+    }
+    if (name.contains("max cape")) {
+      return 400;
+    }
+    if (name.contains("blessed")) {
+      return 300;
+    }
+    if (!name.contains("uncharged")) {
+      return 200;
+    }
+    return 100;
+  }
+
+  private static boolean hasUsableDizanaCape(List<OwnedItem> pool) {
+    return findPreferredUsableDizanaCape(pool) != null;
+  }
+
+  private static KitItem strictAmmoItem(
+      String placeholder, List<OwnedItem> pool, boolean scanned, String... alternatives) {
+    OwnedItem selected =
+        preferredEquipment(pool, EquipmentInventorySlot.AMMO, false, asList(alternatives));
+    if (selected == null) {
+      return missingItem(placeholder, scanned);
+    }
+    return selected.toItem(ownedItemQuantities(pool).getOrDefault(selected.itemId, 1));
+  }
+
+  private static KitItem recommendedAmmo(
+      boolean extraQuiverSlot,
+      String placeholder,
+      List<OwnedItem> pool,
+      boolean scanned,
+      String... alternatives) {
+    if (!extraQuiverSlot) {
+      return strictAmmoItem(placeholder, pool, scanned, alternatives);
+    }
+    Map<Integer, Integer> ownedQuantities = ownedItemQuantities(pool);
+    for (String alternative : alternatives) {
+      String fragment = normalize(alternative);
+      if (fragment.isEmpty()) {
+        continue;
+      }
+      boolean seekingAlternative = fragment.startsWith("seeking ") && fragment.contains("arrow");
+      for (OwnedItem item : pool) {
+        if ((!seekingAlternative || item.isExactSeekingArrow())
+            && item.named(fragment)
+            && (item.equipmentSlot == EXTRA_QUIVER_AMMO_SLOT
+                || item.matchesSlot(EquipmentInventorySlot.AMMO))) {
+          return item.toItem(ownedQuantities.getOrDefault(item.itemId, 1));
+        }
+      }
+    }
+    return missingItem(placeholder, scanned);
+  }
+
+  private static OwnedItem selectEquipmentOwned(
+      EquipmentInventorySlot slot,
+      Requirement requirement,
+      TaskStrategy strategy,
+      CombatStyle style,
+      List<OwnedItem> equipped,
+      List<OwnedItem> pool,
+      boolean oneHanded,
+      String... alternatives) {
+    if (requirement != null) {
+      return preferredEquipment(pool, slot, oneHanded, requirement.alternatives);
+    }
+    if (slot == EquipmentInventorySlot.HEAD) {
+      OwnedItem slayerHead =
+          preferredEquipment(pool, slot, false, Arrays.asList("slayer helmet", "black mask"));
+      if (slayerHead != null) {
+        return slayerHead;
+      }
+    }
+    if (slot == EquipmentInventorySlot.WEAPON) {
+      OwnedItem namedWeapon =
+          preferredEquipmentAllowed(pool, slot, oneHanded, asList(alternatives), strategy);
+      if (namedWeapon != null) {
+        return namedWeapon;
+      }
+      if (strategy != null && strategy.isStrictWeaponProfile()) {
+        List<String> reviewedFallbacks = strategy.getWeapons();
+        if (!reviewedFallbacks.isEmpty()) {
+          OwnedItem allowedFallback =
+              preferredEquipmentAllowed(pool, slot, oneHanded, reviewedFallbacks, strategy);
+          if (allowedFallback != null) {
+            return allowedFallback;
+          }
+          if (strategy.getCostPolicy() == TaskStrategy.CostPolicy.EFFICIENT) {
+            return preferredEquipment(pool, slot, oneHanded, reviewedFallbacks);
+          }
+        }
+        return findBestCompatibleOwnedSlot(pool, slot, strategy, style, oneHanded);
+      }
+    }
+    OwnedItem best = findBestEquipment(pool, slot, strategy, style, oneHanded);
+    if (best != null) {
+      return best;
+    }
+    OwnedItem worn = findEquippedSlot(equipped, slot);
+    if (worn != null
+        && isStyleCompatible(worn, style, slot)
+        && (!oneHanded || !worn.isTwoHanded())
+        && !disallowed(worn, strategy, slot)) {
+      return worn;
+    }
+    return preferredEquipment(pool, slot, oneHanded, asList(alternatives));
+  }
+
+  private static KitItem toEquipmentItem(OwnedItem selected, String placeholder, boolean scanned) {
+    return selected == null ? missingItem(placeholder, scanned) : selected.toItem(1);
+  }
+
+  private static OwnedItem preferredEquipment(
+      List<OwnedItem> owned,
+      EquipmentInventorySlot slot,
+      boolean oneHanded,
+      List<String> alternatives) {
+    return preferredEquipmentVariant(owned, slot, oneHanded, alternatives, null, false);
+  }
+
+  private static OwnedItem preferredEquipmentAllowed(
+      List<OwnedItem> owned,
+      EquipmentInventorySlot slot,
+      boolean oneHanded,
+      List<String> alternatives,
+      TaskStrategy strategy) {
+    return preferredEquipmentVariant(owned, slot, oneHanded, alternatives, strategy, true);
+  }
+
+  private static OwnedItem preferredEquipmentVariant(
+      List<OwnedItem> owned,
+      EquipmentInventorySlot slot,
+      boolean oneHanded,
+      List<String> alternatives,
+      TaskStrategy strategy,
+      boolean enforcePolicy) {
+    if (owned == null || alternatives == null) {
+      return null;
+    }
+    for (int priorityIndex = 0; priorityIndex < alternatives.size(); priorityIndex++) {
+      String fragment = normalize(alternatives.get(priorityIndex));
+      if (fragment.isEmpty()) {
+        continue;
+      }
+      OwnedItem bestVariant = null;
+      long bestVariantScore = Long.MIN_VALUE;
+      for (OwnedItem item : owned) {
+        if (item == null
+            || !item.matchesEquipmentProgression(fragment)
+            || !matchesEquipmentSlot(item, slot)
+            || !isUsableEquipmentVariant(item, slot)
+            || oneHanded && item.isTwoHanded()
+            || enforcePolicy && disallowed(item, strategy, slot)) {
+          continue;
+        }
+        int directRank = item.gearRank(alternatives);
+        if (directRank >= 0 && directRank != priorityIndex) {
+          continue;
+        }
+        long variantScore = equipmentVariantScore(item, slot);
+        if (bestVariant == null || variantScore > bestVariantScore) {
+          bestVariant = item;
+          bestVariantScore = variantScore;
+        }
+      }
+      if (bestVariant != null) {
+        return bestVariant;
+      }
+    }
+    return null;
+  }
+
+  private static boolean isUsableEquipmentVariant(OwnedItem item, EquipmentInventorySlot slot) {
+    if (item == null) {
+      return false;
+    }
+    String name = item.nameKey;
+    if (matchesAny(name, Arrays.asList("broken", "mangled", "depleted", "inactive", "max hood"))) {
+      return false;
+    }
+    if (slot == EquipmentInventorySlot.WEAPON
+        && (name.contains("uncharged") || name.contains(" empty"))) {
+      return false;
+    }
+    return !(name.matches("(?:dharok|guthan|torag|verac) s .+ 0"));
+  }
+
+  private static long equipmentVariantScore(OwnedItem item, EquipmentInventorySlot slot) {
+    if (item == null || item.equipmentStats == null) {
+      return Long.MIN_VALUE / 2L + (item == null ? 0L : ownershipTieBreaker(item.status));
+    }
+    return Math.max(
+            meleeScore(item.equipmentStats, slot),
+            Math.max(rangedScore(item.equipmentStats, slot), magicScore(item.equipmentStats, slot)))
+        + ownershipTieBreaker(item.status);
+  }
+
+  private static OwnedItem findBestEquipment(
+      List<OwnedItem> owned,
+      EquipmentInventorySlot slot,
+      TaskStrategy strategy,
+      CombatStyle style,
+      boolean oneHanded) {
+    OwnedItem best = null;
+    long bestScore = Long.MIN_VALUE;
+    for (OwnedItem item : owned) {
+      if (!matchesEquipmentSlot(item, slot)
+          || item.equipmentStats == null
+          || !isStyleCompatible(item, style, slot)
+          || (oneHanded && item.isTwoHanded())
+          || disallowed(item, strategy, slot)) {
+        continue;
+      }
+      long score = equipmentScore(item, strategy, style, slot);
+      if (best == null || score > bestScore) {
+        best = item;
+        bestScore = score;
+      }
+    }
+    return best;
+  }
+
+  private static boolean matchesEquipmentSlot(OwnedItem item, EquipmentInventorySlot slot) {
+    if (item == null || slot == null) {
+      return false;
+    }
+    if (item.matchesSlot(slot)) {
+      return true;
+    }
+    if (slot == EquipmentInventorySlot.GLOVES && isGloveSlotItemName(item.nameKey)) {
+      return true;
+    }
+    return slot == EquipmentInventorySlot.SHIELD && isDefenderName(item.nameKey);
+  }
+
+  private static boolean isGloveSlotItemName(String value) {
+    String name = normalize(value);
+    return name.contains("bracelet")
+        || name.contains("gloves")
+        || name.contains("gauntlets")
+        || name.contains("vambraces");
+  }
+
+  private static boolean isDefenderName(String value) {
+    String name = normalize(value);
+    return name.contains("defender") && !name.contains("defender hilt");
+  }
+
+  private static KitItem auditedCapeEquipmentItem(
+      String task,
+      TaskStrategy strategy,
+      CombatStyle style,
+      List<OwnedItem> pool,
+      boolean scanned,
+      OwnedItem weapon) {
+    if (style == CombatStyle.RANGED) {
+      OwnedItem dizana = findPreferredUsableDizanaCape(pool);
+      if (dizana != null) {
+        return dizana.toItem(1);
+      }
+    }
+    return auditEquipment(
+        task,
+        EquipmentInventorySlot.CAPE,
+        null,
+        styleLabel(style, "Magic cape", "Dizana's quiver / Ava's assembler", "Melee cape"),
+        strategy,
+        style,
+        Collections.emptyList(),
+        pool,
+        scanned,
+        false,
+        weapon);
+  }
+
+  private static KitItem auditEquipment(
+      String task,
+      EquipmentInventorySlot slot,
+      Requirement requirement,
+      String placeholder,
+      TaskStrategy strategy,
+      CombatStyle style,
+      List<OwnedItem> equipped,
+      List<OwnedItem> pool,
+      boolean scanned,
+      boolean oneHanded,
+      OwnedItem weapon) {
+    List<String> alternatives =
+        requirement == null
+            ? SlayerEquipmentAuditCatalog.priorities(
+                task, strategy, slot, weapon == null ? "" : weapon.nameKey)
+            : requirement.alternatives;
+    OwnedItem selected = preferredEquipment(pool, slot, oneHanded, alternatives);
+    if (selected == null && requirement == null) {
+      selected = findBestCompatibleOwnedSlot(pool, slot, strategy, style, oneHanded);
+    }
+    if (selected == null && requirement == null) {
+      OwnedItem worn = findEquippedSlot(equipped, slot);
+      if (worn != null
+          && isStyleCompatible(worn, style, slot)
+          && (!oneHanded || !worn.isTwoHanded())
+          && !disallowed(worn, strategy, slot)) {
+        selected = worn;
+      }
+    }
+    return toEquipmentItem(
+        selected, requirement == null ? placeholder : requirement.displayName, scanned);
+  }
+
+  private static OwnedItem findBestCompatibleOwnedSlot(
+      List<OwnedItem> owned,
+      EquipmentInventorySlot slot,
+      TaskStrategy strategy,
+      CombatStyle style,
+      boolean oneHanded) {
+    if (owned == null || slot == null) {
+      return null;
+    }
+    OwnedItem best = null;
+    long bestScore = Long.MIN_VALUE;
+    for (OwnedItem item : owned) {
+      if (!matchesEquipmentSlot(item, slot)
+          || !isUsableEquipmentVariant(item, slot)
+          || !isStyleCompatible(item, style, slot)
+          || oneHanded && item.isTwoHanded()
+          || disallowed(item, strategy, slot)) {
+        continue;
+      }
+      long score =
+          item.equipmentStats == null
+              ? equipmentVariantScore(item, slot)
+              : equipmentScore(item, strategy, style, slot);
+      if (best == null || score > bestScore) {
+        best = item;
+        bestScore = score;
+      }
+    }
+    return best;
+  }
+
+  private static long equipmentScore(
+      OwnedItem item, TaskStrategy strategy, CombatStyle style, EquipmentInventorySlot slot) {
+    ItemEquipmentStats stats = item.equipmentStats;
+    if (stats == null) {
+      return Long.MIN_VALUE;
+    }
+    long melee = meleeScore(stats, slot);
+    long ranged = rangedScore(stats, slot);
+    long magic = magicScore(stats, slot);
+    long selected;
+    switch (style) {
+      case MAGIC:
+        selected = magic;
+        break;
+      case RANGED:
+        selected = ranged;
+        break;
+      case MELEE:
+        selected = melee;
+        break;
+      case FLEXIBLE:
+      default:
+        selected = Math.max(melee, Math.max(ranged, magic));
+        break;
+    }
+    if (strategy != null && slot != EquipmentInventorySlot.WEAPON) {
+      int defence = defenceTotal(stats);
+      switch (strategy.getArmourFocus()) {
+        case PRAYER:
+          selected += stats.getPrayer() * 60_000L;
+          break;
+        case DEFENCE:
+          selected += defence * 1_500L;
+          break;
+        case HYBRID:
+          selected += (melee + ranged + magic) / 5L;
+          break;
+        case DAMAGE:
+        default:
+          break;
+      }
+    }
+    return selected + ownershipTieBreaker(item.status);
+  }
+
+  private static boolean isStyleCompatible(
+      OwnedItem item, CombatStyle style, EquipmentInventorySlot slot) {
+    if (item == null
+        || style == CombatStyle.FLEXIBLE
+        || (slot != EquipmentInventorySlot.WEAPON && slot != EquipmentInventorySlot.SHIELD)) {
+      return true;
+    }
+    ItemEquipmentStats stats = item.equipmentStats;
+    String name = item.nameKey;
+    if (slot == EquipmentInventorySlot.WEAPON) {
+      switch (style) {
+        case RANGED:
+          return matchesAny(
+                  name,
+                  Arrays.asList("bow", "crossbow", "blowpipe", "ballista", "atlatl", "chinchompa"))
+              || (stats != null && (stats.getArange() > 0 || stats.getRstr() > 0));
+        case MAGIC:
+          return matchesAny(
+                  name,
+                  Arrays.asList("staff", "wand", "trident", "sceptre", "sanguinesti", "tumeken"))
+              || (stats != null && (stats.getAmagic() > 0 || stats.getMdmg() > 0));
+        case MELEE:
+          return matchesAny(
+                  name,
+                  Arrays.asList(
+                      "scythe", "axe", "sword", "whip", "rapier", "mace", "spear", "hasta",
+                      "halberd", "fang", "claws"))
+              || (stats != null
+                  && (Math.max(stats.getAstab(), Math.max(stats.getAslash(), stats.getAcrush())) > 0
+                      || stats.getStr() > 0));
+        case FLEXIBLE:
+        default:
+          return true;
+      }
+    }
+    switch (style) {
+      case RANGED:
+        return matchesAny(
+                name, Arrays.asList("buckler", "dragonfire ward", "odium ward", "book of law"))
+            || (stats != null && (stats.getArange() > 0 || stats.getRstr() > 0));
+      case MAGIC:
+        return matchesAny(
+                name,
+                Arrays.asList(
+                    "elidinis",
+                    "mage s book",
+                    "book of darkness",
+                    "arcane spirit shield",
+                    "malediction ward",
+                    "ancient wyvern shield"))
+            || (stats != null && (stats.getAmagic() > 0 || stats.getMdmg() > 0));
+      case MELEE:
+        return matchesAny(
+                name,
+                Arrays.asList(
+                    "defender",
+                    "dragonfire shield",
+                    "elysian spirit shield",
+                    "spectral spirit shield",
+                    "crystal shield",
+                    "toktz ket xile"))
+            || (stats != null
+                && (Math.max(stats.getAstab(), Math.max(stats.getAslash(), stats.getAcrush())) > 0
+                    || stats.getStr() > 0));
+      case FLEXIBLE:
+      default:
+        return true;
+    }
+  }
+
+  private static boolean disallowed(
+      OwnedItem item, TaskStrategy strategy, EquipmentInventorySlot slot) {
+    if (item == null || strategy == null || slot != EquipmentInventorySlot.WEAPON) {
+      return false;
+    }
+    String name = item.nameKey;
+    if (name.contains("chinchompa") && !strategy.hasTag(TaskStrategy.MethodTag.CHINNING)) {
+      return true;
+    }
+    if (strategy.getCostPolicy() == TaskStrategy.CostPolicy.EFFICIENT && !strategy.isBoss()) {
+      return name.contains("scythe of vitur")
+          || name.contains("soulreaper axe")
+          || name.contains("tumeken s shadow")
+          || name.contains("eye of ayak")
+          || name.contains("sanguinesti staff");
+    }
+    if (strategy.getCostPolicy() == TaskStrategy.CostPolicy.LOW_RISK) {
+      return name.contains("scythe of vitur")
+          || name.contains("twisted bow")
+          || name.contains("tumeken s shadow")
+          || name.contains("soulreaper axe")
+          || name.contains("zaryte crossbow")
+          || name.contains("bow of faerdhinen")
+          || name.contains("eye of ayak")
+          || name.contains("sanguinesti staff");
+    }
+    return false;
+  }
+
+  private static int defenceTotal(ItemEquipmentStats stats) {
+    return stats.getDstab()
+        + stats.getDslash()
+        + stats.getDcrush()
+        + stats.getDmagic()
+        + stats.getDrange();
+  }
+
+  private static long speedBonus(ItemEquipmentStats stats, EquipmentInventorySlot slot) {
+    return slot == EquipmentInventorySlot.WEAPON && stats.getAspeed() > 0
+        ? Math.max(0, 8 - stats.getAspeed()) * 40L
+        : 0L;
+  }
+
+  private static long meleeScore(ItemEquipmentStats stats, EquipmentInventorySlot slot) {
+    int attack = Math.max(stats.getAstab(), Math.max(stats.getAslash(), stats.getAcrush()));
+    return stats.getStr() * 10_000L
+        + attack * 120L
+        + stats.getPrayer() * 40L
+        + defenceTotal(stats)
+        + speedBonus(stats, slot);
+  }
+
+  private static long rangedScore(ItemEquipmentStats stats, EquipmentInventorySlot slot) {
+    return stats.getRstr() * 10_000L
+        + stats.getArange() * 120L
+        + stats.getPrayer() * 40L
+        + defenceTotal(stats)
+        + speedBonus(stats, slot);
+  }
+
+  private static long magicScore(ItemEquipmentStats stats, EquipmentInventorySlot slot) {
+    return Math.round(stats.getMdmg() * 10_000.0)
+        + stats.getAmagic() * 120L
+        + stats.getPrayer() * 40L
+        + defenceTotal(stats)
+        + speedBonus(stats, slot);
+  }
+
+  private static long ownershipTieBreaker(KitItem.Status status) {
+    if (status == KitItem.Status.EQUIPPED) {
+      return 3L;
+    }
+    if (status == KitItem.Status.INVENTORY) {
+      return 2L;
+    }
+    if (status == KitItem.Status.BANK) {
+      return 1L;
+    }
+    return 0L;
+  }
+
+  private static List<String> asList(String... values) {
+    List<String> result = new ArrayList<>();
+    if (values != null) {
+      Collections.addAll(result, values);
+    }
+    return result;
+  }
+
+  private static boolean isTzKalZukInferno(String task, String location) {
+    return normalize(task).equals("tzkal zuk") && normalize(location).equals("inferno");
+  }
+
+  List<KitItem> buildInventoryLayout(
+      String task,
+      TaskStrategy strategy,
+      String location,
+      String travel,
+      CombatStyle style,
+      List<Requirement> requirements,
+      boolean cannonSuggested,
+      int foodSlots,
+      List<OwnedItem> pool,
+      boolean scanned,
+      List<KitItem> equipmentLayout) {
+    int weaponId = PoweredMagic.weaponId(equipmentLayout);
+    MethodRules methodRules = SlayerMethodRuleCatalog.resolve(task, location, strategy, weaponId);
+    boolean barrows = normalize(task).equals("barrows brothers");
+    boolean barrowsRanged = barrows && barrowsNeedsRangedSwitch(weaponId, methodRules);
+    OwnedItem araxyteWeapon =
+        normalize(task).equals("araxxor")
+            ? preferredInventory(pool, araxxorSafeWeaponAlternatives(), true)
+            : null;
+    List<KitItem> layout = new ArrayList<>();
+    boolean analyzerOwnsTravelSlot = !isTzKalZukInferno(task, location);
+    if (analyzerOwnsTravelSlot) {
+      KitItem selectedTravel = chooseTeleport(task, location, travel, pool, scanned);
+      addItem(layout, selectedTravel);
+      if (normalize(task).equals("tormented demons")
+          && (selectedTravel == null
+              || !normalize(selectedTravel.getDisplayName())
+                  .contains("guthixian temple teleport"))) {
+        OwnedItem litLantern = exactOwned(pool, "sapphire lantern");
+        addItem(
+            layout,
+            litLantern == null
+                ? missingItem("Lit sapphire lantern", scanned)
+                : litLantern.toItem(1));
+      }
+    }
+    for (Requirement requirement : requirements) {
+      if (!requirement.equipment) {
+        addItem(
+            layout,
+            requirement.displayName.equals("Fungicide")
+                ? chooseExact(
+                    requirement.displayName, requirement.quantity, pool, scanned, "fungicide")
+                : choose(
+                    requirement.displayName,
+                    requirement.quantity,
+                    pool,
+                    scanned,
+                    requirement.alternatives));
+      }
+    }
+    boolean resolvedCannonMethod = cannonSuggested || methodRules.usesCannon();
+    if (resolvedCannonMethod) {
+      for (String part : new String[] {"base", "stand", "barrels", "furnace"}) {
+        addItem(layout, choose("Cannon " + part, 1, pool, scanned, "cannon " + part));
+      }
+      int cannonballs =
+          methodRules.getCannonballQuantity() > 0
+              ? methodRules.getCannonballQuantity()
+              : SlayerMethodRuleCatalog.auditedCannonballQuantity(task);
+      addItem(layout, choose("Cannonballs", cannonballs, pool, scanned, "cannonball"));
+    }
+    boolean runePouchRequested =
+        (strategy != null && strategy.needsRunePouch() && !PoweredMagic.usesBuiltInSpell(weaponId))
+            || methodRules.requiresRunePouch()
+            || style == CombatStyle.MAGIC && methodRules.includesRunePouchForMagic();
+    int runePouchCapacity = runePouchRequested ? ownedRunePouchCapacity(pool) : 0;
+    if (runePouchRequested || barrows) {
+      KitItem pouch = choose("Rune pouch", 1, pool, scanned, "divine rune pouch", "rune pouch");
+      if (runePouchRequested || pouch.hasItemId()) {
+        addItem(layout, pouch);
+      }
+    }
+    if (methodRules.requiresBookOfDead()) {
+      addItem(layout, choose("Book of the dead", 1, pool, scanned, "book of the dead"));
+    }
+    Map<Integer, Integer> ownedRuneQuantities = ownedItemQuantities(pool);
+    RunePolicy.Resolution resolvedRunePackage =
+        RunePolicy.resolve(methodRules.getPouchRunes(), ownedRuneQuantities);
+    int pouchSlotsRemaining = runePouchCapacity;
+    for (RunePolicy.ResolvedRune rune : resolvedRunePackage.getRunes()) {
+      if (pouchSlotsRemaining > 0) {
+        pouchSlotsRemaining--;
+        continue;
+      }
+      KitItem runeItem =
+          ownedRuneQuantities.getOrDefault(rune.getItemId(), 0) < rune.getMinimumQuantity()
+              ? missingItem(rune.getName() + " runes", rune.getMinimumQuantity(), scanned)
+              : choose(
+                  rune.getName() + " runes",
+                  rune.getMinimumQuantity(),
+                  pool,
+                  scanned,
+                  normalize(rune.getName()) + " rune");
+      addItem(layout, runeItem);
+    }
+    java.util.Set<String> pouchRunes = new java.util.LinkedHashSet<>();
+    for (RunePolicy.ResolvedRune rune : resolvedRunePackage.getRunes()) {
+      pouchRunes.add(normalize(rune.getName()));
+    }
+    java.util.Set<String> unavailableStructuredRunes = new java.util.LinkedHashSet<>();
+    for (String rune : resolvedRunePackage.getUnownedRequirements()) {
+      unavailableStructuredRunes.add(normalize(rune));
+    }
+    boolean tormentedDemons = normalize(task).equals("tormented demons");
+    boolean maggotKing = normalize(task).contains("maggot king");
+    KitItem tormentedWeapon = null;
+    KitItem maggotCrushWeapon = null;
+    KitItem kingsMagicWeapon = null;
+    KitItem barrowsRangedWeapon = null;
+    for (MethodRules.RequiredItem required : methodRules.getRequiredItems()) {
+      if (!diaries.allowsLoadoutReward(required.getDisplayName(), required.getAlternatives())) {
+        continue;
+      }
+      if (normalize(task).equals("araxxor")
+          && required.getDisplayName().equals("Divine ranging potion")
+          && araxxorSafeAmmunitionAlternatives(araxyteWeapon == null ? "" : araxyteWeapon.nameKey)
+              .isEmpty()) {
+        continue;
+      }
+      if (isStructuredUtilityDuplicate(required, methodRules)) {
+        continue;
+      }
+      if (barrows) {
+        String name = required.getDisplayName();
+        if (!barrowsRanged && (name.startsWith("Ranged ") || name.equals("Ranging potion"))) {
+          continue;
+        }
+        if (name.equals("Exit and restoration teleport")
+            && (hasRestorationTeleport(layout) || hasRestorationTeleport(equipmentLayout))) {
+          continue;
+        }
+      }
+      if (isRuneRequirement(required)) {
+        String requiredRune =
+            normalize(required.getDisplayName()).replace(" runes", "").replace(" rune", "").trim();
+        if (isCoveredByStructuredPouchRune(pouchRunes, requiredRune)) {
+          continue;
+        }
+        if (unavailableStructuredRunes.contains(requiredRune)) {
+          continue;
+        }
+        if (pouchSlotsRemaining > 0) {
+          pouchSlotsRemaining--;
+          continue;
+        }
+      }
+      List<String> alternativesRequired = required.getAlternatives();
+      if (normalize(task).equals("dagannoth kings")
+          && required.getDisplayName().startsWith("Shadow magic ")
+          && (kingsMagicWeapon == null
+              || !normalize(kingsMagicWeapon.getDisplayName()).contains("tumeken"))) {
+        continue;
+      }
+      if (maggotKing && maggotCrushWeapon != null) {
+        if (skipMaggotKingRequirement(required.getDisplayName(), maggotCrushWeapon)) {
+          continue;
+        }
+        alternativesRequired =
+            maggotKingSwitchAlternatives(
+                required.getDisplayName(), maggotCrushWeapon, alternativesRequired);
+      }
+      if (tormentedDemons && tormentedWeapon != null) {
+        if (skipTormentedRequirement(required.getDisplayName(), tormentedWeapon)) {
+          continue;
+        }
+        alternativesRequired =
+            tormentedSwitchAlternatives(
+                required.getDisplayName(), tormentedWeapon, alternativesRequired);
+      }
+      KitItem require =
+          choose(
+              required.getDisplayName(),
+              required.getSlotCount() > 1 ? 1 : required.getQuantity(),
+              pool,
+              scanned,
+              alternativesRequired,
+              required.getGroup() == MethodRules.InventoryGroup.SWITCH);
+      if (barrows && required.getDisplayName().equals("Ranged weapon switch")) {
+        barrowsRangedWeapon = require;
+      }
+      if (normalize(task).equals("dagannoth kings")
+          && required.getDisplayName().equals("Magic weapon switch")) {
+        kingsMagicWeapon = require;
+      }
+      if (required.isOwnedOnly() && (require == null || !require.hasItemId())) {
+        continue;
+      }
+      if (tormentedDemons && required.getDisplayName().equals("Secondary weapon switch")) {
+        tormentedWeapon = require;
+      }
+      if (maggotKing && required.getDisplayName().equals("Crush punish weapon")) {
+        maggotCrushWeapon = require;
+      }
+      if (required.getGroup() == MethodRules.InventoryGroup.SWITCH) {
+        KitItem.SwitchStyle switchStyle =
+            tormentedDemons
+                    && isTormentedSecondaryRequirement(required.getDisplayName())
+                    && isPurgingStaff(tormentedWeapon)
+                ? KitItem.SwitchStyle.MAGIC
+                : inferSwitchStyle(required, style);
+        require = require.asEquipmentSwitch(switchStyle);
+        if (isAlreadyEquippedInPlan(require, equipmentLayout)) {
+          continue;
+        }
+      }
+      for (int slot = 0; slot < required.getSlotCount() && layout.size() < 28; slot++) {
+        addItem(layout, require);
+      }
+    }
+    if (barrows && barrowsRangedWeapon != null && barrowsRangedWeapon.hasItemId()) {
+      addItem(layout, switchAmmunition(barrowsRangedWeapon, strategy, pool, scanned));
+    }
+    if (tormentedDemons) {
+      addItem(layout, switchAmmunition(tormentedWeapon, strategy, pool, scanned));
+    }
+    if (methodRules.includesStyleBoost() || barrows && PoweredMagic.usesBuiltInSpell(weaponId)) {
+      TaskStrategy.CostPolicy potionCostPolicy =
+          strategy == null ? TaskStrategy.CostPolicy.EFFICIENT : strategy.getCostPolicy();
+      if (style == CombatStyle.MAGIC) {
+        addItem(
+            layout, choose("Magic boost", 1, pool, scanned, PotionPolicy.magicBoostAlternatives()));
+      } else if (style == CombatStyle.RANGED) {
+        addItem(
+            layout,
+            choose(
+                "Ranging potion",
+                1,
+                pool,
+                scanned,
+                PotionPolicy.rangedBoostAlternatives(potionCostPolicy)));
+      } else if (style == CombatStyle.FLEXIBLE) {
+        addItem(
+            layout,
+            choose(
+                "Super combat potion",
+                1,
+                pool,
+                scanned,
+                PotionPolicy.meleeBoostAlternatives(potionCostPolicy)));
+        addItem(
+            layout,
+            choose(
+                "Ranging potion",
+                1,
+                pool,
+                scanned,
+                PotionPolicy.rangedBoostAlternatives(potionCostPolicy)));
+        if (hybridUsesCombatMagic(strategy)) {
+          addItem(
+              layout,
+              choose("Magic boost", 1, pool, scanned, PotionPolicy.magicBoostAlternatives()));
+        }
+      } else {
+        addItem(
+            layout,
+            choose(
+                "Super combat potion",
+                1,
+                pool,
+                scanned,
+                PotionPolicy.meleeBoostAlternatives(potionCostPolicy)));
+      }
+    }
+    if (strategy != null && strategy.needsAntivenom()) {
+      addItem(
+          layout,
+          choose(
+              PotionPolicy.EXTENDED_ANTIVENOM_DISPLAY,
+              1,
+              pool,
+              scanned,
+              PotionPolicy.antivenomAlternatives()));
+    }
+    if (strategy != null && strategy.needsStamina()) {
+      addItem(
+          layout,
+          choose(
+              PotionPolicy.EXTENDED_STAMINA_DISPLAY,
+              1,
+              pool,
+              scanned,
+              PotionPolicy.staminaAlternatives()));
+    }
+    KitItem prayerRestore = chooseRestore(methodRules, pool, scanned);
+    if (barrows
+        && prayerRestore.hasItemId()
+        && !normalize(prayerRestore.getDisplayName()).contains("super restore")) {
+      addItem(layout, choose("Stat restore", 1, pool, scanned, "restore potion", "super restore"));
+    }
+    int prayers = methodRules.resolveRestoreSlots(strategy);
+    for (int i = 0; i < prayers && layout.size() < 28; i++) {
+      addItem(layout, prayerRestore);
+    }
+    OwnedItem ownedMeal = preferredInventory(pool, methodRules.getFoodAlternatives());
+    KitItem meal =
+        ownedMeal == null
+            ? missingItem(methodRules.getFoodDisplayName(), scanned)
+            : ownedMeal.toItem(1);
+    int meals = methodRules.resolveFoodSlots(strategy, foodSlots);
+    int ownedMealCount =
+        ownedMeal == null ? 0 : ownedItemQuantities(pool).getOrDefault(ownedMeal.itemId, 0);
+    for (int i = 0; i < meals && layout.size() < 28; i++) {
+      layout.add(i < ownedMealCount ? meal : missingItem(meal.getDisplayName(), scanned));
+    }
+    int target =
+        Math.min(methodRules.getInventoryTarget(), Math.max(0, 28 - methodRules.getLoot()));
+    if (methodRules.fillsRemainingWithRestore()) {
+      while (layout.size() < target && layout.size() < 28) {
+        layout.add(prayerRestore);
+      }
+    } else if (methodRules.fillsRemainingWithFood()) {
+      while (layout.size() < target && layout.size() < 28) {
+        layout.add(meal);
+      }
+    }
+    return enforceConcreteInventoryTarget(
+        organizeInventoryLayout(layout, methodRules, analyzerOwnsTravelSlot),
+        methodRules,
+        prayerRestore,
+        meal);
+  }
+
+  private static boolean barrowsNeedsRangedSwitch(int weaponId, MethodRules rules) {
+    // Wiki Barrows/Strategies: ranged is optional with Shadow or Air spells.
+    switch (weaponId) {
+      case ItemID.TUMEKENS_SHADOW:
+      case ItemID.TUMEKENS_SHADOW_UNCHARGED:
+      case ItemID.DEADMAN_BLIGHTED_TUMEKENS_SHADOW:
+      case ItemID.DEADMAN_BLIGHTED_TUMEKENS_SHADOW_UNCHARGED:
+        return false;
+      default:
+        break;
+    }
+    String spell = normalize(rules.getPrimarySpell());
+    return rules.getSpellbook() != MethodRules.Spellbook.STANDARD
+        || !(spell.contains("air spell") || spell.contains("wind "));
+  }
+
+  private static boolean hasRestorationTeleport(List<KitItem> items) {
+    if (items == null) {
+      return false;
+    }
+    for (KitItem item : items) {
+      if (item == null || !item.hasItemId()) {
+        continue;
+      }
+      String name = normalize(item.getDisplayName());
+      if (name.equals("max cape")
+          || name.startsWith("construction cape")
+          || name.equals("teleport to house")
+          || name.startsWith("ring of dueling")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static List<String> maggotKingSwitchAlternatives(
+      String displayName, KitItem crushWeapon, List<String> defaults) {
+    String requirement = normalize(displayName);
+    String weapon = normalize(crushWeapon == null ? "" : crushWeapon.getDisplayName());
+    if (weapon.contains("soulreaper axe")) {
+      if (requirement.equals("melee body switch")) {
+        return Arrays.asList(
+            "oathplate chest",
+            "inquisitor s hauberk",
+            "torva platebody",
+            "bandos chestplate",
+            "blood moon chestplate",
+            "fighter torso");
+      }
+      if (requirement.equals("melee legs switch")) {
+        return Arrays.asList(
+            "oathplate legs",
+            "inquisitor s plateskirt",
+            "torva platelegs",
+            "bandos tassets",
+            "blood moon tassets",
+            "obsidian platelegs");
+      }
+    }
+    return defaults;
+  }
+
+  private static boolean skipMaggotKingRequirement(String displayName, KitItem crushWeapon) {
+    return normalize(displayName).equals("melee defender switch")
+        && isTwoHandedMaggotKingWeapon(crushWeapon);
+  }
+
+  private static boolean isTwoHandedMaggotKingWeapon(KitItem crushWeapon) {
+    String weapon = normalize(crushWeapon == null ? "" : crushWeapon.getDisplayName());
+    return weapon.contains("scythe of vitur")
+        || weapon.contains("soulreaper axe")
+        || weapon.contains("abyssal bludgeon")
+        || weapon.contains("dual macuahuitl");
+  }
+
+  private static List<String> tormentedSwitchAlternatives(
+      String displayName, KitItem rangedWeapon, List<String> defaults) {
+    String requirement = normalize(displayName);
+    String weapon = normalize(rangedWeapon == null ? "" : rangedWeapon.getDisplayName());
+    if (requirement.equals("secondary body switch")) {
+      if (isPurgingStaff(rangedWeapon)) {
+        return Arrays.asList(
+            "ancestral robe top",
+            "virtus robe top",
+            "ahrim s robetop",
+            "blue moon chestplate",
+            "bloodbark body",
+            "mystic robe top");
+      }
+      if (weapon.contains("bow of faerdhinen")) {
+        return Arrays.asList(
+            "crystal body",
+            "masori body f",
+            "masori body",
+            "blessed body",
+            "black d hide body",
+            "mixed hide top");
+      }
+      if (weapon.contains("eclipse atlatl")) {
+        return Arrays.asList(
+            "eclipse moon chestplate",
+            "masori body f",
+            "masori body",
+            "blessed body",
+            "black d hide body",
+            "mixed hide top");
+      }
+    }
+    if (requirement.equals("secondary legs switch")) {
+      if (isPurgingStaff(rangedWeapon)) {
+        return Arrays.asList(
+            "ancestral robe bottom",
+            "virtus robe bottom",
+            "ahrim s robeskirt",
+            "blue moon tassets",
+            "bloodbark legs",
+            "mystic robe bottom");
+      }
+      if (weapon.contains("bow of faerdhinen")) {
+        return Arrays.asList(
+            "crystal legs",
+            "masori chaps f",
+            "masori chaps",
+            "blessed chaps",
+            "black d hide chaps",
+            "mixed hide legs");
+      }
+      if (weapon.contains("eclipse atlatl")) {
+        return Arrays.asList(
+            "eclipse moon tassets",
+            "masori chaps f",
+            "masori chaps",
+            "blessed chaps",
+            "black d hide chaps",
+            "mixed hide legs");
+      }
+    }
+    return defaults;
+  }
+
+  private static List<String> araxxorSafeWeaponAlternatives() {
+    return Arrays.asList(
+        "noxious halberd",
+        "heavy ballista",
+        "hunters sunlight crossbow",
+        "rune crossbow",
+        "karil s crossbow",
+        "dragon halberd",
+        "crystal halberd",
+        "dharok s greataxe",
+        "zombie axe");
+  }
+
+  private static List<String> araxxorSafeAmmunitionAlternatives(String safeWeaponName) {
+    String weapon = normalize(safeWeaponName);
+    if (weapon.isEmpty()) {
+      return Collections.emptyList();
+    }
+    if (weapon.contains("hunters sunlight crossbow")) {
+      return Arrays.asList("moonlight antler bolts", "sunlight antler bolts");
+    }
+    if (weapon.contains("karil") && weapon.contains("crossbow")) {
+      return Arrays.asList("bolt rack");
+    }
+    if (weapon.contains("heavy ballista")) {
+      return Arrays.asList("dragon javelin", "amethyst javelin", "rune javelin");
+    }
+    if (weapon.contains("crossbow")) {
+      return Arrays.asList(
+          "dragonstone dragon bolts e",
+          "diamond dragon bolts e",
+          "dragon bolts",
+          "diamond bolts e",
+          "runite bolts",
+          "amethyst broad bolts",
+          "broad bolts");
+    }
+    return Collections.emptyList();
+  }
+
+  private static boolean skipTormentedRequirement(String displayName, KitItem secondaryWeapon) {
+    String requirement = normalize(displayName);
+    if (requirement.equals("magic off hand switch")) {
+      return !isPurgingStaff(secondaryWeapon);
+    }
+    if (requirement.equals("divine ranging potion")) {
+      return isPurgingStaff(secondaryWeapon);
+    }
+    return false;
+  }
+
+  private static boolean isTormentedSecondaryRequirement(String displayName) {
+    String requirement = normalize(displayName);
+    return requirement.equals("secondary weapon switch")
+        || requirement.equals("secondary body switch")
+        || requirement.equals("secondary legs switch")
+        || requirement.equals("magic off hand switch");
+  }
+
+  private static boolean isPurgingStaff(KitItem secondaryWeapon) {
+    return secondaryWeapon != null
+        && normalize(secondaryWeapon.getDisplayName()).contains("purging staff");
+  }
+
+  private static KitItem switchAmmunition(
+      KitItem rangedWeapon, TaskStrategy strategy, List<OwnedItem> pool, boolean scanned) {
+    String weapon = normalize(rangedWeapon == null ? "" : rangedWeapon.getDisplayName());
+    if (weapon.contains("purging staff")) {
+      return null;
+    }
+    if (weapon.contains("toxic blowpipe") || weapon.contains("bow of faerdhinen")) {
+      return null;
+    }
+    if (weapon.contains("eclipse atlatl")) {
+      return recommendedAmmo(true, "Atlatl darts", pool, scanned, "atlatl dart")
+          .asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+    }
+    if (weapon.contains("hunters sunlight crossbow")) {
+      return recommendedAmmo(
+              true,
+              "Antler bolts",
+              pool,
+              scanned,
+              "moonlight antler bolts",
+              "sunlight antler bolts")
+          .asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+    }
+    if (weapon.contains("karil")) {
+      return recommendedAmmo(true, "Bolt racks", pool, scanned, "bolt rack")
+          .asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+    }
+    if (weapon.contains("dorgeshuun")) {
+      return recommendedAmmo(true, "Bone bolts", pool, scanned, "bone bolts")
+          .asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+    }
+    if (weapon.equals("rune crossbow")) {
+      return recommendedAmmo(
+              true,
+              "Compatible bolts",
+              pool,
+              scanned,
+              "diamond bolts e",
+              "runite bolts",
+              "broad bolts")
+          .asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+    }
+    if (weapon.contains("crossbow")) {
+      return recommendedAmmo(
+              true,
+              "Compatible bolts",
+              pool,
+              scanned,
+              "ruby dragon bolts e",
+              "diamond dragon bolts e",
+              "dragon bolts",
+              "ruby bolts e",
+              "diamond bolts e",
+              "amethyst broad bolts",
+              "runite bolts",
+              "broad bolts")
+          .asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+    }
+    return bestOwnedStandardArrow(true, null, weapon, strategy, pool, scanned)
+        .asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
+  }
+
+  private static boolean isAlreadyEquippedInPlan(KitItem candidate, List<KitItem> equipmentLayout) {
+    if (candidate == null || equipmentLayout == null) {
+      return false;
+    }
+    for (KitItem equipped : equipmentLayout) {
+      if (equipped == null) {
+        continue;
+      }
+      if (candidate.hasItemId()
+          && equipped.hasItemId()
+          && candidate.getItemId() == equipped.getItemId()) {
+        return true;
+      }
+      if (!candidate.hasItemId()
+          && !equipped.hasItemId()
+          && normalize(candidate.getDisplayName()).equals(normalize(equipped.getDisplayName()))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static List<KitItem> enforceConcreteInventoryTarget(
+      List<KitItem> source, MethodRules rules, KitItem prayerRestore, KitItem food) {
+    if (source == null || source.isEmpty() || rules == null) {
+      return source;
+    }
+    int target =
+        Math.min(Math.max(0, rules.getInventoryTarget()), Math.max(0, 28 - rules.getLoot()));
+    if (target <= 0) {
+      return source;
+    }
+    List<KitItem> concrete = new ArrayList<>();
+    List<KitItem> unresolved = new ArrayList<>();
+    for (KitItem item : source) {
+      if (item == null) {
+        continue;
+      }
+      if (item.hasItemId()
+          || item.getInventoryGroup() == MethodRules.InventoryGroup.UTILITY
+          || item.getInventoryGroup() == MethodRules.InventoryGroup.RUNES
+          || item.getInventoryGroup() == MethodRules.InventoryGroup.PROTECTION
+          || item.getInventoryGroup() == MethodRules.InventoryGroup.SWITCH
+          || item.getInventoryGroup() == MethodRules.InventoryGroup.TRAVEL) {
+        concrete.add(item);
+      } else {
+        unresolved.add(item);
+      }
+    }
+    if (!rules.fillsRemainingWithRestore() && !rules.fillsRemainingWithFood()) {
+      return source;
+    }
+    KitItem preferredFiller = rules.fillsRemainingWithRestore() ? prayerRestore : food;
+    KitItem secondaryFiller = rules.fillsRemainingWithRestore() ? food : prayerRestore;
+    fillConcreteInventory(concrete, target, preferredFiller);
+    fillConcreteInventory(concrete, target, secondaryFiller);
+    List<KitItem> result = new ArrayList<>(Math.min(28, concrete.size() + unresolved.size()));
+    result.addAll(concrete.subList(0, Math.min(28, concrete.size())));
+    for (KitItem item : unresolved) {
+      if (result.size() >= 28) {
+        break;
+      }
+      result.add(item);
+    }
+    return result;
+  }
+
+  private static void fillConcreteInventory(List<KitItem> layout, int target, KitItem filler) {
+    if (layout == null || filler == null || !filler.hasItemId()) {
+      return;
+    }
+    while (layout.size() < target && layout.size() < 28) {
+      layout.add(filler);
+    }
+  }
+
+  private static int ownedRunePouchCapacity(List<OwnedItem> pool) {
+    boolean regular = false;
+    if (pool != null) {
+      for (OwnedItem item : pool) {
+        if (item == null) {
+          continue;
+        }
+        String name = item.nameKey;
+        if (name.contains("divine rune pouch")) {
+          return 4;
+        }
+        if (name.contains("rune pouch")) {
+          regular = true;
+        }
+      }
+    }
+    return regular ? 3 : 0;
+  }
+
+  private static boolean isStructuredUtilityDuplicate(
+      MethodRules.RequiredItem required, MethodRules rules) {
+    if (required == null || rules == null) {
+      return false;
+    }
+    String name = normalize(required.getDisplayName());
+    if (rules.requiresRunePouch()
+        && (name.equals("rune pouch") || name.equals("divine rune pouch"))) {
+      return true;
+    }
+    return rules.requiresBookOfDead() && name.equals("book of the dead");
+  }
+
+  private static boolean isCoveredByStructuredPouchRune(
+      java.util.Set<String> pouchRunes, String requiredRune) {
+    if (pouchRunes == null || pouchRunes.isEmpty()) {
+      return false;
+    }
+    if (pouchRunes.contains(requiredRune)) {
+      return true;
+    }
+    if (pouchRunes.contains("aether")
+        && ("cosmic".equals(requiredRune) || "soul".equals(requiredRune))) {
+      return true;
+    }
+    return false;
+  }
+
+  private static boolean isRuneRequirement(MethodRules.RequiredItem required) {
+    if (required == null || required.getGroup() != MethodRules.InventoryGroup.RUNES) {
+      return false;
+    }
+    String name = normalize(required.getDisplayName());
+    return name.endsWith(" rune") || name.endsWith(" runes");
+  }
+
+  private static KitItem chooseRestore(MethodRules rules, List<OwnedItem> pool, boolean scanned) {
+    if (rules == null || !rules.hasRestorePolicy()) {
+      return missingItem("Prayer restoration", scanned);
+    }
+    OwnedItem owned = fullestOwnedDose(pool, rules.getPrimaryRestoreFamily());
+    if (owned == null
+        && rules.allowsRestoreFallback()
+        && !rules.getFallbackRestoreFamily().isEmpty()) {
+      owned = fullestOwnedDose(pool, rules.getFallbackRestoreFamily());
+    }
+    return owned == null
+        ? missingItem(displayPotionFamily(rules.getPrimaryRestoreFamily()), scanned)
+        : owned.toItem(1);
+  }
+
+  private static String displayPotionFamily(String family) {
+    if (family == null || family.trim().isEmpty()) {
+      return "Prayer restoration";
+    }
+    String value = family.trim();
+    return Character.toUpperCase(value.charAt(0)) + value.substring(1) + "(4)";
+  }
+
+  private static OwnedItem fullestOwnedDose(List<OwnedItem> pool, String family) {
+    String key = stripPotionDose(normalize(family));
+    if (key.isEmpty()) {
+      return null;
+    }
+    return exactOwned(pool, key + " 4", key + " 3", key + " 2", key + " 1");
+  }
+
+  private static String stripPotionDose(String value) {
+    return value == null ? "" : value.replaceFirst("\\s+[1-4]$", "").trim();
+  }
+
+  private static List<KitItem> organizeInventoryLayout(
+      List<KitItem> source, MethodRules rules, boolean sourceSlotZeroIsTravel) {
+    Map<MethodRules.InventoryGroup, List<KitItem>> groups = new LinkedHashMap<>();
+    for (MethodRules.InventoryGroup group : MethodRules.InventoryGroup.values()) {
+      groups.put(group, new ArrayList<>());
+    }
+    for (int index = 0; index < source.size(); index++) {
+      KitItem item = source.get(index);
+      if (item == null) {
+        continue;
+      }
+      MethodRules.InventoryGroup group =
+          sourceSlotZeroIsTravel && index == 0
+              ? MethodRules.InventoryGroup.TRAVEL
+              : classifyInventoryItem(item, rules);
+      groups.get(group).add(item.withInventoryGroup(group));
+    }
+    List<KitItem> organized = new ArrayList<>(source.size());
+    addGroup(organized, groups, MethodRules.InventoryGroup.TRAVEL, rules);
+    List<KitItem> utilities = groups.get(MethodRules.InventoryGroup.UTILITY);
+    if (utilities != null && !utilities.isEmpty()) {
+      List<KitItem> runePouches = new ArrayList<>();
+      for (int index = utilities.size() - 1; index >= 0; index--) {
+        KitItem utility = utilities.get(index);
+        if (normalize(utility == null ? "" : utility.getDisplayName()).contains("rune pouch")) {
+          runePouches.add(0, utility);
+          utilities.remove(index);
+        }
+      }
+      organized.addAll(runePouches);
+    }
+    addGroup(organized, groups, MethodRules.InventoryGroup.SWITCH, rules);
+    addGroup(organized, groups, MethodRules.InventoryGroup.UTILITY, rules);
+    addGroup(organized, groups, MethodRules.InventoryGroup.RUNES, rules);
+    addGroup(organized, groups, MethodRules.InventoryGroup.PROTECTION, rules);
+    addGroup(organized, groups, MethodRules.InventoryGroup.BOOST, rules);
+    addGroup(organized, groups, MethodRules.InventoryGroup.FOOD, rules);
+    addGroup(organized, groups, MethodRules.InventoryGroup.RESTORE, rules);
+    addGroup(organized, groups, MethodRules.InventoryGroup.OTHER, rules);
+    return organized;
+  }
+
+  private static void addGroup(
+      List<KitItem> destination,
+      Map<MethodRules.InventoryGroup, List<KitItem>> groups,
+      MethodRules.InventoryGroup group,
+      MethodRules rules) {
+    List<KitItem> items = groups.get(group);
+    if (items == null || items.isEmpty()) {
+      return;
+    }
+    items.sort(
+        (left, right) -> {
+          int leftPriority = inventoryAuthoredPriority(left, rules, group);
+          int rightPriority = inventoryAuthoredPriority(right, rules, group);
+          if (leftPriority != rightPriority) {
+            return Integer.compare(leftPriority, rightPriority);
+          }
+          int family = inventoryVisualFamily(left).compareTo(inventoryVisualFamily(right));
+          if (family != 0) {
+            return family;
+          }
+          return normalize(left == null ? "" : left.getDisplayName())
+              .compareTo(normalize(right == null ? "" : right.getDisplayName()));
+        });
+    if (isSingletonInventoryGroup(group)) {
+      Set<String> seen = new HashSet<>();
+      items.removeIf(item -> !seen.add(itemIdentity(item)));
+    }
+    destination.addAll(items);
+  }
+
+  private static boolean isSingletonInventoryGroup(MethodRules.InventoryGroup group) {
+    return group == MethodRules.InventoryGroup.TRAVEL
+        || group == MethodRules.InventoryGroup.SWITCH
+        || group == MethodRules.InventoryGroup.UTILITY
+        || group == MethodRules.InventoryGroup.RUNES
+        || group == MethodRules.InventoryGroup.PROTECTION;
+  }
+
+  private static String itemIdentity(KitItem item) {
+    if (item == null) {
+      return "null";
+    }
+    return item.hasItemId() ? "id:" + item.getItemId() : "name:" + normalize(item.getDisplayName());
+  }
+
+  private static int inventoryAuthoredPriority(
+      KitItem item, MethodRules rules, MethodRules.InventoryGroup group) {
+    String name = normalize(item == null ? "" : item.getDisplayName());
+    if (name.contains("rune pouch")) {
+      return -1000;
+    }
+    if (rules == null) {
+      return Integer.MAX_VALUE;
+    }
+    int index = 0;
+    for (MethodRules.RequiredItem required : rules.getRequiredItems()) {
+      if (required.getGroup() != group) {
+        index++;
+        continue;
+      }
+      String display = normalize(required.getDisplayName());
+      if (!display.isEmpty() && name.equals(display)) {
+        return index;
+      }
+      for (String alternative : required.getAlternatives()) {
+        String normalizedAlternative = normalize(alternative);
+        if (!normalizedAlternative.isEmpty() && name.contains(normalizedAlternative)) {
+          return index;
+        }
+      }
+      index++;
+    }
+    return Integer.MAX_VALUE;
+  }
+
+  private static String inventoryVisualFamily(KitItem item) {
+    if (item == null) {
+      return "";
+    }
+    return stripPotionDose(normalize(item.getDisplayName())).replaceFirst("^divine\\s+", "").trim();
+  }
+
+  private static MethodRules.InventoryGroup classifyInventoryItem(KitItem item, MethodRules rules) {
+    String name = normalize(item.getDisplayName());
+    if (rules != null) {
+      for (MethodRules.RequiredItem required : rules.getRequiredItems()) {
+        if (name.equals(normalize(required.getDisplayName()))) {
+          return required.getGroup();
+        }
+        for (String alternative : required.getAlternatives()) {
+          if (name.contains(normalize(alternative))) {
+            return required.getGroup();
+          }
+        }
+      }
+    }
+    if (matchesAny(
+        name,
+        Arrays.asList(
+            "rune pouch",
+            "book of the dead",
+            "herb sack",
+            "gem bag",
+            "bonecrusher",
+            "goading potion",
+            "bag of salt",
+            "rock hammer",
+            "ice cooler",
+            "fungicide",
+            "slayer bell",
+            "fishing explosive",
+            "crystal chime"))) {
+      return MethodRules.InventoryGroup.UTILITY;
+    }
+    if (matchesAny(name, Arrays.asList("sceptre", "switch"))) {
+      return MethodRules.InventoryGroup.SWITCH;
+    }
+    if (matchesAny(name, Arrays.asList(" rune", "cannon", "dart", "arrow", "bolt"))
+        || name.endsWith("runes")) {
+      return MethodRules.InventoryGroup.RUNES;
+    }
+    if (name.contains("saradomin brew")) {
+      return MethodRules.InventoryGroup.FOOD;
+    }
+    if (matchesAny(
+        name,
+        Arrays.asList(
+            "heart",
+            "combat potion",
+            "ranging potion",
+            "magic potion",
+            "bastion potion",
+            "battlemage potion",
+            "ancient brew",
+            "forgotten brew"))) {
+      return MethodRules.InventoryGroup.BOOST;
+    }
+    if (matchesAny(
+        name, Arrays.asList("antivenom", "anti venom", "antipoison", "stamina", "antifire"))) {
+      return MethodRules.InventoryGroup.PROTECTION;
+    }
+    if (matchesAny(
+        name,
+        Arrays.asList(
+            "super restore", "prayer potion", "prayer restoration", "prayer regeneration"))) {
+      return MethodRules.InventoryGroup.RESTORE;
+    }
+    if (isFoodName(name)) {
+      return MethodRules.InventoryGroup.FOOD;
+    }
+    return MethodRules.InventoryGroup.OTHER;
+  }
+
+  private static KitItem.SwitchStyle inferSwitchStyle(
+      MethodRules.RequiredItem required, CombatStyle fallbackStyle) {
+    if (required == null) {
+      return switchStyle(fallbackStyle);
+    }
+    String description = normalize(required.getDisplayName());
+    for (String alternative : required.getAlternatives()) {
+      description += " " + normalize(alternative);
+    }
+    if (matchesAny(
+            description,
+            Arrays.asList(
+                "blowpipe",
+                "shortbow",
+                "longbow",
+                "crossbow",
+                "ballista",
+                " ranged ",
+                " range switch",
+                "masori",
+                "armadyl",
+                "karil"))
+        || description.startsWith("ranged ")) {
+      return KitItem.SwitchStyle.RANGED;
+    }
+    if (matchesAny(
+            description,
+            Arrays.asList(
+                " magic ",
+                " mage ",
+                "magicks",
+                "ancient",
+                "sceptre",
+                "staff",
+                "wand",
+                "ancestral",
+                "virtus",
+                "ahrim",
+                "bloodbark"))
+        || description.startsWith("magic ")
+        || description.startsWith("mage ")) {
+      return KitItem.SwitchStyle.MAGIC;
+    }
+    if (matchesAny(
+            description,
+            Arrays.asList(
+                " melee ", "scythe", "godsword", "whip", "claws", "defender", "torva", "bandos"))
+        || description.startsWith("melee ")) {
+      return KitItem.SwitchStyle.MELEE;
+    }
+    return switchStyle(fallbackStyle);
+  }
+
+  private static KitItem.SwitchStyle switchStyle(CombatStyle style) {
+    if (style == CombatStyle.MAGIC) {
+      return KitItem.SwitchStyle.MAGIC;
+    }
+    if (style == CombatStyle.RANGED) {
+      return KitItem.SwitchStyle.RANGED;
+    }
+    if (style == CombatStyle.MELEE) {
+      return KitItem.SwitchStyle.MELEE;
+    }
+    return KitItem.SwitchStyle.OTHER;
+  }
+
+  private static boolean isFoodName(String name) {
+    return matchesAny(
+        name,
+        Arrays.asList(
+            "anglerfish",
+            "manta ray",
+            "dark crab",
+            "shark",
+            "sea turtle",
+            "karambwan",
+            "monkfish",
+            "high healing food"));
+  }
+
+  List<KitItem> buildOptionalLayout(
+      String task, TaskStrategy strategy, List<OwnedItem> pool, OwnedItem weapon) {
+    List<KitItem> optional = new ArrayList<>();
+    addBlowpipeDartRecommendation(optional, strategy, weapon, pool);
+    if (strategy != null) {
+      for (String itemName : strategy.getOptionalItemPriorities()) {
+        if (!diaries.allowsLoadoutReward(itemName, Collections.singletonList(itemName))) {
+          continue;
+        }
+        addOwnedOptional(optional, pool, itemName);
+      }
+    }
+    addOwnedOptional(optional, pool, "bracelet of slaughter");
+    addOwnedOptional(optional, pool, "expeditious bracelet");
+    addOwnedOptional(optional, pool, "slayer ring");
+    if (diaries.unlocksAshSanctifier() && isAshSanctifierTask(task)) {
+      addOwnedOptional(optional, pool, "ash sanctifier");
+    }
+    if (diaries.unlocksBonecrusher()
+        && strategy != null
+        && !strategy.isBoss()
+        && isBonecrusherTask(task)) {
+      addOwnedOptional(optional, pool, "bonecrusher");
+    }
+    addOwnedOptional(optional, pool, "herb sack");
+    addOwnedOptional(optional, pool, "gem bag");
+    return deduplicateItems(optional);
+  }
+
+  private static boolean isAshSanctifierTask(String assignment) {
+    return matchesAny(
+        normalize(assignment),
+        Arrays.asList(
+            "demon",
+            "hellhound",
+            "bloodveld",
+            "nechryael",
+            "smoke devil",
+            "pyrefiend",
+            "fiend",
+            "cerberus"));
+  }
+
+  private static boolean isBonecrusherTask(String assignment) {
+    String task = normalize(assignment);
+    return matchesAny(
+        task,
+        Arrays.asList(
+            "dragon",
+            "wyvern",
+            "wyrm",
+            "drake",
+            "hydra",
+            "dagannoth",
+            "kalphite",
+            "basilisk",
+            "giant",
+            "troll",
+            "bat",
+            "mole",
+            "ankou"));
+  }
+
+  private void addBlowpipeDartRecommendation(
+      List<KitItem> destination, TaskStrategy strategy, OwnedItem weapon, List<OwnedItem> pool) {
+    if (destination == null || weapon == null || !weapon.named("blowpipe")) {
+      return;
+    }
+    OwnedItem darts =
+        strategy != null && strategy.getCostPolicy() == TaskStrategy.CostPolicy.EFFICIENT
+            ? chooseEfficientBlowpipeDarts(pool)
+            : firstExactOwned(pool, "dragon dart", "amethyst dart", "rune dart", "adamant dart");
+    if (darts != null) {
+      destination.add(darts.toItem(1000));
+    }
+  }
+
+  private OwnedItem chooseEfficientBlowpipeDarts(List<OwnedItem> pool) {
+    OwnedItem amethyst = firstExactOwned(pool, "amethyst dart");
+    OwnedItem rune = firstExactOwned(pool, "rune dart");
+    if (amethyst != null && rune != null) {
+      int amethystPrice = safeItemPrice(amethyst);
+      int runePrice = safeItemPrice(rune);
+      if (amethystPrice > 0 && runePrice > 0) {
+        return amethystPrice <= runePrice ? amethyst : rune;
+      }
+      return amethyst;
+    }
+    if (amethyst != null) {
+      return amethyst;
+    }
+    if (rune != null) {
+      return rune;
+    }
+    return firstExactOwned(pool, "adamant dart");
+  }
+
+  private int safeItemPrice(OwnedItem item) {
+    if (item == null || itemManager == null) {
+      return 0;
+    }
+    try {
+      return Math.max(0, itemManager.getItemPrice(item.itemId));
+    } catch (RuntimeException ignored) {
+      return 0;
+    }
+  }
+
+  private static OwnedItem firstExactOwned(List<OwnedItem> pool, String... exactNames) {
+    if (pool == null || exactNames == null) {
+      return null;
+    }
+    for (String exactName : exactNames) {
+      for (OwnedItem item : pool) {
+        if (item.matchesDisplay(exactName)) {
+          return item;
+        }
+      }
+      for (OwnedItem item : pool) {
+        if (item.matchesExactName(exactName)) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  private static List<KitItem> deduplicateItems(List<KitItem> source) {
+    List<KitItem> result = new ArrayList<>();
+    Set<String> seen = new HashSet<>();
+    for (KitItem item : source) {
+      if (item == null) {
+        continue;
+      }
+      String key =
+          item.hasItemId() ? "id:" + item.getItemId() : "name:" + normalize(item.getDisplayName());
+      if (seen.add(key)) {
+        result.add(item);
+      }
+    }
+    return result;
+  }
+
+  private static void addOwnedOptional(
+      List<KitItem> destination, List<OwnedItem> pool, String... alternatives) {
+    OwnedItem owned = findPreferred(pool, alternatives);
+    if (owned != null) {
+      destination.add(owned.toItem(1));
+    }
+  }
+
+  private KitItem chooseTeleport(
+      String task, String location, String travel, List<OwnedItem> pool, boolean scanned) {
+    String combined = normalize(location + " " + travel);
+    String normalizedTask = normalize(task);
+    if (combined.contains("morytania spider cave")) {
+      OwnedItem direct = exactOwned(pool, "spider cave teleport");
+      if (direct != null) {
+        return direct.toItem(1);
+      }
+    }
+    if (normalizedTask.equals("royal titans")) {
+      return chooseExact(
+          "Giantsoul amulet", 1, pool, scanned, "giantsoul amulet", "dramen staff", "lunar staff");
+    }
+    if (normalizedTask.equals("tormented demons")) {
+      OwnedItem direct = exactOwned(pool, "guthixian temple teleport");
+      return direct == null
+          ? chooseExact("Games necklace / POH jewellery box", 1, pool, scanned, "games necklace")
+          : direct.toItem(1);
+    }
+    if (combined.contains("cowbell")) {
+      return chooseExact("Cowbell amulet", 1, pool, scanned, "cowbell amulet");
+    }
+    if (combined.contains("giantsoul")) {
+      return chooseExact(
+          "Giantsoul amulet", 1, pool, scanned, "giantsoul amulet", "dramen staff", "lunar staff");
+    }
+    if (combined.contains("guthixian temple")) {
+      return chooseExact(
+          "Guthixian temple teleport",
+          1,
+          pool,
+          scanned,
+          "guthixian temple teleport",
+          "games necklace");
+    }
+    if (combined.contains("key master")) {
+      return chooseExact(
+          "Key master teleport", 1, pool, scanned, "key master teleport", "games necklace");
+    }
+    if (combined.contains("barrows teleport")) {
+      return chooseExact(
+          "Barrows teleport",
+          1,
+          pool,
+          scanned,
+          "barrows teleport",
+          "morytania legs 3",
+          "morytania legs 4");
+    }
+    if (combined.contains("ring of shadows") || combined.contains("ancient vault")) {
+      return chooseExact("Ring of shadows", 1, pool, scanned, "ring of shadows");
+    }
+    if (combined.contains("burning amulet") || combined.contains("wilderness obelisk")) {
+      return chooseExact("Wilderness travel", 1, pool, scanned, "burning amulet");
+    }
+    if (combined.contains("digsite pendant")) {
+      return chooseExact("Digsite pendant", 1, pool, scanned, "digsite pendant");
+    }
+    if (combined.contains("drakan")) {
+      return chooseExact("Drakan's medallion", 1, pool, scanned, "drakan s medallion");
+    }
+    if (combined.contains("varrock teleport")) {
+      return chooseExact(
+          "Varrock teleport", 1, pool, scanned, "varrock teleport", "varrock tablet");
+    }
+    if (combined.contains("amulet of glory")) {
+      return chooseExact("Amulet of glory", 1, pool, scanned, "amulet of glory");
+    }
+    if (combined.contains("ring of dueling")) {
+      return chooseExact("Ring of dueling", 1, pool, scanned, "ring of dueling");
+    }
+    if (combined.contains("skills necklace")) {
+      return chooseExact("Skills necklace", 1, pool, scanned, "skills necklace");
+    }
+    if (combined.contains("combat bracelet")) {
+      return chooseExact("Combat bracelet", 1, pool, scanned, "combat bracelet");
+    }
+    if (combined.contains("ectophial")) {
+      return chooseExact("Ectophial", 1, pool, scanned, "ectophial");
+    }
+    if (combined.contains("mort ton teleport")) {
+      return chooseExact("Mort'ton teleport", 1, pool, scanned, "mort ton teleport");
+    }
+    if (combined.contains("pollnivneach teleport")) {
+      return chooseExact("Pollnivneach teleport", 1, pool, scanned, "pollnivneach teleport");
+    }
+    if (combined.contains("zul andra")) {
+      return chooseExact("Zul-andra teleport", 1, pool, scanned, "zul andra teleport");
+    }
+    if (combined.contains("catacomb") || combined.contains("xeric")) {
+      return chooseExact("Xeric's talisman", 1, pool, scanned, "xeric s talisman");
+    }
+    if (combined.contains("karuulm") || combined.contains("rada")) {
+      return chooseExact("Rada's blessing", 1, pool, scanned, "rada s blessing");
+    }
+    if (combined.contains("waterbirth") || combined.contains("rellekka")) {
+      return chooseExact(
+          "Waterbirth travel",
+          1,
+          pool,
+          scanned,
+          "max cape",
+          "construction cape",
+          "teleport to house",
+          "house tab",
+          "fremennik sea boots 4",
+          "fremennik sea boots 3",
+          "fremennik sea boots 2",
+          "fremennik sea boots 1",
+          "slayer ring");
+    }
+    if (combined.contains("fremennik") || combined.contains("slayer cave")) {
+      return chooseTravelFamily(
+          "Slayer ring",
+          1,
+          pool,
+          scanned,
+          "slayer ring",
+          "fremennik sea boots 4",
+          "fremennik sea boots 3",
+          "fremennik sea boots 2",
+          "fremennik sea boots 1");
+    }
+    if (combined.contains("fairy ring")) {
+      if (diaries.hasTier("lumbridge", 4)) {
+        return null;
+      }
+      return chooseExact("Dramen or lunar staff", 1, pool, scanned, "lunar staff", "dramen staff");
+    }
+    return chooseExact(
+        "Teleport out",
+        1,
+        pool,
+        scanned,
+        "max cape",
+        "construction cape",
+        "teleport to house",
+        "house tab",
+        "slayer ring",
+        "ring of dueling",
+        "games necklace");
+  }
+
+  private static KitItem chooseExact(
+      String displayName,
+      int quantity,
+      List<OwnedItem> pool,
+      boolean scanned,
+      String... alternatives) {
+    for (String alternative : alternatives) {
+      String normalized = normalize(alternative);
+      if (normalized.isEmpty()) {
+        continue;
+      }
+      OwnedItem exact = exactOwned(pool, normalized);
+      if (exact != null) {
+        return exact.toItem(quantity);
+      }
+    }
+    return missingItem(displayName, quantity, scanned);
+  }
+
+  private static OwnedItem exactOwned(List<OwnedItem> pool, String... exactNames) {
+    if (pool == null || exactNames == null) {
+      return null;
+    }
+    for (String exactName : exactNames) {
+      for (OwnedItem item : pool) {
+        if (item != null && item.matchesDisplay(exactName)) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  private static KitItem choose(
+      String displayName,
+      int quantity,
+      List<OwnedItem> pool,
+      boolean scanned,
+      List<String> alternatives) {
+    return choose(displayName, quantity, pool, scanned, alternatives, false);
+  }
+
+  private static KitItem choose(
+      String displayName,
+      int quantity,
+      List<OwnedItem> pool,
+      boolean scanned,
+      List<String> alternatives,
+      boolean gearProgression) {
+    OwnedItem owned = preferredInventory(pool, alternatives, gearProgression);
+    return owned == null ? missingItem(displayName, quantity, scanned) : owned.toItem(quantity);
+  }
+
+  private static OwnedItem preferredInventory(List<OwnedItem> pool, List<String> alternatives) {
+    return preferredInventory(pool, alternatives, false);
+  }
+
+  private static OwnedItem preferredInventory(
+      List<OwnedItem> pool, List<String> alternatives, boolean gearProgression) {
+    if (alternatives == null) {
+      return null;
+    }
+    if (gearProgression) {
+      return findPreferredInventoryEquipment(pool, alternatives);
+    }
+    List<String> potionFamilies = new ArrayList<>();
+    List<String> nonPotionAlternatives = new ArrayList<>();
+    for (String alternative : alternatives) {
+      String normalized = normalize(alternative);
+      if (normalized.isEmpty()) {
+        continue;
+      }
+      if (isPotionFamilyName(normalized)) {
+        break;
+      }
+      OwnedItem exact = exactOwned(pool, normalized);
+      if (exact != null) {
+        return exact;
+      }
+    }
+    for (String alternative : alternatives) {
+      String normalized = normalize(alternative);
+      if (normalized.isEmpty()) {
+        continue;
+      }
+      if (hasExplicitPotionDose(normalized)) {
+        OwnedItem exact = exactOwned(pool, normalized);
+        if (exact != null) {
+          return exact;
+        }
+      } else if (isPotionFamilyName(normalized)) {
+        potionFamilies.add(stripPotionDose(normalized));
+      } else {
+        nonPotionAlternatives.add(normalized);
+      }
+    }
+    OwnedItem bestPotion = null;
+    int bestUsefulDoseUnits = -1;
+    int bestFamilyPreference = Integer.MAX_VALUE;
+    for (int familyIndex = 0; familyIndex < potionFamilies.size(); familyIndex++) {
+      String family = potionFamilies.get(familyIndex);
+      for (int dose = 4; dose >= 1; dose--) {
+        OwnedItem owned = exactOwned(pool, family + " " + dose);
+        if (owned == null) {
+          continue;
+        }
+        int usefulDoseUnits = PotionPolicy.effectiveDoseUnits(family, dose);
+        if (usefulDoseUnits > bestUsefulDoseUnits
+            || (usefulDoseUnits == bestUsefulDoseUnits && familyIndex < bestFamilyPreference)) {
+          bestPotion = owned;
+          bestUsefulDoseUnits = usefulDoseUnits;
+          bestFamilyPreference = familyIndex;
+        }
+        break;
+      }
+    }
+    if (bestPotion != null) {
+      return bestPotion;
+    }
+    for (String alternative : nonPotionAlternatives) {
+      OwnedItem exact = exactOwned(pool, alternative);
+      if (exact != null) {
+        return exact;
+      }
+    }
+    return findPreferred(pool, alternatives);
+  }
+
+  private static OwnedItem findPreferredInventoryEquipment(
+      List<OwnedItem> pool, List<String> progression) {
+    if (pool == null || progression == null) {
+      return null;
+    }
+    for (String tier : progression) {
+      String normalizedTier = normalize(tier);
+      if (normalizedTier.isEmpty()) {
+        continue;
+      }
+      OwnedItem exact = exactOwned(pool, normalizedTier);
+      if (exact != null) {
+        return exact;
+      }
+      for (OwnedItem item : pool) {
+        if (item != null && item.matchesEquipmentProgression(normalizedTier)) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  private static boolean hasExplicitPotionDose(String name) {
+    return isPotionFamilyName(name) && name.matches(".*\\s[1-4]$");
+  }
+
+  private static boolean isPotionFamilyName(String name) {
+    return matchesAny(
+        name,
+        Arrays.asList(
+            "potion",
+            "super restore",
+            "brew",
+            "serum",
+            "antidote",
+            "antivenom",
+            "anti venom",
+            "antipoison"));
+  }
+
+  private static KitItem choose(
+      String displayName,
+      int quantity,
+      List<OwnedItem> pool,
+      boolean scanned,
+      String... alternatives) {
+    List<String> values = new ArrayList<>();
+    Collections.addAll(values, alternatives);
+    return choose(displayName, quantity, pool, scanned, values);
+  }
+
+  private static KitItem chooseTravelFamily(
+      String displayName,
+      int quantity,
+      List<OwnedItem> pool,
+      boolean scanned,
+      String... alternatives) {
+    OwnedItem owned = findPreferred(pool, alternatives);
+    return owned == null ? missingItem(displayName, quantity, scanned) : owned.toItem(quantity);
+  }
+
+  private static void addItem(List<KitItem> layout, KitItem item) {
+    if (item != null && layout.size() < 28) {
+      layout.add(item);
+    }
+  }
+
+  private static KitItem missingItem(String displayName, boolean scanned) {
+    return missingItem(displayName, 1, scanned);
+  }
+
+  private static KitItem missingItem(String displayName, int quantity, boolean scanned) {
+    return new KitItem(
+        displayName,
+        -1,
+        Math.max(1, quantity),
+        scanned ? KitItem.Status.MISSING : KitItem.Status.UNKNOWN);
+  }
+
+  private static Requirement requirementForSlot(
+      List<Requirement> requirements, EquipmentInventorySlot slot) {
+    for (Requirement requirement : requirements) {
+      if (!requirement.equipment) {
+        continue;
+      }
+      String name = normalize(requirement.displayName);
+      if (slot == EquipmentInventorySlot.HEAD
+          && matchesAny(
+              name, Arrays.asList("earmuff", "face mask", "nose peg", "spiny helmet", "goggle"))) {
+        return requirement;
+      }
+      if (slot == EquipmentInventorySlot.AMULET && name.contains("witchwood")) {
+        return requirement;
+      }
+      if (slot == EquipmentInventorySlot.BOOTS && name.contains("boots")) {
+        return requirement;
+      }
+      if (slot == EquipmentInventorySlot.GLOVES && name.contains("gloves")) {
+        return requirement;
+      }
+      if (slot == EquipmentInventorySlot.SHIELD
+          && (name.contains("shield") || name.contains("bug lantern"))) {
+        return requirement;
+      }
+      if (slot == EquipmentInventorySlot.WEAPON
+          && (name.contains("weapon") || name.contains("staff"))) {
+        return requirement;
+      }
+      if (slot == EquipmentInventorySlot.AMMO
+          && (name.contains("ammunition") || name.contains("bolts") || name.contains("arrows"))) {
+        return requirement;
+      }
+    }
+    return null;
+  }
+
+  private static OwnedItem findEquippedSlot(List<OwnedItem> equipped, EquipmentInventorySlot slot) {
+    int slotIndex = slot.getSlotIdx();
+    for (OwnedItem item : equipped) {
+      if (item.equipmentSlot == slotIndex) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  private static OwnedItem findPreferred(List<OwnedItem> owned, List<String> alternatives) {
+    if (owned == null || alternatives == null) {
+      return null;
+    }
+    for (String alternative : alternatives) {
+      String fragment = normalize(alternative);
+      if (fragment.isEmpty()) {
+        continue;
+      }
+      for (OwnedItem item : owned) {
+        if (item != null && item.matchesDisplay(fragment)) {
+          return item;
+        }
+      }
+      for (OwnedItem item : owned) {
+        if (item != null && item.named(fragment)) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  private static OwnedItem findPreferred(List<OwnedItem> owned, String... alternatives) {
+    List<String> values = new ArrayList<>();
+    Collections.addAll(values, alternatives);
+    return findPreferred(owned, values);
+  }
+
+  private static String[] weaponFragments(CombatStyle style) {
+    if (style == CombatStyle.MAGIC) {
+      return new String[] {
+        "tumeken",
+        "sanguinesti",
+        "trident",
+        "nightmare staff",
+        "ancient sceptre",
+        "kodai",
+        "wand",
+        "staff"
+      };
+    }
+    if (style == CombatStyle.RANGED) {
+      return new String[] {
+        "twisted bow", "bow of faerdhinen", "blowpipe", "crossbow", "bow", "atlatl"
+      };
+    }
+    return new String[] {
+      "scythe",
+      "soulreaper axe",
+      "osmumten",
+      "fang",
+      "rapier",
+      "abyssal whip",
+      "whip",
+      "lance",
+      "mace",
+      "sword",
+      "axe"
+    };
+  }
+
+  private static String buildEquipmentText(
+      TaskStrategy strategy, CombatStyle style, List<Requirement> requirements) {
+    List<String> parts = new ArrayList<>();
+    parts.add("Slayer helmet or black mask");
+    if (strategy != null) {
+      parts.add(strategy.getMethod());
+    } else {
+      switch (style) {
+        case MAGIC:
+          parts.add("magic-damage weapon and prayer/magic gear");
+          break;
+        case RANGED:
+          parts.add("ranged weapon, ammo, and ranged armour");
+          break;
+        case MELEE:
+          parts.add("melee weapon and strength gear");
+          break;
+        case FLEXIBLE:
+        default:
+          parts.add("task-appropriate combat switches");
+          break;
+      }
+    }
+    for (Requirement requirement : requirements) {
+      if (requirement.equipment) {
+        parts.add(requirement.displayName);
+      }
+    }
+    return join(parts, "; ");
+  }
+
+  private static String buildInventoryText(
+      TaskStrategy strategy,
+      CombatStyle style,
+      List<Requirement> requirements,
+      boolean cannonSuggested,
+      int foodSlots) {
+    List<String> parts = new ArrayList<>();
+    String foodText =
+        foodSlots > 0 ? " and " + foodSlots + " food slot" + (foodSlots == 1 ? "" : "s") : "";
+    switch (style) {
+      case MAGIC:
+        parts.add("runes or rune pouch");
+        parts.add("Magic boost and prayer potions" + foodText);
+        break;
+      case RANGED:
+        parts.add("ammo");
+        parts.add("ranging/prayer potions" + foodText);
+        break;
+      case MELEE:
+        parts.add("super combat/prayer potions" + foodText);
+        break;
+      case FLEXIBLE:
+      default:
+        parts.add("combat-switch potions and prayer supplies" + foodText);
+        break;
+    }
+    if (foodSlots == 0
+        && strategy != null
+        && (strategy.getDamageProfile() == TaskStrategy.DamageProfile.ZERO_WHILE_PROTECTED
+            || strategy.getDamageProfile() == TaskStrategy.DamageProfile.ZERO_WHILE_SAFESPOTTING)) {
+      parts.add(
+          "No food: the reviewed method expects zero incoming damage "
+              + "while its protection method is maintained");
+    }
+    if (strategy != null && strategy.needsAntivenom()) {
+      parts.add("antivenom");
+    }
+    if (strategy != null && strategy.needsStamina()) {
+      parts.add("extended stamina potion (regular stamina fallback)");
+    }
+    if (cannonSuggested) {
+      parts.add("multicannon pieces and cannonballs");
+    }
+    for (Requirement requirement : requirements) {
+      if (!requirement.equipment) {
+        parts.add(requirement.displayName);
+      }
+    }
+    return join(parts, "; ");
+  }
+
+  private static String buildOwnedText(
+      CombatStyle style,
+      List<Requirement> requirements,
+      boolean cannonSuggested,
+      Set<String> inventory,
+      Set<String> equipment,
+      Set<String> bank,
+      boolean scanned) {
+    List<String> status = new ArrayList<>();
+    status.add(styleStatus(style, equipment));
+    for (Requirement requirement : requirements) {
+      status.add(
+          requirement.displayName
+              + ": "
+              + availability(requirement, inventory, equipment, bank, scanned));
+    }
+    if (cannonSuggested) {
+      status.add("Cannon: " + cannonAvailability(inventory, equipment, bank, scanned));
+    }
+    if (!scanned) {
+      status.add("Bank not scanned — open it once");
+    } else {
+      status.add("Bank cache ready");
+    }
+    return join(status, "; ");
+  }
+
+  private static String availability(
+      Requirement requirement,
+      Set<String> inventory,
+      Set<String> equipment,
+      Set<String> bank,
+      boolean scanned) {
+    if (containsAny(equipment, requirement.alternatives)) {
+      return "equipped";
+    }
+    if (containsAny(inventory, requirement.alternatives)) {
+      return "carried";
+    }
+    if (containsAny(bank, requirement.alternatives)) {
+      return "in bank";
+    }
+    return scanned ? "missing" : "not carried; bank unknown";
+  }
+
+  private static boolean hybridUsesCombatMagic(TaskStrategy strategy) {
+    if (strategy == null) {
+      return false;
+    }
+    String text = normalize(strategy.getMethod() + " " + strategy.getRationale());
+    return matchesAny(text, Arrays.asList("magic", "mage", "powered staff", "tumeken", "trident"));
+  }
+
+  private static String cannonAvailability(
+      Set<String> inventory, Set<String> equipment, Set<String> bank, boolean scanned) {
+    Set<String> available = new HashSet<>();
+    available.addAll(inventory);
+    available.addAll(equipment);
+    available.addAll(bank);
+    boolean allParts = true;
+    for (String part : new String[] {"base", "stand", "barrels", "furnace"}) {
+      if (!containsText(available, "cannon " + part)) {
+        allParts = false;
+      }
+    }
+    boolean cannonballs = containsText(available, "cannonball");
+    if (allParts && cannonballs) {
+      return "all pieces and ammo found";
+    }
+    if (!scanned) {
+      return "not fully carried; bank unknown";
+    }
+    List<String> missing = new ArrayList<>();
+    if (!allParts) {
+      missing.add("pieces");
+    }
+    if (!cannonballs) {
+      missing.add("cannonballs");
+    }
+    return "missing " + join(missing, " and ");
+  }
+
+  private static String styleStatus(CombatStyle style, Set<String> equipment) {
+    if (style == CombatStyle.FLEXIBLE) {
+      return equipment.isEmpty() ? "Equipment scan unavailable" : "Equipped setup detected";
+    }
+    boolean detected;
+    switch (style) {
+      case MAGIC:
+        detected =
+            containsAnyText(
+                equipment,
+                "staff",
+                "wand",
+                "trident",
+                "sceptre",
+                "sanguinesti",
+                "tumeken",
+                "ancestral",
+                "virtus",
+                "ahrim",
+                "occult");
+        break;
+      case RANGED:
+        detected =
+            containsAnyText(
+                equipment,
+                "bow",
+                "crossbow",
+                "blowpipe",
+                "atlatl",
+                "masori",
+                "armadyl",
+                "karil",
+                "ava",
+                "quiver");
+        break;
+      case MELEE:
+      default:
+        detected =
+            containsAnyText(
+                equipment,
+                "scimitar",
+                "sword",
+                "whip",
+                "rapier",
+                "mace",
+                "axe",
+                "lance",
+                "scythe",
+                "fang",
+                "torva",
+                "bandos",
+                "defender");
+        break;
+    }
+    return detected
+        ? "Equipped " + style.label + " setup detected"
+        : "No clear " + style.label + " setup equipped";
+  }
+
+  List<Requirement> requirementsFor(
+      String task, String location, CombatStyle style, int remainingKills, boolean desertElite) {
+    task = normalize(task);
+    location = normalize(location);
+    List<Requirement> requirements = new ArrayList<>();
+    String combined = task + " " + location;
+    if (requiresKalphiteQueenRopesForTest(task, location, desertElite)) {
+      requirements.add(inventoryNeed(2, "Rope", "rope"));
+    }
+    if (requiresGenericRockHammerForTest(task)) {
+      requirements.add(inventoryNeed("Rock hammer", "rock hammer"));
+    }
+    for (RequirementRule rule : REQUIREMENT_RULES) {
+      if (rule.matches(task, location, style)) {
+        requirements.add(rule.create(remainingKills));
+      }
+    }
+    if (requiresIceCooler(task, location)) {
+      requirements.add(
+          inventoryNeed(consumableFinisherQuantity(remainingKills), "Ice cooler", "ice cooler"));
+    }
+    if (task.equals("crocodiles")
+        || task.equals("crocodile")
+        || (task.equals("lizards") || task.equals("lizard"))
+        || task.equals("bandits")
+        || task.equals("bandit")) {
+      requirements.add(
+          inventoryNeed(
+              "Desert heat protection",
+              "circlet of water",
+              "desert amulet 4",
+              "waterskin 4",
+              "waterskin 3",
+              "waterskin 2",
+              "waterskin 1"));
+    }
+    if (requiresKaruulmProtectionBootsForTest(
+        task, location, diaries.removesKaruulmBootRequirement())) {
+      requirements.add(
+          gearRequirement(
+              "Stone-protection boots", "boots of stone", "granite boots", "boots of brimstone"));
+    }
+    if (task.contains("kurask") || task.contains("turoth")) {
+      if (style == CombatStyle.RANGED) {
+        requirements.add(
+            gearRequirement(
+                "Broad ammunition", "amethyst broad bolts", "broad bolts", "broad arrows"));
+        requirements.add(
+            gearRequirement(
+                "Broad-ammunition weapon",
+                "zaryte crossbow",
+                "dragon hunter crossbow",
+                "armadyl crossbow",
+                "dragon crossbow",
+                "rune crossbow",
+                "magic shortbow",
+                "magic longbow"));
+      } else if (style == CombatStyle.MAGIC) {
+        requirements.add(
+            gearRequirement(
+                "Magic Dart staff",
+                "slayer s staff e",
+                "slayer s staff",
+                "toxic staff of the dead",
+                "staff of the dead"));
+      } else {
+        requirements.add(
+            gearRequirement(
+                "Leaf-bladed weapon",
+                "leaf bladed battleaxe",
+                "leaf bladed sword",
+                "leaf bladed spear"));
+      }
+    }
+    if (task.contains("fossil island wyvern")
+        || task.contains("skeletal wyvern")
+        || combined.contains("wyvern cave on fossil island")) {
+      if (style == CombatStyle.RANGED) {
+        requirements.add(
+            gearRequirement(
+                "Wyvern-protection shield",
+                "dragonfire ward",
+                "mind shield",
+                "elemental shield",
+                "dragonfire shield",
+                "ancient wyvern shield"));
+      } else {
+        requirements.add(
+            gearRequirement(
+                "Wyvern-protection shield",
+                "ancient wyvern shield",
+                "dragonfire shield",
+                "mind shield",
+                "elemental shield",
+                "dragonfire ward"));
+      }
+    }
+    if ((task.equals("blue dragon") || task.equals("blue dragons"))) {
+      if (style != CombatStyle.MELEE) {
+        requirements.add(
+            gearRequirement(
+                "Dragonfire shield protection",
+                "anti dragon shield",
+                "dragonfire shield",
+                "dragonfire ward",
+                "ancient wyvern shield"));
+      }
+    } else if (usesReviewedDragonPackage(task) && style != CombatStyle.MELEE) {
+      requirements.add(
+          gearRequirement(
+              "Dragonfire shield protection",
+              "dragonfire ward",
+              "anti dragon shield",
+              "dragonfire shield",
+              "ancient wyvern shield"));
+    } else if (isDragonTask(task) && !task.equals("vorkath") && !usesReviewedDragonPackage(task)) {
+      requirements.add(
+          gearRequirement(
+              "Dragonfire shield protection",
+              "anti dragon shield",
+              "dragonfire shield",
+              "dragonfire ward",
+              "ancient wyvern shield"));
+      requirements.add(
+          inventoryNeed(
+              PotionPolicy.EXTENDED_ANTIFIRE_DISPLAY, PotionPolicy.shieldedAntifireAlternatives()));
+    }
+    return requirements;
+  }
+
+  static boolean requiresIceCooler(String task, String location) {
+    String name = normalize(task);
+    return name.contains("lizard")
+        && !name.contains("lizardman")
+        && !name.contains("lizardmen")
+        && !name.contains("sulphur")
+        && !normalize(location).contains("karuulm");
+  }
+
+  static boolean requiresGenericRockHammerForTest(String assignment) {
+    String task = normalize(assignment);
+    return task.contains("gargoyle") && !task.contains("grotesque guardian");
+  }
+
+  static boolean requiresKalphiteQueenRopesForTest(
+      String task, String location, boolean desertElite) {
+    if (desertElite || task == null || location == null) {
+      return false;
+    }
+    String normalizedTask = normalize(task);
+    return (normalizedTask.equals("kalphite queen") || normalizedTask.equals("the kalphite queen"))
+        && normalize(location).equals("kalphite lair");
+  }
+
+  static boolean requiresKaruulmProtectionBootsForTest(
+      String task, String location, boolean kourendEliteDiaryComplete) {
+    if (kourendEliteDiaryComplete) {
+      return false;
+    }
+    String normalizedTask = normalize(task);
+    String normalizedLocation = normalize(location);
+    return normalizedTask.contains("wyrm")
+        || normalizedTask.contains("drake")
+        || normalizedTask.contains("hydra")
+        || normalizedLocation.contains("karuulm");
+  }
+
+  private static boolean isDragonTask(String task) {
+    return task.contains("dragon")
+        && !task.contains("dragonfly")
+        && !task.contains("dragon impling");
+  }
+
+  private static boolean usesReviewedDragonPackage(String task) {
+    return Arrays.asList(
+            "blue dragon",
+            "blue dragons",
+            "black dragon",
+            "black dragons",
+            "green dragon",
+            "green dragons",
+            "red dragon",
+            "red dragons",
+            "metal dragon",
+            "metal dragons",
+            "bronze dragon",
+            "bronze dragons",
+            "iron dragon",
+            "iron dragons",
+            "steel dragon",
+            "steel dragons",
+            "mithril dragon",
+            "mithril dragons",
+            "adamant dragon",
+            "adamant dragons",
+            "rune dragon",
+            "rune dragons")
+        .contains(task);
+  }
+
+  private static String styleLabel(CombatStyle style, String magic, String ranged, String melee) {
+    return style == CombatStyle.MAGIC ? magic : style == CombatStyle.RANGED ? ranged : melee;
+  }
+
+  private static CombatStyle style(TaskStrategy strategy) {
+    if (strategy == null) {
+      return CombatStyle.FLEXIBLE;
+    }
+    switch (strategy.getStyle()) {
+      case MAGIC:
+        return CombatStyle.MAGIC;
+      case RANGED:
+        return CombatStyle.RANGED;
+      case MELEE:
+        return CombatStyle.MELEE;
+      case HYBRID:
+      default:
+        return CombatStyle.FLEXIBLE;
+    }
+  }
+
+  private static boolean isCannonSuggested(String cannon) {
+    return (cannon.contains("recommended")
+            || cannon.contains("preferred")
+            || cannon.contains("optional"))
+        && !cannon.contains("not allowed")
+        && !cannon.contains("disabled")
+        && !cannon.contains("locked");
+  }
+
+  private static Requirement gearRequirement(String displayName, String... alternatives) {
+    return new Requirement(displayName, true, 1, alternatives);
+  }
+
+  private static Requirement inventoryNeed(String displayName, String... alternatives) {
+    return new Requirement(displayName, false, 1, alternatives);
+  }
+
+  private static Requirement inventoryNeed(
+      int quantity, String displayName, String... alternatives) {
+    return new Requirement(displayName, false, quantity, alternatives);
+  }
+
+  private static int consumableFinisherQuantity(int remainingKills) {
+    return remainingKills > 0 ? remainingKills : 1;
+  }
+
+  private static boolean containsAny(Set<String> names, List<String> alternatives) {
+    for (String alternative : alternatives) {
+      if (containsText(names, alternative)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean containsAnyText(Set<String> names, String... fragments) {
+    for (String fragment : fragments) {
+      if (containsText(names, fragment)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean containsText(Set<String> names, String fragment) {
+    String normalizedFragment = normalize(fragment);
+    for (String name : names) {
+      if (name.contains(normalizedFragment)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean matchesAny(String value, List<String> fragments) {
+    for (String fragment : fragments) {
+      if (value.contains(fragment)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static String join(List<String> values, String separator) {
+    StringBuilder result = new StringBuilder();
+    for (String value : values) {
+      if (value == null || value.trim().isEmpty()) {
+        continue;
+      }
+      if (result.length() > 0) {
+        result.append(separator);
+      }
+      result.append(value.trim());
+    }
+    return result.toString();
+  }
+
+  private static String normalize(String value) {
+    if (value == null) {
+      return "";
+    }
+    return value
+        .toLowerCase(Locale.ENGLISH)
+        .replace('\u2019', '\'')
+        .replace("+", " plus ")
+        .replaceAll("[^a-z0-9]+", " ")
+        .trim()
+        .replaceFirst("^the\\s+", "");
+  }
+
+  static String preferredInventoryItemForTest(
+      List<String> ownedDisplayNames, String... alternatives) {
+    return preferredInventoryItemForTest(ownedDisplayNames, false, alternatives);
+  }
+
+  private static String preferredInventoryItemForTest(
+      List<String> ownedDisplayNames, boolean gearProgression, String... alternatives) {
+    List<OwnedItem> owned = new ArrayList<>();
+    for (String displayName : ownedDisplayNames) {
+      owned.add(
+          new OwnedItem(
+              -1,
+              displayName,
+              1,
+              KitItem.Status.BANK,
+              -1,
+              null,
+              Collections.singleton(normalize(displayName))));
+    }
+    OwnedItem selected = preferredInventory(owned, Arrays.asList(alternatives), gearProgression);
+    return selected == null ? "" : selected.displayName;
+  }
+
+  private static int gearRank(String candidate, List<String> progression) {
+    if (candidate == null || candidate.isEmpty() || progression == null) {
+      return -1;
+    }
+    for (int index = 0; index < progression.size(); index++) {
+      if (matchesEquipmentProgressionName(candidate, normalize(progression.get(index)))) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  private static boolean matchesEquipmentProgressionName(String candidate, String tier) {
+    if (candidate == null || tier == null || candidate.isEmpty() || tier.isEmpty()) {
+      return false;
+    }
+    if (candidate.contains(tier)) {
+      return true;
+    }
+    boolean godItem =
+        candidate.startsWith("ancient ")
+            || candidate.startsWith("armadyl ")
+            || candidate.startsWith("bandos ")
+            || candidate.startsWith("guthix ")
+            || candidate.startsWith("saradomin ")
+            || candidate.startsWith("zamorak ");
+    if (tier.equals("blessed body")) {
+      return godItem && candidate.endsWith("d hide body");
+    }
+    if (tier.equals("blessed coif")) {
+      return godItem && candidate.endsWith("coif");
+    }
+    if (tier.equals("blessed chaps")) {
+      return godItem && candidate.endsWith("chaps");
+    }
+    if (tier.equals("blessed vambraces")) {
+      return godItem && (candidate.endsWith("bracers") || candidate.endsWith("vambraces"));
+    }
+    if (tier.equals("blessed boots")) {
+      return godItem && candidate.endsWith("d hide boots");
+    }
+    if (tier.equals("imbued god cape")) {
+      return candidate.matches("imbued (?:saradomin|guthix|zamorak)(?: max)? cape");
+    }
+    if (tier.equals("god cape")) {
+      return candidate.matches("(?:saradomin|guthix|zamorak)(?: max)? cape");
+    }
+    if (tier.equals("dizana s quiver")) {
+      return candidate.matches("(?:blessed )?dizana s (?:quiver|max cape)(?: [a-z0-9]+)*");
+    }
+    if (tier.equals("dizana s max cape")) {
+      return candidate.contains("dizana s max cape");
+    }
+    if (tier.equals("ava s assembler")) {
+      return candidate.contains("assembler max cape") || candidate.contains("masori assembler");
+    }
+    if (tier.equals("ava s accumulator")) {
+      return candidate.contains("accumulator max cape");
+    }
+    if (tier.equals("infernal cape")) {
+      return candidate.contains("infernal max cape");
+    }
+    if (tier.equals("fire cape")) {
+      return candidate.contains("fire max cape");
+    }
+    if (tier.equals("mythical cape")) {
+      return candidate.contains("mythical max cape");
+    }
+    if (tier.equals("ardougne cloak 4")) {
+      return candidate.contains("ardougne max cape");
+    }
+    if (tier.equals("cape of accomplishment")) {
+      return isCapeOfAccomplishmentName(candidate);
+    }
+    if (tier.equals("vestment robe top")) {
+      return godItem && candidate.endsWith("robe top");
+    }
+    if (tier.equals("vestment robe legs")) {
+      return godItem && (candidate.endsWith("robe legs") || candidate.endsWith("robe bottom"));
+    }
+    if (tier.equals("vestment cloak")) {
+      return godItem && candidate.endsWith("cloak");
+    }
+    if (tier.equals("elemental staff")) {
+      return candidate.equals("staff of air")
+          || candidate.equals("staff of water")
+          || candidate.equals("staff of earth")
+          || candidate.equals("staff of fire");
+    }
+    if (tier.equals("mystic staff")) {
+      return candidate.startsWith("mystic ") && candidate.endsWith(" staff");
+    }
+    if (tier.equals("barrows helm")) {
+      return isBarrowsFamily(candidate, "helm");
+    }
+    if (tier.equals("barrows platebody")) {
+      return isBarrowsFamily(candidate, "platebody") || candidate.startsWith("verac s brassard");
+    }
+    if (tier.equals("barrows platelegs")) {
+      return isBarrowsFamily(candidate, "platelegs") || candidate.startsWith("verac s plateskirt");
+    }
+    return false;
+  }
+
+  private static boolean isBarrowsFamily(String candidate, String piece) {
+    return candidate.matches("(?:dharok|guthan|torag) s " + piece + "(?: [a-z0-9]+)*");
+  }
+
+  private static boolean isCapeOfAccomplishmentName(String candidate) {
+    if (candidate.equals("max cape") || candidate.equals("max cape t")) {
+      return true;
+    }
+    return candidate.matches(
+        "(?:attack|strength|defence|ranging|prayer|magic|runecraft|"
+            + "construction|hitpoints|agility|herblore|thieving|crafting|"
+            + "fletching|slayer|hunter|mining|smithing|fishing|cooking|"
+            + "firemaking|woodcutting|farming|sailing|quest point|music|"
+            + "achievement diary) cape(?: t)?");
+  }
+
+  enum CombatStyle {
+    MAGIC("magic"),
+    RANGED("ranged"),
+    MELEE("melee"),
+    FLEXIBLE("flexible");
+    private final String label;
+
+    CombatStyle(String label) {
+      this.label = label;
+    }
+  }
+
+  private static final class StrategyCandidate {
+    private final TaskStrategy strategy;
+    private final OwnedItem weapon;
+    private final int score;
+
+    private StrategyCandidate(TaskStrategy strategy, OwnedItem weapon, int score) {
+      this.strategy = strategy;
+      this.weapon = weapon;
+      this.score = score;
+    }
+  }
+
+  static final class OwnedItem {
+    private final int itemId;
+    private final String displayName;
+    private final String nameKey;
+    private final Set<String> normalizedNames;
+    private final int quantity;
+    private final KitItem.Status status;
+    private final int equipmentSlot;
+    private final ItemEquipmentStats equipmentStats;
+
+    OwnedItem(
+        int itemId,
+        String displayName,
+        int quantity,
+        KitItem.Status status,
+        int equipmentSlot,
+        ItemEquipmentStats equipmentStats,
+        Set<String> normalizedNames) {
+      this.itemId = itemId;
+      this.displayName = displayName;
+      this.nameKey = normalize(displayName);
+      Set<String> aliases = new LinkedHashSet<>();
+      if (normalizedNames != null) {
+        aliases.addAll(normalizedNames);
+      }
+      aliases.add(this.nameKey);
+      this.normalizedNames = Collections.unmodifiableSet(aliases);
+      this.quantity = quantity;
+      this.status = status;
+      this.equipmentSlot = equipmentSlot;
+      this.equipmentStats = equipmentStats;
+    }
+
+    private boolean named(String fragment) {
+      String normalizedFragment = normalize(fragment);
+      if (normalizedFragment.isEmpty()) {
+        return false;
+      }
+      for (String candidate : normalizedNames) {
+        if (candidate.contains(normalizedFragment)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    private boolean matchesEquipmentProgression(String fragment) {
+      String normalizedFragment = normalize(fragment);
+      if (normalizedFragment.isEmpty()) {
+        return false;
+      }
+      for (String candidate : normalizedNames) {
+        if (matchesEquipmentProgressionName(candidate, normalizedFragment)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    private int gearRank(List<String> progression) {
+      return SlayerLoadoutAnalyzer.gearRank(nameKey, progression);
+    }
+
+    private boolean matchesExactName(String value) {
+      String normalizedValue = normalize(value);
+      return !normalizedValue.isEmpty() && normalizedNames.contains(normalizedValue);
+    }
+
+    private boolean matchesDisplay(String value) {
+      String normalizedValue = normalize(value);
+      return !normalizedValue.isEmpty() && nameKey.equals(normalizedValue);
+    }
+
+    private boolean isExactSeekingArrow() {
+      return QuiverAmmo.isSeekingArrow(itemId)
+          || nameKey.startsWith("seeking ") && nameKey.contains("arrow");
+    }
+
+    private boolean matchesSlot(EquipmentInventorySlot slot) {
+      if (equipmentStats != null) {
+        return equipmentStats.getSlot() == slot.getSlotIdx();
+      }
+      return equipmentSlot == slot.getSlotIdx();
+    }
+
+    private boolean isTwoHanded() {
+      if (equipmentStats != null && equipmentStats.isTwoHanded()) {
+        return true;
+      }
+      boolean twoHandedBow =
+          !named("crossbow")
+              && (named(" bow")
+                  || nameKey.startsWith("bow ")
+                  || named("shortbow")
+                  || named("longbow"));
+      return named("blowpipe")
+          || twoHandedBow
+          || named("ballista")
+          || named("scythe")
+          || named("godsword")
+          || named("halberd")
+          || named("spear")
+          || named("2h sword")
+          || named("bludgeon");
+    }
+
+    private KitItem toItem(int requestedQuantity) {
+      return new KitItem(displayName, itemId, Math.max(1, requestedQuantity), status);
+    }
+  }
+
+  private static final class RequirementRule {
+    private final String scope;
+    private final List<String> matches;
+    private final String style;
+    private final boolean equipment;
+    private final String quantity;
+    private final String display;
+    private final String[] alternatives;
+
+    private RequirementRule(String[] row) {
+      scope = row[0];
+      matches = Arrays.asList(row[1].split("\\|", -1));
+      style = row[2];
+      equipment = row[3].equals("E");
+      quantity = row[4];
+      display = row[5];
+      alternatives = row[6].split("\\|", -1);
+    }
+
+    private boolean matches(String task, String location, CombatStyle combatStyle) {
+      String value = scope.equals("location") ? location : task;
+      return matchesAny(value, matches)
+          && requirementStyleMatches(style, combatStyle == null ? "" : combatStyle.name());
+    }
+
+    private Requirement create(int remainingKills) {
+      int amount =
+          quantity.equals("F")
+              ? consumableFinisherQuantity(remainingKills)
+              : quantity.equals("R")
+                  ? 1 + (consumableFinisherQuantity(remainingKills) - 1) / 10
+                  : Integer.parseInt(quantity);
+      return new Requirement(display, equipment, amount, alternatives);
+    }
+  }
+
+  private static List<RequirementRule> loadRequirementRules() {
+    List<RequirementRule> rules = new ArrayList<>();
+    for (String[] row : ResourceTable.decodedRows("slayer-requirements.tsv", 7)) {
+      rules.add(new RequirementRule(row));
+    }
+    return Collections.unmodifiableList(rules);
+  }
+
+  static final class Requirement {
+    private final String displayName;
+    private final boolean equipment;
+    private final int quantity;
+    private final List<String> alternatives;
+
+    private Requirement(
+        String displayName, boolean equipment, int quantity, String... alternatives) {
+      this.displayName = displayName;
+      this.equipment = equipment;
+      this.quantity = Math.max(1, quantity);
+      this.alternatives = new ArrayList<>();
+      for (String alternative : alternatives) {
+        this.alternatives.add(normalize(alternative));
+      }
+    }
+  }
+
+  static boolean regularBlueDragonsAllowLightbearerForTest() {
+    return false;
+  }
+
+  static boolean vorkathAllowsLightbearerForTest() {
+    return true;
+  }
+
+  static List<String> standardArrowPriorityForTest(
+      TaskStrategy.CostPolicy policy, boolean boss, boolean dragonCompatible) {
+    TaskStrategy strategy =
+        TaskStrategy.builder(TaskStrategy.CombatStyle.RANGED, "Arrow policy regression")
+            .costPolicy(policy)
+            .boss(boss)
+            .build();
+    return Arrays.asList(standardArrowPriorityForPolicy(strategy, dragonCompatible));
+  }
+
+  static boolean usableEquipmentVariantForTest(String displayName, EquipmentInventorySlot slot) {
+    return isUsableEquipmentVariant(
+        new OwnedItem(
+            -1,
+            displayName,
+            1,
+            KitItem.Status.BANK,
+            slot == null ? -1 : slot.getSlotIdx(),
+            null,
+            Collections.singleton(normalize(displayName))),
+        slot);
+  }
+
+  static boolean gloveFallbackMatchesSlotForTest(String displayName) {
+    return isGloveSlotItemName(displayName);
+  }
+
+  static boolean defenderFallbackMatchesShieldForTest(String displayName) {
+    return isDefenderName(displayName);
+  }
+
+  static boolean ordinaryOwnedSlotFallbackForTest(EquipmentInventorySlot slot, String displayName) {
+    if (slot == null || displayName == null) {
+      return false;
+    }
+    OwnedItem item =
+        new OwnedItem(
+            -1,
+            displayName,
+            1,
+            KitItem.Status.BANK,
+            slot.getSlotIdx(),
+            null,
+            Collections.singleton(normalize(displayName)));
+    return findBestCompatibleOwnedSlot(
+            Collections.singletonList(item), slot, null, CombatStyle.FLEXIBLE, false)
+        == item;
+  }
+
+  static String normalizePotionDisplayNameForTest(String value) {
+    return normalize(value);
+  }
+
+  static boolean requirementStyleMatches(String configuredStyle, String combatStyle) {
+    String raw = configuredStyle == null ? "" : configuredStyle.trim();
+    if (raw.equals("*")) {
+      return true;
+    }
+    return normalize(raw).equals(normalize(combatStyle));
+  }
+
+  static String preferredInventoryEquipmentForTest(
+      List<String> ownedDisplayNames, String... progression) {
+    return preferredInventoryItemForTest(ownedDisplayNames, true, progression);
+  }
+
+  static boolean equipmentProgressionNameMatchesForTest(String itemName, String tier) {
+    return matchesEquipmentProgressionName(normalize(itemName), normalize(tier));
+  }
+
+  static int directEquipmentProgressionRankForTest(String itemName, List<String> progression) {
+    return gearRank(normalize(itemName), progression);
+  }
 }
-for(int index=0;
-index<containerItems.length;
-index++){Item item=containerItems[index];
-if(!isRealOwnedItem(item,false)){continue;
-}int itemId=item.getId();
-String name=getItemName(itemId);
-if(name.isEmpty()){continue;
-}items.add(new OwnedItem(itemId,name,item.getQuantity(),status,equipmentContainer?index:-1,getEquipmentStats(itemId),getMatchNames(itemId,name)));
-}List<OwnedItem>snapshot=Collections.unmodifiableList(items);
-if(equipmentContainer){cachedEquipmentOwnedState=state;
-cachedEquipmentOwnedItems=snapshot;
-}else{cachedInventoryOwnedState=state;
-cachedInventoryOwnedItems=snapshot;
-}return snapshot;
-}private static int[]snapshotOwnedState(Item[]items){if(items==null||items.length==0){return new int[0];
-}int[]state=new int[items.length*2];
-for(int index=0;index<items.length;index++){Item item=items[index];
-state[index*2]=item==null?-1:item.getId();
-state[index*2+1]=item==null?0:item.getQuantity();
-}return state;
-}private OwnedItem snapshotExtraQuiverAmmo(int itemId,int quantity){if(itemId<=0||quantity<=0||itemManager==null){return null;
-}int normalizedItemId=QuiverAmmo.arrow(itemId);
-String name=getItemName(normalizedItemId);
-if(name.isEmpty()){name=QuiverAmmo.seekingArrowMatchName(normalizedItemId);
-}if(name.isEmpty()){return null;
-}return new OwnedItem(normalizedItemId,name,quantity,KitItem.Status.EQUIPPED,EXTRA_QUIVER_AMMO_SLOT,getEquipmentStats(normalizedItemId),getMatchNames(normalizedItemId,name));
-}private List<OwnedItem>snapshotBank(Map<Integer,Integer>bank){if(bank==null||bank.isEmpty()||itemManager==null){return Collections.emptyList();
-}if(cachedBankSnapshotSource.equals(bank)){return bankOwnedItems;
-}List<OwnedItem>items=new ArrayList<>();
-for(Map.Entry<Integer,Integer>entry:bank.entrySet()){if(entry.getKey()==null||entry.getKey()<=0||entry.getValue()==null||entry.getValue()<=0){continue;
-}int itemId=entry.getKey();
-String name=getItemName(itemId);
-if(name.isEmpty()){continue;
-}items.add(new OwnedItem(itemId,name,entry.getValue(),KitItem.Status.BANK,-1,getEquipmentStats(itemId),getMatchNames(itemId,name)));
-}cachedBankSnapshotSource=Collections.unmodifiableMap(new LinkedHashMap<>(bank));
-bankOwnedItems=Collections.unmodifiableList(items);
-return bankOwnedItems;
-}private boolean isRealOwnedItem(Item item,boolean requireDefinition){if(item==null||item.getId()<=0||item.getQuantity()<=0){return false;
-}Boolean cached=realItemCache.get(item.getId());
-if(cached!=null){return cached;
-}try{ItemComposition composition=itemManager.getItemComposition(item.getId());
-if(composition==null){return!requireDefinition;
-}boolean real=composition.getPlaceholderTemplateId()==-1;
-realItemCache.put(item.getId(),real);
-return real;
-}catch(RuntimeException ignored){return!requireDefinition;
-}}private Set<String>getMatchNames(int itemId,String displayName){Set<String>cached=matchNamesCache.get(itemId);
-if(cached!=null){return cached;
-}Set<String>names=new LinkedHashSet<>();
-addMatchName(names,displayName);
-addSeekingQuiverMatchName(names,itemId);
-try{int variationBase=ItemVariationMapping.map(itemId);
-addMatchName(names,getItemName(variationBase));
-}catch(RuntimeException ignored){}try{Collection<ItemMapping>mappings=ItemMapping.map(itemId);
-if(mappings!=null){for(ItemMapping mapping:mappings){addMatchName(names,getItemName(mapping.getTradeableItem()));
-}}}catch(RuntimeException ignored){}Set<String>result=Collections.unmodifiableSet(names);
-matchNamesCache.put(itemId,result);
-return result;
-}private static void addSeekingQuiverMatchName(Set<String>names,int itemId){addMatchName(names,QuiverAmmo.seekingArrowMatchName(itemId));
-}private static void addMatchName(Set<String>names,String candidate){String normalized=normalize(candidate);
-if(!normalized.isEmpty()&&!normalized.equals("null")){names.add(normalized);
-}}private String getItemName(int itemId){if(itemNameCache.containsKey(itemId)){return itemNameCache.get(itemId);
-}try{ItemComposition composition=itemManager.getItemComposition(itemId);
-if(composition==null||composition.getName()==null||composition.getName().equalsIgnoreCase("null")){return "";
-}String name=composition.getName().trim();
-itemNameCache.put(itemId,name);
-return name;
-}catch(RuntimeException ignored){return "";
-}}private ItemEquipmentStats getEquipmentStats(int itemId){if(equipmentStatsCache.containsKey(itemId)){return equipmentStatsCache.get(itemId);
-}try{ItemStats stats=itemManager.getItemStats(itemId);
-ItemEquipmentStats equipment=stats==null||!stats.isEquipable()?null:stats.getEquipment();
-equipmentStatsCache.put(itemId,equipment);
-return equipment;
-}catch(RuntimeException ignored){return null;
-}}private static boolean isWildernessLoadout(String location,String restriction){if(restriction.contains("non wilderness")){return false;
-}return location.contains("wilderness")||restriction.contains("wilderness allowed")||restriction.contains("krystilia");
-}private static List<OwnedItem>filterRecommendationItems(List<OwnedItem>pool,boolean wildernessLoadout){if(wildernessLoadout){return pool;
-}List<OwnedItem>filtered=new ArrayList<>();
-for(OwnedItem item:pool){if(!item.nameKey.contains("blighted")){filtered.add(item);
-}}return filtered;
-}private static Set<String>namesOf(List<OwnedItem>items){Set<String>names=new HashSet<>();
-for(OwnedItem item:items){names.addAll(item.normalizedNames);
-}return names;
-}private static String buildLayoutTitle(String assignment,String location){String safeTask=assignment==null||assignment.trim().isEmpty()?"Recommended setup":assignment.trim();
-if(location==null||location.trim().isEmpty()){return safeTask;
-}return safeTask+" \u2022 "+location.trim();
-}static OwnedItem selectRecommendedWeapon(String assignment,TaskStrategy strategy,CombatStyle style,List<Requirement>requirements,List<OwnedItem>equipped,List<OwnedItem>pool){Requirement weaponRequirement=requirementForSlot(requirements,EquipmentInventorySlot.WEAPON);
-Requirement shieldRequirement=requirementForSlot(requirements,EquipmentInventorySlot.SHIELD);
-String[]weapons=weaponProgression(assignment,strategy,style).toArray(new String[0]);
-return selectEquipmentOwned(EquipmentInventorySlot.WEAPON,weaponRequirement,strategy,style,equipped,pool,shieldRequirement!=null,weapons);
-}private static List<String>weaponProgression(String assignment,TaskStrategy strategy,CombatStyle style){List<String>progression=new ArrayList<>();
-if(strategy!=null){progression.addAll(strategy.weapons());
-if(!strategy.isStrictWeaponProfile()){for(String fallback:SlayerEquipmentAuditCatalog.weaponProgression(strategy)){if(!progression.contains(fallback)){progression.add(fallback);
-}}}}if(progression.isEmpty()){Collections.addAll(progression,weaponFragments(style));
-}progression.removeIf(weapon->!SlayerTargetFootprintCatalog.allowsWeapon(assignment,weapon));
-return progression;
-}static List<String>weaponProgressionForTest(String assignment,TaskStrategy strategy){return Collections.unmodifiableList(weaponProgression(assignment,strategy,style(strategy)));
-}static List<String>weaponProgressionForTest(TaskStrategy strategy){return weaponProgressionForTest("",strategy);
-}static List<KitItem>buildEquipmentLayout(String task,TaskStrategy strategy,CombatStyle style,List<Requirement>requirements,List<OwnedItem>equipped,List<OwnedItem>pool,boolean scanned,OwnedItem weapon){String normalizedTask=normalize(task);
-List<KitItem>layout=new ArrayList<>();
-Requirement headRequirement=requirementForSlot(requirements,EquipmentInventorySlot.HEAD);
-Requirement weaponRequirement=requirementForSlot(requirements,EquipmentInventorySlot.WEAPON);
-Requirement shieldRequirement=requirementForSlot(requirements,EquipmentInventorySlot.SHIELD);
-Requirement ammoRequirement=requirementForSlot(requirements,EquipmentInventorySlot.AMMO);
-layout.add(auditEquipment(task,EquipmentInventorySlot.HEAD,headRequirement,text(318),strategy,style,equipped,pool,scanned,false,weapon));
-layout.add(auditedCapeEquipmentItem(task,strategy,style,pool,scanned,weapon));
-layout.add(auditEquipment(task,EquipmentInventorySlot.AMULET,requirementForSlot(requirements,EquipmentInventorySlot.AMULET),styleLabel(style,"Magic amulet",text(319),"Strength amulet"),strategy,style,equipped,pool,scanned,false,weapon));
-layout.add(ammoRequirement!=null?requiredAmmoItem(ammoRequirement,weapon,pool,scanned):normalizedTask.equals("araxxor")?buildAraxxorSwitchAmmoItem(style,weapon,strategy,pool,scanned):normalizedTask.equals(text(2))?infernoAmmo(weapon,strategy,pool,scanned):(normalizedTask.equals("blue dragon")||normalizedTask.equals("blue dragons"))&&style==CombatStyle.MAGIC?passiveAmmo(weapon,strategy,pool,scanned):buildAmmoItem(style,weapon,strategy,pool,scanned));
-layout.add(toEquipmentItem(weapon,weaponRequirement==null?strategy!=null?strategy.getMethod():styleLabel(style,"Magic weapon","Ranged weapon","Melee weapon"):weaponRequirement.displayName,scanned));
-layout.add(auditEquipment(task,EquipmentInventorySlot.BODY,null,styleLabel(style,"Magic body","Ranged body","Melee body"),strategy,style,equipped,pool,scanned,false,weapon));
-if(weapon==null){layout.add(missingItem(text(320),scanned));
-}else if(weapon.isTwoHanded()&&shieldRequirement==null){layout.add(new KitItem(text(1077),-1,1,KitItem.Status.EQUIPPED));
-}else{layout.add(auditEquipment(task,EquipmentInventorySlot.SHIELD,shieldRequirement,styleLabel(style,"Magic off-hand",text(322),text(323)),strategy,style,equipped,pool,scanned,false,weapon));
-}layout.add(auditEquipment(task,EquipmentInventorySlot.LEGS,null,styleLabel(style,"Magic legs","Ranged legs","Melee legs"),strategy,style,equipped,pool,scanned,false,weapon));
-layout.add(auditEquipment(task,EquipmentInventorySlot.GLOVES,requirementForSlot(requirements,EquipmentInventorySlot.GLOVES),"Combat gloves",strategy,style,equipped,pool,scanned,false,weapon));
-layout.add(auditEquipment(task,EquipmentInventorySlot.BOOTS,requirementForSlot(requirements,EquipmentInventorySlot.BOOTS),styleLabel(style,"Magic boots","Ranged boots","Melee boots"),strategy,style,equipped,pool,scanned,false,weapon));
-layout.add(auditEquipment(task,EquipmentInventorySlot.RING,null,styleLabel(style,"Magic ring","Ranged ring","Melee ring"),strategy,style,equipped,pool,scanned,false,weapon));
-KitItem extraQuiverAmmo=ammoRequirement==null?buildDizanaExtraAmmoItem(false,style,weapon,strategy,pool,scanned):null;
-if(extraQuiverAmmo!=null){layout.add(extraQuiverAmmo);
-}return layout;
-}private static KitItem requiredAmmoItem(Requirement requirement,OwnedItem weapon,List<OwnedItem>pool,boolean scanned){if(weapon==null){return missingItem(requirement.displayName,scanned);
-}String type=weapon.named("crossbow")?"bolt":"arrow";
-List<String>compatible=new ArrayList<>();
-for(String alternative:requirement.alternatives){if(alternative.contains(type)){compatible.add(alternative);
-}}return strictAmmoItem(requirement.displayName,pool,scanned,compatible.toArray(new String[0]));
-}private static KitItem infernoAmmo(OwnedItem weapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){return infernoAmmo(weapon,strategy,pool,scanned,true);
-}private static KitItem infernoAmmo(OwnedItem weapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned,boolean reserveAmmo){String fallbackName=strategy!=null&&!strategy.weapons().isEmpty()?normalize(strategy.weapons().get(0)):"";
-if(reserveAmmo&&hasUsableDizanaCape(pool)&&canUseDizanaExtraAmmo(weapon,fallbackName)){return passiveAmmo(weapon,strategy,pool,scanned);
-}if(matchesWeaponName(weapon,fallbackName,text(265))||matchesWeaponName(weapon,fallbackName,text(313))){return passiveAmmo(weapon,strategy,pool,scanned);
-}if(matchesWeaponName(weapon,fallbackName,"crossbow")){return recommendedAmmo(!reserveAmmo,text(324),pool,scanned,text(309),"ruby bolts e",text(310),"diamond bolts e");
-}return bestOwnedInfernoArrow(!reserveAmmo,pool,scanned);
-}private static KitItem buildAmmoItem(CombatStyle style,OwnedItem weapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){return buildAmmoItem(style,weapon,strategy,pool,scanned,true);
-}private static KitItem buildAraxxorSwitchAmmoItem(CombatStyle style,OwnedItem weapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){OwnedItem safeWeapon=preferredInventory(pool,araxxorSafeWeaponAlternatives(),true);
-List<String>ammunition=araxxorSafeAmmunitionAlternatives(safeWeapon==null?"":safeWeapon.nameKey);
-if(ammunition.isEmpty()){return buildAmmoItem(style,weapon,strategy,pool,scanned);
-}return strictAmmoItem(text(325),pool,scanned,ammunition.toArray(new String[0]));
-}private static KitItem buildAmmoItem(CombatStyle style,OwnedItem weapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned,boolean reserveAmmo){if(style!=CombatStyle.RANGED){return passiveAmmo(weapon,strategy,pool,scanned);
-}String key=weapon!=null?weapon.nameKey:strategy!=null&&!strategy.weapons().isEmpty()?normalize(strategy.weapons().get(0)):"";
-if(reserveAmmo&&hasUsableDizanaCape(pool)&&canUseDizanaExtraAmmo(weapon,key)){return passiveAmmo(weapon,strategy,pool,scanned);
-}if(matchesWeaponName(weapon,key,"blowpipe")||matchesWeaponName(weapon,key,text(265))||matchesWeaponName(weapon,key,"crystal bow")||matchesWeaponName(weapon,key,text(299))||matchesWeaponName(weapon,key,"craw s bow")||matchesWeaponName(weapon,key,text(300))){return passiveAmmo(weapon,strategy,pool,scanned);
-}if(matchesWeaponName(weapon,key,"ballista")){return strictAmmoItem("Javelins",pool,scanned,"dragon javelin",text(301),text(302));
-}if(matchesWeaponName(weapon,key,"atlatl")){return strictAmmoItem(text(326),pool,scanned,text(303));
-}if(matchesWeaponName(weapon,key,text(304))){return recommendedAmmo(!reserveAmmo,"Antler bolts",pool,scanned,text(305),text(306));
-}if(matchesWeaponName(weapon,key,"crossbow")){String method=strategy==null?"":normalize(strategy.getMethod()+" "+strategy.getRationale());
-if(method.contains("dragonstone bolt")){return recommendedAmmo(!reserveAmmo,text(327),pool,scanned,text(307),text(308),text(309),text(310),"dragon bolts","runite bolts","broad bolts");
-}return recommendedAmmo(!reserveAmmo,"Compatible bolts",pool,scanned,text(309),text(310),"dragon bolts",text(311),"runite bolts","broad bolts");
-}return bestOwnedStandardArrow(!reserveAmmo,weapon,key,strategy,pool,scanned);
-}private static KitItem bestOwnedStandardArrow(boolean extraQuiverSlot,OwnedItem weapon,String fallbackWeaponName,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){String[]priorities=standardArrowPriorityForPolicy(strategy,supportsDragonArrows(weapon,fallbackWeaponName));
-return recommendedAmmo(extraQuiverSlot,strategy!=null&&strategy.getCostPolicy()==TaskStrategy.CostPolicy.EFFICIENT?text(328):"Best owned arrows",pool,scanned,priorities);
-}private static String[]standardArrowPriorityForPolicy(TaskStrategy strategy,boolean dragonCompatible){if(strategy!=null&&strategy.getCostPolicy()==TaskStrategy.CostPolicy.EFFICIENT){return removeDragonArrowsIfUnsupported(strategy.isBoss()?EFFICIENT_BOSS_ARROW_PRIORITY:EFFICIENT_REGULAR_ARROW_PRIORITY,dragonCompatible);
-}return dragonCompatible?STRONGEST_STANDARD_ARROW_PRIORITY:STRONGEST_NON_DRAGON_ARROW_PRIORITY;
-}private static String[]removeDragonArrowsIfUnsupported(String[]priorities,boolean dragonCompatible){if(dragonCompatible){return priorities;
-}List<String>compatible=new ArrayList<>();
-for(String priority:priorities){if(!normalize(priority).contains("dragon arrow")){compatible.add(priority);
-}}return compatible.toArray(new String[0]);
-}private static boolean supportsDragonArrows(OwnedItem weapon,String fallbackWeaponName){String key=weapon==null?normalize(fallbackWeaponName):weapon.nameKey;
-return key.contains("twisted bow")||key.contains("venator bow")||key.contains(text(329))||key.contains("dark bow")||key.contains(text(330));
-}private static KitItem bestOwnedInfernoArrow(boolean extraQuiverSlot,List<OwnedItem>pool,boolean scanned){OwnedItem selected=null;
-int selectedRank=Integer.MAX_VALUE;
-for(OwnedItem item:pool){if(item==null||(!extraQuiverSlot&&item.equipmentSlot==EXTRA_QUIVER_AMMO_SLOT)){continue;
-}int rank=QuiverAmmo.infernoPreference(item.itemId);
-if(rank<selectedRank||(rank==selectedRank&&item.equipmentSlot==EXTRA_QUIVER_AMMO_SLOT&&selected!=null&&selected.equipmentSlot!=EXTRA_QUIVER_AMMO_SLOT)){selected=item;
-selectedRank=rank;
-}}if(selected!=null&&selectedRank<Integer.MAX_VALUE){return selected.toItem(ownedItemQuantities(pool).getOrDefault(selected.itemId,1));
-}return recommendedAmmo(extraQuiverSlot,text(331),pool,scanned,INFERNO_ARROW_PRIORITY);
-}private static KitItem buildDizanaExtraAmmoItem(boolean inferno,CombatStyle style,OwnedItem weapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){if(style!=CombatStyle.RANGED||!hasUsableDizanaCape(pool)){return null;
-}String fallbackName=weapon!=null?weapon.nameKey:strategy!=null&&!strategy.weapons().isEmpty()?normalize(strategy.weapons().get(0)):"";
-if(!canUseDizanaExtraAmmo(weapon,fallbackName)){return null;
-}return inferno?infernoAmmo(weapon,strategy,pool,scanned,false):buildAmmoItem(style,weapon,strategy,pool,scanned,false);
-}private static boolean canUseDizanaExtraAmmo(OwnedItem weapon,String fallbackWeaponName){String key=weapon!=null?weapon.nameKey:normalize(fallbackWeaponName);
-if(key.isEmpty()){return false;
-}if(key.contains("crossbow")){return true;
-}if(!key.contains("bow")){return false;
-}return!key.contains(text(265))&&!key.contains("crystal bow")&&!key.contains(text(299))&&!key.contains("craw s bow");
-}private static boolean matchesWeaponName(OwnedItem weapon,String fallbackName,String fragment){return weapon!=null?weapon.named(fragment):normalize(fallbackName).contains(normalize(fragment));
-}private static KitItem passiveAmmo(OwnedItem weapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){if(strategy!=null&&strategy.getCostPolicy()==TaskStrategy.CostPolicy.EFFICIENT&&benefitsFromLuckyPenny(weapon)){return strictAmmoItem(text(332),pool,scanned,text(333),text(334));
-}return strictAmmoItem("Prayer blessing",pool,scanned,text(33),text(34),text(335),text(336),"holy blessing",text(337),"war blessing","peaceful blessing",text(338),"blessing");
-}private static boolean benefitsFromLuckyPenny(OwnedItem weapon){if(weapon==null){return false;
-}return weapon.named(text(312));
-}private static OwnedItem findPreferredUsableDizanaCape(List<OwnedItem>pool){if(pool==null){return null;
-}OwnedItem best=null;
-int bestScore=Integer.MIN_VALUE;
-for(OwnedItem item:pool){int score=dizanaCapePreferenceScore(item);
-if(score>bestScore){best=item;
-bestScore=score;
-}}return bestScore>0?best:null;
-}private static int dizanaCapePreferenceScore(OwnedItem item){if(item==null){return-1;
-}switch(Math.abs(item.itemId)){case ItemID.SKILLCAPE_MAX_DIZANAS:case ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER:return 400;
-case ItemID.DIZANAS_QUIVER_INFINITE:case ItemID.DIZANAS_QUIVER_INFINITE_TROUVER:return 300;
-case ItemID.DIZANAS_QUIVER_CHARGED:case ItemID.DIZANAS_QUIVER_CHARGED_TROUVER:return 200;
-case ItemID.DIZANAS_QUIVER_UNCHARGED:case ItemID.DIZANAS_QUIVER_UNCHARGED_TROUVER:return 100;
-case ItemID.DIZANAS_QUIVER_BROKEN:case ItemID.DIZANAS_QUIVER_INFINITE_BROKEN:case ItemID.SKILLCAPE_MAX_DIZANAS_BROKEN:case ItemID.DIZANAS_QUIVER_TROUVER_BROKEN:case ItemID.DIZANAS_QUIVER_TROUVER_MANGLED:case ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_BROKEN:case ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_MANGLED:case ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_BROKEN:case ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_MANGLED:return-1;
-default:break;
-}String name=item.nameKey;
-if(!name.contains("dizana")||(!name.contains("quiver")&&!name.contains("max cape"))||name.contains("max hood")||name.contains("broken")||name.contains("mangled")){return-1;
-}if(name.contains("max cape")){return 400;
-}if(name.contains("blessed")){return 300;
-}if(!name.contains("uncharged")){return 200;
-}return 100;
-}private static boolean hasUsableDizanaCape(List<OwnedItem>pool){return findPreferredUsableDizanaCape(pool)!=null;
-}private static KitItem strictAmmoItem(String placeholder,List<OwnedItem>pool,boolean scanned,String...alternatives){OwnedItem selected=preferredEquipment(pool,EquipmentInventorySlot.AMMO,false,asList(alternatives));
-if(selected==null){return missingItem(placeholder,scanned);
-}return selected.toItem(ownedItemQuantities(pool).getOrDefault(selected.itemId,1));
-}private static KitItem recommendedAmmo(boolean extraQuiverSlot,String placeholder,List<OwnedItem>pool,boolean scanned,String...alternatives){if(!extraQuiverSlot){return strictAmmoItem(placeholder,pool,scanned,alternatives);
-}Map<Integer,Integer>ownedQuantities=ownedItemQuantities(pool);
-for(String alternative:alternatives){String fragment=normalize(alternative);
-if(fragment.isEmpty()){continue;
-}boolean seekingAlternative=fragment.startsWith("seeking ")&&fragment.contains("arrow");
-for(OwnedItem item:pool){if((!seekingAlternative||item.isExactSeekingArrow())&&item.named(fragment)&&(item.equipmentSlot==EXTRA_QUIVER_AMMO_SLOT||item.matchesSlot(EquipmentInventorySlot.AMMO))){return item.toItem(ownedQuantities.getOrDefault(item.itemId,1));
-}}}return missingItem(placeholder,scanned);
-}private static OwnedItem selectEquipmentOwned(EquipmentInventorySlot slot,Requirement requirement,TaskStrategy strategy,CombatStyle style,List<OwnedItem>equipped,List<OwnedItem>pool,boolean oneHanded,String...alternatives){if(requirement!=null){return preferredEquipment(pool,slot,oneHanded,requirement.alternatives);
-}if(slot==EquipmentInventorySlot.HEAD){OwnedItem slayerHead=preferredEquipment(pool,slot,false,list("l037"));
-if(slayerHead!=null){return slayerHead;
-}}if(slot==EquipmentInventorySlot.WEAPON){OwnedItem namedWeapon=preferredEquipmentAllowed(pool,slot,oneHanded,asList(alternatives),strategy);
-if(namedWeapon!=null){return namedWeapon;
-}if(strategy!=null&&strategy.isStrictWeaponProfile()){List<String>reviewedFallbacks=strategy.getWeapons();
-if(!reviewedFallbacks.isEmpty()){OwnedItem allowedFallback=preferredEquipmentAllowed(pool,slot,oneHanded,reviewedFallbacks,strategy);
-if(allowedFallback!=null){return allowedFallback;
-}if(strategy.getCostPolicy()==TaskStrategy.CostPolicy.EFFICIENT){return preferredEquipment(pool,slot,oneHanded,reviewedFallbacks);
-}}return findBestCompatibleOwnedSlot(pool,slot,strategy,style,oneHanded);
-}}OwnedItem best=findBestEquipment(pool,slot,strategy,style,oneHanded);
-if(best!=null){return best;
-}OwnedItem worn=findEquippedSlot(equipped,slot);
-if(worn!=null&&isStyleCompatible(worn,style,slot)&&(!oneHanded||!worn.isTwoHanded())&&!disallowed(worn,strategy,slot)){return worn;
-}return preferredEquipment(pool,slot,oneHanded,asList(alternatives));
-}private static KitItem toEquipmentItem(OwnedItem selected,String placeholder,boolean scanned){return selected==null?missingItem(placeholder,scanned):selected.toItem(1);
-}private static OwnedItem preferredEquipment(List<OwnedItem>owned,EquipmentInventorySlot slot,boolean oneHanded,List<String>alternatives){return preferredEquipmentVariant(owned,slot,oneHanded,alternatives,null,false);
-}private static OwnedItem preferredEquipmentAllowed(List<OwnedItem>owned,EquipmentInventorySlot slot,boolean oneHanded,List<String>alternatives,TaskStrategy strategy){return preferredEquipmentVariant(owned,slot,oneHanded,alternatives,strategy,true);
-}private static OwnedItem preferredEquipmentVariant(List<OwnedItem>owned,EquipmentInventorySlot slot,boolean oneHanded,List<String>alternatives,TaskStrategy strategy,boolean enforcePolicy){if(owned==null||alternatives==null){return null;
-}for(int priorityIndex=0;
-priorityIndex<alternatives.size();
-priorityIndex++){String fragment=normalize(alternatives.get(priorityIndex));
-if(fragment.isEmpty()){continue;
-}OwnedItem bestVariant=null;
-long bestVariantScore=Long.MIN_VALUE;
-for(OwnedItem item:owned){if(item==null||!item.matchesEquipmentProgression(fragment)||!matchesEquipmentSlot(item,slot)||!isUsableEquipmentVariant(item,slot)||oneHanded&&item.isTwoHanded()||enforcePolicy&&disallowed(item,strategy,slot)){continue;
-}int directRank=item.gearRank(alternatives);
-if(directRank>=0&&directRank!=priorityIndex){continue;
-}long variantScore=equipmentVariantScore(item,slot);
-if(bestVariant==null||variantScore>bestVariantScore){bestVariant=item;
-bestVariantScore=variantScore;
-}}if(bestVariant!=null){return bestVariant;
-}}return null;
-}private static boolean isUsableEquipmentVariant(OwnedItem item,EquipmentInventorySlot slot){if(item==null){return false;
-}String name=item.nameKey;
-if(matchesAny(name,list("l084"))){return false;
-}if(slot==EquipmentInventorySlot.WEAPON&&(name.contains("uncharged")||name.contains(" empty"))){return false;
-}return!(name.matches(text(339)));
-}private static long equipmentVariantScore(OwnedItem item,EquipmentInventorySlot slot){if(item==null||item.equipmentStats==null){return Long.MIN_VALUE/2L+(item==null?0L:ownershipTieBreaker(item.status));
-}return Math.max(meleeScore(item.equipmentStats,slot),Math.max(rangedScore(item.equipmentStats,slot),magicScore(item.equipmentStats,slot)))+ownershipTieBreaker(item.status);
-}private static OwnedItem findBestEquipment(List<OwnedItem>owned,EquipmentInventorySlot slot,TaskStrategy strategy,CombatStyle style,boolean oneHanded){OwnedItem best=null;
-long bestScore=Long.MIN_VALUE;
-for(OwnedItem item:owned){if(!matchesEquipmentSlot(item,slot)||item.equipmentStats==null||!isStyleCompatible(item,style,slot)||(oneHanded&&item.isTwoHanded())||disallowed(item,strategy,slot)){continue;
-}long score=equipmentScore(item,strategy,style,slot);
-if(best==null||score>bestScore){best=item;
-bestScore=score;
-}}return best;
-}private static boolean matchesEquipmentSlot(OwnedItem item,EquipmentInventorySlot slot){if(item==null||slot==null){return false;
-}if(item.matchesSlot(slot)){return true;
-}if(slot==EquipmentInventorySlot.GLOVES&&isGloveSlotItemName(item.nameKey)){return true;
-}return slot==EquipmentInventorySlot.SHIELD&&isDefenderName(item.nameKey);
-}private static boolean isGloveSlotItemName(String value){String name=normalize(value);
-return name.contains("bracelet")||name.contains("gloves")||name.contains("gauntlets")||name.contains(text(340));
-}private static boolean isDefenderName(String value){String name=normalize(value);
-return name.contains("defender")&&!name.contains(text(341));
-}private static KitItem auditedCapeEquipmentItem(String task,TaskStrategy strategy,CombatStyle style,List<OwnedItem>pool,boolean scanned,OwnedItem weapon){if(style==CombatStyle.RANGED){OwnedItem dizana=findPreferredUsableDizanaCape(pool);
-if(dizana!=null){return dizana.toItem(1);
-}}return auditEquipment(task,EquipmentInventorySlot.CAPE,null,styleLabel(style,"Magic cape",text(342),"Melee cape"),strategy,style,Collections.emptyList(),pool,scanned,false,weapon);
-}private static KitItem auditEquipment(String task,EquipmentInventorySlot slot,Requirement requirement,String placeholder,TaskStrategy strategy,CombatStyle style,List<OwnedItem>equipped,List<OwnedItem>pool,boolean scanned,boolean oneHanded,OwnedItem weapon){List<String>alternatives=requirement==null?SlayerEquipmentAuditCatalog.priorities(task,strategy,slot,weapon==null?"":weapon.nameKey):requirement.alternatives;
-OwnedItem selected=preferredEquipment(pool,slot,oneHanded,alternatives);
-if(selected==null&&requirement==null){selected=findBestCompatibleOwnedSlot(pool,slot,strategy,style,oneHanded);
-}if(selected==null&&requirement==null){OwnedItem worn=findEquippedSlot(equipped,slot);
-if(worn!=null&&isStyleCompatible(worn,style,slot)&&(!oneHanded||!worn.isTwoHanded())&&!disallowed(worn,strategy,slot)){selected=worn;
-}}return toEquipmentItem(selected,requirement==null?placeholder:requirement.displayName,scanned);
-}private static OwnedItem findBestCompatibleOwnedSlot(List<OwnedItem>owned,EquipmentInventorySlot slot,TaskStrategy strategy,CombatStyle style,boolean oneHanded){if(owned==null||slot==null){return null;
-}OwnedItem best=null;
-long bestScore=Long.MIN_VALUE;
-for(OwnedItem item:owned){if(!matchesEquipmentSlot(item,slot)||!isUsableEquipmentVariant(item,slot)||!isStyleCompatible(item,style,slot)||oneHanded&&item.isTwoHanded()||disallowed(item,strategy,slot)){continue;
-}long score=item.equipmentStats==null?equipmentVariantScore(item,slot):equipmentScore(item,strategy,style,slot);
-if(best==null||score>bestScore){best=item;
-bestScore=score;
-}}return best;
-}private static long equipmentScore(OwnedItem item,TaskStrategy strategy,CombatStyle style,EquipmentInventorySlot slot){ItemEquipmentStats stats=item.equipmentStats;
-if(stats==null){return Long.MIN_VALUE;
-}long melee=meleeScore(stats,slot);
-long ranged=rangedScore(stats,slot);
-long magic=magicScore(stats,slot);
-long selected;
-switch(style){case MAGIC:selected=magic;
-break;
-case RANGED:selected=ranged;
-break;
-case MELEE:selected=melee;
-break;
-case FLEXIBLE:default:selected=Math.max(melee,Math.max(ranged,magic));
-break;
-}if(strategy!=null&&slot!=EquipmentInventorySlot.WEAPON){int defence=defenceTotal(stats);
-switch(strategy.getArmourFocus()){case PRAYER:selected+=stats.getPrayer()*60_000L;
-break;
-case DEFENCE:selected+=defence*1_500L;
-break;
-case HYBRID:selected+=(melee+ranged+magic)/5L;
-break;
-case DAMAGE:default:break;
-}}return selected+ownershipTieBreaker(item.status);
-}private static boolean isStyleCompatible(OwnedItem item,CombatStyle style,EquipmentInventorySlot slot){if(item==null||style==CombatStyle.FLEXIBLE||(slot!=EquipmentInventorySlot.WEAPON&&slot!=EquipmentInventorySlot.SHIELD)){return true;
-}ItemEquipmentStats stats=item.equipmentStats;
-String name=item.nameKey;
-if(slot==EquipmentInventorySlot.WEAPON){switch(style){case RANGED:return matchesAny(name,list("l056"))||(stats!=null&&(stats.getArange()>0||stats.getRstr()>0));
-case MAGIC:return matchesAny(name,list("l057"))||(stats!=null&&(stats.getAmagic()>0||stats.getMdmg()>0));
-case MELEE:return matchesAny(name,list("l058"))||(stats!=null&&(Math.max(stats.getAstab(),Math.max(stats.getAslash(),stats.getAcrush()))>0||stats.getStr()>0));
-case FLEXIBLE:default:return true;
-}}switch(style){case RANGED:return matchesAny(name,list("l059"))||(stats!=null&&(stats.getArange()>0||stats.getRstr()>0));
-case MAGIC:return matchesAny(name,list("l060"))||(stats!=null&&(stats.getAmagic()>0||stats.getMdmg()>0));
-case MELEE:return matchesAny(name,list("l061"))||(stats!=null&&(Math.max(stats.getAstab(),Math.max(stats.getAslash(),stats.getAcrush()))>0||stats.getStr()>0));
-case FLEXIBLE:default:return true;
-}}private static boolean disallowed(OwnedItem item,TaskStrategy strategy,EquipmentInventorySlot slot){if(item==null||strategy==null||slot!=EquipmentInventorySlot.WEAPON){return false;
-}String name=item.nameKey;
-if(name.contains(text(300))&&!strategy.hasTag(TaskStrategy.MethodTag.CHINNING)){return true;
-}if(strategy.getCostPolicy()==TaskStrategy.CostPolicy.EFFICIENT&&!strategy.isBoss()){return name.contains(text(312))||name.contains(text(279))||name.contains(text(270))||name.contains(text(348))||name.contains(text(314));
-}if(strategy.getCostPolicy()==TaskStrategy.CostPolicy.LOW_RISK){return name.contains(text(312))||name.contains("twisted bow")||name.contains(text(270))||name.contains(text(279))||name.contains(text(349))||name.contains(text(265))||name.contains(text(348))||name.contains(text(314));
-}return false;
-}private static int defenceTotal(ItemEquipmentStats stats){return stats.getDstab()+stats.getDslash()+stats.getDcrush()+stats.getDmagic()+stats.getDrange();
-}private static long speedBonus(ItemEquipmentStats stats,EquipmentInventorySlot slot){return slot==EquipmentInventorySlot.WEAPON&&stats.getAspeed()>0?Math.max(0,8-stats.getAspeed())*40L:0L;
-}private static long meleeScore(ItemEquipmentStats stats,EquipmentInventorySlot slot){int attack=Math.max(stats.getAstab(),Math.max(stats.getAslash(),stats.getAcrush()));
-return stats.getStr()*10_000L+attack*120L+stats.getPrayer()*40L+defenceTotal(stats)+speedBonus(stats,slot);
-}private static long rangedScore(ItemEquipmentStats stats,EquipmentInventorySlot slot){return stats.getRstr()*10_000L+stats.getArange()*120L+stats.getPrayer()*40L+defenceTotal(stats)+speedBonus(stats,slot);
-}private static long magicScore(ItemEquipmentStats stats,EquipmentInventorySlot slot){return Math.round(stats.getMdmg()*10_000.0)+stats.getAmagic()*120L+stats.getPrayer()*40L+defenceTotal(stats)+speedBonus(stats,slot);
-}private static long ownershipTieBreaker(KitItem.Status status){if(status==KitItem.Status.EQUIPPED){return 3L;
-}if(status==KitItem.Status.INVENTORY){return 2L;
-}if(status==KitItem.Status.BANK){return 1L;
-}return 0L;
-}private static List<String>asList(String...values){List<String>result=new ArrayList<>();
-if(values!=null){Collections.addAll(result,values);
-}return result;
-}private static boolean isTzKalZukInferno(String task,String location){return normalize(task).equals(text(2))&&normalize(location).equals("inferno");
-}List<KitItem>buildInventoryLayout(String task,TaskStrategy strategy,String location,String travel,CombatStyle style,List<Requirement>requirements,boolean cannonSuggested,int foodSlots,List<OwnedItem>pool,boolean scanned,List<KitItem>equipmentLayout){int weaponId=PoweredMagic.weaponId(equipmentLayout);
-MethodRules methodRules=SlayerMethodRuleCatalog.resolve(task,location,strategy,weaponId);
-boolean barrows=normalize(task).equals("barrows brothers");
-boolean barrowsRanged=barrows&&barrowsNeedsRangedSwitch(weaponId,methodRules);
-OwnedItem araxyteWeapon=normalize(task).equals("araxxor")?preferredInventory(pool,araxxorSafeWeaponAlternatives(),true):null;
-List<KitItem>layout=new ArrayList<>();
-boolean analyzerOwnsTravelSlot=!isTzKalZukInferno(task,location);
-if(analyzerOwnsTravelSlot){KitItem selectedTravel=chooseTeleport(task,location,travel,pool,scanned);
-addItem(layout,selectedTravel);
-if(normalize(task).equals("tormented demons")&&(selectedTravel==null||!normalize(selectedTravel.getDisplayName()).contains(text(350)))){OwnedItem litLantern=exactOwned(pool,"sapphire lantern");
-addItem(layout,litLantern==null?missingItem(text(351),scanned):litLantern.toItem(1));
-}}for(Requirement requirement:requirements){if(!requirement.equipment){addItem(layout,requirement.displayName.equals("Fungicide")?chooseExact(requirement.displayName,requirement.quantity,pool,scanned,"fungicide"):choose(requirement.displayName,requirement.quantity,pool,scanned,requirement.alternatives));
-}}boolean resolvedCannonMethod=cannonSuggested||methodRules.usesCannon();
-if(resolvedCannonMethod){for(String part:new String[]{"base","stand","barrels","furnace"}){addItem(layout,choose("Cannon "+part,1,pool,scanned,"cannon "+part));
-}int cannonballs=methodRules.getCannonballQuantity()>0?methodRules.getCannonballQuantity():SlayerMethodRuleCatalog.auditedCannonballQuantity(task);
-addItem(layout,choose("Cannonballs",cannonballs,pool,scanned,"cannonball"));
-}boolean runePouchRequested=(strategy!=null&&strategy.needsRunePouch()&&!PoweredMagic.usesBuiltInSpell(weaponId))||methodRules.requiresRunePouch()||style==CombatStyle.MAGIC&&methodRules.includesRunePouchForMagic();
-int runePouchCapacity=runePouchRequested?ownedRunePouchCapacity(pool):0;
-if(runePouchRequested||barrows){KitItem pouch=choose("Rune pouch",1,pool,scanned,text(352),"rune pouch");
-if(runePouchRequested||pouch.hasItemId()){addItem(layout,pouch);
-}
-}if(methodRules.requiresBookOfDead()){addItem(layout,choose(text(353),1,pool,scanned,text(10)));
-}Map<Integer,Integer>ownedRuneQuantities=ownedItemQuantities(pool);
-RunePolicy.Resolution resolvedRunePackage=RunePolicy.resolve(methodRules.getPouchRunes(),ownedRuneQuantities);
-int pouchSlotsRemaining=runePouchCapacity;
-for(RunePolicy.ResolvedRune rune:resolvedRunePackage.getRunes()){if(pouchSlotsRemaining>0){pouchSlotsRemaining--;
-continue;
-}KitItem runeItem=ownedRuneQuantities.getOrDefault(rune.getItemId(),0)<rune.getMinimumQuantity()?missingItem(rune.getName()+" runes",rune.getMinimumQuantity(),scanned):choose(rune.getName()+" runes",rune.getMinimumQuantity(),pool,scanned,normalize(rune.getName())+" rune");
-addItem(layout,runeItem);
-}java.util.Set<String>pouchRunes=new java.util.LinkedHashSet<>();
-for(RunePolicy.ResolvedRune rune:resolvedRunePackage.getRunes()){pouchRunes.add(normalize(rune.getName()));
-}java.util.Set<String>unavailableStructuredRunes=new java.util.LinkedHashSet<>();
-for(String rune:resolvedRunePackage.getUnownedRequirements()){unavailableStructuredRunes.add(normalize(rune));
-}boolean tormentedDemons=normalize(task).equals("tormented demons");
-boolean maggotKing=normalize(task).contains(text(274));
-KitItem tormentedWeapon=null;
-KitItem maggotCrushWeapon=null;
-KitItem kingsMagicWeapon=null;
-KitItem barrowsRangedWeapon=null;
-for(MethodRules.RequiredItem required:methodRules.getRequiredItems()){if(!diaries.allowsLoadoutReward(required.getDisplayName(),required.getAlternatives())){continue;
-}if(normalize(task).equals("araxxor")&&required.getDisplayName().equals("Divine ranging potion")&&araxxorSafeAmmunitionAlternatives(araxyteWeapon==null?"":araxyteWeapon.nameKey).isEmpty()){continue;
-}if(isStructuredUtilityDuplicate(required,methodRules)){continue;
-}if(barrows){String name=required.getDisplayName();
-if(!barrowsRanged&&(name.startsWith("Ranged ")||name.equals("Ranging potion"))){continue;
-}if(name.equals("Exit and restoration teleport")&&(hasRestorationTeleport(layout)||hasRestorationTeleport(equipmentLayout))){continue;
-}
-}if(isRuneRequirement(required)){String requiredRune=normalize(required.getDisplayName()).replace(" runes","").replace(" rune","").trim();
-if(isCoveredByStructuredPouchRune(pouchRunes,requiredRune)){continue;
-}if(unavailableStructuredRunes.contains(requiredRune)){continue;
-}if(pouchSlotsRemaining>0){pouchSlotsRemaining--;
-continue;
-}}List<String>alternativesRequired=required.getAlternatives();
-if(normalize(task).equals("dagannoth kings")&&required.getDisplayName().startsWith("Shadow magic ")&&(kingsMagicWeapon==null||!normalize(kingsMagicWeapon.getDisplayName()).contains("tumeken"))){continue;
-}
-if(maggotKing&&maggotCrushWeapon!=null){if(skipMaggotKingRequirement(required.getDisplayName(),maggotCrushWeapon)){continue;
-}alternativesRequired=maggotKingSwitchAlternatives(required.getDisplayName(),maggotCrushWeapon,alternativesRequired);
-}if(tormentedDemons&&tormentedWeapon!=null){if(skipTormentedRequirement(required.getDisplayName(),tormentedWeapon)){continue;
-}alternativesRequired=tormentedSwitchAlternatives(required.getDisplayName(),tormentedWeapon,alternativesRequired);
-}KitItem require=choose(required.getDisplayName(),required.getSlotCount()>1?1:required.getQuantity(),pool,scanned,alternativesRequired,required.getGroup()==MethodRules.InventoryGroup.SWITCH);
-if(barrows&&required.getDisplayName().equals("Ranged weapon switch")){barrowsRangedWeapon=require;
-}
-if(normalize(task).equals("dagannoth kings")&&required.getDisplayName().equals("Magic weapon switch")){kingsMagicWeapon=require;
-}
-if(required.isOwnedOnly()&&(require==null||!require.hasItemId())){continue;
-}if(tormentedDemons&&required.getDisplayName().equals("Secondary weapon switch")){tormentedWeapon=require;
-}if(maggotKing&&required.getDisplayName().equals(text(354))){maggotCrushWeapon=require;
-}if(required.getGroup()==MethodRules.InventoryGroup.SWITCH){KitItem.SwitchStyle switchStyle=tormentedDemons&&isTormentedSecondaryRequirement(required.getDisplayName())&&isPurgingStaff(tormentedWeapon)?KitItem.SwitchStyle.MAGIC:inferSwitchStyle(required,style);
-require=require.asEquipmentSwitch(switchStyle);
-if(isAlreadyEquippedInPlan(require,equipmentLayout)){continue;
-}}for(int slot=0;
-slot<required.getSlotCount()&&layout.size()<28;
-slot++){addItem(layout,require);
-}}if(barrows&&barrowsRangedWeapon!=null&&barrowsRangedWeapon.hasItemId()){addItem(layout,switchAmmunition(barrowsRangedWeapon,strategy,pool,scanned));
-}if(tormentedDemons){addItem(layout,switchAmmunition(tormentedWeapon,strategy,pool,scanned));
-}if(methodRules.includesStyleBoost()||barrows&&PoweredMagic.usesBuiltInSpell(weaponId)){TaskStrategy.CostPolicy potionCostPolicy=strategy==null?TaskStrategy.CostPolicy.EFFICIENT:strategy.getCostPolicy();
-if(style==CombatStyle.MAGIC){addItem(layout,choose("Magic boost",1,pool,scanned,PotionPolicy.magicBoostAlternatives()));
-}else if(style==CombatStyle.RANGED){addItem(layout,choose("Ranging potion",1,pool,scanned,PotionPolicy.rangedBoostAlternatives(potionCostPolicy)));
-}else if(style==CombatStyle.FLEXIBLE){addItem(layout,choose("Super combat potion",1,pool,scanned,PotionPolicy.meleeBoostAlternatives(potionCostPolicy)));
-addItem(layout,choose("Ranging potion",1,pool,scanned,PotionPolicy.rangedBoostAlternatives(potionCostPolicy)));
-if(hybridUsesCombatMagic(strategy)){addItem(layout,choose("Magic boost",1,pool,scanned,PotionPolicy.magicBoostAlternatives()));
-}}else{addItem(layout,choose("Super combat potion",1,pool,scanned,PotionPolicy.meleeBoostAlternatives(potionCostPolicy)));
-}}if(strategy!=null&&strategy.needsAntivenom()){addItem(layout,choose(PotionPolicy.EXTENDED_ANTIVENOM_DISPLAY,1,pool,scanned,PotionPolicy.antivenomAlternatives()));
-}if(strategy!=null&&strategy.needsStamina()){addItem(layout,choose(PotionPolicy.EXTENDED_STAMINA_DISPLAY,1,pool,scanned,PotionPolicy.staminaAlternatives()));
-}KitItem prayerRestore=chooseRestore(methodRules,pool,scanned);
-if(barrows&&prayerRestore.hasItemId()&&!normalize(prayerRestore.getDisplayName()).contains("super restore")){
-addItem(layout,choose("Stat restore",1,pool,scanned,"restore potion","super restore"));
-}
-int prayers=methodRules.resolveRestoreSlots(strategy);
-for(int i=0;
-i<prayers&&layout.size()<28;
-i++){addItem(layout,prayerRestore);
-}OwnedItem ownedMeal=preferredInventory(pool,methodRules.getFoodAlternatives());
-KitItem meal=ownedMeal==null?missingItem(methodRules.getFoodDisplayName(),scanned):ownedMeal.toItem(1);
-int meals=methodRules.resolveFoodSlots(strategy,foodSlots);
-int ownedMealCount=ownedMeal==null?0:ownedItemQuantities(pool).getOrDefault(ownedMeal.itemId,0);
-for(int i=0;
-i<meals&&layout.size()<28;
-i++){layout.add(i<ownedMealCount?meal:missingItem(meal.getDisplayName(),scanned));
-}int target=Math.min(methodRules.getInventoryTarget(),Math.max(0,28-methodRules.getLoot()));
-if(methodRules.fillsRemainingWithRestore()){while(layout.size()<target&&layout.size()<28){layout.add(prayerRestore);
-}}else if(methodRules.fillsRemainingWithFood()){while(layout.size()<target&&layout.size()<28){layout.add(meal);
-}}return enforceConcreteInventoryTarget(organizeInventoryLayout(layout,methodRules,analyzerOwnsTravelSlot),methodRules,prayerRestore,meal);
-}private static boolean barrowsNeedsRangedSwitch(int weaponId,MethodRules rules){
-// Wiki Barrows/Strategies: ranged is optional with Shadow or Air spells.
-switch(weaponId){case ItemID.TUMEKENS_SHADOW:case ItemID.TUMEKENS_SHADOW_UNCHARGED:
-case ItemID.DEADMAN_BLIGHTED_TUMEKENS_SHADOW:case ItemID.DEADMAN_BLIGHTED_TUMEKENS_SHADOW_UNCHARGED:return false;
-default:break;
-}
-String spell=normalize(rules.getPrimarySpell());
-return rules.getSpellbook()!=MethodRules.Spellbook.STANDARD||!(spell.contains("air spell")||spell.contains("wind "));
-}private static boolean hasRestorationTeleport(List<KitItem>items){if(items==null){return false;
-}for(KitItem item:items){if(item==null||!item.hasItemId()){continue;
-}String name=normalize(item.getDisplayName());
-if(name.equals("max cape")||name.startsWith("construction cape")||name.equals("teleport to house")||name.startsWith("ring of dueling")){return true;
-}}return false;
-}private static List<String>maggotKingSwitchAlternatives(String displayName,KitItem crushWeapon,List<String>defaults){String requirement=normalize(displayName);
-String weapon=normalize(crushWeapon==null?"":crushWeapon.getDisplayName());
-if(weapon.contains(text(279))){if(requirement.equals(text(355))){return list("l038");
-}if(requirement.equals(text(356))){return list("l039");
-}}return defaults;
-}private static boolean skipMaggotKingRequirement(String displayName,KitItem crushWeapon){return normalize(displayName).equals(text(357))&&isTwoHandedMaggotKingWeapon(crushWeapon);
-}private static boolean isTwoHandedMaggotKingWeapon(KitItem crushWeapon){String weapon=normalize(crushWeapon==null?"":crushWeapon.getDisplayName());
-return weapon.contains(text(312))||weapon.contains(text(279))||weapon.contains(text(358))||weapon.contains(text(359));
-}private static List<String>tormentedSwitchAlternatives(String displayName,KitItem rangedWeapon,List<String>defaults){String requirement=normalize(displayName);
-String weapon=normalize(rangedWeapon==null?"":rangedWeapon.getDisplayName());
-if(requirement.equals("secondary body switch")){if(isPurgingStaff(rangedWeapon)){return list("l040");
-}if(weapon.contains(text(265))){return list("l041");
-}if(weapon.contains(text(360))){return list("l042");
-}}if(requirement.equals("secondary legs switch")){if(isPurgingStaff(rangedWeapon)){return list("l043");
-}if(weapon.contains(text(265))){return list("l044");
-}if(weapon.contains(text(360))){return list("l045");
-}}return defaults;
-}private static List<String>araxxorSafeWeaponAlternatives(){return list("l046");
-}private static List<String>araxxorSafeAmmunitionAlternatives(String safeWeaponName){String weapon=normalize(safeWeaponName);
-if(weapon.isEmpty()){return Collections.emptyList();
-}if(weapon.contains(text(304))){return list("l047");
-}if(weapon.contains("karil")&&weapon.contains("crossbow")){return list("l048");
-}if(weapon.contains("heavy ballista")){return list("l049");
-}if(weapon.contains("crossbow")){return list("l050");
-}return Collections.emptyList();
-}private static boolean skipTormentedRequirement(String displayName,KitItem secondaryWeapon){String requirement=normalize(displayName);
-if(requirement.equals(text(361))){return!isPurgingStaff(secondaryWeapon);
-}if(requirement.equals(text(74))){return isPurgingStaff(secondaryWeapon);
-}return false;
-}private static boolean isTormentedSecondaryRequirement(String displayName){String requirement=normalize(displayName);
-return requirement.equals("secondary weapon switch")||requirement.equals("secondary body switch")||requirement.equals("secondary legs switch")||requirement.equals(text(361));
-}private static boolean isPurgingStaff(KitItem secondaryWeapon){return secondaryWeapon!=null&&normalize(secondaryWeapon.getDisplayName()).contains("purging staff");
-}private static KitItem switchAmmunition(KitItem rangedWeapon,TaskStrategy strategy,List<OwnedItem>pool,boolean scanned){String weapon=normalize(rangedWeapon==null?"":rangedWeapon.getDisplayName());
-if(weapon.contains("purging staff")){return null;
-}if(weapon.contains(text(313))||weapon.contains(text(265))){return null;
-}if(weapon.contains(text(360))){return recommendedAmmo(true,text(326),pool,scanned,text(303)).asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
-}if(weapon.contains(text(304))){return recommendedAmmo(true,"Antler bolts",pool,scanned,text(305),text(306)).asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
-}if(weapon.contains("karil")){return recommendedAmmo(true,"Bolt racks",pool,scanned,"bolt rack").asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
-}if(weapon.contains("dorgeshuun")){return recommendedAmmo(true,"Bone bolts",pool,scanned,"bone bolts").asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
-}if(weapon.equals("rune crossbow")){return recommendedAmmo(true,"Compatible bolts",pool,scanned,"diamond bolts e","runite bolts","broad bolts").asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
-}if(weapon.contains("crossbow")){return recommendedAmmo(true,"Compatible bolts",pool,scanned,text(309),text(310),"dragon bolts","ruby bolts e","diamond bolts e",text(311),"runite bolts","broad bolts").asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
-}return bestOwnedStandardArrow(true,null,weapon,strategy,pool,scanned).asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
-}private static boolean isAlreadyEquippedInPlan(KitItem candidate,List<KitItem>equipmentLayout){if(candidate==null||equipmentLayout==null){return false;
-}for(KitItem equipped:equipmentLayout){if(equipped==null){continue;
-}if(candidate.hasItemId()&&equipped.hasItemId()&&candidate.getItemId()==equipped.getItemId()){return true;
-}if(!candidate.hasItemId()&&!equipped.hasItemId()&&normalize(candidate.getDisplayName()).equals(normalize(equipped.getDisplayName()))){return true;
-}}return false;
-}static List<KitItem>enforceConcreteInventoryTarget(List<KitItem>source,MethodRules rules,KitItem prayerRestore,KitItem food){if(source==null||source.isEmpty()||rules==null){return source;
-}int target=Math.min(Math.max(0,rules.getInventoryTarget()),Math.max(0,28-rules.getLoot()));
-if(target<=0){return source;
-}List<KitItem>concrete=new ArrayList<>();
-List<KitItem>unresolved=new ArrayList<>();
-for(KitItem item:source){if(item==null){continue;
-}if(item.hasItemId()||item.getInventoryGroup()==MethodRules.InventoryGroup.UTILITY||item.getInventoryGroup()==MethodRules.InventoryGroup.RUNES||item.getInventoryGroup()==MethodRules.InventoryGroup.PROTECTION||item.getInventoryGroup()==MethodRules.InventoryGroup.SWITCH||item.getInventoryGroup()==MethodRules.InventoryGroup.TRAVEL){concrete.add(item);
-}else{unresolved.add(item);
-}}if(!rules.fillsRemainingWithRestore()&&!rules.fillsRemainingWithFood()){return source;
-}KitItem preferredFiller=rules.fillsRemainingWithRestore()?prayerRestore:food;
-KitItem secondaryFiller=rules.fillsRemainingWithRestore()?food:prayerRestore;
-fillConcreteInventory(concrete,target,preferredFiller);
-fillConcreteInventory(concrete,target,secondaryFiller);
-List<KitItem>result=new ArrayList<>(Math.min(28,concrete.size()+unresolved.size()));
-result.addAll(concrete.subList(0,Math.min(28,concrete.size())));
-for(KitItem item:unresolved){if(result.size()>=28){break;
-}result.add(item);
-}return result;
-}private static void fillConcreteInventory(List<KitItem>layout,int target,KitItem filler){if(layout==null||filler==null||!filler.hasItemId()){return;
-}while(layout.size()<target&&layout.size()<28){layout.add(filler);
-}}private static int ownedRunePouchCapacity(List<OwnedItem>pool){boolean regular=false;
-if(pool!=null){for(OwnedItem item:pool){if(item==null){continue;
-}String name=item.nameKey;
-if(name.contains(text(352))){return 4;
-}if(name.contains("rune pouch")){regular=true;
-}}}return regular?3:0;
-}private static boolean isStructuredUtilityDuplicate(MethodRules.RequiredItem required,MethodRules rules){if(required==null||rules==null){return false;
-}String name=normalize(required.getDisplayName());
-if(rules.requiresRunePouch()&&(name.equals("rune pouch")||name.equals(text(352)))){return true;
-}return rules.requiresBookOfDead()&&name.equals(text(10));
-}private static boolean isCoveredByStructuredPouchRune(java.util.Set<String>pouchRunes,String requiredRune){if(pouchRunes==null||pouchRunes.isEmpty()){return false;
-}if(pouchRunes.contains(requiredRune)){return true;
-}if(pouchRunes.contains("aether")&&("cosmic".equals(requiredRune)||"soul".equals(requiredRune))){return true;
-}return false;
-}private static boolean isRuneRequirement(MethodRules.RequiredItem required){if(required==null||required.getGroup()!=MethodRules.InventoryGroup.RUNES){return false;
-}String name=normalize(required.getDisplayName());
-return name.endsWith(" rune")||name.endsWith(" runes");
-}private static KitItem chooseRestore(MethodRules rules,List<OwnedItem>pool,boolean scanned){if(rules==null||!rules.hasRestorePolicy()){return missingItem("Prayer restoration",scanned);
-}OwnedItem owned=fullestOwnedDose(pool,rules.getPrimaryRestoreFamily());
-if(owned==null&&rules.allowsRestoreFallback()&&!rules.getFallbackRestoreFamily().isEmpty()){owned=fullestOwnedDose(pool,rules.getFallbackRestoreFamily());
-}return owned==null?missingItem(displayPotionFamily(rules.getPrimaryRestoreFamily()),scanned):owned.toItem(1);
-}private static String displayPotionFamily(String family){if(family==null||family.trim().isEmpty()){return "Prayer restoration";
-}String value=family.trim();
-return Character.toUpperCase(value.charAt(0))+value.substring(1)+"(4)";
-}private static OwnedItem fullestOwnedDose(List<OwnedItem>pool,String family){String key=stripPotionDose(normalize(family));
-if(key.isEmpty()){return null;
-}return exactOwned(pool,key+" 4",key+" 3",key+" 2",key+" 1");
-}private static String stripPotionDose(String value){return value==null?"":value.replaceFirst("\\s+[1-4]$","").trim();
-}private static List<KitItem>organizeInventoryLayout(List<KitItem>source,MethodRules rules,boolean sourceSlotZeroIsTravel){Map<MethodRules.InventoryGroup,List<KitItem>>groups=new LinkedHashMap<>();
-for(MethodRules.InventoryGroup group:MethodRules.InventoryGroup.values()){groups.put(group,new ArrayList<>());
-}for(int index=0;
-index<source.size();
-index++){KitItem item=source.get(index);
-if(item==null){continue;
-}MethodRules.InventoryGroup group=sourceSlotZeroIsTravel&&index==0?MethodRules.InventoryGroup.TRAVEL:classifyInventoryItem(item,rules);
-groups.get(group).add(item.withInventoryGroup(group));
-}List<KitItem>organized=new ArrayList<>(source.size());
-addGroup(organized,groups,MethodRules.InventoryGroup.TRAVEL,rules);
-List<KitItem>utilities=groups.get(MethodRules.InventoryGroup.UTILITY);
-if(utilities!=null&&!utilities.isEmpty()){List<KitItem>runePouches=new ArrayList<>();
-for(int index=utilities.size()-1;
-index>=0;
-index--){KitItem utility=utilities.get(index);
-if(normalize(utility==null?"":utility.getDisplayName()).contains("rune pouch")){runePouches.add(0,utility);
-utilities.remove(index);
-}}organized.addAll(runePouches);
-}addGroup(organized,groups,MethodRules.InventoryGroup.SWITCH,rules);
-addGroup(organized,groups,MethodRules.InventoryGroup.UTILITY,rules);
-addGroup(organized,groups,MethodRules.InventoryGroup.RUNES,rules);
-addGroup(organized,groups,MethodRules.InventoryGroup.PROTECTION,rules);
-addGroup(organized,groups,MethodRules.InventoryGroup.BOOST,rules);
-addGroup(organized,groups,MethodRules.InventoryGroup.FOOD,rules);
-addGroup(organized,groups,MethodRules.InventoryGroup.RESTORE,rules);
-addGroup(organized,groups,MethodRules.InventoryGroup.OTHER,rules);
-return organized;
-}private static void addGroup(List<KitItem>destination,Map<MethodRules.InventoryGroup,List<KitItem>>groups,MethodRules.InventoryGroup group,MethodRules rules){List<KitItem>items=groups.get(group);
-if(items==null||items.isEmpty()){return;
-}items.sort((left,right)->{int leftPriority=inventoryAuthoredPriority(left,rules,group);
-int rightPriority=inventoryAuthoredPriority(right,rules,group);
-if(leftPriority!=rightPriority){return Integer.compare(leftPriority,rightPriority);
-}int family=inventoryVisualFamily(left).compareTo(inventoryVisualFamily(right));
-if(family!=0){return family;
-}return normalize(left==null?"":left.getDisplayName()).compareTo(normalize(right==null?"":right.getDisplayName()));
-});
-if(isSingletonInventoryGroup(group)){Set<String>seen=new HashSet<>();
-items.removeIf(item->!seen.add(itemIdentity(item)));
-}destination.addAll(items);
-}private static boolean isSingletonInventoryGroup(MethodRules.InventoryGroup group){return group==MethodRules.InventoryGroup.TRAVEL||group==MethodRules.InventoryGroup.SWITCH||group==MethodRules.InventoryGroup.UTILITY||group==MethodRules.InventoryGroup.RUNES||group==MethodRules.InventoryGroup.PROTECTION;
-}private static String itemIdentity(KitItem item){if(item==null){return "null";
-}return item.hasItemId()?"id:"+item.getItemId():"name:"+normalize(item.getDisplayName());
-}private static int inventoryAuthoredPriority(KitItem item,MethodRules rules,MethodRules.InventoryGroup group){String name=normalize(item==null?"":item.getDisplayName());
-if(name.contains("rune pouch")){return-1000;
-}if(rules==null){return Integer.MAX_VALUE;
-}int index=0;
-for(MethodRules.RequiredItem required:rules.getRequiredItems()){if(required.getGroup()!=group){index++;
-continue;
-}String display=normalize(required.getDisplayName());
-if(!display.isEmpty()&&name.equals(display)){return index;
-}for(String alternative:required.getAlternatives()){String normalizedAlternative=normalize(alternative);
-if(!normalizedAlternative.isEmpty()&&name.contains(normalizedAlternative)){return index;
-}}index++;
-}return Integer.MAX_VALUE;
-}private static String inventoryVisualFamily(KitItem item){if(item==null){return "";
-}return stripPotionDose(normalize(item.getDisplayName())).replaceFirst("^divine\\s+","").trim();
-}private static MethodRules.InventoryGroup classifyInventoryItem(KitItem item,MethodRules rules){String name=normalize(item.getDisplayName());
-if(rules!=null){for(MethodRules.RequiredItem required:rules.getRequiredItems()){if(name.equals(normalize(required.getDisplayName()))){return required.getGroup();
-}for(String alternative:required.getAlternatives()){if(name.contains(normalize(alternative))){return required.getGroup();
-}}}}if(matchesAny(name,list("l065"))){return MethodRules.InventoryGroup.UTILITY;
-}if(matchesAny(name,list("l066"))){return MethodRules.InventoryGroup.SWITCH;
-}if(matchesAny(name,list("l067"))||name.endsWith("runes")){return MethodRules.InventoryGroup.RUNES;
-}if(name.contains(text(17))){return MethodRules.InventoryGroup.FOOD;
-}if(matchesAny(name,list("l068"))){return MethodRules.InventoryGroup.BOOST;
-}if(matchesAny(name,list("l069"))){return MethodRules.InventoryGroup.PROTECTION;
-}if(matchesAny(name,list("l070"))){return MethodRules.InventoryGroup.RESTORE;
-}if(isFoodName(name)){return MethodRules.InventoryGroup.FOOD;
-}return MethodRules.InventoryGroup.OTHER;
-}private static KitItem.SwitchStyle inferSwitchStyle(MethodRules.RequiredItem required,CombatStyle fallbackStyle){if(required==null){return switchStyle(fallbackStyle);
-}String description=normalize(required.getDisplayName());
-for(String alternative:required.getAlternatives()){description+=" "+normalize(alternative);
-}if(matchesAny(description,list("l062"))||description.startsWith("ranged ")){return KitItem.SwitchStyle.RANGED;
-}if(matchesAny(description,list("l063"))||description.startsWith("magic ")||description.startsWith("mage ")){return KitItem.SwitchStyle.MAGIC;
-}if(matchesAny(description,list("l064"))||description.startsWith("melee ")){return KitItem.SwitchStyle.MELEE;
-}return switchStyle(fallbackStyle);
-}private static KitItem.SwitchStyle switchStyle(CombatStyle style){if(style==CombatStyle.MAGIC){return KitItem.SwitchStyle.MAGIC;
-}if(style==CombatStyle.RANGED){return KitItem.SwitchStyle.RANGED;
-}if(style==CombatStyle.MELEE){return KitItem.SwitchStyle.MELEE;
-}return KitItem.SwitchStyle.OTHER;
-}private static boolean isFoodName(String name){return matchesAny(name,list("l052"));
-}List<KitItem>buildOptionalLayout(String task,TaskStrategy strategy,List<OwnedItem>pool,OwnedItem weapon){List<KitItem>optional=new ArrayList<>();
-addBlowpipeDartRecommendation(optional,strategy,weapon,pool);
-if(strategy!=null){for(String itemName:strategy.getOptionalItemPriorities()){if(!diaries.allowsLoadoutReward(itemName,Collections.singletonList(itemName))){continue;
-}addOwnedOptional(optional,pool,itemName);
-}}addOwnedOptional(optional,pool,text(362));
-addOwnedOptional(optional,pool,text(363));
-addOwnedOptional(optional,pool,"slayer ring");
-if(diaries.unlocksAshSanctifier()&&isAshSanctifierTask(task)){addOwnedOptional(optional,pool,"ash sanctifier");
-}if(diaries.unlocksBonecrusher()&&strategy!=null&&!strategy.isBoss()&&isBonecrusherTask(task)){addOwnedOptional(optional,pool,"bonecrusher");
-}addOwnedOptional(optional,pool,"herb sack");
-addOwnedOptional(optional,pool,"gem bag");
-return deduplicateItems(optional);
-}private static boolean isAshSanctifierTask(String assignment){return matchesAny(normalize(assignment),list("l055"));
-}private static boolean isBonecrusherTask(String assignment){String task=normalize(assignment);
-return matchesAny(task,list("l053"));
-}private void addBlowpipeDartRecommendation(List<KitItem>destination,TaskStrategy strategy,OwnedItem weapon,List<OwnedItem>pool){if(destination==null||weapon==null||!weapon.named("blowpipe")){return;
-}OwnedItem darts=strategy!=null&&strategy.getCostPolicy()==TaskStrategy.CostPolicy.EFFICIENT?chooseEfficientBlowpipeDarts(pool):firstExactOwned(pool,"dragon dart","amethyst dart","rune dart","adamant dart");
-if(darts!=null){destination.add(darts.toItem(1000));
-}}private OwnedItem chooseEfficientBlowpipeDarts(List<OwnedItem>pool){OwnedItem amethyst=firstExactOwned(pool,"amethyst dart");
-OwnedItem rune=firstExactOwned(pool,"rune dart");
-if(amethyst!=null&&rune!=null){int amethystPrice=safeItemPrice(amethyst);
-int runePrice=safeItemPrice(rune);
-if(amethystPrice>0&&runePrice>0){return amethystPrice<=runePrice?amethyst:rune;
-}return amethyst;
-}if(amethyst!=null){return amethyst;
-}if(rune!=null){return rune;
-}return firstExactOwned(pool,"adamant dart");
-}private int safeItemPrice(OwnedItem item){if(item==null||itemManager==null){return 0;
-}try{return Math.max(0,itemManager.getItemPrice(item.itemId));
-}catch(RuntimeException ignored){return 0;
-}}private static OwnedItem firstExactOwned(List<OwnedItem>pool,String...exactNames){if(pool==null||exactNames==null){return null;
-}for(String exactName:exactNames){for(OwnedItem item:pool){if(item.matchesDisplay(exactName)){return item;
-}}for(OwnedItem item:pool){if(item.matchesExactName(exactName)){return item;
-}}}return null;
-}private static List<KitItem>deduplicateItems(List<KitItem>source){List<KitItem>result=new ArrayList<>();
-Set<String>seen=new HashSet<>();
-for(KitItem item:source){if(item==null){continue;
-}String key=item.hasItemId()?"id:"+item.getItemId():"name:"+normalize(item.getDisplayName());
-if(seen.add(key)){result.add(item);
-}}return result;
-}private static void addOwnedOptional(List<KitItem>destination,List<OwnedItem>pool,String...alternatives){OwnedItem owned=findPreferred(pool,alternatives);
-if(owned!=null){destination.add(owned.toItem(1));
-}}private KitItem chooseTeleport(String task,String location,String travel,List<OwnedItem>pool,boolean scanned){String combined=normalize(location+" "+travel);
-String normalizedTask=normalize(task);
-if(combined.contains("morytania spider cave")){OwnedItem direct=exactOwned(pool,"spider cave teleport");
-if(direct!=null){return direct.toItem(1);
-}}
-if(normalizedTask.equals(text(263))){return chooseExact(text(366),1,pool,scanned,text(367),"dramen staff","lunar staff");
-}if(normalizedTask.equals("tormented demons")){OwnedItem direct=exactOwned(pool,text(350));
-return direct==null?chooseExact(text(368),1,pool,scanned,"games necklace"):direct.toItem(1);
-}if(combined.contains("cowbell")){return chooseExact(text(369),1,pool,scanned,text(370));
-}if(combined.contains("giantsoul")){return chooseExact(text(366),1,pool,scanned,text(367),"dramen staff","lunar staff");
-}if(combined.contains(text(371))){return chooseExact(text(372),1,pool,scanned,text(350),"games necklace");
-}if(combined.contains("key master")){return chooseExact("Key master teleport",1,pool,scanned,"key master teleport","games necklace");
-}if(combined.contains("barrows teleport")){return chooseExact("Barrows teleport",1,pool,scanned,"barrows teleport",text(373),text(374));
-}if(combined.contains("ring of shadows")||combined.contains("ancient vault")){return chooseExact("Ring of shadows",1,pool,scanned,"ring of shadows");
-}if(combined.contains(text(375))||combined.contains(text(376))){return chooseExact("Wilderness travel",1,pool,scanned,text(375));
-}if(combined.contains("digsite pendant")){return chooseExact("Digsite pendant",1,pool,scanned,"digsite pendant");
-}if(combined.contains("drakan")){return chooseExact(text(378),1,pool,scanned,text(379));
-}if(combined.contains("varrock teleport")){return chooseExact("Varrock teleport",1,pool,scanned,"varrock teleport","varrock tablet");
-}if(combined.contains(text(30))){return chooseExact(text(380),1,pool,scanned,text(30));
-}if(combined.contains(text(381))){return chooseExact(text(382),1,pool,scanned,text(381));
-}if(combined.contains("skills necklace")){return chooseExact("Skills necklace",1,pool,scanned,"skills necklace");
-}if(combined.contains("combat bracelet")){return chooseExact("Combat bracelet",1,pool,scanned,"combat bracelet");
-}if(combined.contains("ectophial")){return chooseExact("Ectophial",1,pool,scanned,"ectophial");
-}if(combined.contains("mort ton teleport")){return chooseExact(text(383),1,pool,scanned,"mort ton teleport");
-}if(combined.contains(text(384))){return chooseExact(text(385),1,pool,scanned,text(384));
-}if(combined.contains("zul andra")){return chooseExact(text(386),1,pool,scanned,text(387));
-}if(combined.contains("catacomb")||combined.contains("xeric")){return chooseExact(text(388),1,pool,scanned,text(389));
-}if(combined.contains(text(390))||combined.contains("rada")){return chooseExact(text(391),1,pool,scanned,text(35));
-}if(combined.contains("waterbirth")||combined.contains("rellekka")){return chooseExact("Waterbirth travel",1,pool,scanned,"max cape","construction cape","teleport to house","house tab","fremennik sea boots 4","fremennik sea boots 3","fremennik sea boots 2","fremennik sea boots 1","slayer ring");
-}if(combined.contains("fremennik")||combined.contains("slayer cave")){return chooseTravelFamily("Slayer ring",1,pool,scanned,"slayer ring","fremennik sea boots 4","fremennik sea boots 3","fremennik sea boots 2","fremennik sea boots 1");
-}if(combined.contains("fairy ring")){if(diaries.hasTier("lumbridge",4)){return null;
-}return chooseExact(text(392),1,pool,scanned,"lunar staff","dramen staff");
-}return chooseExact("Teleport out",1,pool,scanned,"max cape","construction cape",text(393),"house tab","slayer ring",text(381),"games necklace");
-}private static KitItem chooseExact(String displayName,int quantity,List<OwnedItem>pool,boolean scanned,String...alternatives){for(String alternative:alternatives){String normalized=normalize(alternative);
-if(normalized.isEmpty()){continue;
-}OwnedItem exact=exactOwned(pool,normalized);
-if(exact!=null){return exact.toItem(quantity);
-}}return missingItem(displayName,quantity,scanned);
-}private static OwnedItem exactOwned(List<OwnedItem>pool,String...exactNames){if(pool==null||exactNames==null){return null;
-}for(String exactName:exactNames){for(OwnedItem item:pool){if(item!=null&&item.matchesDisplay(exactName)){return item;
-}}}return null;
-}private static KitItem choose(String displayName,int quantity,List<OwnedItem>pool,boolean scanned,List<String>alternatives){return choose(displayName,quantity,pool,scanned,alternatives,false);
-}private static KitItem choose(String displayName,int quantity,List<OwnedItem>pool,boolean scanned,List<String>alternatives,boolean gearProgression){OwnedItem owned=preferredInventory(pool,alternatives,gearProgression);
-return owned==null?missingItem(displayName,quantity,scanned):owned.toItem(quantity);
-}private static OwnedItem preferredInventory(List<OwnedItem>pool,List<String>alternatives){return preferredInventory(pool,alternatives,false);
-}private static OwnedItem preferredInventory(List<OwnedItem>pool,List<String>alternatives,boolean gearProgression){if(alternatives==null){return null;
-}if(gearProgression){return findPreferredInventoryEquipment(pool,alternatives);
-}List<String>potionFamilies=new ArrayList<>();
-List<String>nonPotionAlternatives=new ArrayList<>();
-for(String alternative:alternatives){String normalized=normalize(alternative);
-if(normalized.isEmpty()){continue;
-}if(isPotionFamilyName(normalized)){break;
-}OwnedItem exact=exactOwned(pool,normalized);
-if(exact!=null){return exact;
-}}for(String alternative:alternatives){String normalized=normalize(alternative);
-if(normalized.isEmpty()){continue;
-}if(hasExplicitPotionDose(normalized)){OwnedItem exact=exactOwned(pool,normalized);
-if(exact!=null){return exact;
-}}else if(isPotionFamilyName(normalized)){potionFamilies.add(stripPotionDose(normalized));
-}else{nonPotionAlternatives.add(normalized);
-}}OwnedItem bestPotion=null;
-int bestUsefulDoseUnits=-1;
-int bestFamilyPreference=Integer.MAX_VALUE;
-for(int familyIndex=0;
-familyIndex<potionFamilies.size();
-familyIndex++){String family=potionFamilies.get(familyIndex);
-for(int dose=4;
-dose>=1;
-dose--){OwnedItem owned=exactOwned(pool,family+" "+dose);
-if(owned==null){continue;
-}int usefulDoseUnits=PotionPolicy.effectiveDoseUnits(family,dose);
-if(usefulDoseUnits>bestUsefulDoseUnits||(usefulDoseUnits==bestUsefulDoseUnits&&familyIndex<bestFamilyPreference)){bestPotion=owned;
-bestUsefulDoseUnits=usefulDoseUnits;
-bestFamilyPreference=familyIndex;
-}break;
-}}if(bestPotion!=null){return bestPotion;
-}for(String alternative:nonPotionAlternatives){OwnedItem exact=exactOwned(pool,alternative);
-if(exact!=null){return exact;
-}}return findPreferred(pool,alternatives);
-}private static OwnedItem findPreferredInventoryEquipment(List<OwnedItem>pool,List<String>progression){if(pool==null||progression==null){return null;
-}for(String tier:progression){String normalizedTier=normalize(tier);
-if(normalizedTier.isEmpty()){continue;
-}OwnedItem exact=exactOwned(pool,normalizedTier);
-if(exact!=null){return exact;
-}for(OwnedItem item:pool){if(item!=null&&item.matchesEquipmentProgression(normalizedTier)){return item;
-}}}return null;
-}private static boolean hasExplicitPotionDose(String name){return isPotionFamilyName(name)&&name.matches(".*\\s[1-4]$");
-}private static boolean isPotionFamilyName(String name){return matchesAny(name,list("l054"));
-}private static KitItem choose(String displayName,int quantity,List<OwnedItem>pool,boolean scanned,String...alternatives){List<String>values=new ArrayList<>();
-Collections.addAll(values,alternatives);
-return choose(displayName,quantity,pool,scanned,values);
-}private static KitItem chooseTravelFamily(String displayName,int quantity,List<OwnedItem>pool,boolean scanned,String...alternatives){OwnedItem owned=findPreferred(pool,alternatives);
-return owned==null?missingItem(displayName,quantity,scanned):owned.toItem(quantity);
-}private static void addItem(List<KitItem>layout,KitItem item){if(item!=null&&layout.size()<28){layout.add(item);
-}}private static KitItem missingItem(String displayName,boolean scanned){return missingItem(displayName,1,scanned);
-}private static KitItem missingItem(String displayName,int quantity,boolean scanned){return new KitItem(displayName,-1,Math.max(1,quantity),scanned?KitItem.Status.MISSING:KitItem.Status.UNKNOWN);
-}private static Requirement requirementForSlot(List<Requirement>requirements,EquipmentInventorySlot slot){for(Requirement requirement:requirements){if(!requirement.equipment){continue;
-}String name=normalize(requirement.displayName);
-if(slot==EquipmentInventorySlot.HEAD&&matchesAny(name,list("l085"))){return requirement;
-}if(slot==EquipmentInventorySlot.AMULET&&name.contains("witchwood")){return requirement;
-}if(slot==EquipmentInventorySlot.BOOTS&&name.contains("boots")){return requirement;
-}if(slot==EquipmentInventorySlot.GLOVES&&name.contains("gloves")){return requirement;
-}if(slot==EquipmentInventorySlot.SHIELD&&(name.contains("shield")||name.contains("bug lantern"))){return requirement;
-}if(slot==EquipmentInventorySlot.WEAPON&&(name.contains("weapon")||name.contains("staff"))){return requirement;
-}if(slot==EquipmentInventorySlot.AMMO&&(name.contains("ammunition")||name.contains("bolts")||name.contains("arrows"))){return requirement;
-}}return null;
-}private static OwnedItem findEquippedSlot(List<OwnedItem>equipped,EquipmentInventorySlot slot){int slotIndex=slot.getSlotIdx();
-for(OwnedItem item:equipped){if(item.equipmentSlot==slotIndex){return item;
-}}return null;
-}private static OwnedItem findPreferred(List<OwnedItem>owned,List<String>alternatives){if(owned==null||alternatives==null){return null;
-}for(String alternative:alternatives){String fragment=normalize(alternative);
-if(fragment.isEmpty()){continue;
-}for(OwnedItem item:owned){if(item!=null&&item.matchesDisplay(fragment)){return item;
-}}for(OwnedItem item:owned){if(item!=null&&item.named(fragment)){return item;
-}}}return null;
-}private static OwnedItem findPreferred(List<OwnedItem>owned,String...alternatives){List<String>values=new ArrayList<>();
-Collections.addAll(values,alternatives);
-return findPreferred(owned,values);
-}private static String[]weaponFragments(CombatStyle style){if(style==CombatStyle.MAGIC){return array("a004");
-}if(style==CombatStyle.RANGED){return array("a005");
-}return array("a006");
-}private static String buildEquipmentText(TaskStrategy strategy,CombatStyle style,List<Requirement>requirements){List<String>parts=new ArrayList<>();
-parts.add(text(394));
-if(strategy!=null){parts.add(strategy.getMethod());
-}else{switch(style){case MAGIC:parts.add(text(395));
-break;
-case RANGED:parts.add(text(396));
-break;
-case MELEE:parts.add(text(397));
-break;
-case FLEXIBLE:default:parts.add(text(398));
-break;
-}}for(Requirement requirement:requirements){if(requirement.equipment){parts.add(requirement.displayName);
-}}return join(parts,"; ");
-}private static String buildInventoryText(TaskStrategy strategy,CombatStyle style,List<Requirement>requirements,boolean cannonSuggested,int foodSlots){List<String>parts=new ArrayList<>();
-String foodText=foodSlots>0?" and "+foodSlots+" food slot"+(foodSlots==1?"":"s"):"";
-switch(style){case MAGIC:parts.add(text(399));
-parts.add(text(400)+foodText);
-break;
-case RANGED:parts.add("ammo");
-parts.add(text(401)+foodText);
-break;
-case MELEE:parts.add(text(402)+foodText);
-break;
-case FLEXIBLE:default:parts.add(text(403)+foodText);
-break;
-}if(foodSlots==0&&strategy!=null&&(strategy.getDamageProfile()==TaskStrategy.DamageProfile.ZERO_WHILE_PROTECTED||strategy.getDamageProfile()==TaskStrategy.DamageProfile.ZERO_WHILE_SAFESPOTTING)){parts.add(text(404)+text(405));
-}if(strategy!=null&&strategy.needsAntivenom()){parts.add("antivenom");
-}if(strategy!=null&&strategy.needsStamina()){parts.add(text(406));
-}if(cannonSuggested){parts.add(text(407));
-}for(Requirement requirement:requirements){if(!requirement.equipment){parts.add(requirement.displayName);
-}}return join(parts,"; ");
-}private static String buildOwnedText(CombatStyle style,List<Requirement>requirements,boolean cannonSuggested,Set<String>inventory,Set<String>equipment,Set<String>bank,boolean scanned){List<String>status=new ArrayList<>();
-status.add(styleStatus(style,equipment));
-for(Requirement requirement:requirements){status.add(requirement.displayName+": "+availability(requirement,inventory,equipment,bank,scanned));
-}if(cannonSuggested){status.add("Cannon: "+cannonAvailability(inventory,equipment,bank,scanned));
-}if(!scanned){status.add(text(1078));
-}else{status.add("Bank cache ready");
-}return join(status,"; ");
-}private static String availability(Requirement requirement,Set<String>inventory,Set<String>equipment,Set<String>bank,boolean scanned){if(containsAny(equipment,requirement.alternatives)){return "equipped";
-}if(containsAny(inventory,requirement.alternatives)){return "carried";
-}if(containsAny(bank,requirement.alternatives)){return "in bank";
-}return scanned?"missing":text(409);
-}private static boolean hybridUsesCombatMagic(TaskStrategy strategy){if(strategy==null){return false;
-}String text=normalize(strategy.getMethod()+" "+strategy.getRationale());
-return matchesAny(text,list("l086"));
-}private static String cannonAvailability(Set<String>inventory,Set<String>equipment,Set<String>bank,boolean scanned){Set<String>available=new HashSet<>();
-available.addAll(inventory);
-available.addAll(equipment);
-available.addAll(bank);
-boolean allParts=true;
-for(String part:new String[]{"base","stand","barrels","furnace"}){if(!containsText(available,"cannon "+part)){allParts=false;
-}}boolean cannonballs=containsText(available,"cannonball");
-if(allParts&&cannonballs){return text(410);
-}if(!scanned){return text(411);
-}List<String>missing=new ArrayList<>();
-if(!allParts){missing.add("pieces");
-}if(!cannonballs){missing.add("cannonballs");
-}return "missing "+join(missing," and ");
-}private static String styleStatus(CombatStyle style,Set<String>equipment){if(style==CombatStyle.FLEXIBLE){return equipment.isEmpty()?"Equipment scan unavailable":text(412);
-}boolean detected;
-switch(style){case MAGIC:detected=containsAnyText(equipment,"staff","wand","trident","sceptre","sanguinesti","tumeken","ancestral","virtus","ahrim","occult");
-break;
-case RANGED:detected=containsAnyText(equipment,"bow","crossbow","blowpipe","atlatl","masori","armadyl","karil","ava","quiver");
-break;
-case MELEE:default:detected=containsAnyText(equipment,"scimitar","sword","whip","rapier","mace","axe","lance","scythe","fang","torva","bandos","defender");
-break;
-}return detected?"Equipped "+style.label+" setup detected":"No clear "+style.label+" setup equipped";
-}List<Requirement>requirementsFor(String task,String location,CombatStyle style,int remainingKills,boolean desertElite){task=normalize(task);
-location=normalize(location);
-List<Requirement>requirements=new ArrayList<>();
-String combined=task+" "+location;
-if(requiresKalphiteQueenRopesForTest(task,location,desertElite)){requirements.add(inventoryNeed(2,"Rope","rope"));
-}if(requiresGenericRockHammerForTest(task)){requirements.add(inventoryNeed("Rock hammer","rock hammer"));
-}for(RequirementRule rule:REQUIREMENT_RULES){if(rule.matches(task,location,style)){requirements.add(rule.create(remainingKills));
-}}if(requiresIceCooler(task,location)){requirements.add(inventoryNeed(consumableFinisherQuantity(remainingKills),"Ice cooler","ice cooler"));
-}if(task.equals("crocodiles")||task.equals("crocodile")||(task.equals("lizards")||task.equals("lizard"))||task.equals("bandits")||task.equals("bandit")){requirements.add(inventoryNeed(text(413),text(414),text(415),text(416),text(417),text(418),text(419)));
-}if(requiresKaruulmProtectionBootsForTest(task,location,diaries.removesKaruulmBootRequirement())){requirements.add(gearRequirement(text(420),text(421),"granite boots",text(422)));
-}if(task.contains("kurask")||task.contains("turoth")){if(style==CombatStyle.RANGED){requirements.add(gearRequirement("Broad ammunition",text(311),"broad bolts","broad arrows"));
-requirements.add(gearRequirement("Broad-ammunition weapon","zaryte crossbow","dragon hunter crossbow","armadyl crossbow","dragon crossbow","rune crossbow","magic shortbow","magic longbow"));
-}else if(style==CombatStyle.MAGIC){requirements.add(gearRequirement("Magic Dart staff",text(424),text(425),text(426),text(247)));
-}else{requirements.add(gearRequirement(text(427),text(428),text(429),text(430)));
-}}if(task.contains(text(431))||task.contains("skeletal wyvern")||combined.contains(text(123))){if(style==CombatStyle.RANGED){requirements.add(gearRequirement(text(432),"dragonfire ward","mind shield","elemental shield","dragonfire shield",text(345)));
-}else{requirements.add(gearRequirement(text(432),text(345),"dragonfire shield","mind shield","elemental shield","dragonfire ward"));
-}}if((task.equals("blue dragon")||task.equals("blue dragons"))){if(style!=CombatStyle.MELEE){requirements.add(gearRequirement(text(433),"anti dragon shield","dragonfire shield","dragonfire ward",text(345)));
-}}else if(usesReviewedDragonPackage(task)&&style!=CombatStyle.MELEE){requirements.add(gearRequirement(text(433),"dragonfire ward","anti dragon shield","dragonfire shield",text(345)));
-}else if(isDragonTask(task)&&!task.equals("vorkath")&&!usesReviewedDragonPackage(task)){requirements.add(gearRequirement(text(433),"anti dragon shield","dragonfire shield","dragonfire ward",text(345)));
-requirements.add(inventoryNeed(PotionPolicy.EXTENDED_ANTIFIRE_DISPLAY,PotionPolicy.shieldedAntifireAlternatives()));
-}return requirements;
-}static boolean requiresIceCooler(String task,String location){String name=normalize(task);
-return name.contains("lizard")&&!name.contains("lizardman")&&!name.contains("lizardmen")&&!name.contains("sulphur")&&!normalize(location).contains("karuulm");
-}static boolean requiresGenericRockHammerForTest(String assignment){String task=normalize(assignment);
-return task.contains("gargoyle")&&!task.contains(text(434));
-}static boolean requiresKalphiteQueenRopesForTest(String task,String location,boolean desertElite){if(desertElite||task==null||location==null){return false;
-}String normalizedTask=normalize(task);
-return(normalizedTask.equals("kalphite queen")||normalizedTask.equals(text(271)))&&normalize(location).equals(text(435));
-}static boolean requiresKaruulmProtectionBootsForTest(String task,String location,boolean kourendEliteDiaryComplete){if(kourendEliteDiaryComplete){return false;
-}String normalizedTask=normalize(task);
-String normalizedLocation=normalize(location);
-return normalizedTask.contains("wyrm")||normalizedTask.contains("drake")||normalizedTask.contains("hydra")||normalizedLocation.contains(text(390));
-}private static boolean isDragonTask(String task){return task.contains("dragon")&&!task.contains("dragonfly")&&!task.contains("dragon impling");
-}private static boolean usesReviewedDragonPackage(String task){return list("l051").contains(task);
-}private static String styleLabel(CombatStyle style,String magic,String ranged,String melee){return style==CombatStyle.MAGIC?magic:style==CombatStyle.RANGED?ranged:melee;
-}private static CombatStyle style(TaskStrategy strategy){if(strategy==null){return CombatStyle.FLEXIBLE;
-}switch(strategy.getStyle()){case MAGIC:return CombatStyle.MAGIC;
-case RANGED:return CombatStyle.RANGED;
-case MELEE:return CombatStyle.MELEE;
-case HYBRID:default:return CombatStyle.FLEXIBLE;
-}}private static boolean isCannonSuggested(String cannon){return(cannon.contains("recommended")||cannon.contains("preferred")||cannon.contains("optional"))&&!cannon.contains("not allowed")&&!cannon.contains("disabled")&&!cannon.contains("locked");
-}private static Requirement gearRequirement(String displayName,String...alternatives){return new Requirement(displayName,true,1,alternatives);
-}private static Requirement inventoryNeed(String displayName,String...alternatives){return new Requirement(displayName,false,1,alternatives);
-}private static Requirement inventoryNeed(int quantity,String displayName,String...alternatives){return new Requirement(displayName,false,quantity,alternatives);
-}private static int consumableFinisherQuantity(int remainingKills){return remainingKills>0?remainingKills:1;
-}private static boolean containsAny(Set<String>names,List<String>alternatives){for(String alternative:alternatives){if(containsText(names,alternative)){return true;
-}}return false;
-}private static boolean containsAnyText(Set<String>names,String...fragments){for(String fragment:fragments){if(containsText(names,fragment)){return true;
-}}return false;
-}private static boolean containsText(Set<String>names,String fragment){String normalizedFragment=normalize(fragment);
-for(String name:names){if(name.contains(normalizedFragment)){return true;
-}}return false;
-}private static boolean matchesAny(String value,List<String>fragments){for(String fragment:fragments){if(value.contains(fragment)){return true;
-}}return false;
-}private static String join(List<String>values,String separator){StringBuilder result=new StringBuilder();
-for(String value:values){if(value==null||value.trim().isEmpty()){continue;
-}if(result.length()>0){result.append(separator);
-}result.append(value.trim());
-}return result.toString();
-}private static String normalize(String value){if(value==null){return "";
-}return value.toLowerCase(Locale.ENGLISH).replace('\u2019','\'').replace("+"," plus ").replaceAll(text(9)," ").trim().replaceFirst("^the\\s+","");
-}static String preferredInventoryItemForTest(List<String>ownedDisplayNames,String...alternatives){return preferredInventoryItemForTest(ownedDisplayNames,false,alternatives);
-}private static String preferredInventoryItemForTest(List<String>ownedDisplayNames,boolean gearProgression,String...alternatives){List<OwnedItem>owned=new ArrayList<>();
-for(String displayName:ownedDisplayNames){owned.add(new OwnedItem(-1,displayName,1,KitItem.Status.BANK,-1,null,Collections.singleton(normalize(displayName))));
-}OwnedItem selected=preferredInventory(owned,Arrays.asList(alternatives),gearProgression);
-return selected==null?"":selected.displayName;
-}private static int gearRank(String candidate,List<String>progression){if(candidate==null||candidate.isEmpty()||progression==null){return-1;
-}for(int index=0;
-index<progression.size();
-index++){if(matchesEquipmentProgressionName(candidate,normalize(progression.get(index)))){return index;
-}}return-1;
-}private static boolean matchesEquipmentProgressionName(String candidate,String tier){if(candidate==null||tier==null||candidate.isEmpty()||tier.isEmpty()){return false;
-}if(candidate.contains(tier)){return true;
-}boolean godItem=candidate.startsWith("ancient ")||candidate.startsWith("armadyl ")||candidate.startsWith("bandos ")||candidate.startsWith("guthix ")||candidate.startsWith("saradomin ")||candidate.startsWith(text(436));
-if(tier.equals(text(437))){return godItem&&candidate.endsWith("d hide body");
-}if(tier.equals(text(438))){return godItem&&candidate.endsWith("coif");
-}if(tier.equals(text(439))){return godItem&&candidate.endsWith("chaps");
-}if(tier.equals(text(440))){return godItem&&(candidate.endsWith("bracers")||candidate.endsWith(text(340)));
-}if(tier.equals(text(441))){return godItem&&candidate.endsWith("d hide boots");
-}if(tier.equals(text(442))){return candidate.matches(text(443));
-}if(tier.equals("god cape")){return candidate.matches(text(444));
-}if(tier.equals(text(445))){return candidate.matches(text(446));
-}if(tier.equals(text(447))){return candidate.contains(text(447));
-}if(tier.equals("ava s assembler")){return candidate.contains(text(448))||candidate.contains("masori assembler");
-}if(tier.equals("ava s accumulator")){return candidate.contains("accumulator max cape");
-}if(tier.equals("infernal cape")){return candidate.contains(text(449));
-}if(tier.equals("fire cape")){return candidate.contains("fire max cape");
-}if(tier.equals(text(450))){return candidate.contains(text(451));
-}if(tier.equals(text(452))){return candidate.contains(text(453));
-}if(tier.equals("cape of accomplishment")){return isCapeOfAccomplishmentName(candidate);
-}if(tier.equals("vestment robe top")){return godItem&&candidate.endsWith("robe top");
-}if(tier.equals("vestment robe legs")){return godItem&&(candidate.endsWith("robe legs")||candidate.endsWith("robe bottom"));
-}if(tier.equals("vestment cloak")){return godItem&&candidate.endsWith("cloak");
-}if(tier.equals("elemental staff")){return candidate.equals("staff of air")||candidate.equals("staff of water")||candidate.equals("staff of earth")||candidate.equals("staff of fire");
-}if(tier.equals(text(454))){return candidate.startsWith("mystic ")&&candidate.endsWith(" staff");
-}if(tier.equals("barrows helm")){return isBarrowsFamily(candidate,"helm");
-}if(tier.equals(text(455))){return isBarrowsFamily(candidate,"platebody")||candidate.startsWith(text(456));
-}if(tier.equals(text(457))){return isBarrowsFamily(candidate,"platelegs")||candidate.startsWith(text(458));
-}return false;
-}private static boolean isBarrowsFamily(String candidate,String piece){return candidate.matches(text(459)+piece+text(460));
-}private static boolean isCapeOfAccomplishmentName(String candidate){if(candidate.equals("max cape")||candidate.equals("max cape t")){return true;
-}return candidate.matches(text(461)+text(462)+text(463)+text(464)+text(465));
-}enum CombatStyle{MAGIC("magic"),RANGED("ranged"),MELEE("melee"),FLEXIBLE("flexible");
-private final String label;
-CombatStyle(String label){this.label=label;
-}}private static final class StrategyCandidate{private final TaskStrategy strategy;
-private final OwnedItem weapon;
-private final int score;
-private StrategyCandidate(TaskStrategy strategy,OwnedItem weapon,int score){this.strategy=strategy;
-this.weapon=weapon;
-this.score=score;
-}}static final class OwnedItem{private final int itemId;
-private final String displayName;
-private final String nameKey;
-private final Set<String>normalizedNames;
-private final int quantity;
-private final KitItem.Status status;
-private final int equipmentSlot;
-private final ItemEquipmentStats equipmentStats;
-OwnedItem(int itemId,String displayName,int quantity,KitItem.Status status,int equipmentSlot,ItemEquipmentStats equipmentStats,Set<String>normalizedNames){this.itemId=itemId;
-this.displayName=displayName;
-this.nameKey=normalize(displayName);
-Set<String>aliases=new LinkedHashSet<>();
-if(normalizedNames!=null){aliases.addAll(normalizedNames);
-}aliases.add(this.nameKey);
-this.normalizedNames=Collections.unmodifiableSet(aliases);
-this.quantity=quantity;
-this.status=status;
-this.equipmentSlot=equipmentSlot;
-this.equipmentStats=equipmentStats;
-}private boolean named(String fragment){String normalizedFragment=normalize(fragment);
-if(normalizedFragment.isEmpty()){return false;
-}for(String candidate:normalizedNames){if(candidate.contains(normalizedFragment)){return true;
-}}return false;
-}private boolean matchesEquipmentProgression(String fragment){String normalizedFragment=normalize(fragment);
-if(normalizedFragment.isEmpty()){return false;
-}for(String candidate:normalizedNames){if(matchesEquipmentProgressionName(candidate,normalizedFragment)){return true;
-}}return false;
-}private int gearRank(List<String>progression){return SlayerLoadoutAnalyzer.gearRank(nameKey,progression);
-}private boolean matchesExactName(String value){String normalizedValue=normalize(value);
-return!normalizedValue.isEmpty()&&normalizedNames.contains(normalizedValue);
-}private boolean matchesDisplay(String value){String normalizedValue=normalize(value);
-return!normalizedValue.isEmpty()&&nameKey.equals(normalizedValue);
-}private boolean isExactSeekingArrow(){return QuiverAmmo.isSeekingArrow(itemId)||nameKey.startsWith("seeking ")&&nameKey.contains("arrow");
-}private boolean matchesSlot(EquipmentInventorySlot slot){if(equipmentStats!=null){return equipmentStats.getSlot()==slot.getSlotIdx();
-}return equipmentSlot==slot.getSlotIdx();
-}private boolean isTwoHanded(){if(equipmentStats!=null&&equipmentStats.isTwoHanded()){return true;
-}boolean twoHandedBow=!named("crossbow")&&(named(" bow")||nameKey.startsWith("bow ")||named("shortbow")||named("longbow"));
-return named("blowpipe")||twoHandedBow||named("ballista")||named("scythe")||named("godsword")||named("halberd")||named("spear")||named("2h sword")||named("bludgeon");
-}private KitItem toItem(int requestedQuantity){return new KitItem(displayName,itemId,Math.max(1,requestedQuantity),status);
-}}private static final class RequirementRule{private final String scope;
-private final List<String>matches;
-private final String style;
-private final boolean equipment;
-private final String quantity;
-private final String display;
-private final String[]alternatives;
-private RequirementRule(String[]row){scope=row[0];
-matches=Arrays.asList(row[1].split("\\|",-1));
-style=row[2];
-equipment=row[3].equals("E");
-quantity=row[4];
-display=row[5];
-alternatives=row[6].split("\\|",-1);
-}private boolean matches(String task,String location,CombatStyle combatStyle){String value=scope.equals("location")?location:task;
-return matchesAny(value,matches)&&requirementStyleMatches(style,combatStyle==null?"":combatStyle.name());
-}private Requirement create(int remainingKills){int amount=quantity.equals("F")?consumableFinisherQuantity(remainingKills):quantity.equals("R")?1+(consumableFinisherQuantity(remainingKills)-1)/10:Integer.parseInt(quantity);
-return new Requirement(display,equipment,amount,alternatives);
-}}private static List<RequirementRule>loadRequirementRules(){List<RequirementRule>rules=new ArrayList<>();
-for(String[]row:ResourceTable.decodedRows(text(466),7)){rules.add(new RequirementRule(row));
-}return Collections.unmodifiableList(rules);
-}static final class Requirement{private final String displayName;
-private final boolean equipment;
-private final int quantity;
-private final List<String>alternatives;
-private Requirement(String displayName,boolean equipment,int quantity,String...alternatives){this.displayName=displayName;
-this.equipment=equipment;
-this.quantity=Math.max(1,quantity);
-this.alternatives=new ArrayList<>();
-for(String alternative:alternatives){this.alternatives.add(normalize(alternative));
-}}}private static List<String>list(String key){List<String>values=LOADOUT_LISTS.get(key);
-if(values==null){throw new IllegalStateException(text(467)+key);
-}return new ArrayList<>(values);
-}private static String[]array(String key){String[]values=LOADOUT_ARRAYS.get(key);
-if(values==null){throw new IllegalStateException(text(468)+key);
-}return values.clone();
-}private static Map<String,List<String>>loadLists(String resourceName){Map<String,List<String>>values=new LinkedHashMap<>();
-for(String[]row:ResourceTable.rows(resourceName,2)){List<String>entries=row[1].isEmpty()?Collections.emptyList():Arrays.asList(row[1].split("\\|",-1));
-if(values.put(row[0],Collections.unmodifiableList(new ArrayList<>(entries)))!=null){throw new IllegalStateException(text(469)+row[0]);
-}}return Collections.unmodifiableMap(values);
-}private static Map<String,String[]>loadArrays(String resourceName){Map<String,String[]>values=new LinkedHashMap<>();
-for(String[]row:ResourceTable.rows(resourceName,2)){String[]entries=row[1].isEmpty()?new String[0]:row[1].split("\\|",-1);
-if(values.put(row[0],entries)!=null){throw new IllegalStateException(text(470)+row[0]);
-}}return Collections.unmodifiableMap(values);
-}static boolean regularBlueDragonsAllowLightbearerForTest(){return false;
-}static boolean vorkathAllowsLightbearerForTest(){return true;
-}static List<String>standardArrowPriorityForTest(TaskStrategy.CostPolicy policy,boolean boss,boolean dragonCompatible){TaskStrategy strategy=TaskStrategy.builder(TaskStrategy.CombatStyle.RANGED,"Arrow policy regression").costPolicy(policy).boss(boss).build();
-return Arrays.asList(standardArrowPriorityForPolicy(strategy,dragonCompatible));
-}static boolean usableEquipmentVariantForTest(String displayName,EquipmentInventorySlot slot){return isUsableEquipmentVariant(new OwnedItem(-1,displayName,1,KitItem.Status.BANK,slot==null?-1:slot.getSlotIdx(),null,Collections.singleton(normalize(displayName))),slot);
-}static boolean gloveFallbackMatchesSlotForTest(String displayName){return isGloveSlotItemName(displayName);
-}static boolean defenderFallbackMatchesShieldForTest(String displayName){return isDefenderName(displayName);
-}static boolean ordinaryOwnedSlotFallbackForTest(EquipmentInventorySlot slot,String displayName){if(slot==null||displayName==null){return false;
-}OwnedItem item=new OwnedItem(-1,displayName,1,KitItem.Status.BANK,slot.getSlotIdx(),null,Collections.singleton(normalize(displayName)));
-return findBestCompatibleOwnedSlot(Collections.singletonList(item),slot,null,CombatStyle.FLEXIBLE,false)==item;
-}static String normalizePotionDisplayNameForTest(String value){return normalize(value);
-}static boolean requirementStyleMatches(String configuredStyle,String combatStyle){String raw=configuredStyle==null?"":configuredStyle.trim();
-if(raw.equals("*")){return true;
-}return normalize(raw).equals(normalize(combatStyle));
-}static String preferredInventoryEquipmentForTest(List<String>ownedDisplayNames,String...progression){return preferredInventoryItemForTest(ownedDisplayNames,true,progression);
-}static boolean equipmentProgressionNameMatchesForTest(String itemName,String tier){return matchesEquipmentProgressionName(normalize(itemName),normalize(tier));
-}static int directEquipmentProgressionRankForTest(String itemName,List<String>progression){return gearRank(normalize(itemName),progression);
-}}

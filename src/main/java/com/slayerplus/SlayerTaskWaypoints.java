@@ -1,78 +1,235 @@
 package com.slayerplus;
+
 import java.util.*;
 import net.runelite.api.coords.WorldPoint;
-final class SlayerTaskWaypoints{private static final Map<String,WorldPoint>WAYPOINTS=load();
-private static final Map<String,WorldPoint>MONSTER_WAYPOINTS=loadMonster();
-private static final Map<String,List<int[]>>PATH_STAGES=loadPaths();
-private static final Map<String,List<int[]>>AGILITY_SHORTCUTS=loadAgilityShortcuts();
-private static final Map<String,List<int[]>>COMBAT_TIERS=loadCombatTiers();
-private static final Map<String,WorldPoint>PRE_ENTRANCE=loadPreEntrance();
-private SlayerTaskWaypoints(){}static WorldPoint find(String creature,String location){WorldPoint specific=findSpecific(creature,location,0);
-return specific!=null?specific:find(location);
-}static WorldPoint findSpecific(String creature,String location){return findSpecific(creature,location,0);
-}static WorldPoint findSpecific(String creature,String location,int combatLevel){if(creature==null){return null;
-}String key=singular(normalize(creature))+"|"+normalize(location);
-WorldPoint tiered=combatTierWaypoint(key,combatLevel);
-return tiered!=null?tiered:MONSTER_WAYPOINTS.get(key);
-}private static WorldPoint combatTierWaypoint(String key,int combatLevel){List<int[]>tiers=COMBAT_TIERS.get(key);
-if(tiers==null){return null;
-}for(int[]tier:tiers){if(combatLevel>=tier[0]){return new WorldPoint(tier[1],tier[2],tier[3]);
-}}return null;
-}static WorldPoint find(String location){return location==null?null:WAYPOINTS.get(normalize(location));
-}static List<WorldPoint>findPath(String creature,String location){return findPath(creature,location,0,0);
-}static List<WorldPoint>findPath(String creature,String location,int agilityLevel,int combatLevel){List<WorldPoint>path=new ArrayList<>();
-WorldPoint preEntrance=creature==null?null:PRE_ENTRANCE.get(singular(normalize(creature))+"|"+normalize(location));
-if(preEntrance!=null){path.add(preEntrance);
-}WorldPoint entrance=agilityEntrance(creature,location,agilityLevel);
-if(entrance==null){entrance=find(location);
-}if(entrance!=null){path.add(entrance);
-}List<WorldPoint>stages=creature==null?null:pathStages(singular(normalize(creature))+"|"+normalize(location),agilityLevel);
-if(stages!=null){path.addAll(stages);
-}WorldPoint interior=findSpecific(creature,location,combatLevel);
-if(interior!=null&&(path.isEmpty()||!path.get(path.size()-1).equals(interior))){path.add(interior);
-}return Collections.unmodifiableList(path);
-}private static List<WorldPoint>pathStages(String key,int agilityLevel){List<int[]>rows=PATH_STAGES.get(key);
-if(rows==null){return null;
-}int bestVariant=-1;
-for(int[]row:rows){if(row[0]<=agilityLevel&&row[0]>bestVariant){bestVariant=row[0];
-}}if(bestVariant<0){return null;
-}List<int[]>matched=new ArrayList<>();
-for(int[]row:rows){if(row[0]==bestVariant){matched.add(row);
-}}matched.sort(Comparator.comparingInt(value->value[1]));
-List<WorldPoint>points=new ArrayList<>();
-for(int[]row:matched){points.add(new WorldPoint(row[2],row[3],row[4]));
-}return points;
-}private static WorldPoint agilityEntrance(String creature,String location,int agilityLevel){if(creature==null){return null;
-}List<int[]>shortcuts=AGILITY_SHORTCUTS.get(singular(normalize(creature))+"|"+normalize(location));
-if(shortcuts==null){return null;
-}for(int[]shortcut:shortcuts){if(agilityLevel>=shortcut[0]){return new WorldPoint(shortcut[1],shortcut[2],shortcut[3]);
-}}return null;
-}private static String normalize(String value){return value==null?"":value.trim().toLowerCase(Locale.ENGLISH);
-}private static String singular(String value){if(value.equals("jellies")){return "jelly";
-}return value.length()>3&&value.endsWith("s")&&!value.endsWith("ss")?value.substring(0,value.length()-1):value;
-}private static Map<String,WorldPoint>load(){Map<String,WorldPoint>map=new HashMap<>();
-for(String[]row:ResourceTable.rows("slayer-task-waypoints.tsv",4)){map.put(normalize(row[0]),new WorldPoint(Integer.parseInt(row[1]),Integer.parseInt(row[2]),Integer.parseInt(row[3])));
-}return Collections.unmodifiableMap(map);
-}private static Map<String,WorldPoint>loadMonster(){Map<String,WorldPoint>map=new HashMap<>();
-for(String[]row:ResourceTable.rows("slayer-task-monster-waypoints.tsv",5)){map.put(singular(normalize(row[0]))+"|"+normalize(row[1]),new WorldPoint(Integer.parseInt(row[2]),Integer.parseInt(row[3]),Integer.parseInt(row[4])));
-}return Collections.unmodifiableMap(map);
-}private static Map<String,List<int[]>>loadPaths(){Map<String,List<int[]>>map=new HashMap<>();
-for(String[]row:ResourceTable.rows("slayer-task-monster-waypoint-paths.tsv",7)){String key=singular(normalize(row[0]))+"|"+normalize(row[1]);
-map.computeIfAbsent(key,unused->new ArrayList<>()).add(new int[]{Integer.parseInt(row[2]),Integer.parseInt(row[3]),Integer.parseInt(row[4]),Integer.parseInt(row[5]),Integer.parseInt(row[6])});
-}for(Map.Entry<String,List<int[]>>entry:map.entrySet()){entry.setValue(Collections.unmodifiableList(entry.getValue()));
-}return Collections.unmodifiableMap(map);
-}private static Map<String,List<int[]>>loadAgilityShortcuts(){Map<String,List<int[]>>map=new HashMap<>();
-for(String[]row:ResourceTable.rows("slayer-task-agility-shortcuts.tsv",6)){String key=singular(normalize(row[0]))+"|"+normalize(row[1]);
-map.computeIfAbsent(key,unused->new ArrayList<>()).add(new int[]{Integer.parseInt(row[2]),Integer.parseInt(row[3]),Integer.parseInt(row[4]),Integer.parseInt(row[5])});
-}for(List<int[]>shortcuts:map.values()){shortcuts.sort((a,b)->Integer.compare(b[0],a[0]));
-}return Collections.unmodifiableMap(map);
-}private static Map<String,List<int[]>>loadCombatTiers(){Map<String,List<int[]>>map=new HashMap<>();
-for(String[]row:ResourceTable.rows("slayer-task-monster-waypoint-tiers.tsv",6)){String key=singular(normalize(row[0]))+"|"+normalize(row[1]);
-map.computeIfAbsent(key,unused->new ArrayList<>()).add(new int[]{Integer.parseInt(row[2]),Integer.parseInt(row[3]),Integer.parseInt(row[4]),Integer.parseInt(row[5])});
-}for(List<int[]>tiers:map.values()){tiers.sort((a,b)->Integer.compare(b[0],a[0]));
-}return Collections.unmodifiableMap(map);
-}private static Map<String,WorldPoint>loadPreEntrance(){Map<String,WorldPoint>map=new HashMap<>();
-for(String[]row:ResourceTable.rows("slayer-task-pre-entrance.tsv",5)){String key=singular(normalize(row[0]))+"|"+normalize(row[1]);
-map.put(key,new WorldPoint(Integer.parseInt(row[2]),Integer.parseInt(row[3]),Integer.parseInt(row[4])));
-}return Collections.unmodifiableMap(map);
-}}
+
+final class SlayerTaskWaypoints {
+  private static final Map<String, WorldPoint> WAYPOINTS = load();
+  private static final Map<String, WorldPoint> MONSTER_WAYPOINTS = loadMonster();
+  private static final Map<String, List<int[]>> PATH_STAGES = loadPaths();
+  private static final Map<String, List<int[]>> AGILITY_SHORTCUTS = loadAgilityShortcuts();
+  private static final Map<String, List<int[]>> COMBAT_TIERS = loadCombatTiers();
+  private static final Map<String, WorldPoint> PRE_ENTRANCE = loadPreEntrance();
+
+  private SlayerTaskWaypoints() {}
+
+  static WorldPoint find(String creature, String location) {
+    WorldPoint specific = findSpecific(creature, location, 0);
+    return specific != null ? specific : find(location);
+  }
+
+  static WorldPoint findSpecific(String creature, String location) {
+    return findSpecific(creature, location, 0);
+  }
+
+  static WorldPoint findSpecific(String creature, String location, int combatLevel) {
+    if (creature == null) {
+      return null;
+    }
+    String key = singular(normalize(creature)) + "|" + normalize(location);
+    WorldPoint tiered = combatTierWaypoint(key, combatLevel);
+    return tiered != null ? tiered : MONSTER_WAYPOINTS.get(key);
+  }
+
+  private static WorldPoint combatTierWaypoint(String key, int combatLevel) {
+    List<int[]> tiers = COMBAT_TIERS.get(key);
+    if (tiers == null) {
+      return null;
+    }
+    for (int[] tier : tiers) {
+      if (combatLevel >= tier[0]) {
+        return new WorldPoint(tier[1], tier[2], tier[3]);
+      }
+    }
+    return null;
+  }
+
+  static WorldPoint find(String location) {
+    return location == null ? null : WAYPOINTS.get(normalize(location));
+  }
+
+  static List<WorldPoint> findPath(String creature, String location) {
+    return findPath(creature, location, 0, 0);
+  }
+
+  static List<WorldPoint> findPath(
+      String creature, String location, int agilityLevel, int combatLevel) {
+    List<WorldPoint> path = new ArrayList<>();
+    WorldPoint preEntrance =
+        creature == null
+            ? null
+            : PRE_ENTRANCE.get(singular(normalize(creature)) + "|" + normalize(location));
+    if (preEntrance != null) {
+      path.add(preEntrance);
+    }
+    WorldPoint entrance = agilityEntrance(creature, location, agilityLevel);
+    if (entrance == null) {
+      entrance = find(location);
+    }
+    if (entrance != null) {
+      path.add(entrance);
+    }
+    List<WorldPoint> stages =
+        creature == null
+            ? null
+            : pathStages(singular(normalize(creature)) + "|" + normalize(location), agilityLevel);
+    if (stages != null) {
+      path.addAll(stages);
+    }
+    WorldPoint interior = findSpecific(creature, location, combatLevel);
+    if (interior != null && (path.isEmpty() || !path.get(path.size() - 1).equals(interior))) {
+      path.add(interior);
+    }
+    return Collections.unmodifiableList(path);
+  }
+
+  private static List<WorldPoint> pathStages(String key, int agilityLevel) {
+    List<int[]> rows = PATH_STAGES.get(key);
+    if (rows == null) {
+      return null;
+    }
+    int bestVariant = -1;
+    for (int[] row : rows) {
+      if (row[0] <= agilityLevel && row[0] > bestVariant) {
+        bestVariant = row[0];
+      }
+    }
+    if (bestVariant < 0) {
+      return null;
+    }
+    List<int[]> matched = new ArrayList<>();
+    for (int[] row : rows) {
+      if (row[0] == bestVariant) {
+        matched.add(row);
+      }
+    }
+    matched.sort(Comparator.comparingInt(value -> value[1]));
+    List<WorldPoint> points = new ArrayList<>();
+    for (int[] row : matched) {
+      points.add(new WorldPoint(row[2], row[3], row[4]));
+    }
+    return points;
+  }
+
+  private static WorldPoint agilityEntrance(String creature, String location, int agilityLevel) {
+    if (creature == null) {
+      return null;
+    }
+    List<int[]> shortcuts =
+        AGILITY_SHORTCUTS.get(singular(normalize(creature)) + "|" + normalize(location));
+    if (shortcuts == null) {
+      return null;
+    }
+    for (int[] shortcut : shortcuts) {
+      if (agilityLevel >= shortcut[0]) {
+        return new WorldPoint(shortcut[1], shortcut[2], shortcut[3]);
+      }
+    }
+    return null;
+  }
+
+  private static String normalize(String value) {
+    return value == null ? "" : value.trim().toLowerCase(Locale.ENGLISH);
+  }
+
+  private static String singular(String value) {
+    if (value.equals("jellies")) {
+      return "jelly";
+    }
+    return value.length() > 3 && value.endsWith("s") && !value.endsWith("ss")
+        ? value.substring(0, value.length() - 1)
+        : value;
+  }
+
+  private static Map<String, WorldPoint> load() {
+    Map<String, WorldPoint> map = new HashMap<>();
+    for (String[] row : ResourceTable.rows("slayer-task-waypoints.tsv", 4)) {
+      map.put(
+          normalize(row[0]),
+          new WorldPoint(
+              Integer.parseInt(row[1]), Integer.parseInt(row[2]), Integer.parseInt(row[3])));
+    }
+    return Collections.unmodifiableMap(map);
+  }
+
+  private static Map<String, WorldPoint> loadMonster() {
+    Map<String, WorldPoint> map = new HashMap<>();
+    for (String[] row : ResourceTable.rows("slayer-task-monster-waypoints.tsv", 5)) {
+      map.put(
+          singular(normalize(row[0])) + "|" + normalize(row[1]),
+          new WorldPoint(
+              Integer.parseInt(row[2]), Integer.parseInt(row[3]), Integer.parseInt(row[4])));
+    }
+    return Collections.unmodifiableMap(map);
+  }
+
+  private static Map<String, List<int[]>> loadPaths() {
+    Map<String, List<int[]>> map = new HashMap<>();
+    for (String[] row : ResourceTable.rows("slayer-task-monster-waypoint-paths.tsv", 7)) {
+      String key = singular(normalize(row[0])) + "|" + normalize(row[1]);
+      map.computeIfAbsent(key, unused -> new ArrayList<>())
+          .add(
+              new int[] {
+                Integer.parseInt(row[2]),
+                Integer.parseInt(row[3]),
+                Integer.parseInt(row[4]),
+                Integer.parseInt(row[5]),
+                Integer.parseInt(row[6])
+              });
+    }
+    for (Map.Entry<String, List<int[]>> entry : map.entrySet()) {
+      entry.setValue(Collections.unmodifiableList(entry.getValue()));
+    }
+    return Collections.unmodifiableMap(map);
+  }
+
+  private static Map<String, List<int[]>> loadAgilityShortcuts() {
+    Map<String, List<int[]>> map = new HashMap<>();
+    for (String[] row : ResourceTable.rows("slayer-task-agility-shortcuts.tsv", 6)) {
+      String key = singular(normalize(row[0])) + "|" + normalize(row[1]);
+      map.computeIfAbsent(key, unused -> new ArrayList<>())
+          .add(
+              new int[] {
+                Integer.parseInt(row[2]),
+                Integer.parseInt(row[3]),
+                Integer.parseInt(row[4]),
+                Integer.parseInt(row[5])
+              });
+    }
+    for (List<int[]> shortcuts : map.values()) {
+      shortcuts.sort((a, b) -> Integer.compare(b[0], a[0]));
+    }
+    return Collections.unmodifiableMap(map);
+  }
+
+  private static Map<String, List<int[]>> loadCombatTiers() {
+    Map<String, List<int[]>> map = new HashMap<>();
+    for (String[] row : ResourceTable.rows("slayer-task-monster-waypoint-tiers.tsv", 6)) {
+      String key = singular(normalize(row[0])) + "|" + normalize(row[1]);
+      map.computeIfAbsent(key, unused -> new ArrayList<>())
+          .add(
+              new int[] {
+                Integer.parseInt(row[2]),
+                Integer.parseInt(row[3]),
+                Integer.parseInt(row[4]),
+                Integer.parseInt(row[5])
+              });
+    }
+    for (List<int[]> tiers : map.values()) {
+      tiers.sort((a, b) -> Integer.compare(b[0], a[0]));
+    }
+    return Collections.unmodifiableMap(map);
+  }
+
+  private static Map<String, WorldPoint> loadPreEntrance() {
+    Map<String, WorldPoint> map = new HashMap<>();
+    for (String[] row : ResourceTable.rows("slayer-task-pre-entrance.tsv", 5)) {
+      String key = singular(normalize(row[0])) + "|" + normalize(row[1]);
+      map.put(
+          key,
+          new WorldPoint(
+              Integer.parseInt(row[2]), Integer.parseInt(row[3]), Integer.parseInt(row[4])));
+    }
+    return Collections.unmodifiableMap(map);
+  }
+}
