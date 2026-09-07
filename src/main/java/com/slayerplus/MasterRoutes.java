@@ -109,22 +109,5 @@ public final class MasterRoutes {
               Arrays.asList(
                   returnItemFamilies == null ? new String[0] : returnItemFamilies.clone()));
     }
-
-    public String getReturnDestination(String family) {
-      String key = family == null ? "" : family.trim().toLowerCase(Locale.ENGLISH);
-      if (id == 5 && key.startsWith("karamja gloves 4")) {
-        return "Slayer Master";
-      }
-      if (id == 5 && key.startsWith("karamja gloves 3")) {
-        return "Gem Mine";
-      }
-      if (id == 8 && key.startsWith("rada s blessing")) {
-        return "Mount Karuulm";
-      }
-      if (id == 10 && key.contains("slayer ring")) {
-        return "Wyrmscraig Cavern";
-      }
-      return name;
-    }
   }
 }

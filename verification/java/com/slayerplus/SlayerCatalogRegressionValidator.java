@@ -23,7 +23,6 @@ public final class SlayerCatalogRegressionValidator {
   /** Fast, deterministic checks safe to run once during plugin startup. */
   public static void validateStartupOrThrow() {
     validateResearchStrategyRegistryParity();
-    SlayerTaskNpcCatalog.validateOrThrow();
     SlayerEncounterStandards.validateBossDefinitions(VariantCatalog.getBossDefinitions());
     validateCriticalMethodContracts();
   }

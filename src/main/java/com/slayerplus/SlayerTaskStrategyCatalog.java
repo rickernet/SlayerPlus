@@ -89,24 +89,12 @@ public final class SlayerTaskStrategyCatalog {
     return REVIEWED_TASK_KEYS.contains(canonicalTaskKey(assignment));
   }
 
-  public static Set<String> getCoveredTaskNames() {
-    return COVERED_TASKS;
-  }
-
   public static List<String> getCurrentTaskNames() {
     return Collections.unmodifiableList(new ArrayList<>(COVERED_TASKS));
   }
 
   public static TaskResearch.Entry getResearchRecord(String assignment) {
     return TaskResearch.find(canonicalTaskKey(assignment));
-  }
-
-  public static List<String> getMissingCurrentTasks() {
-    List<String> missing = new ArrayList<>();
-    for (String task : COVERED_TASKS) {
-      if (!PROFILES.containsKey(canonicalTaskKey(task))) missing.add(task);
-    }
-    return Collections.unmodifiableList(missing);
   }
 
   private static TaskStrategy wildernessStrategyFor(

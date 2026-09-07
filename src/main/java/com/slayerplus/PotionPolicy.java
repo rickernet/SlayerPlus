@@ -59,10 +59,6 @@ class PotionPolicy {
     };
   }
 
-  static String[] fullAntifireAlternatives() {
-    return new String[] {"extended super antifire", "super antifire", "extended antifire"};
-  }
-
   static String[] potionOnlyAntifireAlternatives() {
     return new String[] {"extended super antifire", "super antifire"};
   }

@@ -881,27 +881,6 @@ public final class SlayerLoadoutAnalyzer {
     return item.nameKey.endsWith(" i") || item.nameKey.contains(" i uncharged");
   }
 
-  public Set<String> snapshotNames(ItemContainer container) {
-    if (container == null || itemManager == null) {
-      return Collections.emptySet();
-    }
-    Set<String> names = new HashSet<>();
-    for (Item item : container.getItems()) {
-      if (!isRealOwnedItem(item, false)) {
-        continue;
-      }
-      try {
-        int canonicalId = itemManager.canonicalize(item.getId());
-        ItemComposition composition = itemManager.getItemComposition(canonicalId);
-        if (composition != null) {
-          names.addAll(getMatchNames(canonicalId, composition.getName()));
-        }
-      } catch (RuntimeException ignored) {
-      }
-    }
-    return names;
-  }
-
   public Map<Integer, Integer> snapshotItems(ItemContainer container) {
     if (container == null || itemManager == null) {
       return Collections.emptyMap();

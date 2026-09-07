@@ -139,10 +139,6 @@ final class SlayerAchievementDiarySnapshot {
     return completedTiers.getOrDefault(normalize(region), 0) >= Math.max(1, Math.min(4, tier));
   }
 
-  boolean improvesEnchantedBoltSpecials() {
-    return hasTier("kandarin", 3);
-  }
-
   boolean unlocksAshSanctifier() {
     return hasTier("kourend", 3);
   }
@@ -157,47 +153,6 @@ final class SlayerAchievementDiarySnapshot {
 
   boolean removesKaruulmBootRequirement() {
     return hasTier("kourend", 4);
-  }
-
-  boolean improvesBarrowsRuneRewards() {
-    return hasTier("morytania", 3);
-  }
-
-  int slayerTowerExperienceBonusTenthsPercent() {
-    return Math.min(4, completedTiers.getOrDefault("morytania", 0)) * 25;
-  }
-
-  boolean hasFightCavesDailyResurrection() {
-    return hasTier("karamja", 4);
-  }
-
-  boolean hasZulrahDailyResurrection() {
-    return hasTier("western", 4);
-  }
-
-  boolean notesBrimhavenDungeonDrops() {
-    return hasTier("karamja", 4);
-  }
-
-  boolean notesWildernessDragonBones() {
-    return hasTier("wilderness", 4);
-  }
-
-  boolean notesAviansieAdamantBars() {
-    return hasTier("fremennik", 3);
-  }
-
-  boolean notesDagannothKingBones() {
-    return hasTier("fremennik", 4);
-  }
-
-  boolean allowsWildernessBossLair(String name) {
-    String boss = normalize(name);
-    if (boss.equals("callisto") || boss.equals("venenatis") || boss.equals("vet ion"))
-      return hasTier("wilderness", 2);
-    if (boss.equals("artio") || boss.equals("spindel") || boss.equals("calvar ion"))
-      return hasTier("wilderness", 3);
-    return true;
   }
 
   boolean allowsLoadoutReward(String name, Iterable<String> alternatives) {

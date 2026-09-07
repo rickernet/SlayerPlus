@@ -449,17 +449,6 @@ public final class MethodRules {
       return this;
     }
 
-    public Builder thralls(UtilityRecommendation recommendation) {
-      thrallRecommendation = recommendation == null ? UtilityRecommendation.NONE : recommendation;
-      return this;
-    }
-
-    public Builder deathCharge(UtilityRecommendation recommendation) {
-      deathChargeRecommendation =
-          recommendation == null ? UtilityRecommendation.NONE : recommendation;
-      return this;
-    }
-
     public Builder arceuusUtility(
         boolean useThralls, boolean useDeathCharge, boolean useWardOfArceuus) {
       thrallRecommendation =

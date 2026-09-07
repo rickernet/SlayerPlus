@@ -565,14 +565,9 @@ public class SlayerRegressionTest {
           route.getReturnItemFamilies().isEmpty());
     }
     assertEquals("karamja gloves 4", MasterRoutes.find(5).getReturnItemFamilies().get(0));
-    assertEquals("Slayer Master", MasterRoutes.find(5).getReturnDestination("karamja gloves 4"));
-    assertEquals("Gem Mine", MasterRoutes.find(5).getReturnDestination("karamja gloves 3"));
     assertEquals("rada s blessing 4", MasterRoutes.find(8).getReturnItemFamilies().get(0));
-    assertEquals("Mount Karuulm", MasterRoutes.find(8).getReturnDestination("rada s blessing 4"));
     assertEquals("Mortimer", MasterRoutes.getName(10));
     assertEquals(new WorldPoint(2589, 8614, 0), MasterRoutes.find(10).getDestination());
-    assertEquals(
-        "Wyrmscraig Cavern", MasterRoutes.find(10).getReturnDestination("eternal slayer ring"));
   }
 
   @Test
@@ -1883,15 +1878,6 @@ public class SlayerRegressionTest {
     assertTrue(unlocked.unlocksBonecrusher());
     assertTrue(unlocked.unlocksGiantMoleLocator());
     assertTrue(unlocked.removesKaruulmBootRequirement());
-    assertTrue(unlocked.improvesEnchantedBoltSpecials());
-    assertTrue(unlocked.improvesBarrowsRuneRewards());
-    assertTrue(unlocked.hasFightCavesDailyResurrection());
-    assertTrue(unlocked.hasZulrahDailyResurrection());
-    assertTrue(unlocked.notesAviansieAdamantBars());
-    assertTrue(unlocked.notesDagannothKingBones());
-    assertTrue(unlocked.notesBrimhavenDungeonDrops());
-    assertTrue(unlocked.notesWildernessDragonBones());
-    assertEquals(75, unlocked.slayerTowerExperienceBonusTenthsPercent());
     assertFalse(unlocked.allowsTravelItem("Dramen staff"));
     assertFalse(unlocked.allowsTravelItem("Lunar staff"));
   }
