@@ -1,6 +1,8 @@
 package com.slayerplus;
 
 import java.util.*;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 class SlayerRegularInventoryAuditCatalog {
   private static final Policy DIRECT = new Policy(2, 6, 12, true);
@@ -192,28 +194,15 @@ class SlayerRegularInventoryAuditCatalog {
   }
 
   private static String normalize(String value) {
-    return value == null
-        ? ""
-        : value
-            .toLowerCase(Locale.ENGLISH)
-            .replace('\u2019', '\'')
-            .replaceAll("[^a-z0-9]+", " ")
-            .trim()
-            .replaceFirst("^the\\s+", "");
+    return SlayerText.encounter(value);
   }
 
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   private static final class Policy {
     private final int restoreSlots;
     private final int food;
     private final int loot;
     private final boolean styleBoost;
-
-    private Policy(int restoreSlots, int food, int loot, boolean styleBoost) {
-      this.restoreSlots = restoreSlots;
-      this.food = food;
-      this.loot = loot;
-      this.styleBoost = styleBoost;
-    }
 
     private void apply(MethodRules.Builder rules, TaskStrategy strategy) {
       boolean preventsExpectedDamage =

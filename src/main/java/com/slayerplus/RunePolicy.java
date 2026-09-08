@@ -155,26 +155,66 @@ class RunePolicy {
   }
 
   private static String runeName(int itemId) {
-    if (itemId == ItemID.AIRRUNE) return "Air";
-    if (itemId == ItemID.WATERRUNE) return "Water";
-    if (itemId == ItemID.EARTHRUNE) return "Earth";
-    if (itemId == ItemID.FIRERUNE) return "Fire";
-    if (itemId == ItemID.MINDRUNE) return "Mind";
-    if (itemId == ItemID.CHAOSRUNE) return "Chaos";
-    if (itemId == ItemID.DEATHRUNE) return "Death";
-    if (itemId == ItemID.BLOODRUNE) return "Blood";
-    if (itemId == ItemID.COSMICRUNE) return "Cosmic";
-    if (itemId == ItemID.SOULRUNE) return "Soul";
-    if (itemId == ItemID.WRATHRUNE) return "Wrath";
-    if (itemId == ItemID.LAWRUNE) return "Law";
-    if (itemId == ItemID.NATURERUNE) return "Nature";
-    if (itemId == ItemID.MISTRUNE) return "Mist";
-    if (itemId == ItemID.DUSTRUNE) return "Dust";
-    if (itemId == ItemID.SMOKERUNE) return "Smoke";
-    if (itemId == ItemID.MUDRUNE) return "Mud";
-    if (itemId == ItemID.STEAMRUNE) return "Steam";
-    if (itemId == ItemID.LAVARUNE) return "Lava";
-    if (itemId == ItemID.AETHERRUNE) return "Aether";
+    if (itemId == ItemID.AIRRUNE) {
+      return "Air";
+    }
+    if (itemId == ItemID.WATERRUNE) {
+      return "Water";
+    }
+    if (itemId == ItemID.EARTHRUNE) {
+      return "Earth";
+    }
+    if (itemId == ItemID.FIRERUNE) {
+      return "Fire";
+    }
+    if (itemId == ItemID.MINDRUNE) {
+      return "Mind";
+    }
+    if (itemId == ItemID.CHAOSRUNE) {
+      return "Chaos";
+    }
+    if (itemId == ItemID.DEATHRUNE) {
+      return "Death";
+    }
+    if (itemId == ItemID.BLOODRUNE) {
+      return "Blood";
+    }
+    if (itemId == ItemID.COSMICRUNE) {
+      return "Cosmic";
+    }
+    if (itemId == ItemID.SOULRUNE) {
+      return "Soul";
+    }
+    if (itemId == ItemID.WRATHRUNE) {
+      return "Wrath";
+    }
+    if (itemId == ItemID.LAWRUNE) {
+      return "Law";
+    }
+    if (itemId == ItemID.NATURERUNE) {
+      return "Nature";
+    }
+    if (itemId == ItemID.MISTRUNE) {
+      return "Mist";
+    }
+    if (itemId == ItemID.DUSTRUNE) {
+      return "Dust";
+    }
+    if (itemId == ItemID.SMOKERUNE) {
+      return "Smoke";
+    }
+    if (itemId == ItemID.MUDRUNE) {
+      return "Mud";
+    }
+    if (itemId == ItemID.STEAMRUNE) {
+      return "Steam";
+    }
+    if (itemId == ItemID.LAVARUNE) {
+      return "Lava";
+    }
+    if (itemId == ItemID.AETHERRUNE) {
+      return "Aether";
+    }
     return "Rune";
   }
 }

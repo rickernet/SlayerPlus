@@ -1,36 +1,18 @@
 package com.slayerplus;
 
 import java.util.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 class TuraelBoost {
+  @Getter(AccessLevel.PACKAGE)
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   static final class Entry {
     private final String location;
     private final String travel;
     private final String cannon;
     private final String requirements;
-
-    private Entry(String location, String travel, String cannon, String requirements) {
-      this.location = location;
-      this.travel = travel;
-      this.cannon = cannon;
-      this.requirements = requirements;
-    }
-
-    String getLocation() {
-      return location;
-    }
-
-    String getTravel() {
-      return travel;
-    }
-
-    String getCannon() {
-      return cannon;
-    }
-
-    String getRequirements() {
-      return requirements;
-    }
 
     boolean supportsCannon() {
       String value = normalize(cannon);
@@ -68,12 +50,6 @@ class TuraelBoost {
   }
 
   private static String normalize(String value) {
-    return value == null
-        ? ""
-        : value
-            .toLowerCase(Locale.ENGLISH)
-            .replace('\u2019', '\'')
-            .replaceAll("[^a-z0-9]+", " ")
-            .trim();
+    return SlayerText.normalize(value);
   }
 }

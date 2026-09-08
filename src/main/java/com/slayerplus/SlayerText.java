@@ -1,5 +1,6 @@
 package com.slayerplus;
 
+import java.util.List;
 import java.util.Locale;
 
 final class SlayerText {
@@ -17,5 +18,14 @@ final class SlayerText {
 
   static String encounter(String value) {
     return normalize(value).replaceFirst("^the\\s+", "");
+  }
+
+  static boolean matchesAny(String value, List<String> fragments) {
+    for (String fragment : fragments) {
+      if (value.contains(fragment)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

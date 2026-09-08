@@ -526,18 +526,34 @@ public final class PreparationCatalog {
   }
 
   private static int spellbookVarbitValue(MethodRules.Spellbook spellbook) {
-    if (spellbook == MethodRules.Spellbook.STANDARD) return STANDARD_SPELLBOOK;
-    if (spellbook == MethodRules.Spellbook.ANCIENT) return ANCIENT_SPELLBOOK;
-    if (spellbook == MethodRules.Spellbook.LUNAR) return LUNAR_SPELLBOOK;
-    if (spellbook == MethodRules.Spellbook.ARCEUUS) return ARCEUUS_SPELLBOOK;
+    if (spellbook == MethodRules.Spellbook.STANDARD) {
+      return STANDARD_SPELLBOOK;
+    }
+    if (spellbook == MethodRules.Spellbook.ANCIENT) {
+      return ANCIENT_SPELLBOOK;
+    }
+    if (spellbook == MethodRules.Spellbook.LUNAR) {
+      return LUNAR_SPELLBOOK;
+    }
+    if (spellbook == MethodRules.Spellbook.ARCEUUS) {
+      return ARCEUUS_SPELLBOOK;
+    }
     return -1;
   }
 
   private static String spellbookDisplayName(MethodRules.Spellbook spellbook) {
-    if (spellbook == MethodRules.Spellbook.STANDARD) return "Standard spellbook";
-    if (spellbook == MethodRules.Spellbook.ANCIENT) return "Ancient Magicks";
-    if (spellbook == MethodRules.Spellbook.LUNAR) return "Lunar spellbook";
-    if (spellbook == MethodRules.Spellbook.ARCEUUS) return "Arceuus spellbook";
+    if (spellbook == MethodRules.Spellbook.STANDARD) {
+      return "Standard spellbook";
+    }
+    if (spellbook == MethodRules.Spellbook.ANCIENT) {
+      return "Ancient Magicks";
+    }
+    if (spellbook == MethodRules.Spellbook.LUNAR) {
+      return "Lunar spellbook";
+    }
+    if (spellbook == MethodRules.Spellbook.ARCEUUS) {
+      return "Arceuus spellbook";
+    }
     return "Spellbook";
   }
 
@@ -556,18 +572,42 @@ public final class PreparationCatalog {
 
   private static int runeIdForName(String value) {
     String name = normalize(value);
-    if (name.contains("air rune")) return AIR_RUNE;
-    if (name.contains("water rune")) return WATER_RUNE;
-    if (name.contains("earth rune")) return EARTH_RUNE;
-    if (name.contains("fire rune")) return FIRE_RUNE;
-    if (name.contains("mind rune")) return MIND_RUNE;
-    if (name.contains("chaos rune")) return CHAOS_RUNE;
-    if (name.contains("death rune")) return DEATH_RUNE;
-    if (name.contains("blood rune")) return BLOOD_RUNE;
-    if (name.contains("cosmic rune")) return COSMIC_RUNE;
-    if (name.contains("soul rune")) return SOUL_RUNE;
-    if (name.contains("wrath rune")) return WRATH_RUNE;
-    if (name.contains("aether rune")) return AETHER_RUNE;
+    if (name.contains("air rune")) {
+      return AIR_RUNE;
+    }
+    if (name.contains("water rune")) {
+      return WATER_RUNE;
+    }
+    if (name.contains("earth rune")) {
+      return EARTH_RUNE;
+    }
+    if (name.contains("fire rune")) {
+      return FIRE_RUNE;
+    }
+    if (name.contains("mind rune")) {
+      return MIND_RUNE;
+    }
+    if (name.contains("chaos rune")) {
+      return CHAOS_RUNE;
+    }
+    if (name.contains("death rune")) {
+      return DEATH_RUNE;
+    }
+    if (name.contains("blood rune")) {
+      return BLOOD_RUNE;
+    }
+    if (name.contains("cosmic rune")) {
+      return COSMIC_RUNE;
+    }
+    if (name.contains("soul rune")) {
+      return SOUL_RUNE;
+    }
+    if (name.contains("wrath rune")) {
+      return WRATH_RUNE;
+    }
+    if (name.contains("aether rune")) {
+      return AETHER_RUNE;
+    }
     return -1;
   }
 
@@ -815,14 +855,7 @@ public final class PreparationCatalog {
   }
 
   private static String normalize(String value) {
-    return value == null
-        ? ""
-        : value
-            .toLowerCase(Locale.ENGLISH)
-            .replace('\u2019', '\'')
-            .replaceAll("[^a-z0-9]+", " ")
-            .trim()
-            .replaceFirst("^the\\s+", "");
+    return SlayerText.encounter(value);
   }
 
   private static final class RuneRequirement {
@@ -941,10 +974,18 @@ public final class PreparationCatalog {
     }
 
     public String spellbookName() {
-      if (book == MethodRules.Spellbook.ANCIENT) return "Ancient Magicks";
-      if (book == MethodRules.Spellbook.ARCEUUS) return "Arceuus spellbook";
-      if (book == MethodRules.Spellbook.LUNAR) return "Lunar spellbook";
-      if (book == MethodRules.Spellbook.STANDARD) return "Standard spellbook";
+      if (book == MethodRules.Spellbook.ANCIENT) {
+        return "Ancient Magicks";
+      }
+      if (book == MethodRules.Spellbook.ARCEUUS) {
+        return "Arceuus spellbook";
+      }
+      if (book == MethodRules.Spellbook.LUNAR) {
+        return "Lunar spellbook";
+      }
+      if (book == MethodRules.Spellbook.STANDARD) {
+        return "Standard spellbook";
+      }
       return active ? "Spellbook" : "";
     }
 
@@ -954,8 +995,12 @@ public final class PreparationCatalog {
 
     public int getRequiredMagicLevel() {
       String normalized = spellName.toLowerCase(Locale.ENGLISH);
-      if (normalized.contains("ice barrage")) return ICE_BARRAGE_LEVEL;
-      if (normalized.contains("ice burst")) return ICE_BURST_LEVEL;
+      if (normalized.contains("ice barrage")) {
+        return ICE_BARRAGE_LEVEL;
+      }
+      if (normalized.contains("ice burst")) {
+        return ICE_BURST_LEVEL;
+      }
       return 0;
     }
 

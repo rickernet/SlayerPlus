@@ -118,7 +118,8 @@ public final class VariantCatalog {
   private static VariantResourceData loadVariantData() {
     List<BossDefinition> bosses = new ArrayList<>();
     Map<String, DirectBossDefinition> directBosses = new LinkedHashMap<>();
-    for (String[] fields : ResourceTable.decodedRows("slayer-task-variants.tsv", 3, 8)) {
+    for (String[] fields :
+        ResourceTable.rowsWithEscapedDelimiters("slayer-task-variants.tsv", 3, 8)) {
       if (fields.length == 8 && fields[0].equals("B")) {
         String[] assignments = fields[7].isEmpty() ? new String[0] : fields[7].split("\\|", -1);
         bosses.add(
@@ -220,7 +221,6 @@ public final class VariantCatalog {
       String assignment, String location, SlayerPlusConfig config) {
     return SlayerTaskStrategyCatalog.resolve(
         assignment,
-        config == null ? Preference.Playstyle.FAST_XP : config.playstyle(),
         config == null ? Preference.Cannon.ALLOW : config.cannonPreference(),
         config == null ? Preference.Burst.ALLOW : config.burstPreference(),
         config == null ? Preference.CombatStyle.AUTOMATIC : config.combatStylePreference(),
@@ -229,15 +229,7 @@ public final class VariantCatalog {
   }
 
   private static String normalize(String value) {
-    if (value == null) {
-      return "";
-    }
-    return value
-        .toLowerCase(Locale.ENGLISH)
-        .replace('\u2019', '\'')
-        .replaceAll("[^a-z0-9]+", " ")
-        .trim()
-        .replaceFirst("^the\\s+", "");
+    return SlayerText.encounter(value);
   }
 
   private static final class VariantResourceData {

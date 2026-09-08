@@ -16,12 +16,10 @@ public final class SlayerMethodRuleCoverage {
         failures.add(assignment + ": no individually reviewed strategy");
         continue;
       }
-      for (final Preference.Playstyle playstyle : Preference.Playstyle.values()) {
-        for (final Preference.Cannon cannon : Preference.Cannon.values()) {
-          for (final Preference.Burst burst : Preference.Burst.values()) {
-            for (final Preference.CombatStyle combat : Preference.CombatStyle.values()) {
-              validateSelection(assignment, playstyle, cannon, burst, combat, validated, failures);
-            }
+      for (final Preference.Cannon cannon : Preference.Cannon.values()) {
+        for (final Preference.Burst burst : Preference.Burst.values()) {
+          for (final Preference.CombatStyle combat : Preference.CombatStyle.values()) {
+            validateSelection(assignment, cannon, burst, combat, validated, failures);
           }
         }
       }
@@ -34,7 +32,6 @@ public final class SlayerMethodRuleCoverage {
 
   private static void validateSelection(
       final String assignment,
-      final Preference.Playstyle playstyle,
       final Preference.Cannon cannon,
       final Preference.Burst burst,
       final Preference.CombatStyle combat,
@@ -43,7 +40,7 @@ public final class SlayerMethodRuleCoverage {
     try {
       final TaskStrategy strategy =
           SlayerTaskStrategyCatalog.resolve(
-              assignment, playstyle, cannon, burst, combat, "Not restricted", false);
+              assignment, cannon, burst, combat, "Not restricted", false);
       if (strategy == null || !strategy.isReviewed()) {
         failures.add(assignment + ": preference resolved to an unreviewed method");
         return;

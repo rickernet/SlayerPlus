@@ -5,18 +5,14 @@ import lombok.Getter;
 
 @Getter
 public final class KitPlan {
-  private final String equipment;
-  private final String inventory;
   private final String ownedStatus;
   private final String layoutTitle;
   private final List<KitItem> equipmentItems;
   private final List<KitItem> inventoryItems;
   private final List<KitItem> optionalItems;
 
-  public KitPlan(String equipment, String inventory, String ownedStatus) {
+  public KitPlan(String ownedStatus) {
     this(
-        equipment,
-        inventory,
         ownedStatus,
         "Recommended setup",
         Collections.emptyList(),
@@ -25,15 +21,11 @@ public final class KitPlan {
   }
 
   public KitPlan(
-      String equipment,
-      String inventory,
       String ownedStatus,
       String layoutTitle,
       List<KitItem> equipmentItems,
       List<KitItem> inventoryItems,
       List<KitItem> optionalItems) {
-    this.equipment = safe(equipment, "Use your strongest task setup");
-    this.inventory = safe(inventory, "Food and task supplies");
     this.ownedStatus = safe(ownedStatus, "No item scan available");
     this.layoutTitle = safe(layoutTitle, "Recommended setup");
     this.equipmentItems = immutableCopy(equipmentItems);
@@ -72,8 +64,7 @@ public final class KitPlan {
     }
     return updated == null
         ? this
-        : new KitPlan(
-            equipment, inventory, ownedStatus, layoutTitle, equipmentItems, updated, optionalItems);
+        : new KitPlan(ownedStatus, layoutTitle, equipmentItems, updated, optionalItems);
   }
 
   public boolean hasVisualLayout() {
@@ -98,8 +89,6 @@ public final class KitPlan {
 
   public static KitPlan hidden() {
     return new KitPlan(
-        "Hidden in settings",
-        "Hidden in settings",
         "Loadout recommendations disabled",
         "Loadout recommendations disabled",
         Collections.emptyList(),
@@ -111,8 +100,6 @@ public final class KitPlan {
     String task =
         assignment == null || assignment.trim().isEmpty() ? "This task" : assignment.trim();
     return new KitPlan(
-        "Research pending",
-        "No inventory generated",
         "SlayerPlus will not create a broad or guessed loadout.",
         task + " — strategy review pending",
         Collections.emptyList(),
@@ -122,8 +109,6 @@ public final class KitPlan {
 
   public static KitPlan empty() {
     return new KitPlan(
-        "—",
-        "—",
         "No active loadout",
         "Waiting for Slayer task",
         Collections.emptyList(),

@@ -1,3 +1,4 @@
+# Columns: task_name, prayer_slots, loot_slots, food_slots, include_style_boost
 Aberrant spectres	4	2	12	true
 Basilisks	4	2	12	true
 Bloodveld	4	2	12	true

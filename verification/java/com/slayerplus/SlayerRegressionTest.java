@@ -102,8 +102,6 @@ public class SlayerRegressionTest {
     KitPlan plan =
         new KitPlan(
             "Ready",
-            "Ready",
-            "Ready",
             "Turael boost",
             Collections.singletonList(new KitItem("Max cape", 100, 1, KitItem.Status.EQUIPPED)),
             Collections.singletonList(
@@ -171,7 +169,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
                 task,
-                Preference.Playstyle.FAST_XP,
                 Preference.Cannon.ALLOW,
                 Preference.Burst.NEVER,
                 Preference.CombatStyle.AUTOMATIC,
@@ -202,7 +199,6 @@ public class SlayerRegressionTest {
     final TaskStrategy melee =
         SlayerTaskStrategyCatalog.resolve(
             "Skeletal wyverns",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -241,7 +237,6 @@ public class SlayerRegressionTest {
     final TaskStrategy ranged =
         SlayerTaskStrategyCatalog.resolve(
             "Skeletal wyverns",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_RANGED,
@@ -266,7 +261,6 @@ public class SlayerRegressionTest {
     final TaskStrategy magic =
         SlayerTaskStrategyCatalog.resolve(
             "Skeletal wyverns",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MAGIC,
@@ -379,7 +373,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Nechryaels",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -532,7 +525,6 @@ public class SlayerRegressionTest {
       final TaskStrategy strategy =
           SlayerTaskStrategyCatalog.resolve(
               task,
-              Preference.Playstyle.FAST_XP,
               Preference.Cannon.NEVER,
               Preference.Burst.NEVER,
               Preference.CombatStyle.AUTOMATIC,
@@ -545,7 +537,6 @@ public class SlayerRegressionTest {
     final TaskStrategy otherworldly =
         SlayerTaskStrategyCatalog.resolve(
             "Otherworldly beings",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -651,13 +642,7 @@ public class SlayerRegressionTest {
     final KitPlan enriched =
         SlayerPlusPlugin.appendMasterReturnTeleportForTest(
             new KitPlan(
-                "Gear",
-                "Inventory",
-                "Owned",
-                "Test",
-                Collections.emptyList(),
-                inventory,
-                Collections.emptyList()),
+                "Owned", "Test", Collections.emptyList(), inventory, Collections.emptyList()),
             3000,
             "Karamja gloves 4");
     assertEquals(28, enriched.getInventoryItems().size());
@@ -675,7 +660,6 @@ public class SlayerRegressionTest {
     final TaskStrategy whisperer =
         SlayerTaskStrategyCatalog.resolve(
             "The Whisperer",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -752,7 +736,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Vorkath",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -808,7 +791,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Vorkath",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -858,7 +840,6 @@ public class SlayerRegressionTest {
     final TaskStrategy melee =
         SlayerTaskStrategyCatalog.resolve(
             "Vorkath",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MELEE,
@@ -868,7 +849,6 @@ public class SlayerRegressionTest {
         new Recommendation(
             "Ungael",
             melee.getMethod(),
-            "Owned melee setup",
             "Travel to Rellekka",
             "Not allowed",
             "Rune pouch",
@@ -905,7 +885,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Blue dragons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -924,7 +903,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Blue dragons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_RANGED,
@@ -953,7 +931,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Blue dragons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MAGIC,
@@ -978,7 +955,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Blue dragons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MELEE,
@@ -998,7 +974,6 @@ public class SlayerRegressionTest {
       final TaskStrategy strategy =
           SlayerTaskStrategyCatalog.resolve(
               task,
-              Preference.Playstyle.FAST_XP,
               Preference.Cannon.NEVER,
               Preference.Burst.NEVER,
               Preference.CombatStyle.PREFER_RANGED,
@@ -1017,7 +992,6 @@ public class SlayerRegressionTest {
     final TaskStrategy magic =
         SlayerTaskStrategyCatalog.resolve(
             "Metal dragons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MAGIC,
@@ -1047,7 +1021,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Royal Titans",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1151,7 +1124,8 @@ public class SlayerRegressionTest {
     assertTrue(containsLabelText(panel, "Combat style"));
     assertTrue(containsLabelText(panel, "Slayer helm"));
     assertTrue(containsLabelText(panel, "Shard preference"));
-    assertTrue(containsLabelText(panel, "Travel priority"));
+    assertFalse(containsLabelText(panel, "Playstyle"));
+    assertFalse(containsLabelText(panel, "Travel priority"));
     assertFalse(containsLabelText(panel, "ROUTING & DISPLAY"));
     assertFalse(containsLabelText(panel, "Enable Shortest Path routing"));
     assertFalse(containsLabelText(panel, "Show loadout recommendations"));
@@ -1182,7 +1156,6 @@ public class SlayerRegressionTest {
       final TaskStrategy strategy =
           SlayerTaskStrategyCatalog.resolve(
               task,
-              Preference.Playstyle.FAST_XP,
               Preference.Cannon.ALLOW,
               Preference.Burst.ALLOW,
               Preference.CombatStyle.AUTOMATIC,
@@ -1287,8 +1260,6 @@ public class SlayerRegressionTest {
     panel.showRecommendation(
         null,
         new KitPlan(
-            "—",
-            "—",
             "No item scan available",
             "THE WHISPERER • Lassar Undercity",
             Collections.emptyList(),
@@ -1615,7 +1586,6 @@ public class SlayerRegressionTest {
     final TaskStrategy fireGiants =
         SlayerTaskStrategyCatalog.resolve(
             "Fire giants",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -1627,7 +1597,6 @@ public class SlayerRegressionTest {
     final TaskStrategy tzhaar =
         SlayerTaskStrategyCatalog.resolve(
             "Tzhaar",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -1638,7 +1607,6 @@ public class SlayerRegressionTest {
     final TaskStrategy brutus =
         SlayerTaskStrategyCatalog.resolve(
             "Brutus",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1664,7 +1632,6 @@ public class SlayerRegressionTest {
     final TaskStrategy birds =
         SlayerTaskStrategyCatalog.resolve(
             "Birds",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1676,7 +1643,6 @@ public class SlayerRegressionTest {
     final TaskStrategy rats =
         SlayerTaskStrategyCatalog.resolve(
             "Rats",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1687,7 +1653,6 @@ public class SlayerRegressionTest {
     final TaskStrategy wolves =
         SlayerTaskStrategyCatalog.resolve(
             "Wolves",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1701,7 +1666,6 @@ public class SlayerRegressionTest {
             "Nardah desert",
             SlayerTaskStrategyCatalog.resolve(
                 "Crocodiles",
-                Preference.Playstyle.FAST_XP,
                 Preference.Cannon.NEVER,
                 Preference.Burst.NEVER,
                 Preference.CombatStyle.AUTOMATIC,
@@ -1717,7 +1681,6 @@ public class SlayerRegressionTest {
     final TaskStrategy bats =
         SlayerTaskStrategyCatalog.resolve(
             "Bats",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1734,7 +1697,6 @@ public class SlayerRegressionTest {
     final TaskStrategy araxxor =
         SlayerTaskStrategyCatalog.resolve(
             "Araxxor",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1767,7 +1729,6 @@ public class SlayerRegressionTest {
     final TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "The Grotesque Guardians",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1914,7 +1875,6 @@ public class SlayerRegressionTest {
     final TaskStrategy blackDemonMagic =
         SlayerTaskStrategyCatalog.resolve(
             "Black demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MAGIC,
@@ -1926,7 +1886,6 @@ public class SlayerRegressionTest {
     final TaskStrategy blackDemonAutomatic =
         SlayerTaskStrategyCatalog.resolve(
             "Black demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1937,7 +1896,6 @@ public class SlayerRegressionTest {
     final TaskStrategy waterfiends =
         SlayerTaskStrategyCatalog.resolve(
             "Waterfiends",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1952,7 +1910,6 @@ public class SlayerRegressionTest {
     final TaskStrategy preferred =
         SlayerTaskStrategyCatalog.resolve(
             "Hill giants",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.PREFER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1963,7 +1920,6 @@ public class SlayerRegressionTest {
     final TaskStrategy disabled =
         SlayerTaskStrategyCatalog.resolve(
             "Hill giants",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -1977,7 +1933,6 @@ public class SlayerRegressionTest {
     final TaskStrategy meiyerditch =
         SlayerTaskStrategyCatalog.resolve(
             "Bloodveld",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2008,7 +1963,6 @@ public class SlayerRegressionTest {
     final TaskStrategy catacombs =
         SlayerTaskStrategyCatalog.resolve(
             "Bloodveld",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.PREFER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2026,7 +1980,6 @@ public class SlayerRegressionTest {
     final TaskStrategy tower =
         SlayerTaskStrategyCatalog.resolve(
             "Bloodveld",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.PREFER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2038,7 +1991,6 @@ public class SlayerRegressionTest {
     final TaskStrategy godWars =
         SlayerTaskStrategyCatalog.resolve(
             "Bloodveld",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.PREFER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2054,7 +2006,6 @@ public class SlayerRegressionTest {
     final TaskStrategy regular =
         SlayerTaskStrategyCatalog.resolve(
             "Greater demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2071,7 +2022,6 @@ public class SlayerRegressionTest {
     final TaskStrategy water =
         SlayerTaskStrategyCatalog.resolve(
             "Greater demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MAGIC,
@@ -2082,7 +2032,6 @@ public class SlayerRegressionTest {
     final TaskStrategy karuulmCannon =
         SlayerTaskStrategyCatalog.resolve(
             "Greater demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.PREFER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2094,7 +2043,6 @@ public class SlayerRegressionTest {
     final TaskStrategy chasmCannon =
         SlayerTaskStrategyCatalog.resolve(
             "Greater demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.PREFER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2107,7 +2055,6 @@ public class SlayerRegressionTest {
     final TaskStrategy explicitChasmMelee =
         SlayerTaskStrategyCatalog.resolve(
             "Greater demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.PREFER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MELEE,
@@ -2119,7 +2066,6 @@ public class SlayerRegressionTest {
     final TaskStrategy kril =
         SlayerTaskStrategyCatalog.resolve(
             "K'ril Tsutsaroth",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2183,7 +2129,6 @@ public class SlayerRegressionTest {
     final TaskStrategy meleeKril =
         SlayerTaskStrategyCatalog.resolve(
             "K'ril Tsutsaroth",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.PREFER_MELEE,
@@ -2218,7 +2163,6 @@ public class SlayerRegressionTest {
     final TaskStrategy skotizo =
         SlayerTaskStrategyCatalog.resolve(
             "Skotizo",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2233,7 +2177,6 @@ public class SlayerRegressionTest {
     final TaskStrategy tormented =
         SlayerTaskStrategyCatalog.resolve(
             "Tormented demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2320,7 +2263,6 @@ public class SlayerRegressionTest {
     final TaskStrategy cerberus =
         SlayerTaskStrategyCatalog.resolve(
             "Cerberus",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2348,7 +2290,6 @@ public class SlayerRegressionTest {
     final TaskStrategy aviansies =
         SlayerTaskStrategyCatalog.resolve(
             "Aviansies",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2469,7 +2410,6 @@ public class SlayerRegressionTest {
     final TaskStrategy kree =
         SlayerTaskStrategyCatalog.resolve(
             "Kree'arra",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2479,7 +2419,6 @@ public class SlayerRegressionTest {
     final TaskStrategy bats =
         SlayerTaskStrategyCatalog.resolve(
             "Bats",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -2505,7 +2444,6 @@ public class SlayerRegressionTest {
       final TaskStrategy strategy =
           SlayerTaskStrategyCatalog.resolve(
               task,
-              Preference.Playstyle.FAST_XP,
               Preference.Cannon.ALLOW,
               Preference.Burst.ALLOW,
               Preference.CombatStyle.AUTOMATIC,

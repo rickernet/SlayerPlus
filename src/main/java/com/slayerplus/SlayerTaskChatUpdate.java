@@ -3,8 +3,13 @@ package com.slayerplus;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.runelite.client.util.Text;
 
+@Getter(AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class SlayerTaskChatUpdate {
   private static final Pattern ASSIGNMENT =
       Pattern.compile(
@@ -19,13 +24,6 @@ class SlayerTaskChatUpdate {
   private final int remaining;
   private final int streak;
   private final int points;
-
-  private SlayerTaskChatUpdate(String assignment, int remaining, int streak, int points) {
-    this.assignment = assignment;
-    this.remaining = remaining;
-    this.streak = streak;
-    this.points = points;
-  }
 
   static SlayerTaskChatUpdate parse(String rawMessage) {
     if (rawMessage == null) {
@@ -64,17 +62,5 @@ class SlayerTaskChatUpdate {
 
   String getTaskName() {
     return assignment;
-  }
-
-  int getRemaining() {
-    return remaining;
-  }
-
-  int getStreak() {
-    return streak;
-  }
-
-  int getPoints() {
-    return points;
   }
 }

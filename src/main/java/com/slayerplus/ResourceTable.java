@@ -11,7 +11,7 @@ final class ResourceTable {
     return rows(name, false, columns);
   }
 
-  static List<String[]> decodedRows(String name, int... columns) {
+  static List<String[]> rowsWithEscapedDelimiters(String name, int... columns) {
     return rows(name, true, columns);
   }
 
@@ -39,7 +39,7 @@ final class ResourceTable {
         }
         if (decode) {
           for (int index = 0; index < row.length; index++) {
-            row[index] = decode(row[index]);
+            row[index] = restoreEscapedDelimiters(row[index]);
           }
         }
         rows.add(row);
@@ -50,7 +50,7 @@ final class ResourceTable {
     return Collections.unmodifiableList(rows);
   }
 
-  private static String decode(String value) {
+  private static String restoreEscapedDelimiters(String value) {
     return value.replace("%7C", "|").replace("%0A", "\n").replace("%09", "\t").replace("%25", "%");
   }
 }

@@ -86,8 +86,6 @@ public class SlayerRefreshPerformanceTest {
             .withInventoryGroup(MethodRules.InventoryGroup.UTILITY);
     KitPlan plan =
         new KitPlan(
-            "equipment",
-            "inventory",
             "owned",
             "task",
             Collections.emptyList(),

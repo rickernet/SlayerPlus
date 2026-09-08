@@ -1,6 +1,8 @@
 package com.slayerplus;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 public final class BoostCoordinator {
   public static final int TURAEL_AYA_MASTER_ID = 1;
@@ -21,18 +23,12 @@ public final class BoostCoordinator {
   }
 
   @Getter
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   public static final class Decision {
     private final int completionNumber;
     private final int masterId;
     private final boolean bonusTask;
     private final int cycleStep;
-
-    private Decision(int completionNumber, int masterId, boolean bonusTask, int cycleStep) {
-      this.completionNumber = completionNumber;
-      this.masterId = masterId;
-      this.bonusTask = bonusTask;
-      this.cycleStep = cycleStep;
-    }
 
     public String getProgressText() {
       return bonusTask

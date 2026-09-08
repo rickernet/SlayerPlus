@@ -14,7 +14,6 @@ public class PoweredMagicTest {
     TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Barrows Brothers",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,

@@ -56,7 +56,9 @@ public class RunePolicyTest {
 
   private static List<Integer> resolve(Map<Integer, Integer> owned, int... required) {
     MethodRules.Builder rules = MethodRules.builder();
-    for (int id : required) rules.pouchRune(id, "Rune", 1);
+    for (int id : required) {
+      rules.pouchRune(id, "Rune", 1);
+    }
     RunePolicy.Resolution result = RunePolicy.resolve(rules.build().getPouchRunes(), owned);
     assertTrue(result.getUnownedRequirements().isEmpty());
     return result.getRunes().stream()

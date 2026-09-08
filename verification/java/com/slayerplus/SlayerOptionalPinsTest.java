@@ -65,8 +65,6 @@ public class SlayerOptionalPinsTest {
     KitItem pouch = item(ItemID.BH_RUNE_POUCH);
     KitPlan original =
         new KitPlan(
-            "gear",
-            "inventory",
             "owned",
             "task",
             Collections.singletonList(shark),

@@ -12,55 +12,40 @@ class PotionPolicy {
   private PotionPolicy() {}
 
   static String[] staminaAlternatives() {
-    return new String[] {"extended stamina potion", "stamina potion"};
+    return SlayerLoadoutData.array("stamina_potions");
   }
 
   static String[] goadingAlternatives() {
-    return new String[] {"goading potion"};
+    return SlayerLoadoutData.array("goading_potions");
   }
 
   static String[] antivenomAlternatives() {
-    return new String[] {"extended anti venom plus", "anti venom plus", "anti venom"};
+    return SlayerLoadoutData.array("venom_protection_potions");
   }
 
   static String[] rangedBoostAlternatives(TaskStrategy.CostPolicy costPolicy) {
     if (costPolicy == TaskStrategy.CostPolicy.MAX_DPS) {
-      return new String[] {
-        "divine bastion potion", "divine ranging potion", "bastion potion", "ranging potion"
-      };
+      return SlayerLoadoutData.array("maximum_damage_ranged_boosts");
     }
-    return new String[] {
-      "ranging potion", "bastion potion", "divine ranging potion", "divine bastion potion"
-    };
+    return SlayerLoadoutData.array("efficient_ranged_boosts");
   }
 
   static String[] meleeBoostAlternatives(TaskStrategy.CostPolicy costPolicy) {
     return costPolicy == TaskStrategy.CostPolicy.MAX_DPS
-        ? new String[] {"divine super combat potion", "super combat potion"}
-        : new String[] {"super combat potion", "divine super combat potion"};
+        ? SlayerLoadoutData.array("maximum_damage_melee_boosts")
+        : SlayerLoadoutData.array("efficient_melee_boosts");
   }
 
   static String[] magicBoostAlternatives() {
-    return new String[] {
-      "saturated heart",
-      "imbued heart",
-      "forgotten brew",
-      "divine battlemage potion",
-      "divine magic potion",
-      "battlemage potion",
-      "magic potion",
-      "ancient brew"
-    };
+    return SlayerLoadoutData.array("magic_boosts");
   }
 
   static String[] shieldedAntifireAlternatives() {
-    return new String[] {
-      "extended antifire", "antifire potion", "extended super antifire", "super antifire"
-    };
+    return SlayerLoadoutData.array("shield_compatible_antifire_potions");
   }
 
   static String[] potionOnlyAntifireAlternatives() {
-    return new String[] {"extended super antifire", "super antifire"};
+    return SlayerLoadoutData.array("shield_free_antifire_potions");
   }
 
   static int effectiveDoseUnits(String potionFamily, int doses) {

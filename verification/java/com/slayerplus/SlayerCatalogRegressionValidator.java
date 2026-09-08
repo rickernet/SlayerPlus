@@ -55,20 +55,11 @@ public final class SlayerCatalogRegressionValidator {
       locations.addAll(SlayerRecommendationEngine.catalogLocationsForValidation(assignment));
 
       for (final String location : locations) {
-        for (final Preference.Playstyle playstyle : Preference.Playstyle.values()) {
-          for (final Preference.Cannon cannon : Preference.Cannon.values()) {
-            for (final Preference.Burst burst : Preference.Burst.values()) {
-              for (final Preference.CombatStyle combat : Preference.CombatStyle.values()) {
-                validateSelection(
-                    assignment,
-                    location,
-                    playstyle,
-                    cannon,
-                    burst,
-                    combat,
-                    validatedCoverage,
-                    failures);
-              }
+        for (final Preference.Cannon cannon : Preference.Cannon.values()) {
+          for (final Preference.Burst burst : Preference.Burst.values()) {
+            for (final Preference.CombatStyle combat : Preference.CombatStyle.values()) {
+              validateSelection(
+                  assignment, location, cannon, burst, combat, validatedCoverage, failures);
             }
           }
         }
@@ -103,40 +94,35 @@ public final class SlayerCatalogRegressionValidator {
 
   private static void validateCriticalMethodContracts() {
     /* Dust Devil stacking requires a real aggression utility in the 4 x 7. */
-    for (final Preference.Playstyle playstyle :
-        new Preference.Playstyle[] {Preference.Playstyle.FAST_XP, Preference.Playstyle.PROFIT}) {
-      final TaskStrategy strategy =
-          SlayerTaskStrategyCatalog.resolve(
-              "Dust devils",
-              playstyle,
-              Preference.Cannon.ALLOW,
-              Preference.Burst.ALLOW,
-              Preference.CombatStyle.AUTOMATIC,
-              "Catacombs of Kourend",
-              false);
-      if (strategy == null || !strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)) {
-        throw new IllegalStateException(
-            "Dust Devil " + playstyle + " lost its reviewed Ancient AoE method");
+    final TaskStrategy strategy =
+        SlayerTaskStrategyCatalog.resolve(
+            "Dust devils",
+            Preference.Cannon.ALLOW,
+            Preference.Burst.ALLOW,
+            Preference.CombatStyle.AUTOMATIC,
+            "Catacombs of Kourend",
+            false);
+    if (strategy == null || !strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)) {
+      throw new IllegalStateException("Dust Devils lost their reviewed Ancient AoE method");
+    }
+    final MethodRules rules =
+        SlayerMethodRuleCatalog.resolve("Dust devils", "Catacombs of Kourend", strategy);
+    boolean aggressionUtility = false;
+    for (final MethodRules.RequiredItem item : rules.getRequiredItems()) {
+      if (item.getGroup() != MethodRules.InventoryGroup.UTILITY) {
+        continue;
       }
-      final MethodRules rules =
-          SlayerMethodRuleCatalog.resolve("Dust devils", "Catacombs of Kourend", strategy);
-      boolean aggressionUtility = false;
-      for (final MethodRules.RequiredItem item : rules.getRequiredItems()) {
-        if (item.getGroup() != MethodRules.InventoryGroup.UTILITY) {
-          continue;
-        }
-        for (final String alternative : item.getAlternatives()) {
-          final String name = normalize(alternative);
-          if (name.contains("dart") || name.contains("knife") || name.contains("goading potion")) {
-            aggressionUtility = true;
-            break;
-          }
+      for (final String alternative : item.getAlternatives()) {
+        final String name = normalize(alternative);
+        if (name.contains("dart") || name.contains("knife") || name.contains("goading potion")) {
+          aggressionUtility = true;
+          break;
         }
       }
-      if (!aggressionUtility) {
-        throw new IllegalStateException(
-            "Dust Devil stacking method has no owned-resolvable aggression utility slot");
-      }
+    }
+    if (!aggressionUtility) {
+      throw new IllegalStateException(
+          "Dust Devil stacking method has no owned-resolvable aggression utility slot");
     }
 
     /*
@@ -147,7 +133,6 @@ public final class SlayerCatalogRegressionValidator {
     final TaskStrategy cerberus =
         SlayerTaskStrategyCatalog.resolve(
             "Cerberus",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -176,7 +161,6 @@ public final class SlayerCatalogRegressionValidator {
   private static void validateSelection(
       final String assignment,
       final String location,
-      final Preference.Playstyle playstyle,
       final Preference.Cannon cannon,
       final Preference.Burst burst,
       final Preference.CombatStyle combat,
@@ -184,11 +168,10 @@ public final class SlayerCatalogRegressionValidator {
       final List<String> failures) {
     try {
       final TaskStrategy strategy =
-          SlayerTaskStrategyCatalog.resolve(
-              assignment, playstyle, cannon, burst, combat, location, false);
+          SlayerTaskStrategyCatalog.resolve(assignment, cannon, burst, combat, location, false);
       if (strategy == null || !strategy.isReviewed()) {
         failures.add(
-            selectionLabel(assignment, location, playstyle, cannon, burst, combat)
+            selectionLabel(assignment, location, cannon, burst, combat)
                 + ": unreviewed/null strategy");
         return;
       }
@@ -200,9 +183,7 @@ public final class SlayerCatalogRegressionValidator {
       }
     } catch (RuntimeException ex) {
       failures.add(
-          selectionLabel(assignment, location, playstyle, cannon, burst, combat)
-              + ": "
-              + safeMessage(ex));
+          selectionLabel(assignment, location, cannon, burst, combat) + ": " + safeMessage(ex));
     }
   }
 
@@ -352,12 +333,10 @@ public final class SlayerCatalogRegressionValidator {
   private static String selectionLabel(
       final String task,
       final String location,
-      final Preference.Playstyle playstyle,
       final Preference.Cannon cannon,
       final Preference.Burst burst,
       final Preference.CombatStyle combat) {
-    return task + " @ " + location + " [" + playstyle + "/" + cannon + "/" + burst + "/" + combat
-        + "]";
+    return task + " @ " + location + " [" + cannon + "/" + burst + "/" + combat + "]";
   }
 
   private static String normalize(final String value) {

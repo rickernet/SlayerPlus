@@ -62,7 +62,9 @@ final class PoweredMagic {
   }
 
   static boolean replacesStandardAttack(String spell) {
-    if (spell == null) return false;
+    if (spell == null) {
+      return false;
+    }
     String name = spell.toLowerCase(Locale.ENGLISH);
     return name.equals("magic dart")
         || name.matches(

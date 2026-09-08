@@ -1,37 +1,11 @@
 package com.slayerplus;
 
+import static com.slayerplus.SlayerText.normalize;
+
 import java.util.*;
 
 class SlayerTargetFootprintCatalog {
-  private static final Set<String> MULTI_TILE_SCYTHE_TARGETS =
-      Collections.unmodifiableSet(
-          new HashSet<>(
-              Arrays.asList(
-                  "abyssal sire",
-                  "the abyssal sire",
-                  "alchemical hydra",
-                  "the alchemical hydra",
-                  "amoxliatl",
-                  "araxxor",
-                  "cerberus",
-                  "dark beast",
-                  "dark beasts",
-                  "dagannoth kings",
-                  "duke sucellus",
-                  "giant mole",
-                  "grotesque guardians",
-                  "the grotesque guardians",
-                  "hellhound",
-                  "hellhounds",
-                  "kalphite queen",
-                  "the kalphite queen",
-                  "maggot king",
-                  "the maggot king",
-                  "sarachnis",
-                  "skotizo",
-                  "thermonuclear smoke devil",
-                  "the thermonuclear smoke devil",
-                  "vardorvis")));
+  private static final Set<String> MULTI_TILE_SCYTHE_TARGETS = loadMultiTileScytheTargets();
 
   private SlayerTargetFootprintCatalog() {}
 
@@ -47,14 +21,11 @@ class SlayerTargetFootprintCatalog {
     return MULTI_TILE_SCYTHE_TARGETS.contains(normalize(assignment));
   }
 
-  private static String normalize(String value) {
-    if (value == null) {
-      return "";
+  private static Set<String> loadMultiTileScytheTargets() {
+    Set<String> targets = new HashSet<>();
+    for (String[] row : ResourceTable.rows("slayer-multitile-targets.tsv", 1)) {
+      targets.add(normalize(row[0]));
     }
-    return value
-        .toLowerCase(Locale.ROOT)
-        .replace('\u2019', '\'')
-        .replaceAll("[^a-z0-9]+", " ")
-        .trim();
+    return Collections.unmodifiableSet(targets);
   }
 }

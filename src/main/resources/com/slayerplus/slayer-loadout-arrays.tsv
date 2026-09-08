@@ -1,0 +1,60 @@
+# Descriptive key followed by an ordered, pipe-separated preference list.
+magic_weapon_priority	tumeken|sanguinesti|trident|nightmare staff|ancient sceptre|kodai|wand|staff
+ranged_weapon_priority	twisted bow|bow of faerdhinen|blowpipe|crossbow|bow|atlatl
+melee_weapon_priority	scythe|soulreaper axe|osmumten|fang|rapier|abyssal whip|whip|lance|mace|sword|axe
+inferno_arrow_priority	seeking dragon arrow|seeking amethyst arrow|dragon arrow|seeking rune arrow|amethyst arrow|rune arrow|seeking adamant arrow|seeking broad arrow|adamant arrow|seeking mithril arrow|broad arrow|seeking steel arrow|mithril arrow|seeking iron arrow|steel arrow|seeking bronze arrow|iron arrow|bronze arrow
+efficient_boss_arrow_priority	amethyst arrow|seeking amethyst arrow|rune arrow|seeking rune arrow|dragon arrow|seeking dragon arrow|adamant arrow|seeking adamant arrow|broad arrow|seeking broad arrow|mithril arrow|seeking mithril arrow|steel arrow|seeking steel arrow|iron arrow|seeking iron arrow|bronze arrow|seeking bronze arrow
+efficient_regular_arrow_priority	rune arrow|seeking rune arrow|amethyst arrow|seeking amethyst arrow|dragon arrow|seeking dragon arrow|adamant arrow|seeking adamant arrow|broad arrow|seeking broad arrow|mithril arrow|seeking mithril arrow|steel arrow|seeking steel arrow|iron arrow|seeking iron arrow|bronze arrow|seeking bronze arrow
+strongest_non_dragon_arrow_priority	seeking amethyst arrow|amethyst arrow|seeking rune arrow|rune arrow|seeking adamant arrow|adamant arrow|seeking broad arrow|broad arrow|seeking mithril arrow|mithril arrow|seeking steel arrow|steel arrow|seeking iron arrow|iron arrow|seeking bronze arrow|bronze arrow
+strongest_standard_arrow_priority	seeking dragon arrow|dragon arrow|seeking amethyst arrow|amethyst arrow|seeking rune arrow|rune arrow|seeking adamant arrow|adamant arrow|seeking broad arrow|broad arrow|seeking mithril arrow|mithril arrow|seeking steel arrow|steel arrow|seeking iron arrow|iron arrow|seeking bronze arrow|bronze arrow
+stamina_potions	extended stamina potion|stamina potion
+goading_potions	goading potion
+venom_protection_potions	extended anti venom plus|anti venom plus|anti venom
+maximum_damage_ranged_boosts	divine bastion potion|divine ranging potion|bastion potion|ranging potion
+efficient_ranged_boosts	ranging potion|bastion potion|divine ranging potion|divine bastion potion
+maximum_damage_melee_boosts	divine super combat potion|super combat potion
+efficient_melee_boosts	super combat potion|divine super combat potion
+magic_boosts	saturated heart|imbued heart|forgotten brew|divine battlemage potion|divine magic potion|battlemage potion|magic potion|ancient brew
+shield_compatible_antifire_potions	extended antifire|antifire potion|extended super antifire|super antifire
+shield_free_antifire_potions	extended super antifire|super antifire
+water_weakness_staves	harmonised nightmare staff|kodai wand|mist battlestaff|water battlestaff|mystic water staff|staff of water
+fire_weakness_staves	twinflame staff|harmonised nightmare staff|smoke battlestaff|lava battlestaff|fire battlestaff|mystic fire staff|staff of fire
+earth_weakness_staves	harmonised nightmare staff|staff of the dead|mud battlestaff|earth battlestaff|mystic earth staff|staff of earth
+air_weakness_staves	twinflame staff|harmonised nightmare staff|smoke battlestaff|air battlestaff|mystic air staff|staff of air
+self_ammunition_ranged_weapons	blowpipe|bow of faerdhinen|crystal bow|webweaver bow|craw s bow|chinchompa
+owned_crossbow_ammunition	dragonstone dragon bolts e|dragonstone bolts e|ruby dragon bolts e|diamond dragon bolts e|dragon bolts|amethyst broad bolts|runite bolts|broad bolts
+basic_owned_arrows	dragon arrow|amethyst arrow|rune arrow|broad arrow
+ballista_ammunition	dragon javelin|amethyst javelin|rune javelin
+dragonstone_crossbow_ammunition	dragonstone dragon bolts e|dragonstone bolts e|ruby dragon bolts e|diamond dragon bolts e|dragon bolts|runite bolts|broad bolts
+standard_crossbow_ammunition	ruby dragon bolts e|diamond dragon bolts e|dragon bolts|amethyst broad bolts|runite bolts|broad bolts
+prayer_blessings	rada s blessing 4|rada s blessing 3|rada s blessing 2|rada s blessing 1|holy blessing|unholy blessing|war blessing|peaceful blessing|honourable blessing|blessing
+cannon_parts	base|stand|barrels|furnace
+magic_setup_fragments	staff|wand|trident|sceptre|sanguinesti|tumeken|ancestral|virtus|ahrim|occult
+ranged_setup_fragments	bow|crossbow|blowpipe|atlatl|masori|armadyl|karil|ava|quiver
+melee_setup_fragments	scimitar|sword|whip|rapier|mace|axe|lance|scythe|fang|torva|bandos|defender
+desert_heat_protection	circlet of water|desert amulet 4|waterskin 4|waterskin 3|waterskin 2|waterskin 1
+stone_protection_boots	boots of stone|granite boots|boots of brimstone
+broad_ammunition	amethyst broad bolts|broad bolts|broad arrows
+broad_ammunition_weapons	zaryte crossbow|dragon hunter crossbow|armadyl crossbow|dragon crossbow|rune crossbow|magic shortbow|magic longbow
+magic_dart_staves	slayer s staff e|slayer s staff|toxic staff of the dead|staff of the dead
+leaf_bladed_weapons	leaf bladed battleaxe|leaf bladed sword|leaf bladed spear
+ranged_wyvern_shields	dragonfire ward|mind shield|elemental shield|dragonfire shield|ancient wyvern shield
+melee_wyvern_shields	ancient wyvern shield|dragonfire shield|mind shield|elemental shield|dragonfire ward
+standard_dragonfire_shields	anti dragon shield|dragonfire shield|dragonfire ward|ancient wyvern shield
+preferred_dragonfire_shields	dragonfire ward|anti dragon shield|dragonfire shield|ancient wyvern shield
+tagging_projectiles	mithril dart|steel dart|iron dart|bronze dart|adamant dart|mithril knife|steel knife|iron knife|bronze knife|adamant knife
+medium_cannonball_tasks	dagannoth|kalphites|suqahs|trolls|warped creatures|gryphons|scabarites
+blighted_food	blighted anglerfish|blighted manta ray|blighted karambwan|anglerfish|manta ray|cooked karambwan
+wilderness_escape_items	royal seed pod|seed pod|dragonstone teleport scroll|amulet of glory|ring of wealth
+reviewed_chromatic_dragons	blue dragon|blue dragons|black dragon|black dragons|green dragon|green dragons|red dragon|red dragons
+poison_protection	antidote plus plus|antidote plus|superantipoison|antipoison
+light_source_tasks	cave bug|cave bugs|cave slime|cave slimes
+safe_light_sources	bruma torch|bullseye lantern|emerald lantern|sapphire lantern|oil lantern|candle lantern
+poison_protection_tasks	cave crawler|cave crawlers|cave slime|cave slimes
+armadyl_protection_items	honourable blessing|armadyl pendant|book of law|armadyl bracers|armadyl d hide boots|armadyl d hide body|armadyl chaps|armadyl cloak
+zamorak_protection_items	unholy blessing|unholy book|zamorak bracers|zamorak d hide boots|zamorak d hide body|zamorak chaps|zamorak cloak
+wilderness_encounters	callisto|venenatis|vet ion|vet'ion|scorpia|chaos elemental|the chaos elemental|chaos fanatic|the chaos fanatic|crazy archaeologists|revenants|lava dragons|green dragons|mammoths|rogues|magic axes|dark warriors|earth warriors|ents
+metal_dragon_tasks	metal dragon|metal dragons|bronze dragon|bronze dragons|iron dragon|iron dragons|steel dragon|steel dragons|mithril dragon|mithril dragons|adamant dragon|adamant dragons|rune dragon|rune dragons
+air_spell_fragments	air spell|air spells|wind spell|wind spells
+standard_combat_spell_fragments	magic dart|water blast|water spell|earth wave|earth spell|fire spell|air spell|wind spell
+arceuus_utility_excluded_bosses	amoxliatl|araxxor|sarachnis|vardorvis|grotesque guardians|the grotesque guardians|zulrah|kalphite queen|the kalphite queen

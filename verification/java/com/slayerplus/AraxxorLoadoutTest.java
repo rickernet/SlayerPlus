@@ -60,7 +60,6 @@ public class AraxxorLoadoutTest {
   private TaskStrategy strategy(String task) {
     return SlayerTaskStrategyCatalog.resolve(
         task,
-        Preference.Playstyle.FAST_XP,
         Preference.Cannon.NEVER,
         Preference.Burst.NEVER,
         Preference.CombatStyle.AUTOMATIC,

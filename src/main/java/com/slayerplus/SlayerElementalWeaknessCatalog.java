@@ -1,28 +1,23 @@
 package com.slayerplus;
 
 import java.util.*;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 class SlayerElementalWeaknessCatalog {
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   private enum Element {
     AIR("Wind"),
     EARTH("Earth"),
     FIRE("Fire"),
     WATER("Water");
     private final String spellLabel;
-
-    Element(String spellLabel) {
-      this.spellLabel = spellLabel;
-    }
   }
 
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   static final class Entry {
     private final Element element;
     private final int percent;
-
-    private Entry(Element element, int percent) {
-      this.element = element;
-      this.percent = percent;
-    }
 
     String getSpellLabel() {
       return element.spellLabel;
@@ -79,43 +74,14 @@ class SlayerElementalWeaknessCatalog {
   private static String[] staffPriorities(Element element) {
     switch (element) {
       case WATER:
-        return new String[] {
-          "harmonised nightmare staff",
-          "kodai wand",
-          "mist battlestaff",
-          "water battlestaff",
-          "mystic water staff",
-          "staff of water"
-        };
+        return SlayerLoadoutData.array("water_weakness_staves");
       case FIRE:
-        return new String[] {
-          "twinflame staff",
-          "harmonised nightmare staff",
-          "smoke battlestaff",
-          "lava battlestaff",
-          "fire battlestaff",
-          "mystic fire staff",
-          "staff of fire"
-        };
+        return SlayerLoadoutData.array("fire_weakness_staves");
       case EARTH:
-        return new String[] {
-          "harmonised nightmare staff",
-          "staff of the dead",
-          "mud battlestaff",
-          "earth battlestaff",
-          "mystic earth staff",
-          "staff of earth"
-        };
+        return SlayerLoadoutData.array("earth_weakness_staves");
       case AIR:
       default:
-        return new String[] {
-          "twinflame staff",
-          "harmonised nightmare staff",
-          "smoke battlestaff",
-          "air battlestaff",
-          "mystic air staff",
-          "staff of air"
-        };
+        return SlayerLoadoutData.array("air_weakness_staves");
     }
   }
 
@@ -138,13 +104,6 @@ class SlayerElementalWeaknessCatalog {
   }
 
   private static String normalize(String value) {
-    return value == null
-        ? ""
-        : value
-            .toLowerCase(Locale.ENGLISH)
-            .replace('\u2019', '\'')
-            .replaceAll("[^a-z0-9]+", " ")
-            .trim()
-            .replaceFirst("^the\\s+", "");
+    return SlayerText.encounter(value);
   }
 }

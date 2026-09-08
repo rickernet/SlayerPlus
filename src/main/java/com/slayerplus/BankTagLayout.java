@@ -1,6 +1,11 @@
 package com.slayerplus;
 
+import static com.slayerplus.SlayerText.matchesAny;
+
 import java.util.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.*;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.ItemID;
@@ -10,6 +15,7 @@ import net.runelite.client.plugins.banktags.tabs.Layout;
 import net.runelite.client.plugins.banktags.tabs.LayoutManager;
 import net.runelite.client.util.Text;
 
+@RequiredArgsConstructor
 public final class BankTagLayout {
   public static final String TAG_NAME = "SlayerPlus Current";
   private static final int BANK_COLUMNS = 8;
@@ -44,19 +50,6 @@ public final class BankTagLayout {
   private final ConfigManager configs;
   private int[] lastSavedLayout = new int[0];
   private Set<Integer> lastSavedTaggedItemIds = Collections.emptySet();
-
-  public BankTagLayout(
-      Client client,
-      TagManager tagManager,
-      LayoutManager layoutManager,
-      BankTagsService bankTagsService,
-      ConfigManager configs) {
-    this.client = client;
-    this.tagManager = tagManager;
-    this.layoutManager = layoutManager;
-    this.bankTagsService = bankTagsService;
-    this.configs = configs;
-  }
 
   public Result createOrUpdate(
       KitPlan plan,
@@ -109,7 +102,7 @@ public final class BankTagLayout {
       if (index == 11) {
         if (hasUsableDizanaForLayout
             && recommendedExtraQuiverAmmoItemId > 0
-            && placeNestedQuiverAmmoItemId(
+            && placeInventoryItemId(
                 layout, tags, recommendedExtraQuiverAmmoItemId, EQUIPMENT_POSITIONS[index])) {
           layoutSlots++;
         }
@@ -163,8 +156,7 @@ public final class BankTagLayout {
             PREPARATION_REFERENCE_START_ROW + preparationIndex / PREPARATION_REFERENCE_COLUMNS;
         int column =
             PREPARATION_REFERENCE_START_COLUMN + preparationIndex % PREPARATION_REFERENCE_COLUMNS;
-        if (placePreparationReferenceItemId(
-            layout, tags, preparationItemId, position(row, column))) {
+        if (placeInventoryItemId(layout, tags, preparationItemId, position(row, column))) {
           layoutSlots++;
           preparationIndex++;
         }
@@ -714,26 +706,7 @@ public final class BankTagLayout {
       return !isRunePouch(item);
     }
     String name = normalizeName(item.getDisplayName());
-    return matchesAny(
-        name,
-        Arrays.asList(
-            "herb sack",
-            "seed box",
-            "soul bearer",
-            "bonecrusher",
-            "ash sanctifier",
-            "holy wrench",
-            "looting bag",
-            "gem bag",
-            "book of the dead",
-            "explorer s ring",
-            "rock hammer",
-            "bag of salt",
-            "ice cooler",
-            "slayer bell",
-            "fungicide",
-            "fishing explosive",
-            "task tool"));
+    return matchesAny(name, SlayerLoadoutData.list("bank_utility_names"));
   }
 
   private static void placeEquipmentSwitchGroups(
@@ -885,18 +858,7 @@ public final class BankTagLayout {
   private static boolean isArmorTop(KitItem item) {
     String name = normalizeName(item == null ? "" : item.getDisplayName());
     String words = " " + name + " ";
-    return matchesAny(
-            name,
-            Arrays.asList(
-                "robe top",
-                "robetop",
-                "leathertop",
-                "platebody",
-                "chainbody",
-                "chestplate",
-                "hauberk",
-                "torso",
-                "tunic"))
+    return matchesAny(name, SlayerLoadoutData.list("body_armor_fragments"))
         || words.contains(" body ")
         || words.contains(" top ");
   }
@@ -904,20 +866,7 @@ public final class BankTagLayout {
   private static boolean isArmorLegs(KitItem item) {
     String name = normalizeName(item == null ? "" : item.getDisplayName());
     String words = " " + name + " ";
-    return matchesAny(
-            name,
-            Arrays.asList(
-                "robe bottom",
-                "robebottom",
-                "robeskirt",
-                "leatherskirt",
-                "platelegs",
-                "plateskirt",
-                "chainskirt",
-                "tassets",
-                "chaps",
-                "trousers",
-                "cuisse"))
+    return matchesAny(name, SlayerLoadoutData.list("leg_armor_fragments"))
         || words.contains(" leg ")
         || words.contains(" legs ")
         || words.contains(" skirt ")
@@ -936,14 +885,10 @@ public final class BankTagLayout {
         .trim();
   }
 
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   private static final class Candidate {
     private final KitItem item;
     private final int sourceIndex;
-
-    private Candidate(KitItem item, int sourceIndex) {
-      this.item = item;
-      this.sourceIndex = sourceIndex;
-    }
   }
 
   private static final class SwitchGroup {
@@ -955,22 +900,11 @@ public final class BankTagLayout {
     }
   }
 
+  @Getter(AccessLevel.PACKAGE)
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   static final class InventoryPlacement {
     private final KitItem item;
     private final int slotIndex;
-
-    private InventoryPlacement(KitItem item, int slotIndex) {
-      this.item = item;
-      this.slotIndex = slotIndex;
-    }
-
-    KitItem getItem() {
-      return item;
-    }
-
-    int getSlotIndex() {
-      return slotIndex;
-    }
   }
 
   private static int bankInventoryVisualGroup(KitItem item) {
@@ -981,54 +915,23 @@ public final class BankTagLayout {
     if (name.contains("goading potion")) {
       return 0;
     }
-    if (matchesAny(
-        name,
-        Arrays.asList(
-            "super restore",
-            "prayer potion",
-            "prayer restoration",
-            "prayer regeneration",
-            "sanfew serum"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("restore_potion_names"))) {
       return 4;
     }
     if (isBankInventoryFood(name)) {
       return 5;
     }
-    if (matchesAny(
-        name,
-        Arrays.asList("anti venom", "antivenom", "antipoison", "stamina potion", "antifire"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("protection_potion_names"))) {
       return 2;
     }
-    if (matchesAny(
-        name,
-        Arrays.asList(
-            "combat potion",
-            "ranging potion",
-            "magic potion",
-            "bastion potion",
-            "battlemage potion",
-            "ancient brew",
-            "forgotten brew",
-            "imbued heart",
-            "saturated heart"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("boost_potion_names"))) {
       return 1;
     }
     return 0;
   }
 
   private static boolean isBankInventoryFood(String name) {
-    return matchesAny(
-        name,
-        Arrays.asList(
-            "anglerfish",
-            "manta ray",
-            "dark crab",
-            "shark",
-            "sea turtle",
-            "karambwan",
-            "guthix rest",
-            "monkfish",
-            "high healing food"));
+    return matchesAny(name, SlayerLoadoutData.list("bank_food_names"));
   }
 
   private static String bankInventoryVisualFamily(KitItem item) {
@@ -1046,15 +949,6 @@ public final class BankTagLayout {
             .replace('’', '\'')
             .replaceAll("[^a-z0-9]+", " ")
             .trim();
-  }
-
-  private static boolean matchesAny(String value, List<String> fragments) {
-    for (String fragment : fragments) {
-      if (value.contains(fragment)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private static boolean place(Layout layout, Set<Integer> tags, KitItem item, int position) {
@@ -1113,26 +1007,6 @@ public final class BankTagLayout {
     return true;
   }
 
-  private static boolean placeNestedQuiverAmmoItemId(
-      Layout layout, Set<Integer> tags, int raw, int position) {
-    if (raw <= 0) {
-      return false;
-    }
-    tags.add(raw);
-    layout.setItemAtPos(raw, position);
-    return true;
-  }
-
-  private static boolean placePreparationReferenceItemId(
-      Layout layout, Set<Integer> tags, int raw, int position) {
-    if (raw <= 0) {
-      return false;
-    }
-    tags.add(raw);
-    layout.setItemAtPos(raw, position);
-    return true;
-  }
-
   private static boolean placeItemId(Layout layout, Set<Integer> tags, int raw, int position) {
     if (raw <= 0 || !tags.add(raw)) {
       return false;
@@ -1149,14 +1023,11 @@ public final class BankTagLayout {
     return row * BANK_COLUMNS + column;
   }
 
+  @Getter
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   public static final class Result {
     private final boolean success;
     private final String message;
-
-    private Result(boolean success, String message) {
-      this.success = success;
-      this.message = message;
-    }
 
     public static Result success(String message) {
       return new Result(true, message);
@@ -1164,14 +1035,6 @@ public final class BankTagLayout {
 
     public static Result failure(String message) {
       return new Result(false, message);
-    }
-
-    public boolean isSuccess() {
-      return success;
-    }
-
-    public String getMessage() {
-      return message;
     }
   }
 

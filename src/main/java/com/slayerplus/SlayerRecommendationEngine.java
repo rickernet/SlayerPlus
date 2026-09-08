@@ -1,5 +1,7 @@
 package com.slayerplus;
 
+import static com.slayerplus.SlayerText.matchesAny;
+
 import java.io.*;
 import java.util.*;
 import net.runelite.api.*;
@@ -81,9 +83,6 @@ public final class SlayerRecommendationEngine {
     return new Recommendation(
         selected.location,
         strategy.getMethod(),
-        buildReason(selected, normalizedTask, selectedScore, masterId)
-            + " "
-            + strategy.getRationale(),
         selected.travel,
         formatCannon(selected.cannonSupport),
         formatRequirements(selected, lockedUpgrade),
@@ -102,11 +101,6 @@ public final class SlayerRecommendationEngine {
     return new Recommendation(
         entry.getLocation(),
         strategy.getMethod(),
-        "Turael/Aya point boosting uses the current Wiki point-farming "
-            + "location, the lowest practical monster variant, an expeditious "
-            + "bracelet when owned, and a cannon only when the selected area "
-            + "supports it. "
-            + strategy.getRationale(),
         entry.getTravel(),
         entry.getCannon(),
         entry.getRequirements(),
@@ -122,7 +116,6 @@ public final class SlayerRecommendationEngine {
       return new Recommendation(
           "No non-Wilderness match",
           "Check the assignment with your Slayer master",
-          "Safety rule blocked a Wilderness route because Krystilia is not the selected master.",
           "Do not route into the Wilderness",
           "Not recommended",
           "Assigned-area data needs verification",
@@ -132,13 +125,6 @@ public final class SlayerRecommendationEngine {
     return new Recommendation(
         area,
         strategy.getMethod(),
-        (masterId == KONAR_MASTER_ID
-                ? "Konar fixes the destination. Your combat preferences still shape the recommended"
-                    + " method and cannon guidance."
-                : "The assignment fixes the destination, so preferences are applied only to the"
-                    + " method and cannon guidance.")
-            + " "
-            + strategy.getRationale(),
         travelForArea(area),
         formatCannon(cannonForArea(area)),
         "Use the monster inside the assigned area",
@@ -149,14 +135,7 @@ public final class SlayerRecommendationEngine {
   private Recommendation wildernessRecommendation(String assignment) {
     String normalized = normalize(assignment);
     String location;
-    if (Arrays.asList(
-            "abyssal demons",
-            "ankou",
-            "black demons",
-            "dust devils",
-            "greater demons",
-            "hellhounds")
-        .contains(normalized)) {
+    if (SlayerLoadoutData.list("wilderness_slayer_cave_tasks").contains(normalized)) {
       location = "Wilderness Slayer Cave";
     } else if (normalized.equals("bloodveld") || normalized.equals("bloodvelds")) {
       location = "Wilderness God Wars Dungeon";
@@ -167,9 +146,6 @@ public final class SlayerRecommendationEngine {
     return new Recommendation(
         location,
         strategy.getMethod(),
-        "Krystilia overrides the normal Wilderness block. Safety and low carried risk take priority"
-            + " over the normal profile score. "
-            + strategy.getRationale(),
         "Start from Ferox Enclave and use the safest route",
         formatCannon(CannonSupport.OPTIONAL),
         "Krystilia assignment active",
@@ -183,11 +159,6 @@ public final class SlayerRecommendationEngine {
     return new Recommendation(
         "Standard Slayer location",
         strategy.getMethod(),
-        (strategy.isReviewed()
-                ? "The task has a reviewed combat profile, but its preferred travel destination has"
-                    + " not been added to the route catalog yet. "
-                : "No generated loadout is available until this task is individually reviewed. ")
-            + strategy.getRationale(),
         "Use the nearest unlocked standard task location",
         "Check location rules",
         "Task-specific equipment profile active",
@@ -203,8 +174,6 @@ public final class SlayerRecommendationEngine {
     return new Recommendation(
         "Location locked",
         strategy.getMethod(),
-        "The highest-scoring catalog option is locked by an access requirement. "
-            + strategy.getRationale(),
         lockedOption.travel,
         formatCannon(lockedOption.cannonSupport),
         requirementName(lockedOption) + " required",
@@ -248,18 +217,7 @@ public final class SlayerRecommendationEngine {
 
   private int scoreOption(LocationOption option, String normalizedTask, int masterId) {
     int speed = speedRating(option);
-    int profit = profitRating(option);
-    int afk = afkRating(option);
-    int score;
-    switch (playstyle()) {
-      case PROFIT:
-        score = profit * 4 + speed + afk / 4;
-        break;
-      case FAST_XP:
-      default:
-        score = speed * 5;
-        break;
-    }
+    int score = speedRating(option) * 5;
     boolean cannonAvailable =
         option.cannonSupport == CannonSupport.RECOMMENDED
             || option.cannonSupport == CannonSupport.OPTIONAL;
@@ -326,124 +284,11 @@ public final class SlayerRecommendationEngine {
     return clampRating(rating);
   }
 
-  private int profitRating(LocationOption option) {
-    String text = normalize(option.location + " " + option.method);
-    int rating = 34;
-    if (text.contains("higher value") || text.contains("basilisk knight")) {
-      rating += 48;
-    }
-    if (matchesAny(text, Arrays.asList("lithkren", "kraken", "gargoyle", "skeletal wyvern"))) {
-      rating += 35;
-    }
-    if (matchesAny(text, Arrays.asList("darkmeyer", "cave horror", "abyssal"))) {
-      rating += 24;
-    }
-    if (text.contains("ancient shard") || text.contains("totem")) {
-      rating += 18;
-    }
-    return clampRating(rating);
-  }
-
-  private int afkRating(LocationOption option) {
-    String text = normalize(option.method);
-    int rating = 45;
-    if (text.contains("single combat") || text.contains("melee")) {
-      rating += 24;
-    }
-    if (text.contains("ranged")) {
-      rating += 12;
-    }
-    if (text.contains("cannon")) {
-      rating += 12;
-    }
-    if (text.contains("burst") || text.contains("barrage") || text.contains("stacked")) {
-      rating -= 26;
-    }
-    if (text.contains("finish each kill")
-        || text.contains("witchwood")
-        || text.contains("boots of stone")) {
-      rating -= 18;
-    }
-    return clampRating(rating);
-  }
-
   private int travelScore(String route) {
     String normalized = normalize(route);
     boolean directTeleport =
-        matchesAny(
-            normalized,
-            Arrays.asList(
-                "teleport",
-                "slayer ring",
-                "xeric",
-                "rada",
-                "drakan",
-                "digsite pendant",
-                "fairy ring"));
-    boolean freeOrReusable =
-        matchesAny(
-            normalized,
-            Arrays.asList(
-                "minigame teleport", "fairy ring", "spirit tree", "run from", "then run"));
-    boolean likelyConsumable =
-        matchesAny(
-            normalized,
-            Arrays.asList(
-                "games necklace",
-                "talisman",
-                "slayer ring",
-                "digsite pendant",
-                "teleport crystal",
-                "house teleport"));
-    switch (travelPreference()) {
-      case CHEAPEST:
-        if (freeOrReusable) {
-          return 52;
-        }
-        return likelyConsumable ? -20 : 18;
-      case AVOID_CONSUMABLES:
-        return likelyConsumable ? -70 : 42;
-      case FASTEST:
-      default:
-        return directTeleport ? 45 : 8;
-    }
-  }
-
-  private String buildReason(
-      LocationOption option, String normalizedTask, int score, int masterId) {
-    StringBuilder reason = new StringBuilder();
-    reason.append(playstyle()).append(" profile selected this unlocked option");
-    switch (playstyle()) {
-      case PROFIT:
-        reason.append(" for its stronger loot and supply-efficiency potential");
-        break;
-      case FAST_XP:
-      default:
-        reason.append(" for maximum kill-speed potential without a gear-cost penalty");
-        break;
-    }
-    if (cannonPreference() == Preference.Cannon.PREFER
-        && option.cannonSupport != CannonSupport.NOT_ALLOWED) {
-      reason.append("; cannon preference increased its score");
-    } else if (cannonPreference() == Preference.Cannon.NEVER
-        && option.cannonSupport == CannonSupport.NOT_ALLOWED) {
-      reason.append("; it naturally avoids cannon use");
-    }
-    if (burstPreference() == Preference.Burst.PREFER && supportsBurst(option)) {
-      reason.append("; burst/barrage preference increased its score");
-    } else if (burstPreference() == Preference.Burst.NEVER && !supportsBurst(option)) {
-      reason.append("; it avoids burst/barrage");
-    }
-    if (shardPreferenceBonusForTest(shardPreference(), normalizedTask, option.location) > 0) {
-      reason.append("; shard preference selected a valid shard-producing area");
-    }
-    reason
-        .append(". Travel was ranked by ")
-        .append(travelPreference().toString().toLowerCase(Locale.ENGLISH))
-        .append(". Score: ")
-        .append(score)
-        .append('.');
-    return reason.toString();
+        matchesAny(normalized, SlayerLoadoutData.list("direct_teleport_fragments"));
+    return directTeleport ? 45 : 8;
   }
 
   private static boolean supportsBurst(LocationOption option) {
@@ -453,12 +298,6 @@ public final class SlayerRecommendationEngine {
 
   private static int clampRating(int value) {
     return Math.max(0, Math.min(100, value));
-  }
-
-  private Preference.Playstyle playstyle() {
-    return config == null || config.playstyle() == null
-        ? Preference.Playstyle.FAST_XP
-        : config.playstyle();
   }
 
   private Preference.CombatStyle combatStylePreference() {
@@ -477,12 +316,6 @@ public final class SlayerRecommendationEngine {
     return config == null || config.burstPreference() == null
         ? Preference.Burst.ALLOW
         : config.burstPreference();
-  }
-
-  private Preference.Travel travelPreference() {
-    return config == null || config.travelPreference() == null
-        ? Preference.Travel.FASTEST
-        : config.travelPreference();
   }
 
   private Preference.Shard shardPreference() {
@@ -542,7 +375,6 @@ public final class SlayerRecommendationEngine {
   private TaskStrategy strategyFor(String assignment, String location, boolean wilderness) {
     return SlayerTaskStrategyCatalog.resolve(
         assignment,
-        playstyle(),
         cannonPreference(),
         burstPreference(),
         combatStylePreference(),
@@ -596,16 +428,7 @@ public final class SlayerRecommendationEngine {
 
   private static CannonSupport cannonForArea(String area) {
     String normalized = normalize(area);
-    if (matchesAny(
-        normalized,
-        Arrays.asList(
-            "catacombs",
-            "slayer tower",
-            "fremennik slayer dungeon",
-            "karuulm",
-            "kraken",
-            "god wars",
-            "mos le harmless"))) {
+    if (matchesAny(normalized, SlayerLoadoutData.list("cannon_restricted_locations"))) {
       return CannonSupport.NOT_ALLOWED;
     }
     if (normalized.contains("lighthouse")
@@ -642,7 +465,8 @@ public final class SlayerRecommendationEngine {
 
   private static Map<String, List<LocationOption>> createTaskLocations() {
     Map<String, List<LocationOption>> groups = new LinkedHashMap<>();
-    for (String[] fields : ResourceTable.decodedRows("slayer-task-locations.tsv", 9)) {
+    for (String[] fields :
+        ResourceTable.rowsWithEscapedDelimiters("slayer-task-locations.tsv", 9)) {
       if (!fields[0].equals("O")) {
         throw new IllegalStateException("Invalid task-location row type: " + fields[0]);
       }
@@ -682,23 +506,7 @@ public final class SlayerRecommendationEngine {
   }
 
   private static String normalize(String value) {
-    if (value == null) {
-      return "";
-    }
-    return value
-        .toLowerCase(Locale.ENGLISH)
-        .replace('\u2019', '\'')
-        .replaceAll("[^a-z0-9]+", " ")
-        .trim();
-  }
-
-  private static boolean matchesAny(String value, List<String> fragments) {
-    for (String fragment : fragments) {
-      if (value.contains(fragment)) {
-        return true;
-      }
-    }
-    return false;
+    return SlayerText.normalize(value);
   }
 
   private enum CannonSupport {

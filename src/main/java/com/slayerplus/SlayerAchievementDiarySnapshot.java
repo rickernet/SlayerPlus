@@ -1,6 +1,8 @@
 package com.slayerplus;
 
 import java.util.*;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.VarbitID;
 
@@ -113,12 +115,18 @@ final class SlayerAchievementDiarySnapshot {
   }
 
   static SlayerAchievementDiarySnapshot capture(Client client) {
-    if (client == null) return EMPTY;
+    if (client == null) {
+      return EMPTY;
+    }
     Map<String, Integer> tiers = new LinkedHashMap<>();
-    for (int i = 0; i < REGIONS.length; i++) {
+    for (int regionIndex = 0; regionIndex < REGIONS.length; regionIndex++) {
       int tier = 0;
-      for (int j = 0; j < 4; j++) if (client.getVarbitValue(VARBITS[i][j]) > 0) tier = j + 1;
-      tiers.put(REGIONS[i], tier);
+      for (int tierIndex = 0; tierIndex < 4; tierIndex++) {
+        if (client.getVarbitValue(VARBITS[regionIndex][tierIndex]) > 0) {
+          tier = tierIndex + 1;
+        }
+      }
+      tiers.put(REGIONS[regionIndex], tier);
     }
     tiers.put("karamja", client.getVarbitValue(VarbitID.KARAMJA_DIARY_ELITE_COMPLETE) > 0 ? 4 : 0);
     return new SlayerAchievementDiarySnapshot(tiers);
@@ -126,9 +134,12 @@ final class SlayerAchievementDiarySnapshot {
 
   boolean allowsTravelItem(String family) {
     String item = normalize(family);
-    if ((item.equals("dramen staff") || item.equals("lunar staff")) && hasTier("lumbridge", 4))
+    if ((item.equals("dramen staff") || item.equals("lunar staff")) && hasTier("lumbridge", 4)) {
       return false;
-    if (item.contains("achievement diary cape")) return allEliteComplete();
+    }
+    if (item.contains("achievement diary cape")) {
+      return allEliteComplete();
+    }
     Requirement requirement = Requirement.forItem(item);
     return requirement == null
         || requirement.region.equals("karamja")
@@ -157,11 +168,18 @@ final class SlayerAchievementDiarySnapshot {
 
   boolean allowsLoadoutReward(String name, Iterable<String> alternatives) {
     StringBuilder combined = new StringBuilder(normalize(name));
-    if (alternatives != null)
-      for (String alternative : alternatives) combined.append(' ').append(normalize(alternative));
+    if (alternatives != null) {
+      for (String alternative : alternatives) {
+        combined.append(' ').append(normalize(alternative));
+      }
+    }
     String value = combined.toString();
-    if (value.contains("ash sanctifier")) return unlocksAshSanctifier();
-    if (value.contains("bonecrusher")) return unlocksBonecrusher();
+    if (value.contains("ash sanctifier")) {
+      return unlocksAshSanctifier();
+    }
+    if (value.contains("bonecrusher")) {
+      return unlocksBonecrusher();
+    }
     return !value.contains("mole locator") || unlocksGiantMoleLocator();
   }
 
@@ -174,32 +192,26 @@ final class SlayerAchievementDiarySnapshot {
     return new SlayerAchievementDiarySnapshot(tiers == null ? Map.of() : tiers);
   }
 
+  @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
   private static final class Requirement {
     final String region;
     final int tier;
 
-    Requirement(String region, int tier) {
-      this.region = region;
-      this.tier = tier;
-    }
-
     static Requirement forItem(String item) {
-      for (String[] row : REWARD_PREFIXES)
+      for (String[] row : REWARD_PREFIXES) {
         if (item.startsWith(row[0])) {
-          for (int tier = 4; tier >= 1; tier--)
-            if (item.endsWith(" " + tier)) return new Requirement(row[1], tier);
+          for (int tier = 4; tier >= 1; tier--) {
+            if (item.endsWith(" " + tier)) {
+              return new Requirement(row[1], tier);
+            }
+          }
         }
+      }
       return null;
     }
   }
 
   private static String normalize(String value) {
-    return value == null
-        ? ""
-        : value
-            .toLowerCase(Locale.ENGLISH)
-            .replace('\u2019', '\'')
-            .replaceAll("[^a-z0-9]+", " ")
-            .trim();
+    return SlayerText.normalize(value);
   }
 }

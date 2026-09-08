@@ -9,13 +9,14 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.gameval.*;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.ItemID;
-import net.runelite.api.kit.KitType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -58,7 +59,6 @@ public class SlayerPlusPlugin extends Plugin {
   private static final String RUNELITE_SLAYER_POINTS_KEY = "points";
   private static final String LAST_SLAYER_MASTER_SNAPSHOT_KEY = "lastSlayerMasterIdV1";
   private static final String PORTRAIT_CALIBRATION_KEY = "portraitCalibrationV1";
-  private static final String PLAYSTYLE_KEY = "playstyle";
   private static final String EASY_TELEPORTS_CONFIG_GROUP = "easypharaohsceptre";
   private static final String INFERNO_TRAVEL_SNAPSHOT_KEY = "infernoTravelItemSnapshotV1";
   private static final String OWNED_SLAYER_HELMETS_SNAPSHOT_KEY = "ownedSlayerHelmetItemIdsV1";
@@ -122,6 +122,7 @@ public class SlayerPlusPlugin extends Plugin {
   private int braceletChargeInfoBoxItemId = -1;
   private boolean braceletAbsentAfterDepletion;
   private int lastAppearanceHash = Integer.MIN_VALUE;
+  private int portraitTurnDirection = 1;
   private boolean portraitPending;
   private long portraitRetry;
   private boolean portraitLoaded;
@@ -199,7 +200,6 @@ public class SlayerPlusPlugin extends Plugin {
 
   @Override
   protected void startUp() {
-    migrateRemovedPlaystyle();
     slayerService = findExistingSlayerService(pluginManager.getPlugins());
     portraitRenderer = new PlayerPortraitRenderer(client);
     portraitLoaded =
@@ -459,21 +459,6 @@ public class SlayerPlusPlugin extends Plugin {
     return gameState == GameState.HOPPING
         || gameState == GameState.CONNECTION_LOST
         || gameState == GameState.LOGGING_IN;
-  }
-
-  private void migrateRemovedPlaystyle() {
-    String stored = configs.getConfiguration(SlayerPlusConfig.GROUP, PLAYSTYLE_KEY);
-    if (stored == null || stored.trim().isEmpty()) {
-      return;
-    }
-    String normalized =
-        stored.trim().toUpperCase(Locale.ENGLISH).replace('-', '_').replace(' ', '_');
-    if (normalized.equals("BALANCED")
-        || normalized.equals("KONAR_FOCUSED")
-        || normalized.equals("AFK")) {
-      configs.setConfiguration(
-          SlayerPlusConfig.GROUP, PLAYSTYLE_KEY, Preference.Playstyle.FAST_XP.name());
-    }
   }
 
   @Subscribe
@@ -750,6 +735,9 @@ public class SlayerPlusPlugin extends Plugin {
   }
 
   private static int[] snapshotExactItemState(Item[] items) {
+    if (items == null || items.length == 0) {
+      return new int[0];
+    }
     int[] state = new int[items.length * 2];
     for (int slot = 0; slot < items.length; slot++) {
       Item item = items[slot];
@@ -870,7 +858,7 @@ public class SlayerPlusPlugin extends Plugin {
     }
     bankReachedForRestock = true;
     BankRoutes routes = accountBankRoutes();
-    if (routes.remember(player.getWorldLocation(), client.isInInstancedRegion())) {
+    if (routes.remember(player.getWorldLocation(), client.getTopLevelWorldView().isInstance())) {
       configs.setRSProfileConfiguration(
           SlayerPlusConfig.GROUP, BankRoutes.CONFIG_KEY, routes.serialize());
     }
@@ -912,6 +900,7 @@ public class SlayerPlusPlugin extends Plugin {
     appearanceHash = 31 * appearanceHash + composition.getGender();
     if (appearanceHash != lastAppearanceHash) {
       lastAppearanceHash = appearanceHash;
+      portraitTurnDirection = Math.random() < 0.5 ? -1 : 1;
       portraitPending = true;
       portraitRetry = 0;
     }
@@ -922,7 +911,8 @@ public class SlayerPlusPlugin extends Plugin {
       deferPortraitRetry();
       return;
     }
-    BufferedImage cachedPortrait = portraitCache.get(appearanceHash);
+    int portraitCacheKey = 31 * appearanceHash + portraitTurnDirection;
+    BufferedImage cachedPortrait = portraitCache.get(portraitCacheKey);
     if (cachedPortrait != null) {
       portraitPending = false;
       portraitRetry = 0;
@@ -935,43 +925,12 @@ public class SlayerPlusPlugin extends Plugin {
     int originalPoseFrame = player.getPoseAnimationFrame();
     try {
       player.setPoseAnimationFrame(0);
-      int[] equipmentIds = composition.getEquipmentIds();
-      int weaponIndex = KitType.WEAPON.getIndex();
-      int torsoIndex = KitType.TORSO.getIndex();
-      boolean weaponEquipped =
-          weaponIndex >= 0
-              && weaponIndex < equipmentIds.length
-              && equipmentIds[weaponIndex] >= PlayerComposition.ITEM_OFFSET;
-      int originalWeapon = weaponEquipped ? equipmentIds[weaponIndex] : 0;
-      Model bodyModel;
-      if (weaponEquipped) {
-        equipmentIds[weaponIndex] = 0;
-        composition.setHash();
-        try {
-          bodyModel = player.getModel();
-        } finally {
-          equipmentIds[weaponIndex] = originalWeapon;
-          composition.setHash();
-        }
-      } else {
-        bodyModel = player.getModel();
-      }
-      if (bodyModel == null) {
-        deferPortraitRetry();
-        return;
-      }
       Model displayModel = player.getModel();
       if (displayModel == null) {
         deferPortraitRetry();
         return;
       }
-      boolean torsoArmourEquipped =
-          torsoIndex >= 0
-              && torsoIndex < equipmentIds.length
-              && equipmentIds[torsoIndex] >= PlayerComposition.ITEM_OFFSET;
-      boolean allowCalibration = !portraitLoaded && !weaponEquipped && torsoArmourEquipped;
-      BufferedImage portrait =
-          portraitRenderer.render(displayModel, bodyModel, portraitLoaded || allowCalibration);
+      BufferedImage portrait = portraitRenderer.render(displayModel, portraitTurnDirection);
       if (portrait != null) {
         if (!portraitLoaded && portraitRenderer.hasCalibration()) {
           String calibration = portraitRenderer.exportCalibration();
@@ -982,7 +941,7 @@ public class SlayerPlusPlugin extends Plugin {
         }
         portraitPending = false;
         portraitRetry = 0;
-        portraitCache.put(appearanceHash, portrait);
+        portraitCache.put(portraitCacheKey, portrait);
         SwingUtilities.invokeLater(() -> ui.setPortrait(portrait));
       } else {
         deferPortraitRetry();
@@ -1208,11 +1167,7 @@ public class SlayerPlusPlugin extends Plugin {
       if (!config.showLoadoutRecommendations()) {
         loadout = KitPlan.hidden();
       } else if (analyzer == null) {
-        loadout =
-            new KitPlan(
-                "Loadout scanner unavailable",
-                "Loadout scanner unavailable",
-                "No item scan available");
+        loadout = new KitPlan("No item scan available");
       } else {
         loadout =
             analyzer.analyze(
@@ -1692,7 +1647,7 @@ public class SlayerPlusPlugin extends Plugin {
       }
       return false;
     }
-    rawBankState = snapshotRawBankContainerState(bankContainer);
+    rawBankState = snapshotExactItemState(bankContainer.getItems());
     rawBankConfirmed = confirmedBankScan;
     boolean previouslyScanned = scanned;
     int previousQuiverId = bankDizanaId;
@@ -1732,21 +1687,6 @@ public class SlayerPlusPlugin extends Plugin {
       }
     }
     return true;
-  }
-
-  private static int[] snapshotRawBankContainerState(ItemContainer bankContainer) {
-    Item[] items = bankContainer.getItems();
-    if (items == null || items.length == 0) {
-      return new int[0];
-    }
-    int[] state = new int[items.length * 2];
-    for (int slot = 0; slot < items.length; slot++) {
-      Item item = items[slot];
-      int offset = slot * 2;
-      state[offset] = item == null ? -1 : item.getId();
-      state[offset + 1] = item == null ? 0 : item.getQuantity();
-    }
-    return state;
   }
 
   static boolean shouldSkipUnchangedBankScanForTest(boolean scanned, boolean rawStateMatches) {
@@ -2177,6 +2117,7 @@ public class SlayerPlusPlugin extends Plugin {
 
   private void updateShortestPathRoute() {
     spiderTeleportPending = false;
+    routeNeedsTravelItem = false;
     if (shortestPathBridge == null) {
       return;
     }
@@ -2220,6 +2161,7 @@ public class SlayerPlusPlugin extends Plugin {
     Player localPlayer = client.getLocalPlayer();
     int combatLevel = localPlayer == null ? 0 : localPlayer.getCombatLevel();
     KitItem travelItem = selectedTravelItem();
+    routeNeedsTravelItem = travelItem != null;
     String routePathKey =
         target.assignment
             + '|'
@@ -2428,41 +2370,7 @@ public class SlayerPlusPlugin extends Plugin {
 
   private Set<Integer> travelCandidateItemIds() {
     Set<Integer> ids = new LinkedHashSet<>();
-    List<String> fragments =
-        Arrays.asList(
-            "giantsoul amulet",
-            "dramen staff",
-            "lunar staff",
-            "cowbell amulet",
-            "guthixian temple teleport",
-            "games necklace",
-            "key master teleport",
-            "barrows teleport",
-            "morytania legs 3",
-            "morytania legs 4",
-            "ring of shadows",
-            "burning amulet",
-            "royal seed pod",
-            "seed pod",
-            "digsite pendant",
-            "drakan s medallion",
-            "varrock teleport",
-            "varrock tablet",
-            "amulet of glory",
-            "ring of dueling",
-            "skills necklace",
-            "combat bracelet",
-            "ectophial",
-            "mort ton teleport",
-            "pollnivneach teleport",
-            "zul andra teleport",
-            "xeric s talisman",
-            "rada s blessing",
-            "slayer ring",
-            "max cape",
-            "construction cape",
-            "teleport to house",
-            "house tab");
+    List<String> fragments = SlayerLoadoutData.list("travel_item_fragments");
     for (Integer itemId : bank.keySet()) {
       addTravelCandidateIfMatch(ids, fragments, itemId);
     }
@@ -2703,6 +2611,7 @@ public class SlayerPlusPlugin extends Plugin {
     }
     boolean pinned = readOptionalPins().contains(itemId);
     client
+        .getMenu()
         .createMenuEntry("Examine".equals(event.getOption()) ? -1 : -2)
         .setOption(pinned ? "Unpin from SlayerPlus optional row" : "Pin to SlayerPlus optional row")
         .setParam0(event.getActionParam0())
@@ -2813,24 +2722,8 @@ public class SlayerPlusPlugin extends Plugin {
   }
 
   private KitPlan withOwnedMasterReturnTeleport(KitPlan plan) {
-    if (plan == null) {
-      return null;
-    }
     MasterRoutes.MasterRoute master = MasterRoutes.find(getPostTaskReturnMasterId());
-    if (master == null) {
-      return plan;
-    }
-    for (String family : master.getReturnItemFamilies()) {
-      if (!diaries.allowsTravelItem(family)) {
-        continue;
-      }
-      ItemMatch match = ownedTravel(family);
-      if (match == null) {
-        continue;
-      }
-      return appendMasterReturnTeleportForTest(plan, match.itemId, match.displayName);
-    }
-    return plan;
+    return master == null ? plan : appendFirstOwnedTravel(plan, master.getReturnItemFamilies());
   }
 
   static boolean shouldAddPersistentReturnTeleports(boolean infernoTarget) {
@@ -2838,13 +2731,14 @@ public class SlayerPlusPlugin extends Plugin {
   }
 
   private KitPlan withOwnedBankTeleport(KitPlan plan) {
+    return appendFirstOwnedTravel(plan, SlayerLoadoutData.list("bank_return_teleports"));
+  }
+
+  private KitPlan appendFirstOwnedTravel(KitPlan plan, Iterable<String> families) {
     if (plan == null) {
       return null;
     }
-    String[] bankFamilies = {
-      "max cape", "crafting cape", "amulet of eternal glory", "ring of dueling", "amulet of glory"
-    };
-    for (String family : bankFamilies) {
+    for (String family : families) {
       if (!diaries.allowsTravelItem(family)) {
         continue;
       }
@@ -2932,8 +2826,6 @@ public class SlayerPlusPlugin extends Plugin {
       inventory.set(replaceIndex, masterReturn);
     }
     return new KitPlan(
-        plan.getEquipment(),
-        plan.getInventory(),
         plan.getOwnedStatus(),
         plan.getLayoutTitle(),
         plan.getEquipmentItems(),
@@ -3276,16 +3168,11 @@ public class SlayerPlusPlugin extends Plugin {
     return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
   }
 
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   private static final class ItemMatch {
     private final int itemId;
     private final String displayName;
     private final int score;
-
-    private ItemMatch(int itemId, String displayName, int score) {
-      this.itemId = itemId;
-      this.displayName = displayName;
-      this.score = score;
-    }
   }
 
   @Provides

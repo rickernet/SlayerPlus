@@ -184,27 +184,16 @@ final class SlayerTaskWaypoints {
   }
 
   private static Map<String, List<int[]>> loadAgilityShortcuts() {
-    Map<String, List<int[]>> map = new HashMap<>();
-    for (String[] row : ResourceTable.rows("slayer-task-agility-shortcuts.tsv", 6)) {
-      String key = singular(normalize(row[0])) + "|" + normalize(row[1]);
-      map.computeIfAbsent(key, unused -> new ArrayList<>())
-          .add(
-              new int[] {
-                Integer.parseInt(row[2]),
-                Integer.parseInt(row[3]),
-                Integer.parseInt(row[4]),
-                Integer.parseInt(row[5])
-              });
-    }
-    for (List<int[]> shortcuts : map.values()) {
-      shortcuts.sort((a, b) -> Integer.compare(b[0], a[0]));
-    }
-    return Collections.unmodifiableMap(map);
+    return loadTieredCoordinates("slayer-task-agility-shortcuts.tsv");
   }
 
   private static Map<String, List<int[]>> loadCombatTiers() {
+    return loadTieredCoordinates("slayer-task-monster-waypoint-tiers.tsv");
+  }
+
+  private static Map<String, List<int[]>> loadTieredCoordinates(String resource) {
     Map<String, List<int[]>> map = new HashMap<>();
-    for (String[] row : ResourceTable.rows("slayer-task-monster-waypoint-tiers.tsv", 6)) {
+    for (String[] row : ResourceTable.rows(resource, 6)) {
       String key = singular(normalize(row[0])) + "|" + normalize(row[1]);
       map.computeIfAbsent(key, unused -> new ArrayList<>())
           .add(

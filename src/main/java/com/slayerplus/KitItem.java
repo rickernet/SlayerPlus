@@ -1,6 +1,8 @@
 package com.slayerplus;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
 public final class KitItem {
@@ -11,6 +13,8 @@ public final class KitItem {
     OTHER
   }
 
+  @Getter
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   public enum Status {
     EQUIPPED("Equipped"),
     INVENTORY("In inventory"),
@@ -18,14 +22,6 @@ public final class KitItem {
     MISSING("Missing"),
     UNKNOWN("Bank not scanned");
     private final String label;
-
-    Status(String label) {
-      this.label = label;
-    }
-
-    public String getLabel() {
-      return label;
-    }
   }
 
   private final String displayName;

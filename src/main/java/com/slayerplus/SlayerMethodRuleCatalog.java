@@ -26,9 +26,7 @@ public final class SlayerMethodRuleCatalog {
     if ((task.equals("cave kraken") || task.equals("cave krakens"))
         && (strategy == null || !strategy.isBoss())) {
       rules
-          .method(
-              "Disturb a regular whirlpool, keep Protect from Magic active, and use the selected"
-                  + " powered Magic weapon.")
+          .method("Disturb a regular whirlpool and use the selected powered Magic weapon.")
           .control(MethodRules.DamageControl.PRAYER_PROTECTED)
           .restore("prayer potion", "super restore")
           .restoreSlots(5)
@@ -126,16 +124,7 @@ public final class SlayerMethodRuleCatalog {
           "Tagging darts/knives",
           100,
           MethodRules.InventoryGroup.UTILITY,
-          "mithril dart",
-          "steel dart",
-          "iron dart",
-          "bronze dart",
-          "adamant dart",
-          "mithril knife",
-          "steel knife",
-          "iron knife",
-          "bronze knife",
-          "adamant knife");
+          SlayerLoadoutData.array("tagging_projectiles"));
     }
     if (strategy.fillsInventoryToTarget()) {
       rules.inventoryTarget(strategy.getInventoryTargetSlots());
@@ -151,15 +140,7 @@ public final class SlayerMethodRuleCatalog {
     if (matches(task, "smoke devils", "bloodveld", "araxytes")) {
       return 2000;
     }
-    if (matches(
-        task,
-        "dagannoth",
-        "kalphites",
-        "suqahs",
-        "trolls",
-        "warped creatures",
-        "gryphons",
-        "scabarites")) {
+    if (matches(task, SlayerLoadoutData.array("medium_cannonball_tasks"))) {
       return 1500;
     }
     return 1000;
@@ -183,14 +164,7 @@ public final class SlayerMethodRuleCatalog {
     if (isWildernessEncounter(task, location, strategy)) {
       rules
           .restore("blighted super restore", "super restore")
-          .food(
-              "Blighted high-healing food",
-              "blighted anglerfish",
-              "blighted manta ray",
-              "blighted karambwan",
-              "anglerfish",
-              "manta ray",
-              "cooked karambwan")
+          .food("Blighted high-healing food", SlayerLoadoutData.array("blighted_food"))
           .loot(8)
           .restoreSlots(3)
           .food(preventsExpectedDamage(resolveDamageControl(strategy)) ? 0 : 6)
@@ -199,11 +173,7 @@ public final class SlayerMethodRuleCatalog {
               "Level-30 Wilderness escape",
               1,
               MethodRules.InventoryGroup.UTILITY,
-              "royal seed pod",
-              "seed pod",
-              "dragonstone teleport scroll",
-              "amulet of glory",
-              "ring of wealth");
+              SlayerLoadoutData.array("wilderness_escape_items"));
       if (isDragonEncounter(task)) {
         rules.requiredSlots(
             strategy.getStyle() == TaskStrategy.CombatStyle.MELEE
@@ -252,17 +222,7 @@ public final class SlayerMethodRuleCatalog {
     }
     if (isDragonEncounter(task)) {
       var melee = strategy.getStyle() == TaskStrategy.CombatStyle.MELEE;
-      var reviewedChromatic =
-          matches(
-              task,
-              "blue dragon",
-              "blue dragons",
-              "black dragon",
-              "black dragons",
-              "green dragon",
-              "green dragons",
-              "red dragon",
-              "red dragons");
+      var reviewedChromatic = matches(task, SlayerLoadoutData.array("reviewed_chromatic_dragons"));
       var metal = isMetalDragonTask(task);
       if (reviewedChromatic || metal) {
         rules.requiredSlots(
@@ -298,10 +258,7 @@ public final class SlayerMethodRuleCatalog {
                   "Poison protection",
                   1,
                   MethodRules.InventoryGroup.PROTECTION,
-                  "antidote plus plus",
-                  "antidote plus",
-                  "superantipoison",
-                  "antipoison");
+                  SlayerLoadoutData.array("poison_protection"));
         }
         return;
       }
@@ -332,27 +289,19 @@ public final class SlayerMethodRuleCatalog {
     } else {
       rules.cannon(false, 0);
     }
-    if (matches(task, "cave bug", "cave bugs", "cave slime", "cave slimes")) {
+    if (matches(task, SlayerLoadoutData.array("light_source_tasks"))) {
       rules.require(
           "Safe light source",
           1,
           MethodRules.InventoryGroup.UTILITY,
-          "bruma torch",
-          "bullseye lantern",
-          "emerald lantern",
-          "sapphire lantern",
-          "oil lantern",
-          "candle lantern");
+          SlayerLoadoutData.array("safe_light_sources"));
     }
-    if (matches(task, "cave crawler", "cave crawlers", "cave slime", "cave slimes")) {
+    if (matches(task, SlayerLoadoutData.array("poison_protection_tasks"))) {
       rules.require(
           "Poison protection",
           1,
           MethodRules.InventoryGroup.PROTECTION,
-          "antidote plus plus",
-          "antidote plus",
-          "superantipoison",
-          "antipoison");
+          SlayerLoadoutData.array("poison_protection"));
     }
     if (matches(task, "lizard", "lizards")) {
       rules
@@ -361,12 +310,7 @@ public final class SlayerMethodRuleCatalog {
               "Desert heat protection",
               1,
               MethodRules.InventoryGroup.PROTECTION,
-              "circlet of water",
-              "desert amulet 4",
-              "waterskin 4",
-              "waterskin 3",
-              "waterskin 2",
-              "waterskin 1");
+              SlayerLoadoutData.array("desert_heat_protection"));
     }
     if (matches(task, "skeleton", "skeletons")) {
       rules.require("Rope", 1, MethodRules.InventoryGroup.UTILITY, "rope");
@@ -388,25 +332,12 @@ public final class SlayerMethodRuleCatalog {
             "Armadyl protection",
             1,
             MethodRules.InventoryGroup.PROTECTION,
-            "honourable blessing",
-            "armadyl pendant",
-            "book of law",
-            "armadyl bracers",
-            "armadyl d hide boots",
-            "armadyl d hide body",
-            "armadyl chaps",
-            "armadyl cloak")
+            SlayerLoadoutData.array("armadyl_protection_items"))
         .require(
             "Zamorak protection",
             1,
             MethodRules.InventoryGroup.PROTECTION,
-            "unholy blessing",
-            "unholy book",
-            "zamorak bracers",
-            "zamorak d hide boots",
-            "zamorak d hide body",
-            "zamorak chaps",
-            "zamorak cloak");
+            SlayerLoadoutData.array("zamorak_protection_items"));
     return true;
   }
 
@@ -470,27 +401,7 @@ public final class SlayerMethodRuleCatalog {
       String task, String location, TaskStrategy strategy) {
     return strategy != null && strategy.hasTag(TaskStrategy.MethodTag.WILDERNESS)
         || isWilderness(location)
-        || matches(
-            task,
-            "callisto",
-            "venenatis",
-            "vet ion",
-            "vet'ion",
-            "scorpia",
-            "chaos elemental",
-            "the chaos elemental",
-            "chaos fanatic",
-            "the chaos fanatic",
-            "crazy archaeologists",
-            "revenants",
-            "lava dragons",
-            "green dragons",
-            "mammoths",
-            "rogues",
-            "magic axes",
-            "dark warriors",
-            "earth warriors",
-            "ents");
+        || matches(task, SlayerLoadoutData.array("wilderness_encounters"));
   }
 
   private static boolean isDragonEncounter(String task) {
@@ -498,22 +409,7 @@ public final class SlayerMethodRuleCatalog {
   }
 
   private static boolean isMetalDragonTask(String task) {
-    return matches(
-        task,
-        "metal dragon",
-        "metal dragons",
-        "bronze dragon",
-        "bronze dragons",
-        "iron dragon",
-        "iron dragons",
-        "steel dragon",
-        "steel dragons",
-        "mithril dragon",
-        "mithril dragons",
-        "adamant dragon",
-        "adamant dragons",
-        "rune dragon",
-        "rune dragons");
+    return matches(task, SlayerLoadoutData.array("metal_dragon_tasks"));
   }
 
   private static void applyResearchedSpellbookRules(
@@ -588,10 +484,7 @@ public final class SlayerMethodRuleCatalog {
           .pouchRune(ItemID.BLOODRUNE, "Blood", 2000);
       return;
     }
-    if (method.contains("air spell")
-        || method.contains("air spells")
-        || method.contains("wind spell")
-        || method.contains("wind spells")) {
+    if (containsAny(method, SlayerLoadoutData.array("air_spell_fragments"))) {
       rules
           .spell(MethodRules.Spellbook.STANDARD, "Wind Surge or Wind Wave")
           .runePouch(true)
@@ -606,15 +499,8 @@ public final class SlayerMethodRuleCatalog {
       return false;
     }
     var method = normalize(strategy.getMethod());
-    return method.contains("magic dart")
-        || mentionsWaterAndFireSpells(method)
-        || method.contains("water blast")
-        || method.contains("water spell")
-        || method.contains("earth wave")
-        || method.contains("earth spell")
-        || method.contains("fire spell")
-        || method.contains("air spell")
-        || method.contains("wind spell");
+    return mentionsWaterAndFireSpells(method)
+        || containsAny(method, SlayerLoadoutData.array("standard_combat_spell_fragments"));
   }
 
   private static boolean mentionsWaterAndFireSpells(String method) {
@@ -651,17 +537,7 @@ public final class SlayerMethodRuleCatalog {
     }
     if (matches(task, "cerberus")) {
       thralls = true;
-    } else if (matches(
-        task,
-        "amoxliatl",
-        "araxxor",
-        "sarachnis",
-        "vardorvis",
-        "grotesque guardians",
-        "the grotesque guardians",
-        "zulrah",
-        "kalphite queen",
-        "the kalphite queen")) {
+    } else if (matches(task, SlayerLoadoutData.array("arceuus_utility_excluded_bosses"))) {
       thralls = true;
       deathCharge = true;
     } else if (matches(task, "phantom muspah", "the phantom muspah")) {
@@ -731,17 +607,12 @@ public final class SlayerMethodRuleCatalog {
     var barrage = strategy != null && strategy.hasTag(TaskStrategy.MethodTag.BARRAGE);
     if (style == TaskStrategy.CombatStyle.MAGIC && barrage) {
       rules
-          .method(
-              "Keep Protect from Missiles active, stack the group with a cannon, then Ice Barrage"
-                  + " them.")
+          .method("Stack the group with a cannon, then Ice Barrage them.")
           .layout(MethodRules.LayoutProfile.BARRAGE);
     } else if (style == TaskStrategy.CombatStyle.RANGED) {
-      rules.method(
-          "Keep Protect from Missiles active and use the selected ranged setup; cannon where"
-              + " allowed.");
+      rules.method("Use the selected ranged setup; cannon where allowed.");
     } else {
-      rules.method(
-          "Keep Protect from Missiles active and use the selected setup; cannon where allowed.");
+      rules.method("Use the selected setup; cannon where allowed.");
     }
     rules
         .control(MethodRules.DamageControl.PRAYER_PROTECTED)
@@ -879,17 +750,13 @@ public final class SlayerMethodRuleCatalog {
     var style = strategy == null ? null : strategy.getStyle();
     if (boss.equals("k ril tsutsaroth")) {
       return style == TaskStrategy.CombatStyle.RANGED
-          ? "Bind and kite K'ril with Scorching bow, Protect from Missiles, then stack the"
-              + " bodyguards and Blood Barrage them for healing."
-          : "Use demonbane melee, Protect from Melee, and step under or reposition between"
-              + " attacks.";
+          ? "Use the selected Scorching bow setup."
+          : "Use the selected demonbane melee setup.";
     }
     if (boss.equals("general graardor")) {
       return style == TaskStrategy.CombatStyle.RANGED
-          ? "Use the selected door-altar or kite cycle, keep the tile rhythm, and clean up the"
-              + " bodyguards."
-          : "Protect from Melee, step under as required, and clean up the bodyguards after the"
-              + " kill.";
+          ? "Use the selected ranged setup."
+          : "Use the selected melee setup.";
     }
     return BOSS_METHODS.getOrDefault(boss, "");
   }
@@ -958,6 +825,15 @@ public final class SlayerMethodRuleCatalog {
 
   private static boolean contains(String text, String part) {
     return safe(text).toLowerCase(Locale.ENGLISH).contains(safe(part).toLowerCase(Locale.ENGLISH));
+  }
+
+  private static boolean containsAny(String text, String... fragments) {
+    for (String fragment : fragments) {
+      if (text.contains(fragment)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static String normalize(String value) {

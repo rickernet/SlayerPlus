@@ -1,7 +1,11 @@
 package com.slayerplus;
 
+import static com.slayerplus.SlayerText.matchesAny;
+
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.*;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.client.game.*;
@@ -9,109 +13,17 @@ import net.runelite.client.game.*;
 public final class SlayerLoadoutAnalyzer {
   private static final List<RequirementRule> REQUIREMENT_RULES = loadRequirementRules();
   private static final int EXTRA_QUIVER_AMMO_SLOT = 14;
+  private static final String[] CANNON_PARTS = SlayerLoadoutData.array("cannon_parts");
   private static final String[] STRONGEST_STANDARD_ARROW_PRIORITY =
-      new String[] {
-        "seeking dragon arrow",
-        "dragon arrow",
-        "seeking amethyst arrow",
-        "amethyst arrow",
-        "seeking rune arrow",
-        "rune arrow",
-        "seeking adamant arrow",
-        "adamant arrow",
-        "seeking broad arrow",
-        "broad arrow",
-        "seeking mithril arrow",
-        "mithril arrow",
-        "seeking steel arrow",
-        "steel arrow",
-        "seeking iron arrow",
-        "iron arrow",
-        "seeking bronze arrow",
-        "bronze arrow"
-      };
+      SlayerLoadoutData.array("strongest_standard_arrow_priority");
   private static final String[] STRONGEST_NON_DRAGON_ARROW_PRIORITY =
-      new String[] {
-        "seeking amethyst arrow",
-        "amethyst arrow",
-        "seeking rune arrow",
-        "rune arrow",
-        "seeking adamant arrow",
-        "adamant arrow",
-        "seeking broad arrow",
-        "broad arrow",
-        "seeking mithril arrow",
-        "mithril arrow",
-        "seeking steel arrow",
-        "steel arrow",
-        "seeking iron arrow",
-        "iron arrow",
-        "seeking bronze arrow",
-        "bronze arrow"
-      };
+      SlayerLoadoutData.array("strongest_non_dragon_arrow_priority");
   private static final String[] EFFICIENT_REGULAR_ARROW_PRIORITY =
-      new String[] {
-        "rune arrow",
-        "seeking rune arrow",
-        "amethyst arrow",
-        "seeking amethyst arrow",
-        "dragon arrow",
-        "seeking dragon arrow",
-        "adamant arrow",
-        "seeking adamant arrow",
-        "broad arrow",
-        "seeking broad arrow",
-        "mithril arrow",
-        "seeking mithril arrow",
-        "steel arrow",
-        "seeking steel arrow",
-        "iron arrow",
-        "seeking iron arrow",
-        "bronze arrow",
-        "seeking bronze arrow"
-      };
+      SlayerLoadoutData.array("efficient_regular_arrow_priority");
   private static final String[] EFFICIENT_BOSS_ARROW_PRIORITY =
-      new String[] {
-        "amethyst arrow",
-        "seeking amethyst arrow",
-        "rune arrow",
-        "seeking rune arrow",
-        "dragon arrow",
-        "seeking dragon arrow",
-        "adamant arrow",
-        "seeking adamant arrow",
-        "broad arrow",
-        "seeking broad arrow",
-        "mithril arrow",
-        "seeking mithril arrow",
-        "steel arrow",
-        "seeking steel arrow",
-        "iron arrow",
-        "seeking iron arrow",
-        "bronze arrow",
-        "seeking bronze arrow"
-      };
+      SlayerLoadoutData.array("efficient_boss_arrow_priority");
   private static final String[] INFERNO_ARROW_PRIORITY =
-      new String[] {
-        "seeking dragon arrow",
-        "seeking amethyst arrow",
-        "dragon arrow",
-        "seeking rune arrow",
-        "amethyst arrow",
-        "rune arrow",
-        "seeking adamant arrow",
-        "seeking broad arrow",
-        "adamant arrow",
-        "seeking mithril arrow",
-        "broad arrow",
-        "seeking steel arrow",
-        "mithril arrow",
-        "seeking iron arrow",
-        "steel arrow",
-        "seeking bronze arrow",
-        "iron arrow",
-        "bronze arrow"
-      };
+      SlayerLoadoutData.array("inferno_arrow_priority");
   private final ItemManager itemManager;
   private Map<Integer, Integer> cachedBankSnapshotSource = Collections.emptyMap();
   private List<OwnedItem> bankOwnedItems = Collections.emptyList();
@@ -242,13 +154,7 @@ public final class SlayerLoadoutAnalyzer {
             normalize(effectiveLocation), normalize(effectiveTarget.getRestriction()));
     List<StrategyCandidate> candidates = new ArrayList<>();
     addStrategyCandidate(
-        candidates,
-        effectiveStrategy,
-        pool,
-        effectiveTask,
-        effectiveLocation,
-        config.playstyle(),
-        true);
+        candidates, effectiveStrategy, pool, effectiveTask, effectiveLocation, true);
     boolean automaticStyleLocked =
         effectiveStrategy.hasTag(TaskStrategy.MethodTag.AUTOMATIC_STYLE_LOCKED);
     if (!automaticStyleLocked) {
@@ -261,20 +167,12 @@ public final class SlayerLoadoutAnalyzer {
         TaskStrategy candidate =
             SlayerTaskStrategyCatalog.resolve(
                 effectiveTask,
-                config.playstyle(),
                 config.cannonPreference(),
                 config.burstPreference(),
                 preference,
                 effectiveLocation,
                 wilderness);
-        addStrategyCandidate(
-            candidates,
-            candidate,
-            pool,
-            effectiveTask,
-            effectiveLocation,
-            config.playstyle(),
-            false);
+        addStrategyCandidate(candidates, candidate, pool, effectiveTask, effectiveLocation, false);
       }
     }
     StrategyCandidate best = null;
@@ -286,11 +184,6 @@ public final class SlayerLoadoutAnalyzer {
     if (best == null) {
       return recommendation;
     }
-    String ownedReason =
-        "Automatic compared the reviewed viable combat styles against "
-            + "your real bank, inventory, and equipped items. "
-            + best.weapon.displayName
-            + " produced the strongest owned setup for this method. ";
     TaskStrategy selectedStrategy =
         effectiveStrategy.hasTag(TaskStrategy.MethodTag.TURAEL_POINT_BOOST)
             ? best.strategy.withAdditionalTags(TaskStrategy.MethodTag.TURAEL_POINT_BOOST)
@@ -301,7 +194,6 @@ public final class SlayerLoadoutAnalyzer {
     return new Recommendation(
         effectiveLocation,
         resolvedMethod,
-        ownedReason + best.strategy.getRationale(),
         effectiveTarget.getTravel(),
         effectiveTarget.getCannon(),
         recommendation.getRequirements(),
@@ -315,7 +207,6 @@ public final class SlayerLoadoutAnalyzer {
       List<OwnedItem> pool,
       String encounter,
       String location,
-      Preference.Playstyle playstyle,
       boolean originalAutomatic) {
     if (strategy == null || !strategy.isReviewed()) {
       return;
@@ -360,24 +251,11 @@ public final class SlayerLoadoutAnalyzer {
     if (strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)) {
       score += 36;
     }
-    Preference.Playstyle resolvedPlaystyle =
-        playstyle == null ? Preference.Playstyle.FAST_XP : playstyle;
-    switch (resolvedPlaystyle) {
-      case PROFIT:
-        if (strategy.getCostPolicy() == TaskStrategy.CostPolicy.EFFICIENT) {
-          score += 18;
-        }
-        score -= operatingCostPenalty(weapon);
-        break;
-      case FAST_XP:
-      default:
-        if (strategy.getCostPolicy() == TaskStrategy.CostPolicy.MAX_DPS) {
-          score += 14;
-        }
-        if (strategy.getArmourFocus() == TaskStrategy.ArmourFocus.DAMAGE) {
-          score += 8;
-        }
-        break;
+    if (strategy.getCostPolicy() == TaskStrategy.CostPolicy.MAX_DPS) {
+      score += 14;
+    }
+    if (strategy.getArmourFocus() == TaskStrategy.ArmourFocus.DAMAGE) {
+      score += 8;
     }
     candidates.add(new StrategyCandidate(strategy, weapon, score));
   }
@@ -436,12 +314,7 @@ public final class SlayerLoadoutAnalyzer {
 
   private static boolean isSelfContainedRangedWeapon(OwnedItem weapon) {
     return weapon != null
-        && (weapon.named("blowpipe")
-            || weapon.named("bow of faerdhinen")
-            || weapon.named("crystal bow")
-            || weapon.named("webweaver bow")
-            || weapon.named("craw s bow")
-            || weapon.named("chinchompa"));
+        && weapon.namedAny(SlayerLoadoutData.array("self_ammunition_ranged_weapons"));
   }
 
   private static int minimumSufficientAmmo(OwnedItem weapon) {
@@ -507,23 +380,8 @@ public final class SlayerLoadoutAnalyzer {
                 EquipmentInventorySlot.HEAD,
                 false,
                 ranged
-                    ? Arrays.asList(
-                        "masori mask",
-                        "void ranger helm",
-                        "slayer helmet i",
-                        "crystal helm",
-                        "serpentine helm",
-                        "blessed coif")
-                    : Arrays.asList(
-                        "torva full helm",
-                        "slayer helmet i",
-                        "neitiznot faceguard",
-                        "serpentine helm",
-                        "oathplate helm",
-                        "justiciar faceguard",
-                        "blood moon helm",
-                        "helm of neitiznot",
-                        "barrows helm"))
+                    ? SlayerLoadoutData.list("ranged_head_priority")
+                    : SlayerLoadoutData.list("melee_head_priority"))
             != null;
     boolean body =
         preferredEquipment(
@@ -531,23 +389,8 @@ public final class SlayerLoadoutAnalyzer {
                 EquipmentInventorySlot.BODY,
                 false,
                 ranged
-                    ? Arrays.asList(
-                        "masori body",
-                        "elite void top",
-                        "void knight top",
-                        "crystal body",
-                        "karil s leathertop",
-                        "blessed body",
-                        "black d hide body")
-                    : Arrays.asList(
-                        "torva platebody",
-                        "bandos chestplate",
-                        "oathplate chest",
-                        "justiciar chestguard",
-                        "blood moon chestplate",
-                        "barrows platebody",
-                        "fighter torso",
-                        "obsidian platebody"))
+                    ? SlayerLoadoutData.list("ranged_body_priority")
+                    : SlayerLoadoutData.list("melee_body_priority"))
             != null;
     boolean legs =
         preferredEquipment(
@@ -555,22 +398,8 @@ public final class SlayerLoadoutAnalyzer {
                 EquipmentInventorySlot.LEGS,
                 false,
                 ranged
-                    ? Arrays.asList(
-                        "masori chaps",
-                        "elite void robe",
-                        "void knight robe",
-                        "crystal legs",
-                        "karil s leatherskirt",
-                        "blessed chaps",
-                        "black d hide chaps")
-                    : Arrays.asList(
-                        "torva platelegs",
-                        "bandos tassets",
-                        "oathplate legs",
-                        "justiciar legguards",
-                        "blood moon tassets",
-                        "barrows platelegs",
-                        "obsidian platelegs"))
+                    ? SlayerLoadoutData.list("ranged_legs_priority")
+                    : SlayerLoadoutData.list("melee_legs_priority"))
             != null;
     boolean offHand =
         weapon.isTwoHanded()
@@ -579,13 +408,8 @@ public final class SlayerLoadoutAnalyzer {
                     EquipmentInventorySlot.SHIELD,
                     false,
                     ranged
-                        ? Arrays.asList("dragonfire ward", "anti dragon shield")
-                        : Arrays.asList(
-                            "avernic defender",
-                            "dragon defender",
-                            "rune defender",
-                            "toktz ket xil",
-                            "rune kiteshield"))
+                        ? SlayerLoadoutData.list("ranged_shield_priority")
+                        : SlayerLoadoutData.list("melee_shield_priority"))
                 != null;
     return (slayerPackage || salvePackage) && head && body && legs && offHand;
   }
@@ -596,8 +420,8 @@ public final class SlayerLoadoutAnalyzer {
         EquipmentInventorySlot.HEAD,
         false,
         ranged
-            ? Arrays.asList("slayer helmet i", "black mask i")
-            : Arrays.asList("slayer helmet i", "black mask i", "slayer helmet", "black mask"));
+            ? SlayerLoadoutData.list("vorkath_ranged_slayer_head")
+            : SlayerLoadoutData.list("vorkath_melee_slayer_head"));
   }
 
   private static int matchingPriorityIndex(OwnedItem weapon, List<String> priorities) {
@@ -615,12 +439,7 @@ public final class SlayerLoadoutAnalyzer {
     if (strategy.getStyle() != TaskStrategy.CombatStyle.RANGED) {
       return true;
     }
-    if (weapon.named("blowpipe")
-        || weapon.named("bow of faerdhinen")
-        || weapon.named("crystal bow")
-        || weapon.named("webweaver bow")
-        || weapon.named("craw s bow")
-        || weapon.named("chinchompa")
+    if (weapon.namedAny(SlayerLoadoutData.array("self_ammunition_ranged_weapons"))
         || weapon.named(" dart")
         || weapon.nameKey.endsWith("dart")
         || weapon.named(" knife")
@@ -628,7 +447,7 @@ public final class SlayerLoadoutAnalyzer {
       return true;
     }
     if (weapon.named("ballista")) {
-      return containsAnyOwned(pool, "dragon javelin", "amethyst javelin", "rune javelin");
+      return containsAnyOwned(pool, SlayerLoadoutData.array("ballista_ammunition"));
     }
     if (weapon.named("atlatl")) {
       return containsAnyOwned(pool, "atlatl dart");
@@ -637,18 +456,9 @@ public final class SlayerLoadoutAnalyzer {
       return containsAnyOwned(pool, "moonlight antler bolts", "sunlight antler bolts");
     }
     if (weapon.named("crossbow")) {
-      return containsAnyOwned(
-          pool,
-          "dragonstone dragon bolts e",
-          "dragonstone bolts e",
-          "ruby dragon bolts e",
-          "diamond dragon bolts e",
-          "dragon bolts",
-          "amethyst broad bolts",
-          "runite bolts",
-          "broad bolts");
+      return containsAnyOwned(pool, SlayerLoadoutData.array("owned_crossbow_ammunition"));
     }
-    return containsAnyOwned(pool, "dragon arrow", "amethyst arrow", "rune arrow", "broad arrow");
+    return containsAnyOwned(pool, SlayerLoadoutData.array("basic_owned_arrows"));
   }
 
   private static boolean containsAnyOwned(List<OwnedItem> pool, String... fragments) {
@@ -673,23 +483,6 @@ public final class SlayerLoadoutAnalyzer {
       }
     }
     return quantities;
-  }
-
-  private static int operatingCostPenalty(OwnedItem weapon) {
-    if (weapon.named("scythe of vitur")) {
-      return 60;
-    }
-    if (weapon.named("toxic blowpipe")
-        || weapon.named("sanguinesti staff")
-        || weapon.named("tumeken s shadow")) {
-      return 34;
-    }
-    if (weapon.named("arclight")
-        || weapon.named("crystal bow")
-        || weapon.named("bow of faerdhinen")) {
-      return 12;
-    }
-    return 0;
   }
 
   public KitPlan analyze(
@@ -755,8 +548,6 @@ public final class SlayerLoadoutAnalyzer {
             pool,
             style);
     return new KitPlan(
-        buildEquipmentText(strategy, style, requirements),
-        buildInventoryText(strategy, style, requirements, cannonSuggested, foodSlots),
         buildOwnedText(
             style,
             requirements,
@@ -861,9 +652,15 @@ public final class SlayerLoadoutAnalyzer {
 
   static int combatAchievementHelmetTierForTest(String itemName) {
     String name = normalize(itemName);
-    if (name.startsWith("tzkal slayer helmet")) return 3;
-    if (name.startsWith("vampyric slayer helmet")) return 2;
-    if (name.startsWith("tztok slayer helmet")) return 1;
+    if (name.startsWith("tzkal slayer helmet")) {
+      return 3;
+    }
+    if (name.startsWith("vampyric slayer helmet")) {
+      return 2;
+    }
+    if (name.startsWith("tztok slayer helmet")) {
+      return 1;
+    }
     return 0;
   }
 
@@ -1447,17 +1244,12 @@ public final class SlayerLoadoutAnalyzer {
     if (reserveAmmo && hasUsableDizanaCape(pool) && canUseDizanaExtraAmmo(weapon, key)) {
       return passiveAmmo(weapon, strategy, pool, scanned);
     }
-    if (matchesWeaponName(weapon, key, "blowpipe")
-        || matchesWeaponName(weapon, key, "bow of faerdhinen")
-        || matchesWeaponName(weapon, key, "crystal bow")
-        || matchesWeaponName(weapon, key, "webweaver bow")
-        || matchesWeaponName(weapon, key, "craw s bow")
-        || matchesWeaponName(weapon, key, "chinchompa")) {
+    if (matchesWeaponName(weapon, key, SlayerLoadoutData.array("self_ammunition_ranged_weapons"))) {
       return passiveAmmo(weapon, strategy, pool, scanned);
     }
     if (matchesWeaponName(weapon, key, "ballista")) {
       return strictAmmoItem(
-          "Javelins", pool, scanned, "dragon javelin", "amethyst javelin", "rune javelin");
+          "Javelins", pool, scanned, SlayerLoadoutData.array("ballista_ammunition"));
     }
     if (matchesWeaponName(weapon, key, "atlatl")) {
       return strictAmmoItem("Atlatl darts", pool, scanned, "atlatl dart");
@@ -1480,25 +1272,14 @@ public final class SlayerLoadoutAnalyzer {
             "Enchanted dragonstone bolts",
             pool,
             scanned,
-            "dragonstone dragon bolts e",
-            "dragonstone bolts e",
-            "ruby dragon bolts e",
-            "diamond dragon bolts e",
-            "dragon bolts",
-            "runite bolts",
-            "broad bolts");
+            SlayerLoadoutData.array("dragonstone_crossbow_ammunition"));
       }
       return recommendedAmmo(
           !reserveAmmo,
           "Compatible bolts",
           pool,
           scanned,
-          "ruby dragon bolts e",
-          "diamond dragon bolts e",
-          "dragon bolts",
-          "amethyst broad bolts",
-          "runite bolts",
-          "broad bolts");
+          SlayerLoadoutData.array("standard_crossbow_ammunition"));
     }
     return bestOwnedStandardArrow(!reserveAmmo, weapon, key, strategy, pool, scanned);
   }
@@ -1627,10 +1408,16 @@ public final class SlayerLoadoutAnalyzer {
         && !key.contains("craw s bow");
   }
 
-  private static boolean matchesWeaponName(OwnedItem weapon, String fallbackName, String fragment) {
-    return weapon != null
-        ? weapon.named(fragment)
-        : normalize(fallbackName).contains(normalize(fragment));
+  private static boolean matchesWeaponName(
+      OwnedItem weapon, String fallbackName, String... fragments) {
+    for (String fragment : fragments) {
+      if (weapon != null
+          ? weapon.named(fragment)
+          : normalize(fallbackName).contains(normalize(fragment))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static KitItem passiveAmmo(
@@ -1642,19 +1429,7 @@ public final class SlayerLoadoutAnalyzer {
           "Ghommal's lucky penny", pool, scanned, "ghommal s lucky penny", "ghommals lucky penny");
     }
     return strictAmmoItem(
-        "Prayer blessing",
-        pool,
-        scanned,
-        "rada s blessing 4",
-        "rada s blessing 3",
-        "rada s blessing 2",
-        "rada s blessing 1",
-        "holy blessing",
-        "unholy blessing",
-        "war blessing",
-        "peaceful blessing",
-        "honourable blessing",
-        "blessing");
+        "Prayer blessing", pool, scanned, SlayerLoadoutData.array("prayer_blessings"));
   }
 
   private static boolean benefitsFromLuckyPenny(OwnedItem weapon) {
@@ -1786,7 +1561,7 @@ public final class SlayerLoadoutAnalyzer {
     }
     if (slot == EquipmentInventorySlot.HEAD) {
       OwnedItem slayerHead =
-          preferredEquipment(pool, slot, false, Arrays.asList("slayer helmet", "black mask"));
+          preferredEquipment(pool, slot, false, SlayerLoadoutData.list("unimbued_slayer_head"));
       if (slayerHead != null) {
         return slayerHead;
       }
@@ -1895,7 +1670,7 @@ public final class SlayerLoadoutAnalyzer {
       return false;
     }
     String name = item.nameKey;
-    if (matchesAny(name, Arrays.asList("broken", "mangled", "depleted", "inactive", "max hood"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("unusable_equipment_fragments"))) {
       return false;
     }
     if (slot == EquipmentInventorySlot.WEAPON
@@ -2115,21 +1890,13 @@ public final class SlayerLoadoutAnalyzer {
     if (slot == EquipmentInventorySlot.WEAPON) {
       switch (style) {
         case RANGED:
-          return matchesAny(
-                  name,
-                  Arrays.asList("bow", "crossbow", "blowpipe", "ballista", "atlatl", "chinchompa"))
+          return matchesAny(name, SlayerLoadoutData.list("ranged_weapon_fragments"))
               || (stats != null && (stats.getArange() > 0 || stats.getRstr() > 0));
         case MAGIC:
-          return matchesAny(
-                  name,
-                  Arrays.asList("staff", "wand", "trident", "sceptre", "sanguinesti", "tumeken"))
+          return matchesAny(name, SlayerLoadoutData.list("magic_weapon_fragments"))
               || (stats != null && (stats.getAmagic() > 0 || stats.getMdmg() > 0));
         case MELEE:
-          return matchesAny(
-                  name,
-                  Arrays.asList(
-                      "scythe", "axe", "sword", "whip", "rapier", "mace", "spear", "hasta",
-                      "halberd", "fang", "claws"))
+          return matchesAny(name, SlayerLoadoutData.list("melee_weapon_fragments"))
               || (stats != null
                   && (Math.max(stats.getAstab(), Math.max(stats.getAslash(), stats.getAcrush())) > 0
                       || stats.getStr() > 0));
@@ -2140,30 +1907,13 @@ public final class SlayerLoadoutAnalyzer {
     }
     switch (style) {
       case RANGED:
-        return matchesAny(
-                name, Arrays.asList("buckler", "dragonfire ward", "odium ward", "book of law"))
+        return matchesAny(name, SlayerLoadoutData.list("ranged_offhand_fragments"))
             || (stats != null && (stats.getArange() > 0 || stats.getRstr() > 0));
       case MAGIC:
-        return matchesAny(
-                name,
-                Arrays.asList(
-                    "elidinis",
-                    "mage s book",
-                    "book of darkness",
-                    "arcane spirit shield",
-                    "malediction ward",
-                    "ancient wyvern shield"))
+        return matchesAny(name, SlayerLoadoutData.list("magic_offhand_fragments"))
             || (stats != null && (stats.getAmagic() > 0 || stats.getMdmg() > 0));
       case MELEE:
-        return matchesAny(
-                name,
-                Arrays.asList(
-                    "defender",
-                    "dragonfire shield",
-                    "elysian spirit shield",
-                    "spectral spirit shield",
-                    "crystal shield",
-                    "toktz ket xile"))
+        return matchesAny(name, SlayerLoadoutData.list("melee_offhand_fragments"))
             || (stats != null
                 && (Math.max(stats.getAstab(), Math.max(stats.getAslash(), stats.getAcrush())) > 0
                     || stats.getStr() > 0));
@@ -2320,7 +2070,7 @@ public final class SlayerLoadoutAnalyzer {
     }
     boolean resolvedCannonMethod = cannonSuggested || methodRules.usesCannon();
     if (resolvedCannonMethod) {
-      for (String part : new String[] {"base", "stand", "barrels", "furnace"}) {
+      for (String part : CANNON_PARTS) {
         addItem(layout, choose("Cannon " + part, 1, pool, scanned, "cannon " + part));
       }
       int cannonballs =
@@ -2631,22 +2381,10 @@ public final class SlayerLoadoutAnalyzer {
     String weapon = normalize(crushWeapon == null ? "" : crushWeapon.getDisplayName());
     if (weapon.contains("soulreaper axe")) {
       if (requirement.equals("melee body switch")) {
-        return Arrays.asList(
-            "oathplate chest",
-            "inquisitor s hauberk",
-            "torva platebody",
-            "bandos chestplate",
-            "blood moon chestplate",
-            "fighter torso");
+        return SlayerLoadoutData.list("araxxor_melee_body_switch");
       }
       if (requirement.equals("melee legs switch")) {
-        return Arrays.asList(
-            "oathplate legs",
-            "inquisitor s plateskirt",
-            "torva platelegs",
-            "bandos tassets",
-            "blood moon tassets",
-            "obsidian platelegs");
+        return SlayerLoadoutData.list("araxxor_melee_legs_switch");
       }
     }
     return defaults;
@@ -2671,76 +2409,31 @@ public final class SlayerLoadoutAnalyzer {
     String weapon = normalize(rangedWeapon == null ? "" : rangedWeapon.getDisplayName());
     if (requirement.equals("secondary body switch")) {
       if (isPurgingStaff(rangedWeapon)) {
-        return Arrays.asList(
-            "ancestral robe top",
-            "virtus robe top",
-            "ahrim s robetop",
-            "blue moon chestplate",
-            "bloodbark body",
-            "mystic robe top");
+        return SlayerLoadoutData.list("magic_body_switch");
       }
       if (weapon.contains("bow of faerdhinen")) {
-        return Arrays.asList(
-            "crystal body",
-            "masori body f",
-            "masori body",
-            "blessed body",
-            "black d hide body",
-            "mixed hide top");
+        return SlayerLoadoutData.list("crystal_ranged_body_switch");
       }
       if (weapon.contains("eclipse atlatl")) {
-        return Arrays.asList(
-            "eclipse moon chestplate",
-            "masori body f",
-            "masori body",
-            "blessed body",
-            "black d hide body",
-            "mixed hide top");
+        return SlayerLoadoutData.list("eclipse_ranged_body_switch");
       }
     }
     if (requirement.equals("secondary legs switch")) {
       if (isPurgingStaff(rangedWeapon)) {
-        return Arrays.asList(
-            "ancestral robe bottom",
-            "virtus robe bottom",
-            "ahrim s robeskirt",
-            "blue moon tassets",
-            "bloodbark legs",
-            "mystic robe bottom");
+        return SlayerLoadoutData.list("magic_legs_switch");
       }
       if (weapon.contains("bow of faerdhinen")) {
-        return Arrays.asList(
-            "crystal legs",
-            "masori chaps f",
-            "masori chaps",
-            "blessed chaps",
-            "black d hide chaps",
-            "mixed hide legs");
+        return SlayerLoadoutData.list("crystal_ranged_legs_switch");
       }
       if (weapon.contains("eclipse atlatl")) {
-        return Arrays.asList(
-            "eclipse moon tassets",
-            "masori chaps f",
-            "masori chaps",
-            "blessed chaps",
-            "black d hide chaps",
-            "mixed hide legs");
+        return SlayerLoadoutData.list("eclipse_ranged_legs_switch");
       }
     }
     return defaults;
   }
 
   private static List<String> araxxorSafeWeaponAlternatives() {
-    return Arrays.asList(
-        "noxious halberd",
-        "heavy ballista",
-        "hunters sunlight crossbow",
-        "rune crossbow",
-        "karil s crossbow",
-        "dragon halberd",
-        "crystal halberd",
-        "dharok s greataxe",
-        "zombie axe");
+    return SlayerLoadoutData.list("araxxor_safe_weapons");
   }
 
   private static List<String> araxxorSafeAmmunitionAlternatives(String safeWeaponName) {
@@ -2749,23 +2442,16 @@ public final class SlayerLoadoutAnalyzer {
       return Collections.emptyList();
     }
     if (weapon.contains("hunters sunlight crossbow")) {
-      return Arrays.asList("moonlight antler bolts", "sunlight antler bolts");
+      return SlayerLoadoutData.list("hunters_crossbow_ammunition");
     }
     if (weapon.contains("karil") && weapon.contains("crossbow")) {
-      return Arrays.asList("bolt rack");
+      return SlayerLoadoutData.list("karils_crossbow_ammunition");
     }
     if (weapon.contains("heavy ballista")) {
-      return Arrays.asList("dragon javelin", "amethyst javelin", "rune javelin");
+      return SlayerLoadoutData.list("heavy_ballista_ammunition");
     }
     if (weapon.contains("crossbow")) {
-      return Arrays.asList(
-          "dragonstone dragon bolts e",
-          "diamond dragon bolts e",
-          "dragon bolts",
-          "diamond bolts e",
-          "runite bolts",
-          "amethyst broad bolts",
-          "broad bolts");
+      return SlayerLoadoutData.list("crossbow_ammunition");
     }
     return Collections.emptyList();
   }
@@ -3160,55 +2846,26 @@ public final class SlayerLoadoutAnalyzer {
         }
       }
     }
-    if (matchesAny(
-        name,
-        Arrays.asList(
-            "rune pouch",
-            "book of the dead",
-            "herb sack",
-            "gem bag",
-            "bonecrusher",
-            "goading potion",
-            "bag of salt",
-            "rock hammer",
-            "ice cooler",
-            "fungicide",
-            "slayer bell",
-            "fishing explosive",
-            "crystal chime"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("utility_inventory_fragments"))) {
       return MethodRules.InventoryGroup.UTILITY;
     }
-    if (matchesAny(name, Arrays.asList("sceptre", "switch"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("switch_inventory_fragments"))) {
       return MethodRules.InventoryGroup.SWITCH;
     }
-    if (matchesAny(name, Arrays.asList(" rune", "cannon", "dart", "arrow", "bolt"))
+    if (matchesAny(name, SlayerLoadoutData.list("rune_ammunition_fragments"))
         || name.endsWith("runes")) {
       return MethodRules.InventoryGroup.RUNES;
     }
     if (name.contains("saradomin brew")) {
       return MethodRules.InventoryGroup.FOOD;
     }
-    if (matchesAny(
-        name,
-        Arrays.asList(
-            "heart",
-            "combat potion",
-            "ranging potion",
-            "magic potion",
-            "bastion potion",
-            "battlemage potion",
-            "ancient brew",
-            "forgotten brew"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("boost_inventory_fragments"))) {
       return MethodRules.InventoryGroup.BOOST;
     }
-    if (matchesAny(
-        name, Arrays.asList("antivenom", "anti venom", "antipoison", "stamina", "antifire"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("protection_inventory_fragments"))) {
       return MethodRules.InventoryGroup.PROTECTION;
     }
-    if (matchesAny(
-        name,
-        Arrays.asList(
-            "super restore", "prayer potion", "prayer restoration", "prayer regeneration"))) {
+    if (matchesAny(name, SlayerLoadoutData.list("restore_inventory_fragments"))) {
       return MethodRules.InventoryGroup.RESTORE;
     }
     if (isFoodName(name)) {
@@ -3226,44 +2883,16 @@ public final class SlayerLoadoutAnalyzer {
     for (String alternative : required.getAlternatives()) {
       description += " " + normalize(alternative);
     }
-    if (matchesAny(
-            description,
-            Arrays.asList(
-                "blowpipe",
-                "shortbow",
-                "longbow",
-                "crossbow",
-                "ballista",
-                " ranged ",
-                " range switch",
-                "masori",
-                "armadyl",
-                "karil"))
+    if (matchesAny(description, SlayerLoadoutData.list("ranged_switch_fragments"))
         || description.startsWith("ranged ")) {
       return KitItem.SwitchStyle.RANGED;
     }
-    if (matchesAny(
-            description,
-            Arrays.asList(
-                " magic ",
-                " mage ",
-                "magicks",
-                "ancient",
-                "sceptre",
-                "staff",
-                "wand",
-                "ancestral",
-                "virtus",
-                "ahrim",
-                "bloodbark"))
+    if (matchesAny(description, SlayerLoadoutData.list("magic_switch_fragments"))
         || description.startsWith("magic ")
         || description.startsWith("mage ")) {
       return KitItem.SwitchStyle.MAGIC;
     }
-    if (matchesAny(
-            description,
-            Arrays.asList(
-                " melee ", "scythe", "godsword", "whip", "claws", "defender", "torva", "bandos"))
+    if (matchesAny(description, SlayerLoadoutData.list("melee_switch_fragments"))
         || description.startsWith("melee ")) {
       return KitItem.SwitchStyle.MELEE;
     }
@@ -3284,17 +2913,7 @@ public final class SlayerLoadoutAnalyzer {
   }
 
   private static boolean isFoodName(String name) {
-    return matchesAny(
-        name,
-        Arrays.asList(
-            "anglerfish",
-            "manta ray",
-            "dark crab",
-            "shark",
-            "sea turtle",
-            "karambwan",
-            "monkfish",
-            "high healing food"));
+    return matchesAny(name, SlayerLoadoutData.list("food_names"));
   }
 
   List<KitItem> buildOptionalLayout(
@@ -3328,36 +2947,12 @@ public final class SlayerLoadoutAnalyzer {
 
   private static boolean isAshSanctifierTask(String assignment) {
     return matchesAny(
-        normalize(assignment),
-        Arrays.asList(
-            "demon",
-            "hellhound",
-            "bloodveld",
-            "nechryael",
-            "smoke devil",
-            "pyrefiend",
-            "fiend",
-            "cerberus"));
+        normalize(assignment), SlayerLoadoutData.list("ash_sanctifier_task_fragments"));
   }
 
   private static boolean isBonecrusherTask(String assignment) {
     String task = normalize(assignment);
-    return matchesAny(
-        task,
-        Arrays.asList(
-            "dragon",
-            "wyvern",
-            "wyrm",
-            "drake",
-            "hydra",
-            "dagannoth",
-            "kalphite",
-            "basilisk",
-            "giant",
-            "troll",
-            "bat",
-            "mole",
-            "ankou"));
+    return matchesAny(task, SlayerLoadoutData.list("bonecrusher_task_fragments"));
   }
 
   private void addBlowpipeDartRecommendation(
@@ -3748,17 +3343,7 @@ public final class SlayerLoadoutAnalyzer {
   }
 
   private static boolean isPotionFamilyName(String name) {
-    return matchesAny(
-        name,
-        Arrays.asList(
-            "potion",
-            "super restore",
-            "brew",
-            "serum",
-            "antidote",
-            "antivenom",
-            "anti venom",
-            "antipoison"));
+    return matchesAny(name, SlayerLoadoutData.list("potion_family_names"));
   }
 
   private static KitItem choose(
@@ -3808,8 +3393,7 @@ public final class SlayerLoadoutAnalyzer {
       }
       String name = normalize(requirement.displayName);
       if (slot == EquipmentInventorySlot.HEAD
-          && matchesAny(
-              name, Arrays.asList("earmuff", "face mask", "nose peg", "spiny helmet", "goggle"))) {
+          && matchesAny(name, SlayerLoadoutData.list("task_head_protection_fragments"))) {
         return requirement;
       }
       if (slot == EquipmentInventorySlot.AMULET && name.contains("witchwood")) {
@@ -3878,117 +3462,12 @@ public final class SlayerLoadoutAnalyzer {
 
   private static String[] weaponFragments(CombatStyle style) {
     if (style == CombatStyle.MAGIC) {
-      return new String[] {
-        "tumeken",
-        "sanguinesti",
-        "trident",
-        "nightmare staff",
-        "ancient sceptre",
-        "kodai",
-        "wand",
-        "staff"
-      };
+      return SlayerLoadoutData.array("magic_weapon_priority");
     }
     if (style == CombatStyle.RANGED) {
-      return new String[] {
-        "twisted bow", "bow of faerdhinen", "blowpipe", "crossbow", "bow", "atlatl"
-      };
+      return SlayerLoadoutData.array("ranged_weapon_priority");
     }
-    return new String[] {
-      "scythe",
-      "soulreaper axe",
-      "osmumten",
-      "fang",
-      "rapier",
-      "abyssal whip",
-      "whip",
-      "lance",
-      "mace",
-      "sword",
-      "axe"
-    };
-  }
-
-  private static String buildEquipmentText(
-      TaskStrategy strategy, CombatStyle style, List<Requirement> requirements) {
-    List<String> parts = new ArrayList<>();
-    parts.add("Slayer helmet or black mask");
-    if (strategy != null) {
-      parts.add(strategy.getMethod());
-    } else {
-      switch (style) {
-        case MAGIC:
-          parts.add("magic-damage weapon and prayer/magic gear");
-          break;
-        case RANGED:
-          parts.add("ranged weapon, ammo, and ranged armour");
-          break;
-        case MELEE:
-          parts.add("melee weapon and strength gear");
-          break;
-        case FLEXIBLE:
-        default:
-          parts.add("task-appropriate combat switches");
-          break;
-      }
-    }
-    for (Requirement requirement : requirements) {
-      if (requirement.equipment) {
-        parts.add(requirement.displayName);
-      }
-    }
-    return join(parts, "; ");
-  }
-
-  private static String buildInventoryText(
-      TaskStrategy strategy,
-      CombatStyle style,
-      List<Requirement> requirements,
-      boolean cannonSuggested,
-      int foodSlots) {
-    List<String> parts = new ArrayList<>();
-    String foodText =
-        foodSlots > 0 ? " and " + foodSlots + " food slot" + (foodSlots == 1 ? "" : "s") : "";
-    switch (style) {
-      case MAGIC:
-        parts.add("runes or rune pouch");
-        parts.add("Magic boost and prayer potions" + foodText);
-        break;
-      case RANGED:
-        parts.add("ammo");
-        parts.add("ranging/prayer potions" + foodText);
-        break;
-      case MELEE:
-        parts.add("super combat/prayer potions" + foodText);
-        break;
-      case FLEXIBLE:
-      default:
-        parts.add("combat-switch potions and prayer supplies" + foodText);
-        break;
-    }
-    if (foodSlots == 0
-        && strategy != null
-        && (strategy.getDamageProfile() == TaskStrategy.DamageProfile.ZERO_WHILE_PROTECTED
-            || strategy.getDamageProfile() == TaskStrategy.DamageProfile.ZERO_WHILE_SAFESPOTTING)) {
-      parts.add(
-          "No food: the reviewed method expects zero incoming damage "
-              + "while its protection method is maintained");
-    }
-    if (strategy != null && strategy.needsAntivenom()) {
-      parts.add("antivenom");
-    }
-    if (strategy != null && strategy.needsStamina()) {
-      parts.add("extended stamina potion (regular stamina fallback)");
-    }
-    if (cannonSuggested) {
-      parts.add("multicannon pieces and cannonballs");
-    }
-    for (Requirement requirement : requirements) {
-      if (!requirement.equipment) {
-        parts.add(requirement.displayName);
-      }
-    }
-    return join(parts, "; ");
+    return SlayerLoadoutData.array("melee_weapon_priority");
   }
 
   private static String buildOwnedText(
@@ -4041,7 +3520,7 @@ public final class SlayerLoadoutAnalyzer {
       return false;
     }
     String text = normalize(strategy.getMethod() + " " + strategy.getRationale());
-    return matchesAny(text, Arrays.asList("magic", "mage", "powered staff", "tumeken", "trident"));
+    return matchesAny(text, SlayerLoadoutData.list("powered_magic_weapon_fragments"));
   }
 
   private static String cannonAvailability(
@@ -4051,7 +3530,7 @@ public final class SlayerLoadoutAnalyzer {
     available.addAll(equipment);
     available.addAll(bank);
     boolean allParts = true;
-    for (String part : new String[] {"base", "stand", "barrels", "furnace"}) {
+    for (String part : CANNON_PARTS) {
       if (!containsText(available, "cannon " + part)) {
         allParts = false;
       }
@@ -4080,51 +3559,14 @@ public final class SlayerLoadoutAnalyzer {
     boolean detected;
     switch (style) {
       case MAGIC:
-        detected =
-            containsAnyText(
-                equipment,
-                "staff",
-                "wand",
-                "trident",
-                "sceptre",
-                "sanguinesti",
-                "tumeken",
-                "ancestral",
-                "virtus",
-                "ahrim",
-                "occult");
+        detected = containsAnyText(equipment, SlayerLoadoutData.array("magic_setup_fragments"));
         break;
       case RANGED:
-        detected =
-            containsAnyText(
-                equipment,
-                "bow",
-                "crossbow",
-                "blowpipe",
-                "atlatl",
-                "masori",
-                "armadyl",
-                "karil",
-                "ava",
-                "quiver");
+        detected = containsAnyText(equipment, SlayerLoadoutData.array("ranged_setup_fragments"));
         break;
       case MELEE:
       default:
-        detected =
-            containsAnyText(
-                equipment,
-                "scimitar",
-                "sword",
-                "whip",
-                "rapier",
-                "mace",
-                "axe",
-                "lance",
-                "scythe",
-                "fang",
-                "torva",
-                "bandos",
-                "defender");
+        detected = containsAnyText(equipment, SlayerLoadoutData.array("melee_setup_fragments"));
         break;
     }
     return detected
@@ -4153,57 +3595,30 @@ public final class SlayerLoadoutAnalyzer {
       requirements.add(
           inventoryNeed(consumableFinisherQuantity(remainingKills), "Ice cooler", "ice cooler"));
     }
-    if (task.equals("crocodiles")
-        || task.equals("crocodile")
-        || (task.equals("lizards") || task.equals("lizard"))
-        || task.equals("bandits")
-        || task.equals("bandit")) {
+    if (matchesAny(task, SlayerLoadoutData.list("desert_heat_tasks"))) {
       requirements.add(
           inventoryNeed(
-              "Desert heat protection",
-              "circlet of water",
-              "desert amulet 4",
-              "waterskin 4",
-              "waterskin 3",
-              "waterskin 2",
-              "waterskin 1"));
+              "Desert heat protection", SlayerLoadoutData.array("desert_heat_protection")));
     }
     if (requiresKaruulmProtectionBootsForTest(
         task, location, diaries.removesKaruulmBootRequirement())) {
       requirements.add(
           gearRequirement(
-              "Stone-protection boots", "boots of stone", "granite boots", "boots of brimstone"));
+              "Stone-protection boots", SlayerLoadoutData.array("stone_protection_boots")));
     }
     if (task.contains("kurask") || task.contains("turoth")) {
       if (style == CombatStyle.RANGED) {
         requirements.add(
-            gearRequirement(
-                "Broad ammunition", "amethyst broad bolts", "broad bolts", "broad arrows"));
+            gearRequirement("Broad ammunition", SlayerLoadoutData.array("broad_ammunition")));
         requirements.add(
             gearRequirement(
-                "Broad-ammunition weapon",
-                "zaryte crossbow",
-                "dragon hunter crossbow",
-                "armadyl crossbow",
-                "dragon crossbow",
-                "rune crossbow",
-                "magic shortbow",
-                "magic longbow"));
+                "Broad-ammunition weapon", SlayerLoadoutData.array("broad_ammunition_weapons")));
       } else if (style == CombatStyle.MAGIC) {
         requirements.add(
-            gearRequirement(
-                "Magic Dart staff",
-                "slayer s staff e",
-                "slayer s staff",
-                "toxic staff of the dead",
-                "staff of the dead"));
+            gearRequirement("Magic Dart staff", SlayerLoadoutData.array("magic_dart_staves")));
       } else {
         requirements.add(
-            gearRequirement(
-                "Leaf-bladed weapon",
-                "leaf bladed battleaxe",
-                "leaf bladed sword",
-                "leaf bladed spear"));
+            gearRequirement("Leaf-bladed weapon", SlayerLoadoutData.array("leaf_bladed_weapons")));
       }
     }
     if (task.contains("fossil island wyvern")
@@ -4212,21 +3627,11 @@ public final class SlayerLoadoutAnalyzer {
       if (style == CombatStyle.RANGED) {
         requirements.add(
             gearRequirement(
-                "Wyvern-protection shield",
-                "dragonfire ward",
-                "mind shield",
-                "elemental shield",
-                "dragonfire shield",
-                "ancient wyvern shield"));
+                "Wyvern-protection shield", SlayerLoadoutData.array("ranged_wyvern_shields")));
       } else {
         requirements.add(
             gearRequirement(
-                "Wyvern-protection shield",
-                "ancient wyvern shield",
-                "dragonfire shield",
-                "mind shield",
-                "elemental shield",
-                "dragonfire ward"));
+                "Wyvern-protection shield", SlayerLoadoutData.array("melee_wyvern_shields")));
       }
     }
     if ((task.equals("blue dragon") || task.equals("blue dragons"))) {
@@ -4234,27 +3639,18 @@ public final class SlayerLoadoutAnalyzer {
         requirements.add(
             gearRequirement(
                 "Dragonfire shield protection",
-                "anti dragon shield",
-                "dragonfire shield",
-                "dragonfire ward",
-                "ancient wyvern shield"));
+                SlayerLoadoutData.array("standard_dragonfire_shields")));
       }
     } else if (usesReviewedDragonPackage(task) && style != CombatStyle.MELEE) {
       requirements.add(
           gearRequirement(
               "Dragonfire shield protection",
-              "dragonfire ward",
-              "anti dragon shield",
-              "dragonfire shield",
-              "ancient wyvern shield"));
+              SlayerLoadoutData.array("preferred_dragonfire_shields")));
     } else if (isDragonTask(task) && !task.equals("vorkath") && !usesReviewedDragonPackage(task)) {
       requirements.add(
           gearRequirement(
               "Dragonfire shield protection",
-              "anti dragon shield",
-              "dragonfire shield",
-              "dragonfire ward",
-              "ancient wyvern shield"));
+              SlayerLoadoutData.array("standard_dragonfire_shields")));
       requirements.add(
           inventoryNeed(
               PotionPolicy.EXTENDED_ANTIFIRE_DISPLAY, PotionPolicy.shieldedAntifireAlternatives()));
@@ -4306,30 +3702,7 @@ public final class SlayerLoadoutAnalyzer {
   }
 
   private static boolean usesReviewedDragonPackage(String task) {
-    return Arrays.asList(
-            "blue dragon",
-            "blue dragons",
-            "black dragon",
-            "black dragons",
-            "green dragon",
-            "green dragons",
-            "red dragon",
-            "red dragons",
-            "metal dragon",
-            "metal dragons",
-            "bronze dragon",
-            "bronze dragons",
-            "iron dragon",
-            "iron dragons",
-            "steel dragon",
-            "steel dragons",
-            "mithril dragon",
-            "mithril dragons",
-            "adamant dragon",
-            "adamant dragons",
-            "rune dragon",
-            "rune dragons")
-        .contains(task);
+    return SlayerLoadoutData.list("reviewed_dragon_tasks").contains(task);
   }
 
   private static String styleLabel(CombatStyle style, String magic, String ranged, String melee) {
@@ -4401,15 +3774,6 @@ public final class SlayerLoadoutAnalyzer {
     String normalizedFragment = normalize(fragment);
     for (String name : names) {
       if (name.contains(normalizedFragment)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private static boolean matchesAny(String value, List<String> fragments) {
-    for (String fragment : fragments) {
-      if (value.contains(fragment)) {
         return true;
       }
     }
@@ -4586,28 +3950,20 @@ public final class SlayerLoadoutAnalyzer {
             + "achievement diary) cape(?: t)?");
   }
 
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   enum CombatStyle {
     MAGIC("magic"),
     RANGED("ranged"),
     MELEE("melee"),
     FLEXIBLE("flexible");
     private final String label;
-
-    CombatStyle(String label) {
-      this.label = label;
-    }
   }
 
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   private static final class StrategyCandidate {
     private final TaskStrategy strategy;
     private final OwnedItem weapon;
     private final int score;
-
-    private StrategyCandidate(TaskStrategy strategy, OwnedItem weapon, int score) {
-      this.strategy = strategy;
-      this.weapon = weapon;
-      this.score = score;
-    }
   }
 
   static final class OwnedItem {
@@ -4650,6 +4006,15 @@ public final class SlayerLoadoutAnalyzer {
       }
       for (String candidate : normalizedNames) {
         if (candidate.contains(normalizedFragment)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    private boolean namedAny(String... fragments) {
+      for (String fragment : fragments) {
+        if (named(fragment)) {
           return true;
         }
       }
@@ -4759,7 +4124,7 @@ public final class SlayerLoadoutAnalyzer {
 
   private static List<RequirementRule> loadRequirementRules() {
     List<RequirementRule> rules = new ArrayList<>();
-    for (String[] row : ResourceTable.decodedRows("slayer-requirements.tsv", 7)) {
+    for (String[] row : ResourceTable.rowsWithEscapedDelimiters("slayer-requirements.tsv", 7)) {
       rules.add(new RequirementRule(row));
     }
     return Collections.unmodifiableList(rules);

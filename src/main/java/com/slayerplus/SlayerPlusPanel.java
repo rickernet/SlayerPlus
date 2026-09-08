@@ -106,10 +106,8 @@ public class SlayerPlusPanel extends PluginPanel {
   private JComboBox<Preference.CombatStyle> combatStyleSetting;
   private JComboBox<String> helmSetting;
   private final List<String> ownedHelms = new ArrayList<>();
-  private JComboBox<Preference.Playstyle> playstyleSetting;
   private JComboBox<Preference.Cannon> cannonSetting;
   private JComboBox<Preference.Burst> burstSetting;
-  private JComboBox<Preference.Travel> travelSetting;
   private JComboBox<Preference.Shard> shardSetting;
   private final JComboBox<String> devPreviewSetting = new JComboBox<>();
   private Consumer<String> devPreviewAction;
@@ -340,12 +338,8 @@ public class SlayerPlusPanel extends PluginPanel {
     bonusMasterSetting = new JComboBox<>(Preference.BonusMaster.values());
     combatStyleSetting = new JComboBox<>(Preference.CombatStyle.values());
     helmSetting = new JComboBox<>();
-    playstyleSetting =
-        new JComboBox<>(
-            new Preference.Playstyle[] {Preference.Playstyle.FAST_XP, Preference.Playstyle.PROFIT});
     cannonSetting = new JComboBox<>(Preference.Cannon.values());
     burstSetting = new JComboBox<>(Preference.Burst.values());
-    travelSetting = new JComboBox<>(Preference.Travel.values());
     shardSetting = new JComboBox<>(Preference.Shard.values());
     JPanel modeSection =
         settingsSection(
@@ -371,8 +365,6 @@ public class SlayerPlusPanel extends PluginPanel {
         settingsSection(
             "LOADOUT PREFERENCES",
             "Controls how valid gear, supplies, and task methods are ranked.");
-    loadoutSection.add(fullWidth(settingRow("Playstyle", playstyleSetting)));
-    loadoutSection.add(Box.createVerticalStrut(CARD_GAP));
     loadoutSection.add(fullWidth(settingRow("Combat style", combatStyleSetting)));
     loadoutSection.add(Box.createVerticalStrut(CARD_GAP));
     loadoutSection.add(fullWidth(settingRow("Slayer helm", helmSetting)));
@@ -382,8 +374,6 @@ public class SlayerPlusPanel extends PluginPanel {
     loadoutSection.add(fullWidth(settingRow("Burst / barrage", burstSetting)));
     loadoutSection.add(Box.createVerticalStrut(CARD_GAP));
     loadoutSection.add(fullWidth(settingRow("Shard preference", shardSetting)));
-    loadoutSection.add(Box.createVerticalStrut(CARD_GAP));
-    loadoutSection.add(fullWidth(settingRow("Travel priority", travelSetting)));
     settings.add(fullWidth(loadoutSection));
     settings.add(Box.createVerticalStrut(SECTION_PADDING));
     JPanel devSection =
@@ -412,14 +402,10 @@ public class SlayerPlusPanel extends PluginPanel {
         event -> saveSetting("combatStylePreference", combatStyleSetting.getSelectedItem()));
     helmSetting.addActionListener(
         event -> saveSetting(HelmetPreference.CONFIG_KEY, helmSetting.getSelectedItem()));
-    playstyleSetting.addActionListener(
-        event -> saveSetting("playstyle", playstyleSetting.getSelectedItem()));
     cannonSetting.addActionListener(
         event -> saveSetting("cannonPreference", cannonSetting.getSelectedItem()));
     burstSetting.addActionListener(
         event -> saveSetting("burstPreference", burstSetting.getSelectedItem()));
-    travelSetting.addActionListener(
-        event -> saveSetting("travelPreference", travelSetting.getSelectedItem()));
     shardSetting.addActionListener(
         event -> saveSetting("shardPreference", shardSetting.getSelectedItem()));
     refreshSettingsControls();
@@ -495,10 +481,8 @@ public class SlayerPlusPanel extends PluginPanel {
       refreshPointBoostSettingEnabled();
       combatStyleSetting.setSelectedItem(config.combatStylePreference());
       rebuildSlayerHelmetSetting();
-      playstyleSetting.setSelectedItem(config.playstyle());
       cannonSetting.setSelectedItem(config.cannonPreference());
       burstSetting.setSelectedItem(config.burstPreference());
-      travelSetting.setSelectedItem(config.travelPreference());
       shardSetting.setSelectedItem(config.shardPreference());
     } finally {
       updatingSettings = false;
@@ -1272,8 +1256,7 @@ public class SlayerPlusPanel extends PluginPanel {
       refreshLayout();
       return;
     }
-    KitPlan safeLoadout =
-        loadout == null ? new KitPlan("—", "—", "No item scan available") : loadout;
+    KitPlan safeLoadout = loadout == null ? new KitPlan("No item scan available") : loadout;
     updateBankTagCard(safeLoadout);
     updateDartRecommendation(recommendation, safeLoadout);
     refreshLayout();

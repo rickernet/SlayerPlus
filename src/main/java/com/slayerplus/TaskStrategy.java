@@ -1,24 +1,20 @@
 package com.slayerplus;
 
 import java.util.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
 public final class TaskStrategy {
+  @Getter
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   public enum CombatStyle {
     MELEE("melee"),
     RANGED("ranged"),
     MAGIC("magic"),
     HYBRID("hybrid");
     private final String label;
-
-    CombatStyle(String label) {
-      this.label = label;
-    }
-
-    public String getLabel() {
-      return label;
-    }
   }
 
   public enum ArmourFocus {
@@ -323,7 +319,9 @@ public final class TaskStrategy {
     public Builder tags(MethodTag... values) {
       if (values != null) {
         for (MethodTag value : values) {
-          if (value != null) methodTags.add(value);
+          if (value != null) {
+            methodTags.add(value);
+          }
         }
       }
       return this;
@@ -395,9 +393,13 @@ public final class TaskStrategy {
     }
 
     private static void addAll(List<String> destination, String... values) {
-      if (values == null) return;
+      if (values == null) {
+        return;
+      }
       for (String value : values) {
-        if (value != null && !value.trim().isEmpty()) destination.add(value.trim());
+        if (value != null && !value.trim().isEmpty()) {
+          destination.add(value.trim());
+        }
       }
     }
   }

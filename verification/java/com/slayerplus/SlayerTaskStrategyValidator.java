@@ -23,7 +23,6 @@ public final class SlayerTaskStrategyValidator {
       final TaskStrategy automatic =
           SlayerTaskStrategyCatalog.resolve(
               entry.getTaskName(),
-              Preference.Playstyle.FAST_XP,
               Preference.Cannon.ALLOW,
               Preference.Burst.ALLOW,
               Preference.CombatStyle.AUTOMATIC,
@@ -36,7 +35,6 @@ public final class SlayerTaskStrategyValidator {
         final TaskStrategy wilderness =
             SlayerTaskStrategyCatalog.resolve(
                 entry.getTaskName(),
-                Preference.Playstyle.FAST_XP,
                 Preference.Cannon.ALLOW,
                 Preference.Burst.NEVER,
                 Preference.CombatStyle.AUTOMATIC,
@@ -96,7 +94,7 @@ public final class SlayerTaskStrategyValidator {
      * Global research invariant: a style that is authored only as a viable
      * player-preference alternative must never become Automatic just because
      * the NPC has an elemental/style weakness.  Automatic is reserved for the
-     * researched practical/meta method for the requested playstyle.
+     * researched practical/meta method.
      */
     for (final String assignment : SlayerTaskStrategyCatalog.getCurrentTaskNames()) {
       final TaskResearch.Entry research = TaskResearch.find(assignment);
@@ -105,30 +103,20 @@ public final class SlayerTaskStrategyValidator {
               ? "Not restricted"
               : research.getLocations().get(0);
 
-      for (final Preference.Playstyle playstyle : Preference.Playstyle.values()) {
-        for (final Preference.Cannon cannon : Preference.Cannon.values()) {
-          for (final Preference.Burst burst : Preference.Burst.values()) {
-            final TaskStrategy automatic =
-                SlayerTaskStrategyCatalog.resolve(
-                    assignment,
-                    playstyle,
-                    cannon,
-                    burst,
-                    Preference.CombatStyle.AUTOMATIC,
-                    location,
-                    false);
+      for (final Preference.Cannon cannon : Preference.Cannon.values()) {
+        for (final Preference.Burst burst : Preference.Burst.values()) {
+          final TaskStrategy automatic =
+              SlayerTaskStrategyCatalog.resolve(
+                  assignment, cannon, burst, Preference.CombatStyle.AUTOMATIC, location, false);
 
-            if (automatic != null
-                && automatic.hasTag(TaskStrategy.MethodTag.PREFERENCE_ONLY_ALTERNATIVE)) {
-              errors.add(
-                  assignment
-                      + ": Automatic selected a preference-only alternative for "
-                      + playstyle
-                      + "/"
-                      + cannon
-                      + "/"
-                      + burst);
-            }
+          if (automatic != null
+              && automatic.hasTag(TaskStrategy.MethodTag.PREFERENCE_ONLY_ALTERNATIVE)) {
+            errors.add(
+                assignment
+                    + ": Automatic selected a preference-only alternative for "
+                    + cannon
+                    + "/"
+                    + burst);
           }
         }
       }
@@ -149,26 +137,24 @@ public final class SlayerTaskStrategyValidator {
               ? "Not restricted"
               : research.getLocations().get(0);
 
-      for (final Preference.Playstyle playstyle : Preference.Playstyle.values()) {
-        for (final Preference.Burst burst : Preference.Burst.values()) {
-          for (final Preference.CombatStyle combat : Preference.CombatStyle.values()) {
-            final TaskStrategy strategy =
-                SlayerTaskStrategyCatalog.resolve(
-                    assignment, playstyle, Preference.Cannon.NEVER, burst, combat, location, false);
-            if (strategy != null && strategy.hasTag(TaskStrategy.MethodTag.CANNON)) {
-              errors.add(assignment + ": Cannon.NEVER leaked a cannon method");
-            }
+      for (final Preference.Burst burst : Preference.Burst.values()) {
+        for (final Preference.CombatStyle combat : Preference.CombatStyle.values()) {
+          final TaskStrategy strategy =
+              SlayerTaskStrategyCatalog.resolve(
+                  assignment, Preference.Cannon.NEVER, burst, combat, location, false);
+          if (strategy != null && strategy.hasTag(TaskStrategy.MethodTag.CANNON)) {
+            errors.add(assignment + ": Cannon.NEVER leaked a cannon method");
           }
         }
+      }
 
-        for (final Preference.Cannon cannon : Preference.Cannon.values()) {
-          for (final Preference.CombatStyle combat : Preference.CombatStyle.values()) {
-            final TaskStrategy strategy =
-                SlayerTaskStrategyCatalog.resolve(
-                    assignment, playstyle, cannon, Preference.Burst.NEVER, combat, location, false);
-            if (strategy != null && strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)) {
-              errors.add(assignment + ": Burst.NEVER leaked a burst/barrage method");
-            }
+      for (final Preference.Cannon cannon : Preference.Cannon.values()) {
+        for (final Preference.CombatStyle combat : Preference.CombatStyle.values()) {
+          final TaskStrategy strategy =
+              SlayerTaskStrategyCatalog.resolve(
+                  assignment, cannon, Preference.Burst.NEVER, combat, location, false);
+          if (strategy != null && strategy.hasTag(TaskStrategy.MethodTag.BARRAGE)) {
+            errors.add(assignment + ": Burst.NEVER leaked a burst/barrage method");
           }
         }
       }
@@ -176,24 +162,14 @@ public final class SlayerTaskStrategyValidator {
   }
 
   private static void validateTzKalZukProfiles(final List<String> errors) {
-    final TaskStrategy fast = resolveZuk(Preference.Playstyle.FAST_XP);
-    final TaskStrategy profit = resolveZuk(Preference.Playstyle.PROFIT);
-
-    validateZukStrategy("Fast XP", fast, errors);
-    validateZukStrategy("Profit", profit, errors);
-
-    if (profit != null && profit.getCostPolicy() != TaskStrategy.CostPolicy.EFFICIENT) {
-      errors.add("TzKal-Zuk: Profit profile is not resource-efficient");
-    }
-
-    validateZukInventory("Fast XP", fast, 2, 7, 9, 2, 1, errors);
-    validateZukInventory("Profit", profit, 2, 8, 8, 2, 1, errors);
+    final TaskStrategy strategy = resolveZuk();
+    validateZukStrategy("Automatic", strategy, errors);
+    validateZukInventory("Automatic", strategy, 2, 7, 9, 2, 1, errors);
   }
 
-  private static TaskStrategy resolveZuk(final Preference.Playstyle playstyle) {
+  private static TaskStrategy resolveZuk() {
     return SlayerTaskStrategyCatalog.resolve(
         "TzKal-Zuk",
-        playstyle,
         Preference.Cannon.NEVER,
         Preference.Burst.ALLOW,
         Preference.CombatStyle.AUTOMATIC,
@@ -351,7 +327,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy dustNoBurst =
         SlayerTaskStrategyCatalog.resolve(
             "Dust devils",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,
@@ -364,7 +339,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy krakenMeleePreference =
         SlayerTaskStrategyCatalog.resolve(
             "Cave kraken",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.PREFER_MELEE,
@@ -377,7 +351,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy abyssalTower =
         SlayerTaskStrategyCatalog.resolve(
             "Abyssal demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.PREFER,
             Preference.CombatStyle.AUTOMATIC,
@@ -390,7 +363,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy kalphiteNoCannon =
         SlayerTaskStrategyCatalog.resolve(
             "Kalphites",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -403,7 +375,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy smokeNoCannon =
         SlayerTaskStrategyCatalog.resolve(
             "Smoke devils",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -418,7 +389,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy regularHellhound =
         SlayerTaskStrategyCatalog.resolve(
             "Hellhounds",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -438,7 +408,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy cannonHellhound =
         SlayerTaskStrategyCatalog.resolve(
             "Hellhounds",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -456,58 +425,22 @@ public final class SlayerTaskStrategyValidator {
               + " method");
     }
 
-    final TaskStrategy profitStrongholdHellhound =
+    final TaskStrategy meleeHellhound =
         SlayerTaskStrategyCatalog.resolve(
             "Hellhounds",
-            Preference.Playstyle.PROFIT,
-            Preference.Cannon.ALLOW,
-            Preference.Burst.ALLOW,
-            Preference.CombatStyle.AUTOMATIC,
-            "Stronghold Slayer Cave",
-            false);
-    if (profitStrongholdHellhound.getStyle() != TaskStrategy.CombatStyle.RANGED
-        || !profitStrongholdHellhound.hasTag(TaskStrategy.MethodTag.SAFESPOT)
-        || !profitStrongholdHellhound.hasTag(TaskStrategy.MethodTag.AUTOMATIC_STYLE_LOCKED)
-        || profitStrongholdHellhound.hasTag(TaskStrategy.MethodTag.CANNON)
-        || profitStrongholdHellhound.weapons().isEmpty()
-        || !profitStrongholdHellhound.weapons().get(0).equals("toxic blowpipe")) {
-      errors.add(
-          "Hellhounds: Stronghold Profit Automatic must keep blowpipe-first single-target Ranged"
-              + " safespotting without forcing cannon cost");
-    }
-
-    final TaskStrategy fastMeleeHellhound =
-        SlayerTaskStrategyCatalog.resolve(
-            "Hellhounds",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.PREFER_MELEE,
             "Catacombs of Kourend",
             false);
-    final TaskStrategy profitMeleeHellhound =
-        SlayerTaskStrategyCatalog.resolve(
-            "Hellhounds",
-            Preference.Playstyle.PROFIT,
-            Preference.Cannon.NEVER,
-            Preference.Burst.ALLOW,
-            Preference.CombatStyle.PREFER_MELEE,
-            "Catacombs of Kourend",
-            false);
-    if (fastMeleeHellhound.weapons().isEmpty()
-        || !fastMeleeHellhound.weapons().get(0).equals("scythe of vitur")) {
-      errors.add("Hellhounds: Fast XP melee should keep the max-DPS Scythe-first order");
-    }
-    if (profitMeleeHellhound.weapons().isEmpty()
-        || !profitMeleeHellhound.weapons().get(0).equals("emberlight")
-        || profitMeleeHellhound.getCostPolicy() != TaskStrategy.CostPolicy.EFFICIENT) {
-      errors.add("Hellhounds: Profit melee must prioritize Emberlight before charge-heavy weapons");
+    if (meleeHellhound.weapons().isEmpty()
+        || !meleeHellhound.weapons().get(0).equals("scythe of vitur")) {
+      errors.add("Hellhounds: melee should keep the max-DPS Scythe-first order");
     }
 
     final TaskStrategy cerberusAutomatic =
         SlayerTaskStrategyCatalog.resolve(
             "Cerberus",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -523,7 +456,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy gryphonAutomatic =
         SlayerTaskStrategyCatalog.resolve(
             "Gryphons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
@@ -532,7 +464,6 @@ public final class SlayerTaskStrategyValidator {
     final TaskStrategy gryphonMagicPreference =
         SlayerTaskStrategyCatalog.resolve(
             "Gryphons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.PREFER_MAGIC,
@@ -546,38 +477,21 @@ public final class SlayerTaskStrategyValidator {
               + " preference alternative");
     }
 
-    final TaskStrategy frostFast =
+    final TaskStrategy frostDragons =
         SlayerTaskStrategyCatalog.resolve(
             "Frost dragons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,
             "Grimstone",
             false);
-    final TaskStrategy frostProfit =
-        SlayerTaskStrategyCatalog.resolve(
-            "Frost dragons",
-            Preference.Playstyle.PROFIT,
-            Preference.Cannon.ALLOW,
-            Preference.Burst.ALLOW,
-            Preference.CombatStyle.AUTOMATIC,
-            "Grimstone",
-            false);
-    if (frostFast.getStyle() != TaskStrategy.CombatStyle.MAGIC
-        || frostProfit.getStyle() != TaskStrategy.CombatStyle.MELEE
-        || !frostProfit.getMethod().toLowerCase().contains("crush")
-        || frostProfit.getWeaponPriorities().isEmpty()
-        || !frostProfit.getWeaponPriorities().get(0).equals("dragon hunter lance")) {
-      errors.add(
-          "Frost dragons: Fast XP should keep high-DPS Fire Magic while Profit/AFK use the"
-              + " researched Dragon hunter lance-on-Crush melee method");
+    if (frostDragons.getStyle() != TaskStrategy.CombatStyle.MAGIC) {
+      errors.add("Frost dragons: Automatic should keep the reviewed high-DPS Fire Magic method");
     }
 
     final TaskStrategy reviewedWilderness =
         SlayerTaskStrategyCatalog.resolve(
             "Abyssal demons",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.ALLOW,
             Preference.Burst.ALLOW,
             Preference.CombatStyle.AUTOMATIC,

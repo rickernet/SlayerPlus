@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.ItemID;
 import org.junit.Test;
 
@@ -15,12 +16,18 @@ public class BarrowsInventoryTest {
   private final TaskStrategy strategy =
       SlayerTaskStrategyCatalog.resolve(
           "Barrows Brothers",
-          Preference.Playstyle.FAST_XP,
           Preference.Cannon.NEVER,
           Preference.Burst.NEVER,
           Preference.CombatStyle.AUTOMATIC,
           "Barrows",
           false);
+
+  @Test
+  public void barrowsHasShortestPathDestination() {
+    assertEquals(
+        Collections.singletonList(new WorldPoint(3565, 3314, 0)),
+        SlayerTaskWaypoints.findPath("Barrows Brothers", "Barrows"));
+  }
 
   @Test
   public void shadowGetsOneCapeMagicBoostAndLootPouchWithoutRangedSwitch() {

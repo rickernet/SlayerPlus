@@ -1,7 +1,9 @@
 package com.slayerplus;
 
 import java.util.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.client.game.ItemVariationMapping;
 
@@ -20,15 +22,21 @@ final class QuiverAmmo {
   }
 
   private static int quiverRank(int id) {
-    if (!isUsableDizanaVariant(id)) return -1;
-    if (id == ItemID.SKILLCAPE_MAX_DIZANAS || id == ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER)
+    if (!isUsableDizanaVariant(id)) {
+      return -1;
+    }
+    if (id == ItemID.SKILLCAPE_MAX_DIZANAS || id == ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER) {
       return 400;
-    if (id == ItemID.DIZANAS_QUIVER_INFINITE || id == ItemID.DIZANAS_QUIVER_INFINITE_TROUVER)
+    }
+    if (id == ItemID.DIZANAS_QUIVER_INFINITE || id == ItemID.DIZANAS_QUIVER_INFINITE_TROUVER) {
       return 300;
-    if (id == ItemID.DIZANAS_QUIVER_CHARGED || id == ItemID.DIZANAS_QUIVER_CHARGED_TROUVER)
+    }
+    if (id == ItemID.DIZANAS_QUIVER_CHARGED || id == ItemID.DIZANAS_QUIVER_CHARGED_TROUVER) {
       return 200;
-    if (id == ItemID.DIZANAS_QUIVER_UNCHARGED || id == ItemID.DIZANAS_QUIVER_UNCHARGED_TROUVER)
+    }
+    if (id == ItemID.DIZANAS_QUIVER_UNCHARGED || id == ItemID.DIZANAS_QUIVER_UNCHARGED_TROUVER) {
       return 100;
+    }
     return 1;
   }
 
@@ -49,7 +57,9 @@ final class QuiverAmmo {
       ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_BROKEN,
       ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_MANGLED
     };
-    for (int id : unusable) ids.remove(id);
+    for (int id : unusable) {
+      ids.remove(id);
+    }
     return Set.copyOf(ids);
   }
 
@@ -163,7 +173,9 @@ final class QuiverAmmo {
       int... variants) {
     Arrow arrow = new Arrow(canonical, ordinary, name, rank);
     map.put(canonical, arrow);
-    for (int id : variants) map.put(id, arrow);
+    for (int id : variants) {
+      map.put(id, arrow);
+    }
   }
 
   static int arrow(int id) {
@@ -187,15 +199,25 @@ final class QuiverAmmo {
 
   static int restoreSeekingIdentityFromPlaceholders(int rawAmmo, Iterable<Integer> hints) {
     int ammo = arrow(rawAmmo);
-    if (ammo <= 0 || isSeekingArrow(ammo) || hints == null) return ammo;
-    for (Integer raw : hints) if (raw != null && isUnderlyingArrow(ammo, raw)) return arrow(raw);
+    if (ammo <= 0 || isSeekingArrow(ammo) || hints == null) {
+      return ammo;
+    }
+    for (Integer raw : hints) {
+      if (raw != null && isUnderlyingArrow(ammo, raw)) {
+        return arrow(raw);
+      }
+    }
     return ammo;
   }
 
   static int resolveExactIdentity(int widgetId, int varpId, int cachedId) {
     int widget = arrow(widgetId), varp = arrow(varpId);
-    if (isSeekingArrow(varp)) return varp;
-    if (isSeekingArrow(widget) && (varp <= 0 || isUnderlyingArrow(varp, widget))) return widget;
+    if (isSeekingArrow(varp)) {
+      return varp;
+    }
+    if (isSeekingArrow(widget) && (varp <= 0 || isUnderlyingArrow(varp, widget))) {
+      return widget;
+    }
     return varp > 0 ? varp : widget > 0 ? widget : arrow(cachedId);
   }
 
@@ -223,9 +245,11 @@ final class QuiverAmmo {
   static Snapshot restoreHiddenBankedSeekingAmmo(
       boolean quiverFound, Snapshot live, Iterable<Integer> hints) {
     Snapshot current = live == null ? Snapshot.empty() : live;
-    if (current.isPresent() || !quiverFound) return current;
+    if (current.isPresent() || !quiverFound) {
+      return current;
+    }
     int best = -1, rank = Integer.MAX_VALUE;
-    if (hints != null)
+    if (hints != null) {
       for (Integer raw : hints) {
         int candidate = raw == null ? -1 : arrow(raw);
         int candidateRank = infernoPreference(candidate);
@@ -234,6 +258,7 @@ final class QuiverAmmo {
           rank = candidateRank;
         }
       }
+    }
     return Snapshot.of(best, 1);
   }
 
@@ -242,14 +267,17 @@ final class QuiverAmmo {
         && secondary.isPresent()
         && !isSeekingArrow(primary.itemId)
         && isSeekingArrow(secondary.itemId)
-        && isUnderlyingArrow(primary.itemId, secondary.itemId))
+        && isUnderlyingArrow(primary.itemId, secondary.itemId)) {
       return Snapshot.of(secondary.itemId, primary.quantity);
+    }
     return primary;
   }
 
   static int infernoPreference(int id) {
     Arrow arrow = ARROWS.get(id);
-    if (arrow != null) return arrow.rank;
+    if (arrow != null) {
+      return arrow.rank;
+    }
     int normalized = arrow(id);
     int[] ordinary = {
       ItemID.DRAGON_ARROW,
@@ -263,7 +291,11 @@ final class QuiverAmmo {
       ItemID.BRONZE_ARROW
     };
     int[] ranks = {2, 4, 5, 8, 10, 12, 14, 16, 17};
-    for (int i = 0; i < ordinary.length; i++) if (normalized == ordinary[i]) return ranks[i];
+    for (int index = 0; index < ordinary.length; index++) {
+      if (normalized == ordinary[index]) {
+        return ranks[index];
+      }
+    }
     return Integer.MAX_VALUE;
   }
 
@@ -271,27 +303,18 @@ final class QuiverAmmo {
     return infernoPreference(live) < infernoPreference(recommended) ? arrow(live) : recommended;
   }
 
+  @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
   private static final class Arrow {
-    final int canonical, ordinary, rank;
+    final int canonical, ordinary;
     final String name;
-
-    Arrow(int canonical, int ordinary, String name, int rank) {
-      this.canonical = canonical;
-      this.ordinary = ordinary;
-      this.name = name;
-      this.rank = rank;
-    }
+    final int rank;
   }
 
   @Getter
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   static final class Snapshot {
     private static final Snapshot EMPTY = new Snapshot(-1, 0);
     private final int itemId, quantity;
-
-    private Snapshot(int itemId, int quantity) {
-      this.itemId = itemId;
-      this.quantity = quantity;
-    }
 
     static Snapshot empty() {
       return EMPTY;

@@ -1,0 +1,61 @@
+# Descriptive key followed by an ordered, pipe-separated preference list.
+bank_return_teleports	max cape|crafting cape|amulet of eternal glory|ring of dueling|amulet of glory
+ranged_head_priority	masori mask|void ranger helm|slayer helmet i|crystal helm|serpentine helm|blessed coif
+melee_head_priority	torva full helm|slayer helmet i|neitiznot faceguard|serpentine helm|oathplate helm|justiciar faceguard|blood moon helm|helm of neitiznot|barrows helm
+ranged_body_priority	masori body|elite void top|void knight top|crystal body|karil s leathertop|blessed body|black d hide body
+melee_body_priority	torva platebody|bandos chestplate|oathplate chest|justiciar chestguard|blood moon chestplate|barrows platebody|fighter torso|obsidian platebody
+ranged_legs_priority	masori chaps|elite void robe|void knight robe|crystal legs|karil s leatherskirt|blessed chaps|black d hide chaps
+melee_legs_priority	torva platelegs|bandos tassets|oathplate legs|justiciar legguards|blood moon tassets|barrows platelegs|obsidian platelegs
+ranged_shield_priority	dragonfire ward|anti dragon shield
+melee_shield_priority	avernic defender|dragon defender|rune defender|toktz ket xil|rune kiteshield
+vorkath_ranged_slayer_head	slayer helmet i|black mask i
+vorkath_melee_slayer_head	slayer helmet i|black mask i|slayer helmet|black mask
+unimbued_slayer_head	slayer helmet|black mask
+araxxor_melee_body_switch	oathplate chest|inquisitor s hauberk|torva platebody|bandos chestplate|blood moon chestplate|fighter torso
+araxxor_melee_legs_switch	oathplate legs|inquisitor s plateskirt|torva platelegs|bandos tassets|blood moon tassets|obsidian platelegs
+magic_body_switch	ancestral robe top|virtus robe top|ahrim s robetop|blue moon chestplate|bloodbark body|mystic robe top
+crystal_ranged_body_switch	crystal body|masori body f|masori body|blessed body|black d hide body|mixed hide top
+eclipse_ranged_body_switch	eclipse moon chestplate|masori body f|masori body|blessed body|black d hide body|mixed hide top
+magic_legs_switch	ancestral robe bottom|virtus robe bottom|ahrim s robeskirt|blue moon tassets|bloodbark legs|mystic robe bottom
+crystal_ranged_legs_switch	crystal legs|masori chaps f|masori chaps|blessed chaps|black d hide chaps|mixed hide legs
+eclipse_ranged_legs_switch	eclipse moon tassets|masori chaps f|masori chaps|blessed chaps|black d hide chaps|mixed hide legs
+araxxor_safe_weapons	noxious halberd|heavy ballista|hunters sunlight crossbow|rune crossbow|karil s crossbow|dragon halberd|crystal halberd|dharok s greataxe|zombie axe
+hunters_crossbow_ammunition	moonlight antler bolts|sunlight antler bolts
+karils_crossbow_ammunition	bolt rack
+heavy_ballista_ammunition	dragon javelin|amethyst javelin|rune javelin
+crossbow_ammunition	dragonstone dragon bolts e|diamond dragon bolts e|dragon bolts|diamond bolts e|runite bolts|amethyst broad bolts|broad bolts
+reviewed_dragon_tasks	blue dragon|blue dragons|black dragon|black dragons|green dragon|green dragons|red dragon|red dragons|metal dragon|metal dragons|bronze dragon|bronze dragons|iron dragon|iron dragons|steel dragon|steel dragons|mithril dragon|mithril dragons|adamant dragon|adamant dragons|rune dragon|rune dragons
+food_names	anglerfish|manta ray|dark crab|shark|sea turtle|karambwan|monkfish|high healing food
+bonecrusher_task_fragments	dragon|wyvern|wyrm|drake|hydra|dagannoth|kalphite|basilisk|giant|troll|bat|mole|ankou
+potion_family_names	potion|super restore|brew|serum|antidote|antivenom|anti venom|antipoison
+ash_sanctifier_task_fragments	demon|hellhound|bloodveld|nechryael|smoke devil|pyrefiend|fiend|cerberus
+ranged_weapon_fragments	bow|crossbow|blowpipe|ballista|atlatl|chinchompa
+magic_weapon_fragments	staff|wand|trident|sceptre|sanguinesti|tumeken
+melee_weapon_fragments	scythe|axe|sword|whip|rapier|mace|spear|hasta|halberd|fang|claws
+ranged_offhand_fragments	buckler|dragonfire ward|odium ward|book of law
+magic_offhand_fragments	elidinis|mage s book|book of darkness|arcane spirit shield|malediction ward|ancient wyvern shield
+melee_offhand_fragments	defender|dragonfire shield|elysian spirit shield|spectral spirit shield|crystal shield|toktz ket xile
+ranged_switch_fragments	blowpipe|shortbow|longbow|crossbow|ballista| ranged | range switch|masori|armadyl|karil
+magic_switch_fragments	 magic | mage |magicks|ancient|sceptre|staff|wand|ancestral|virtus|ahrim|bloodbark
+melee_switch_fragments	 melee |scythe|godsword|whip|claws|defender|torva|bandos
+utility_inventory_fragments	rune pouch|book of the dead|herb sack|gem bag|bonecrusher|goading potion|bag of salt|rock hammer|ice cooler|fungicide|slayer bell|fishing explosive|crystal chime
+switch_inventory_fragments	sceptre|switch
+rune_ammunition_fragments	 rune|cannon|dart|arrow|bolt
+boost_inventory_fragments	heart|combat potion|ranging potion|magic potion|bastion potion|battlemage potion|ancient brew|forgotten brew
+protection_inventory_fragments	antivenom|anti venom|antipoison|stamina|antifire
+restore_inventory_fragments	super restore|prayer potion|prayer restoration|prayer regeneration
+bank_food_names	anglerfish|manta ray|dark crab|shark|sea turtle|karambwan|guthix rest|monkfish|high healing food
+bank_utility_names	herb sack|seed box|soul bearer|bonecrusher|ash sanctifier|holy wrench|looting bag|gem bag|book of the dead|explorer s ring|rock hammer|bag of salt|ice cooler|slayer bell|fungicide|fishing explosive|task tool
+body_armor_fragments	robe top|robetop|leathertop|platebody|chainbody|chestplate|hauberk|torso|tunic
+leg_armor_fragments	robe bottom|robebottom|robeskirt|leatherskirt|platelegs|plateskirt|chainskirt|tassets|chaps|trousers|cuisse
+direct_teleport_fragments	teleport|slayer ring|xeric|rada|drakan|digsite pendant|fairy ring
+cannon_restricted_locations	catacombs|slayer tower|fremennik slayer dungeon|karuulm|kraken|god wars|mos le harmless
+restore_potion_names	super restore|prayer potion|prayer restoration|prayer regeneration|sanfew serum
+protection_potion_names	anti venom|antivenom|antipoison|stamina potion|antifire
+boost_potion_names	combat potion|ranging potion|magic potion|bastion potion|battlemage potion|ancient brew|forgotten brew|imbued heart|saturated heart
+unusable_equipment_fragments	broken|mangled|depleted|inactive|max hood
+task_head_protection_fragments	earmuff|face mask|nose peg|spiny helmet|goggle
+powered_magic_weapon_fragments	magic|mage|powered staff|tumeken|trident
+wilderness_slayer_cave_tasks	abyssal demons|ankou|black demons|dust devils|greater demons|hellhounds
+travel_item_fragments	giantsoul amulet|dramen staff|lunar staff|cowbell amulet|guthixian temple teleport|games necklace|key master teleport|barrows teleport|morytania legs 3|morytania legs 4|ring of shadows|burning amulet|royal seed pod|seed pod|digsite pendant|drakan s medallion|varrock teleport|varrock tablet|amulet of glory|ring of dueling|skills necklace|combat bracelet|ectophial|mort ton teleport|pollnivneach teleport|zul andra teleport|xeric s talisman|rada s blessing|slayer ring|max cape|construction cape|teleport to house|house tab
+desert_heat_tasks	crocodiles|crocodile|lizards|lizard|bandits|bandit

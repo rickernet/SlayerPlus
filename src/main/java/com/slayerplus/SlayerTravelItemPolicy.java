@@ -1,6 +1,5 @@
 package com.slayerplus;
 
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 public final class SlayerTravelItemPolicy {
@@ -43,13 +42,6 @@ public final class SlayerTravelItemPolicy {
   }
 
   private static String normalize(String value) {
-    if (value == null) {
-      return "";
-    }
-    return value
-        .toLowerCase(Locale.ENGLISH)
-        .replace('\u2019', '\'')
-        .replaceAll("[^a-z0-9]+", " ")
-        .trim();
+    return SlayerText.normalize(value);
   }
 }

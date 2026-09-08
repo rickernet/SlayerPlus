@@ -82,7 +82,6 @@ public class SlayerPreparationReminderTest {
     TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
             "Araxxor",
-            Preference.Playstyle.FAST_XP,
             Preference.Cannon.NEVER,
             Preference.Burst.NEVER,
             Preference.CombatStyle.AUTOMATIC,

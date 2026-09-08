@@ -46,13 +46,7 @@ public final class TaskResearch {
   }
 
   private static String normalize(String value) {
-    if (value == null) return "";
-    return value
-        .toLowerCase(Locale.ENGLISH)
-        .replace('\u2019', '\'')
-        .replaceAll("[^a-z0-9]+", " ")
-        .trim()
-        .replaceFirst("^the\\s+", "");
+    return SlayerText.encounter(value);
   }
 
   @Getter

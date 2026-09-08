@@ -59,22 +59,10 @@ public interface SlayerPlusConfig extends Config {
   }
 
   @ConfigItem(
-      keyName = "playstyle",
-      name = "Playstyle",
-      description =
-          "Fast XP prioritizes maximum damage without considering gear or charge cost. Profit"
-              + " favors efficient supplies and loot.",
-      position = 1,
-      section = RECOMMENDATION_SECTION)
-  default Preference.Playstyle playstyle() {
-    return Preference.Playstyle.FAST_XP;
-  }
-
-  @ConfigItem(
       keyName = "cannonPreference",
       name = "Cannon",
       description = "Prefer, allow, or avoid cannon locations.",
-      position = 2,
+      position = 1,
       section = RECOMMENDATION_SECTION)
   default Preference.Cannon cannonPreference() {
     return Preference.Cannon.ALLOW;
@@ -84,20 +72,10 @@ public interface SlayerPlusConfig extends Config {
       keyName = "burstPreference",
       name = "Burst / barrage",
       description = "Prefer, allow, or avoid burst and barrage methods.",
-      position = 3,
+      position = 2,
       section = RECOMMENDATION_SECTION)
   default Preference.Burst burstPreference() {
     return Preference.Burst.ALLOW;
-  }
-
-  @ConfigItem(
-      keyName = "travelPreference",
-      name = "Travel",
-      description = "Choose how travel routes affect location scoring.",
-      position = 4,
-      section = RECOMMENDATION_SECTION)
-  default Preference.Travel travelPreference() {
-    return Preference.Travel.FASTEST;
   }
 
   @ConfigItem(
@@ -106,7 +84,7 @@ public interface SlayerPlusConfig extends Config {
       description =
           "Prefer valid task locations that drop ancient shards, crystal shards, both, or neither."
               + " Assigned-area and Wilderness restrictions always take priority.",
-      position = 5,
+      position = 3,
       section = RECOMMENDATION_SECTION)
   default Preference.Shard shardPreference() {
     return Preference.Shard.NO_PREFERENCE;
