@@ -35,9 +35,9 @@ class SlayerTravelItemOverlay extends WidgetItemOverlay {
   @Override
   public Dimension render(Graphics2D graphics) {
     activeItemId = plugin.getTravelItemIdForOverlay();
-    if (plugin.showSpiderTeleportInstruction()) {
+    String instruction = plugin.directTeleportInstruction();
+    if (!instruction.isEmpty()) {
       Player player = client.getLocalPlayer();
-      String instruction = "Use Spider cave teleport";
       Point point = player == null ? null : player.getCanvasTextLocation(graphics, instruction, 40);
       if (point != null) {
         OverlayUtil.renderTextLocation(graphics, point, instruction, TRAVEL_ITEM_COLOR);

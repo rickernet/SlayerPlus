@@ -17,6 +17,7 @@ import net.runelite.api.events.*;
 import net.runelite.api.gameval.*;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.ItemID;
+import net.runelite.api.kit.KitType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -191,8 +192,9 @@ public class SlayerPlusPlugin extends Plugin {
   private boolean settingsRefresh;
   private boolean travelHighlightActive;
   private boolean routeNeedsTravelItem = true;
-  private boolean spiderTeleportPending;
-  private boolean spiderTeleportArrived;
+  private boolean directTeleportPending;
+  private boolean directTeleportArrived;
+  private String directTeleportName = "";
   private Set<Integer> cachedTravelCandidateIds = Collections.emptySet();
   private String cachedRoutePathKey = "";
   private List<WorldPoint> cachedRoutePath = Collections.emptyList();
@@ -307,8 +309,9 @@ public class SlayerPlusPlugin extends Plugin {
 
   private void resetSessionState() {
     travelHighlightActive = false;
-    spiderTeleportPending = false;
-    spiderTeleportArrived = false;
+    directTeleportPending = false;
+    directTeleportArrived = false;
+    directTeleportName = "";
     cachedTravelCandidateIds = Collections.emptySet();
     cachedRoutePathKey = "";
     cachedRoutePath = Collections.emptyList();
@@ -829,7 +832,8 @@ public class SlayerPlusPlugin extends Plugin {
 
   void handleBankClosed() {
     bankInterfaceOpen = false;
-    spiderTeleportArrived = false;
+    directTeleportArrived = false;
+    directTeleportName = "";
     bankReachedForRestock = true;
     scheduleRefresh(false);
     pendingRefreshDeadlineTick = tick;
@@ -895,7 +899,8 @@ public class SlayerPlusPlugin extends Plugin {
     if (composition == null) {
       return;
     }
-    int appearanceHash = Arrays.hashCode(composition.getEquipmentIds());
+    int[] equipmentIds = composition.getEquipmentIds();
+    int appearanceHash = Arrays.hashCode(equipmentIds);
     appearanceHash = 31 * appearanceHash + Arrays.hashCode(composition.getColors());
     appearanceHash = 31 * appearanceHash + composition.getGender();
     if (appearanceHash != lastAppearanceHash) {
@@ -925,12 +930,36 @@ public class SlayerPlusPlugin extends Plugin {
     int originalPoseFrame = player.getPoseAnimationFrame();
     try {
       player.setPoseAnimationFrame(0);
-      Model displayModel = player.getModel();
+      int weaponIndex = KitType.WEAPON.getIndex();
+      boolean weaponEquipped =
+          weaponIndex >= 0
+              && weaponIndex < equipmentIds.length
+              && equipmentIds[weaponIndex] >= PlayerComposition.ITEM_OFFSET;
+      Model bodyModel;
+      if (weaponEquipped) {
+        int weapon = equipmentIds[weaponIndex];
+        equipmentIds[weaponIndex] = 0;
+        composition.setHash();
+        try {
+          bodyModel = player.getModel();
+        } finally {
+          equipmentIds[weaponIndex] = weapon;
+          composition.setHash();
+        }
+      } else {
+        bodyModel = player.getModel();
+      }
+      Model displayModel = weaponEquipped ? player.getModel() : bodyModel;
+      if (bodyModel == null) {
+        deferPortraitRetry();
+        return;
+      }
       if (displayModel == null) {
         deferPortraitRetry();
         return;
       }
-      BufferedImage portrait = portraitRenderer.render(displayModel, portraitTurnDirection);
+      BufferedImage portrait =
+          portraitRenderer.render(displayModel, bodyModel, portraitTurnDirection);
       if (portrait != null) {
         if (!portraitLoaded && portraitRenderer.hasCalibration()) {
           String calibration = portraitRenderer.exportCalibration();
@@ -1272,7 +1301,7 @@ public class SlayerPlusPlugin extends Plugin {
     if (readinessOverlay == null || overlayManager == null) {
       return;
     }
-    boolean show = preparation.isActive() && !preparation.isReady();
+    boolean show = travelHighlightActive && preparation.isActive() && !preparation.isReady();
     if (!show) {
       hideReadinessOverlay();
       return;
@@ -2112,11 +2141,12 @@ public class SlayerPlusPlugin extends Plugin {
       boolean active = travelHighlightActive;
       SwingUtilities.invokeLater(() -> ui.showTravelHighlightState(active));
     }
+    updateReadinessOverlay();
     updateShortestPathRoute();
   }
 
   private void updateShortestPathRoute() {
-    spiderTeleportPending = false;
+    directTeleportPending = false;
     routeNeedsTravelItem = false;
     if (shortestPathBridge == null) {
       return;
@@ -2191,11 +2221,12 @@ public class SlayerPlusPlugin extends Plugin {
       return;
     }
     routeNeedsTravelItem = waypoint.equals(path.get(0));
-    if (travelItem != null && travelItem.getItemId() == ItemID.TELEPORTSCROLL_SPIDERCAVE) {
+    String teleportName = directTeleportName(travelItem);
+    if (!teleportName.isEmpty()) {
       WorldPoint here = localPlayer == null ? null : localPlayer.getWorldLocation();
-      boolean away = needsSpiderTeleport(here, waypoint, path.get(0));
-      spiderTeleportPending = updateSpiderTeleportTrip(here != null, away);
-      routeNeedsTravelItem = spiderTeleportPending;
+      boolean away = needsDirectTeleport(here, waypoint, path.get(0));
+      directTeleportPending = updateDirectTeleportTrip(teleportName, here != null, away);
+      routeNeedsTravelItem = directTeleportPending;
       if (away) {
         shortestPathBridge.clear();
         return;
@@ -2204,26 +2235,51 @@ public class SlayerPlusPlugin extends Plugin {
     shortestPathBridge.routeTo(waypoint, false, routeNeedsTravelItem);
   }
 
-  static boolean needsSpiderTeleport(WorldPoint here, WorldPoint waypoint, WorldPoint entrance) {
+  static boolean needsDirectTeleport(WorldPoint here, WorldPoint waypoint, WorldPoint entrance) {
     return here != null
         && waypoint.equals(entrance)
         && (here.getPlane() != entrance.getPlane() || chebyshevDistance(here, entrance) > 64);
   }
 
-  boolean updateSpiderTeleportTrip(boolean locationKnown, boolean away) {
-    if (locationKnown && !away) {
-      spiderTeleportArrived = true;
+  boolean updateDirectTeleportTrip(String teleportName, boolean locationKnown, boolean away) {
+    if (!teleportName.equals(directTeleportName)) {
+      directTeleportName = teleportName;
+      directTeleportArrived = false;
     }
-    return locationKnown && away && !spiderTeleportArrived;
+    if (locationKnown && !away) {
+      directTeleportArrived = true;
+    }
+    return locationKnown && away && !directTeleportArrived;
   }
 
-  boolean showSpiderTeleportInstruction() {
-    return spiderTeleportPending && travelHighlightActive && !bankInterfaceOpen;
+  String directTeleportInstruction() {
+    return directTeleportPending && travelHighlightActive && !bankInterfaceOpen
+        ? "Use " + directTeleportName
+        : "";
+  }
+
+  private static String directTeleportName(KitItem item) {
+    if (item == null) {
+      return "";
+    }
+    String name = trip(item.getDisplayName());
+    if (name.equals("spider cave teleport")) {
+      return "Spider cave teleport";
+    }
+    return name.equals("guthixian temple teleport") ? "Guthixian temple teleport" : "";
   }
 
   static List<WorldPoint> prioritizeTravelArrival(
       List<WorldPoint> path, String location, String item) {
-    if (!trip(location).equals("fremennik slayer dungeon") || !trip(item).contains("slayer ring")) {
+    String destination = trip(location);
+    String travel = trip(item);
+    if (destination.equals("ancient guthixian temple")) {
+      if (travel.contains("games necklace")) {
+        return Collections.singletonList(new WorldPoint(3245, 9500, 2));
+      }
+      return path.isEmpty() ? path : Collections.singletonList(path.get(0));
+    }
+    if (!destination.equals("fremennik slayer dungeon") || !travel.contains("slayer ring")) {
       return path;
     }
     List<WorldPoint> result = new ArrayList<>();

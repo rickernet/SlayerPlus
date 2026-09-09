@@ -590,6 +590,20 @@ public class SlayerRegressionTest {
   }
 
   @Test
+  public void tormentedDemonRouteStopsWhereSupportedTravelEnds() {
+    List<WorldPoint> templePath =
+        Arrays.asList(new WorldPoint(4097, 4419, 0), new WorldPoint(4136, 4372, 0));
+    assertEquals(
+        Collections.singletonList(new WorldPoint(4097, 4419, 0)),
+        SlayerPlusPlugin.prioritizeTravelArrival(
+            templePath, "Ancient Guthixian Temple", "Guthixian temple teleport"));
+    assertEquals(
+        Collections.singletonList(new WorldPoint(3245, 9500, 2)),
+        SlayerPlusPlugin.prioritizeTravelArrival(
+            templePath, "Ancient Guthixian Temple", "Games necklace(8)"));
+  }
+
+  @Test
   public void wildcardInventoryRequirementsApplyToEveryCombatStyle() {
     assertTrue(SlayerLoadoutAnalyzer.requirementStyleMatches("*", "RANGED"));
     assertTrue(SlayerLoadoutAnalyzer.requirementStyleMatches("magic", "MAGIC"));
@@ -966,6 +980,60 @@ public class SlayerRegressionTest {
     assertEquals(TaskStrategy.CombatStyle.MELEE, strategy.getStyle());
     assertEquals(12, rules.getLoot());
     assertEquals(6, rules.resolveFoodSlots(strategy, strategy.getFood()));
+  }
+
+  @Test
+  public void dragonfireProtectionSurvivesCannonRulesAndSkipsSafespots() {
+    final TaskStrategy meleeCannon =
+        TaskStrategy.builder(TaskStrategy.CombatStyle.MELEE, "Melee dragon regression")
+            .tags(TaskStrategy.MethodTag.CANNON)
+            .reviewed("2026-09-09")
+            .build();
+    final MethodRules meleeRules =
+        SlayerMethodRuleCatalog.resolve("Black dragons", "Standard Slayer location", meleeCannon);
+    assertEquals(
+        1,
+        meleeRules.getRequiredItems().stream()
+            .filter(
+                item ->
+                    item.getDisplayName().equals(PotionPolicy.EXTENDED_SUPER_ANTIFIRE_DISPLAY))
+            .count());
+
+    final TaskStrategy shieldedRanged =
+        TaskStrategy.builder(TaskStrategy.CombatStyle.RANGED, "Ranged dragon regression")
+            .reviewed("2026-09-09")
+            .build();
+    final MethodRules rangedRules =
+        SlayerMethodRuleCatalog.resolve(
+            "Black dragons", "Standard Slayer location", shieldedRanged);
+    assertEquals(
+        1,
+        rangedRules.getRequiredItems().stream()
+            .filter(
+                item -> item.getDisplayName().equals(PotionPolicy.EXTENDED_ANTIFIRE_DISPLAY))
+            .count());
+
+    final TaskStrategy safespot =
+        TaskStrategy.builder(TaskStrategy.CombatStyle.RANGED, "Safespot dragon regression")
+            .tags(TaskStrategy.MethodTag.SAFESPOT)
+            .damageProfile(TaskStrategy.DamageProfile.ZERO_WHILE_SAFESPOTTING)
+            .reviewed("2026-09-09")
+            .build();
+    final MethodRules safespotRules =
+        SlayerMethodRuleCatalog.resolve("Black dragons", "Standard Slayer location", safespot);
+    assertFalse(
+        safespotRules.getRequiredItems().stream()
+            .anyMatch(item -> item.getDisplayName().toLowerCase().contains("antifire")));
+    final TaskStrategy babyDragons =
+        TaskStrategy.builder(TaskStrategy.CombatStyle.MELEE, "Baby dragon regression")
+            .reviewed("2026-09-09")
+            .build();
+    assertFalse(
+        SlayerMethodRuleCatalog.resolve(
+                "Baby blue dragons", "Taverley Dungeon", babyDragons)
+            .getRequiredItems()
+            .stream()
+            .anyMatch(item -> item.getDisplayName().toLowerCase().contains("antifire")));
   }
 
   @Test

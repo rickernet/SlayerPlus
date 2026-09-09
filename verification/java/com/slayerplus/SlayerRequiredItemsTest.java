@@ -207,7 +207,7 @@ public class SlayerRequiredItemsTest {
 
   private List<KitItem> equipment(String task, CombatStyle style, List<OwnedItem> pool) {
     TaskStrategy strategy = strategy(style);
-    List<Requirement> requirements = analyzer.requirementsFor(task, "", style, 25, false);
+    List<Requirement> requirements = analyzer.requirementsFor(task, "", style, 25, false, strategy);
     OwnedItem weapon =
         SlayerLoadoutAnalyzer.selectRecommendedWeapon(
             task, strategy, style, requirements, Collections.emptyList(), pool);
@@ -216,14 +216,15 @@ public class SlayerRequiredItemsTest {
   }
 
   private List<KitItem> inventory(String task, CombatStyle style, List<OwnedItem> pool) {
+    TaskStrategy strategy = strategy(style);
     List<KitItem> layout =
         analyzer.buildInventoryLayout(
             task,
-            strategy(style),
+            strategy,
             "",
             "",
             style,
-            analyzer.requirementsFor(task, "", style, 25, false),
+            analyzer.requirementsFor(task, "", style, 25, false, strategy),
             false,
             8,
             pool,

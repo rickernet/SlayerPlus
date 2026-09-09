@@ -18,30 +18,17 @@ public final class SlayerEncounterStandards {
         .trim();
   }
 
-  public static String resolveTaskMethod(
-      String encounter,
-      String location,
-      boolean bossEncounter,
-      String routePositioningNote,
-      TaskStrategy strategy) {
-    if (strategy != null && strategy.isReviewed()) {
-      MethodRules rules = SlayerMethodRuleCatalog.resolve(encounter, location, strategy);
-      String method = safe(rules.getMethod());
-      if (!method.isEmpty()) {
-        return method;
-      }
-    }
-    String authored = strategy == null ? "" : safe(strategy.getMethod());
-    if (!authored.isEmpty()) {
-      return authored;
-    }
-    String route = safe(routePositioningNote);
-    return route.isEmpty() ? "No reviewed method is available for this encounter." : route;
+  static boolean isDragonTask(String task) {
+    return task.contains("dragon")
+        && !task.startsWith("baby ")
+        && !task.contains("dragonfly")
+        && !task.contains("dragon impling");
   }
 
-  public static String resolveTaskMethod(
-      String encounter, boolean bossEncounter, String routePositioningNote, TaskStrategy strategy) {
-    return resolveTaskMethod(encounter, "", bossEncounter, routePositioningNote, strategy);
+  static boolean isSafespot(TaskStrategy strategy) {
+    return strategy != null
+        && (strategy.hasTag(TaskStrategy.MethodTag.SAFESPOT)
+            || strategy.getDamageProfile() == TaskStrategy.DamageProfile.ZERO_WHILE_SAFESPOTTING);
   }
 
   public static boolean validateBossDefinitions(

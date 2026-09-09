@@ -528,7 +528,7 @@ public final class SlayerLoadoutAnalyzer {
     }
     CombatStyle style = style(strategy);
     List<Requirement> requirements =
-        requirementsFor(task, location, style, remainingKills, desertElite);
+        requirementsFor(task, location, style, remainingKills, desertElite, strategy);
     boolean cannonSuggested = isCannonSuggested(cannon);
     int foodSlots = strategy.getRecommendedFoodSlots(remainingKills);
     OwnedItem weapon =
@@ -3575,7 +3575,12 @@ public final class SlayerLoadoutAnalyzer {
   }
 
   List<Requirement> requirementsFor(
-      String task, String location, CombatStyle style, int remainingKills, boolean desertElite) {
+      String task,
+      String location,
+      CombatStyle style,
+      int remainingKills,
+      boolean desertElite,
+      TaskStrategy strategy) {
     task = normalize(task);
     location = normalize(location);
     List<Requirement> requirements = new ArrayList<>();
@@ -3634,26 +3639,23 @@ public final class SlayerLoadoutAnalyzer {
                 "Wyvern-protection shield", SlayerLoadoutData.array("melee_wyvern_shields")));
       }
     }
-    if ((task.equals("blue dragon") || task.equals("blue dragons"))) {
-      if (style != CombatStyle.MELEE) {
+    if (!SlayerEncounterStandards.isSafespot(strategy) && style != CombatStyle.MELEE) {
+      if (task.equals("blue dragon") || task.equals("blue dragons")) {
+        requirements.add(
+            gearRequirement(
+                "Dragonfire shield protection",
+                SlayerLoadoutData.array("standard_dragonfire_shields")));
+      } else if (usesReviewedDragonPackage(task)) {
+        requirements.add(
+            gearRequirement(
+                "Dragonfire shield protection",
+                SlayerLoadoutData.array("preferred_dragonfire_shields")));
+      } else if (SlayerEncounterStandards.isDragonTask(task) && !task.equals("vorkath")) {
         requirements.add(
             gearRequirement(
                 "Dragonfire shield protection",
                 SlayerLoadoutData.array("standard_dragonfire_shields")));
       }
-    } else if (usesReviewedDragonPackage(task) && style != CombatStyle.MELEE) {
-      requirements.add(
-          gearRequirement(
-              "Dragonfire shield protection",
-              SlayerLoadoutData.array("preferred_dragonfire_shields")));
-    } else if (isDragonTask(task) && !task.equals("vorkath") && !usesReviewedDragonPackage(task)) {
-      requirements.add(
-          gearRequirement(
-              "Dragonfire shield protection",
-              SlayerLoadoutData.array("standard_dragonfire_shields")));
-      requirements.add(
-          inventoryNeed(
-              PotionPolicy.EXTENDED_ANTIFIRE_DISPLAY, PotionPolicy.shieldedAntifireAlternatives()));
     }
     return requirements;
   }
@@ -3693,12 +3695,6 @@ public final class SlayerLoadoutAnalyzer {
         || normalizedTask.contains("drake")
         || normalizedTask.contains("hydra")
         || normalizedLocation.contains("karuulm");
-  }
-
-  private static boolean isDragonTask(String task) {
-    return task.contains("dragon")
-        && !task.contains("dragonfly")
-        && !task.contains("dragon impling");
   }
 
   private static boolean usesReviewedDragonPackage(String task) {

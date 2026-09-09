@@ -24,24 +24,31 @@ public class AraxxorLoadoutTest {
   @Test
   public void teleportPromptWaitsForRebankAfterArrival() {
     SlayerPlusPlugin plugin = new SlayerPlusPlugin();
-    assertTrue(plugin.updateSpiderTeleportTrip(true, true));
-    assertFalse(plugin.updateSpiderTeleportTrip(true, false));
-    assertFalse(plugin.updateSpiderTeleportTrip(false, false));
-    assertFalse(plugin.updateSpiderTeleportTrip(true, true));
+    assertTrue(plugin.updateDirectTeleportTrip("Spider cave teleport", true, true));
+    assertFalse(plugin.updateDirectTeleportTrip("Spider cave teleport", true, false));
+    assertFalse(plugin.updateDirectTeleportTrip("Spider cave teleport", false, false));
+    assertFalse(plugin.updateDirectTeleportTrip("Spider cave teleport", true, true));
     plugin.handleBankClosed();
-    assertTrue(plugin.updateSpiderTeleportTrip(true, true));
+    assertTrue(plugin.updateDirectTeleportTrip("Spider cave teleport", true, true));
   }
 
   @Test
   public void customTeleportStopsAtCaveAndLeavesWalkingToShortestPath() {
     WorldPoint entrance = new WorldPoint(3657, 3407, 0);
     assertTrue(
-        SlayerPlusPlugin.needsSpiderTeleport(new WorldPoint(2935, 3280, 0), entrance, entrance));
+        SlayerPlusPlugin.needsDirectTeleport(new WorldPoint(2935, 3280, 0), entrance, entrance));
     assertFalse(
-        SlayerPlusPlugin.needsSpiderTeleport(new WorldPoint(3658, 3403, 0), entrance, entrance));
+        SlayerPlusPlugin.needsDirectTeleport(new WorldPoint(3658, 3403, 0), entrance, entrance));
     WorldPoint inside = new WorldPoint(3630, 9813, 0);
-    assertFalse(SlayerPlusPlugin.needsSpiderTeleport(inside, inside, entrance));
-    assertFalse(SlayerPlusPlugin.needsSpiderTeleport(null, entrance, entrance));
+    assertFalse(SlayerPlusPlugin.needsDirectTeleport(inside, inside, entrance));
+    assertFalse(SlayerPlusPlugin.needsDirectTeleport(null, entrance, entrance));
+  }
+
+  @Test
+  public void differentDirectTeleportStartsANewTrip() {
+    SlayerPlusPlugin plugin = new SlayerPlusPlugin();
+    assertFalse(plugin.updateDirectTeleportTrip("Spider cave teleport", true, false));
+    assertTrue(plugin.updateDirectTeleportTrip("Guthixian temple teleport", true, true));
   }
 
   private final SlayerLoadoutAnalyzer analyzer = new SlayerLoadoutAnalyzer(null);

@@ -44,6 +44,9 @@ public class SlayerPreparationReminderTest {
     SlayerTaskReadinessOverlay overlay = new SlayerTaskReadinessOverlay(new SlayerPlusPlugin());
     overlay.update(plan(false, false, false));
     assertEquals(OverlayPosition.TOP_RIGHT, overlay.getPosition());
+    assertTrue(overlay.isMovable());
+    assertFalse(overlay.isResizable());
+    assertEquals(285, overlay.getPanelComponent().getPreferredSize().width);
     assertFalse(overlay.isClearChildren());
     int count = overlay.getPanelComponent().getChildren().size();
     assertEquals(6, count); // Title, spellbook, spell, three rune rows; no explanatory footer.

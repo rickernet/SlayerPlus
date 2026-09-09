@@ -2,36 +2,44 @@ package com.slayerplus;
 
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import net.runelite.api.Client;
 import net.runelite.api.Model;
 import net.runelite.api.Rasterizer;
 
 @RequiredArgsConstructor
 public final class PlayerPortraitRenderer {
-  private static final int CAPTURE_SIZE = 448;
+  private static final int CAPTURE_SIZE = 320;
   private static final int OUTPUT_SIZE = 140;
   private static final int FRONT_YAW = 0;
-  private static final double HEAD_TURN_RADIANS = Math.toRadians(11.0);
+  private static final double HEAD_TURN_RADIANS = Math.toRadians(7.0);
   private static final int NECK_SCAN_BINS = 72;
   private static final int CLEAR_RGB = 0x010203;
-  private static final int EXTENDED_CAPTURE_EXTRA = 448;
+  private static final int EXTENDED_CAPTURE_EXTRA = 640;
+  private static final int SIDE_SOURCE_EXTENSION_COLUMNS = 32;
   private static final int TOP_SOURCE_EXTENSION_ROWS = 64;
   private static final int[] ZOOM_LEVELS = {120, 145, 170, 200, 230, 260, 300, 340, 380};
   private final Client client;
   private Framing lockedFraming;
   private ContentBounds lockedContentBounds;
 
-  public BufferedImage render(Model inputModel, int turnDirection) {
-    if (inputModel == null) {
+  public BufferedImage render(Model displayInputModel, Model bodyInputModel, int turnDirection) {
+    if (displayInputModel == null || bodyInputModel == null) {
       return null;
     }
-    Model unskewed = inputModel.getUnskewedModel();
-    Model model = unskewed != null ? unskewed : inputModel;
+    boolean weaponEquipped = displayInputModel != bodyInputModel;
+    Model bodyUnskewed = bodyInputModel.getUnskewedModel();
+    Model bodyModel = bodyUnskewed != null ? bodyUnskewed : bodyInputModel;
+    Model displayModel = bodyModel;
+    if (weaponEquipped) {
+      Model displayUnskewed = displayInputModel.getUnskewedModel();
+      displayModel = displayUnskewed != null ? displayUnskewed : displayInputModel;
+    }
     Rasterizer rasterizer = client.getRasterizer();
     if (rasterizer == null) {
       return null;
@@ -63,10 +71,13 @@ public final class PlayerPortraitRenderer {
     try {
       rasterizer.setDrawRegion(
           captureX, captureY, captureX + CAPTURE_SIZE, captureY + CAPTURE_SIZE);
-      model.calculateBoundsCylinder();
+      bodyModel.calculateBoundsCylinder();
+      if (weaponEquipped) {
+        displayModel.calculateBoundsCylinder();
+      }
       if (lockedFraming == null) {
         lockedFraming =
-            findInitialFraming(model, rasterizer, pixels, rasterWidth, captureX, captureY);
+            findInitialFraming(bodyModel, rasterizer, pixels, rasterWidth, captureX, captureY);
       }
       if (lockedFraming == null) {
         return null;
@@ -74,7 +85,7 @@ public final class PlayerPortraitRenderer {
       if (lockedContentBounds == null) {
         var calibrationCapture =
             renderCaptureSized(
-                model,
+                bodyModel,
                 rasterizer,
                 pixels,
                 rasterWidth,
@@ -82,24 +93,37 @@ public final class PlayerPortraitRenderer {
                 captureY,
                 CAPTURE_SIZE,
                 lockedFraming);
-        var calibrationPortrait = copyLockedCrop(calibrationCapture, lockedFraming, true, 0, 0);
+        var calibrationPortrait =
+            copyLockedCrop(calibrationCapture, lockedFraming, true, 0, 0, 1);
         if (calibrationPortrait == null) {
           return null;
         }
       }
-      NeckTurn neckTurn = applyTemporaryNeckTurn(model, turnDirection);
+      int renderScale = extendedCaptureSize / CAPTURE_SIZE;
+      Framing renderFraming =
+          renderScale == 1
+              ? lockedFraming
+              : supersampledFraming(
+                  lockedFraming, lockedContentBounds, client.get3dZoom(), renderScale);
+      NeckTurn neckTurn = applyTemporaryNeckTurn(displayModel, bodyModel, turnDirection);
       try {
         var capture =
             renderCaptureSized(
-                model,
+                displayModel,
                 rasterizer,
                 pixels,
                 rasterWidth,
                 extendedCaptureX,
                 extendedCaptureY,
                 extendedCaptureSize,
-                lockedFraming);
-        return copyLockedCrop(capture, lockedFraming, false, extendedOffsetX, extendedOffsetY);
+                renderFraming);
+        return copyLockedCrop(
+            capture,
+            lockedFraming,
+            false,
+            extendedOffsetX,
+            extendedOffsetY,
+            renderScale);
       } finally {
         if (neckTurn != null) {
           neckTurn.restore();
@@ -136,6 +160,25 @@ public final class PlayerPortraitRenderer {
     return captureRegion(pixels, rasterWidth, captureX, captureY, captureSize, captureSize);
   }
 
+  private static Framing supersampledFraming(
+      Framing framing, ContentBounds bounds, int projectionZoom, int renderScale) {
+    double contentCenter = framing.cropY + (bounds.minY + bounds.maxY + 1) / 2.0;
+    int verticalOffset = framing.verticalOffset;
+    if (projectionZoom > 0) {
+      verticalOffset +=
+          (int)
+              Math.round(
+                  (CAPTURE_SIZE / 2.0 - contentCenter) * framing.zoom / projectionZoom);
+    }
+    return new Framing(
+        Math.max(1, framing.zoom / renderScale),
+        verticalOffset,
+        framing.cropX,
+        framing.cropY,
+        framing.cropWidth,
+        framing.cropHeight);
+  }
+
   public boolean hasCalibration() {
     return lockedFraming != null && lockedContentBounds != null;
   }
@@ -144,27 +187,18 @@ public final class PlayerPortraitRenderer {
     if (!hasCalibration()) {
       return null;
     }
-    return "v1"
-        + ","
-        + lockedFraming.zoom
-        + ","
-        + lockedFraming.verticalOffset
-        + ","
-        + lockedFraming.cropX
-        + ","
-        + lockedFraming.cropY
-        + ","
-        + lockedFraming.cropWidth
-        + ","
-        + lockedFraming.cropHeight
-        + ","
-        + lockedContentBounds.minX
-        + ","
-        + lockedContentBounds.minY
-        + ","
-        + lockedContentBounds.maxX
-        + ","
-        + lockedContentBounds.maxY;
+    return String.format(
+        "v2,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+        lockedFraming.zoom,
+        lockedFraming.verticalOffset,
+        lockedFraming.cropX,
+        lockedFraming.cropY,
+        lockedFraming.cropWidth,
+        lockedFraming.cropHeight,
+        lockedContentBounds.minX,
+        lockedContentBounds.minY,
+        lockedContentBounds.maxX,
+        lockedContentBounds.maxY);
   }
 
   public boolean loadCalibration(String value) {
@@ -172,20 +206,19 @@ public final class PlayerPortraitRenderer {
       return false;
     }
     String[] parts = value.split(",");
-    if (parts.length != 11 || !"v1".equals(parts[0])) {
+    if (parts.length != 11 || !"v2".equals(parts[0])) {
       return false;
     }
     try {
-      int zoom = Integer.parseInt(parts[1]);
-      int verticalOffset = Integer.parseInt(parts[2]);
-      int cropX = Integer.parseInt(parts[3]);
-      int cropY = Integer.parseInt(parts[4]);
-      int cropWidth = Integer.parseInt(parts[5]);
-      int cropHeight = Integer.parseInt(parts[6]);
-      int minX = Integer.parseInt(parts[7]);
-      int minY = Integer.parseInt(parts[8]);
-      int maxX = Integer.parseInt(parts[9]);
-      int maxY = Integer.parseInt(parts[10]);
+      int[] values = new int[10];
+      for (int index = 0; index < values.length; index++) {
+        values[index] = Integer.parseInt(parts[index + 1]);
+      }
+      int zoom = values[0];
+      int cropX = values[2];
+      int cropY = values[3];
+      int cropWidth = values[4];
+      int cropHeight = values[5];
       if (zoom <= 0
           || cropWidth <= 0
           || cropHeight <= 0
@@ -193,16 +226,16 @@ public final class PlayerPortraitRenderer {
           || cropY < 0
           || cropX + cropWidth > CAPTURE_SIZE
           || cropY + cropHeight > CAPTURE_SIZE
-          || minX < 0
-          || minY < 0
-          || maxX < minX
-          || maxY < minY
-          || maxX >= cropWidth
-          || maxY >= cropHeight) {
+          || values[6] < 0
+          || values[7] < 0
+          || values[8] < values[6]
+          || values[9] < values[7]
+          || values[8] >= cropWidth
+          || values[9] >= cropHeight) {
         return false;
       }
-      lockedFraming = new Framing(zoom, verticalOffset, cropX, cropY, cropWidth, cropHeight);
-      lockedContentBounds = new ContentBounds(minX, minY, maxX, maxY);
+      lockedFraming = new Framing(zoom, values[1], cropX, cropY, cropWidth, cropHeight);
+      lockedContentBounds = new ContentBounds(values[6], values[7], values[8], values[9]);
       return true;
     } catch (NumberFormatException exception) {
       return false;
@@ -233,9 +266,8 @@ public final class PlayerPortraitRenderer {
       for (int verticalOffset : verticalOffsets) {
         rasterizer.fillRectangle(captureX, captureY, CAPTURE_SIZE, CAPTURE_SIZE, CLEAR_RGB);
         model.drawOrtho(0, 0, FRONT_YAW, 0, 0, verticalOffset, 0, zoom);
-        var capture =
-            captureRegion(pixels, rasterWidth, captureX, captureY, CAPTURE_SIZE, CAPTURE_SIZE);
-        Candidate candidate = measure(capture, zoom, verticalOffset);
+        Candidate candidate =
+            measure(pixels, rasterWidth, captureX, captureY, zoom, verticalOffset);
         if (candidate != null && (best == null || candidate.score > best.score)) {
           best = candidate;
         }
@@ -245,11 +277,22 @@ public final class PlayerPortraitRenderer {
       return null;
     }
     int fullWidth = best.maxX - best.minX + 1;
-    int fullHeight = best.maxY - best.minY + 1;
     int centerX = best.minX + fullWidth / 2;
-    int cropHeight = findHeadAndShoulderHeight(best.image, best.minY, best.maxY, fullWidth);
+    Framing bestFraming = new Framing(best.zoom, best.verticalOffset, 0, 0, 1, 1);
+    BufferedImage bestCapture =
+        renderCaptureSized(
+            model,
+            rasterizer,
+            pixels,
+            rasterWidth,
+            captureX,
+            captureY,
+            CAPTURE_SIZE,
+            bestFraming);
+    int cropHeight = findHeadAndShoulderHeight(bestCapture, best.minY, best.maxY, fullWidth);
     int widestUpperBody =
-        findMaximumRowWidth(best.image, best.minY, Math.min(best.maxY, best.minY + cropHeight - 1));
+        findMaximumRowWidth(
+            bestCapture, best.minY, Math.min(best.maxY, best.minY + cropHeight - 1));
     int cropWidth =
         Math.min(
             CAPTURE_SIZE,
@@ -330,15 +373,22 @@ public final class PlayerPortraitRenderer {
     return maximumX < minimumX ? 0 : maximumX - minimumX + 1;
   }
 
-  private static Candidate measure(BufferedImage image, int zoom, int verticalOffset) {
-    int minX = image.getWidth();
-    int minY = image.getHeight();
+  private static Candidate measure(
+      int[] pixels,
+      int rasterWidth,
+      int captureX,
+      int captureY,
+      int zoom,
+      int verticalOffset) {
+    int minX = CAPTURE_SIZE;
+    int minY = CAPTURE_SIZE;
     int maxX = -1;
     int maxY = -1;
     int pixelCount = 0;
-    for (int y = 0; y < image.getHeight(); y++) {
-      for (int x = 0; x < image.getWidth(); x++) {
-        int rgb = image.getRGB(x, y) & 0x00FFFFFF;
+    for (int y = 0; y < CAPTURE_SIZE; y++) {
+      int row = (captureY + y) * rasterWidth + captureX;
+      for (int x = 0; x < CAPTURE_SIZE; x++) {
+        int rgb = pixels[row + x] & 0x00FFFFFF;
         if (rgb == CLEAR_RGB) {
           continue;
         }
@@ -363,12 +413,12 @@ public final class PlayerPortraitRenderer {
     score -= Math.abs(portraitHeight - 88) * 1800;
     score -= Math.abs(portraitWidth - 92) * 1400;
     if (minY <= 12
-        || maxY >= image.getHeight() - 13
+        || maxY >= CAPTURE_SIZE - 13
         || minX <= 12
-        || maxX >= image.getWidth() - 13) {
+        || maxX >= CAPTURE_SIZE - 13) {
       return null;
     }
-    return new Candidate(image, minX, minY, maxX, maxY, zoom, verticalOffset, score);
+    return new Candidate(minX, minY, maxX, maxY, zoom, verticalOffset, score);
   }
 
   private BufferedImage copyLockedCrop(
@@ -376,19 +426,44 @@ public final class PlayerPortraitRenderer {
       Framing framing,
       boolean allowCalibration,
       int captureOffsetX,
-      int captureOffsetY) {
+      int captureOffsetY,
+      int renderScale) {
     int requestedTopExtension = allowCalibration ? 0 : TOP_SOURCE_EXTENSION_ROWS;
-    int availableTopExtension = Math.max(0, captureOffsetY + framing.cropY);
+    int sideExtension = allowCalibration ? 0 : SIDE_SOURCE_EXTENSION_COLUMNS;
+    int availableTopExtension =
+        renderScale == 1
+            ? Math.max(0, captureOffsetY + framing.cropY)
+            : requestedTopExtension;
     int sourceTopExtension = Math.min(requestedTopExtension, availableTopExtension);
     var source =
         new BufferedImage(
-            framing.cropWidth,
-            framing.cropHeight + sourceTopExtension,
-            BufferedImage.TYPE_INT_ARGB);
+            (framing.cropWidth + sideExtension * 2) * renderScale,
+            (framing.cropHeight + sourceTopExtension) * renderScale,
+            BufferedImage.TYPE_INT_ARGB_PRE);
+    int sourceOriginX;
+    int sourceOriginY;
+    if (renderScale == 1) {
+      sourceOriginX = captureOffsetX + framing.cropX - sideExtension;
+      sourceOriginY = captureOffsetY + framing.cropY - sourceTopExtension;
+    } else {
+      double contentCenter =
+          framing.cropY
+              + (lockedContentBounds.minY + lockedContentBounds.maxY + 1) / 2.0;
+      sourceOriginX =
+          (int)
+              Math.round(
+                  capture.getWidth() / 2.0
+                      + (framing.cropX - sideExtension - CAPTURE_SIZE / 2.0) * renderScale);
+      sourceOriginY =
+          (int)
+              Math.round(
+                  capture.getHeight() / 2.0
+                      + (framing.cropY - sourceTopExtension - contentCenter) * renderScale);
+    }
     for (int y = 0; y < source.getHeight(); y++) {
-      for (int x = 0; x < framing.cropWidth; x++) {
-        int sourceX = captureOffsetX + framing.cropX + x;
-        int sourceY = captureOffsetY + framing.cropY - sourceTopExtension + y;
+      for (int x = 0; x < source.getWidth(); x++) {
+        int sourceX = sourceOriginX + x;
+        int sourceY = sourceOriginY + y;
         if (sourceX < 0
             || sourceX >= capture.getWidth()
             || sourceY < 0
@@ -433,10 +508,17 @@ public final class PlayerPortraitRenderer {
               Math.min(source.getWidth() - 1, measuredMaxX + horizontalPadding),
               Math.min(source.getHeight() - 1, measuredMaxY + bottomPadding));
     }
-    int minX = lockedContentBounds.minX;
-    int minY = lockedContentBounds.minY + sourceTopExtension;
-    int maxX = lockedContentBounds.maxX;
-    int maxY = lockedContentBounds.maxY + sourceTopExtension;
+    int minX = (lockedContentBounds.minX + sideExtension) * renderScale;
+    int minY = (lockedContentBounds.minY + sourceTopExtension) * renderScale;
+    int maxX = (lockedContentBounds.maxX + sideExtension + 1) * renderScale - 1;
+    int maxY = (lockedContentBounds.maxY + sourceTopExtension + 1) * renderScale - 1;
+    if (!allowCalibration) {
+      int[] horizontalBounds = horizontalOpaqueBounds(source);
+      if (horizontalBounds != null) {
+        minX = Math.min(minX, horizontalBounds[0]);
+        maxX = Math.max(maxX, horizontalBounds[1]);
+      }
+    }
     int visibleWidth = maxX - minX + 1;
     int visibleHeight = maxY - minY + 1;
     int availableWidth = OUTPUT_SIZE - 4;
@@ -454,46 +536,103 @@ public final class PlayerPortraitRenderer {
     int extensionDrawHeight = extendedDrawHeight - drawHeight;
     int extendedTargetY = Math.max(0, targetY - extensionDrawHeight);
     var scaledPortrait =
-        new BufferedImage(drawWidth, extendedDrawHeight, BufferedImage.TYPE_INT_ARGB);
-    var scaledGraphics = scaledPortrait.createGraphics();
-    scaledGraphics.setRenderingHint(
-        RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-    scaledGraphics.setRenderingHint(
-        RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-    scaledGraphics.setRenderingHint(
-        RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    scaledGraphics.drawImage(
-        source, 0, 0, drawWidth, extendedDrawHeight, minX, extendedMinY, maxX + 1, maxY + 1, null);
-    scaledGraphics.dispose();
-    var refinedPortrait = applySubtleSharpen(scaledPortrait);
-    var output = new BufferedImage(OUTPUT_SIZE, OUTPUT_SIZE, BufferedImage.TYPE_INT_ARGB);
+        downsampleCrop(
+            source,
+            minX,
+            extendedMinY,
+            maxX + 1,
+            maxY + 1,
+            drawWidth,
+            extendedDrawHeight);
+    var output = new BufferedImage(OUTPUT_SIZE, OUTPUT_SIZE, BufferedImage.TYPE_INT_ARGB_PRE);
     var graphics = output.createGraphics();
     graphics.setRenderingHint(
         RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
     graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    graphics.drawImage(refinedPortrait, targetX, extendedTargetY, null);
+    graphics.drawImage(scaledPortrait, targetX, extendedTargetY, null);
     graphics.dispose();
     return output;
   }
 
-  private static BufferedImage applySubtleSharpen(BufferedImage input) {
-    float[] kernel = {0.0f, -0.10f, 0.0f, -0.10f, 1.40f, -0.10f, 0.0f, -0.10f, 0.0f};
-    ConvolveOp sharpen = new ConvolveOp(new Kernel(3, 3, kernel), ConvolveOp.EDGE_NO_OP, null);
-    return sharpen.filter(input, null);
+  private static int[] horizontalOpaqueBounds(BufferedImage image) {
+    int minimum = image.getWidth();
+    int maximum = -1;
+    for (int y = 0; y < image.getHeight(); y++) {
+      for (int x = 0; x < image.getWidth(); x++) {
+        if ((image.getRGB(x, y) >>> 24) != 0) {
+          minimum = Math.min(minimum, x);
+          maximum = Math.max(maximum, x);
+        }
+      }
+    }
+    return maximum < minimum ? null : new int[] {minimum, maximum};
   }
 
-  private static NeckTurn applyTemporaryNeckTurn(Model model, int turnDirection) {
+  private static BufferedImage downsampleCrop(
+      BufferedImage source,
+      int sourceX,
+      int sourceY,
+      int sourceMaxX,
+      int sourceMaxY,
+      int width,
+      int height) {
+    var intermediate =
+        new BufferedImage(width * 2, height * 2, BufferedImage.TYPE_INT_ARGB_PRE);
+    var graphics = intermediate.createGraphics();
+    configureResampling(graphics);
+    graphics.drawImage(
+        source,
+        0,
+        0,
+        intermediate.getWidth(),
+        intermediate.getHeight(),
+        sourceX,
+        sourceY,
+        sourceMaxX,
+        sourceMaxY,
+        null);
+    graphics.dispose();
+
+    var output = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
+    graphics = output.createGraphics();
+    configureResampling(graphics);
+    graphics.drawImage(intermediate, 0, 0, width, height, null);
+    graphics.dispose();
+    return output;
+  }
+
+  private static void configureResampling(java.awt.Graphics2D graphics) {
+    graphics.setRenderingHint(
+        RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+    graphics.setRenderingHint(
+        RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+    graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+  }
+
+  private static NeckTurn applyTemporaryNeckTurn(
+      Model model, Model bodyModel, int turnDirection) {
     int vertexCount = model.getVerticesCount();
     float[] verticesX = model.getVerticesX();
     float[] verticesY = model.getVerticesY();
     float[] verticesZ = model.getVerticesZ();
+    int bodyVertexCount = bodyModel.getVerticesCount();
+    float[] bodyX = bodyModel.getVerticesX();
+    float[] bodyY = bodyModel.getVerticesY();
+    float[] bodyZ = bodyModel.getVerticesZ();
     if (vertexCount < 12
         || verticesX == null
         || verticesY == null
         || verticesZ == null
         || verticesX.length < vertexCount
         || verticesY.length < vertexCount
-        || verticesZ.length < vertexCount) {
+        || verticesZ.length < vertexCount
+        || bodyVertexCount < 12
+        || bodyX == null
+        || bodyY == null
+        || bodyZ == null
+        || bodyX.length < bodyVertexCount
+        || bodyY.length < bodyVertexCount
+        || bodyZ.length < bodyVertexCount) {
       return null;
     }
     float minimumY = Float.POSITIVE_INFINITY;
@@ -502,25 +641,25 @@ public final class PlayerPortraitRenderer {
     float maximumX = Float.NEGATIVE_INFINITY;
     float minimumZ = Float.POSITIVE_INFINITY;
     float maximumZ = Float.NEGATIVE_INFINITY;
-    for (int vertex = 0; vertex < vertexCount; vertex++) {
-      minimumY = Math.min(minimumY, verticesY[vertex]);
-      maximumY = Math.max(maximumY, verticesY[vertex]);
-      minimumX = Math.min(minimumX, verticesX[vertex]);
-      maximumX = Math.max(maximumX, verticesX[vertex]);
-      minimumZ = Math.min(minimumZ, verticesZ[vertex]);
-      maximumZ = Math.max(maximumZ, verticesZ[vertex]);
+    for (int vertex = 0; vertex < bodyVertexCount; vertex++) {
+      minimumY = Math.min(minimumY, bodyY[vertex]);
+      maximumY = Math.max(maximumY, bodyY[vertex]);
+      minimumX = Math.min(minimumX, bodyX[vertex]);
+      maximumX = Math.max(maximumX, bodyX[vertex]);
+      minimumZ = Math.min(minimumZ, bodyZ[vertex]);
+      maximumZ = Math.max(maximumZ, bodyZ[vertex]);
     }
     float modelHeight = maximumY - minimumY;
     if (modelHeight < 20.0f) {
       return null;
     }
-    float neckY = findNeckY(verticesX, verticesY, verticesZ, vertexCount, minimumY, maximumY);
+    float neckY = findNeckY(bodyX, bodyY, bodyZ, bodyVertexCount, minimumY, maximumY);
     float[] pivot =
         findNeckPivot(
-            verticesX,
-            verticesY,
-            verticesZ,
-            vertexCount,
+            bodyX,
+            bodyY,
+            bodyZ,
+            bodyVertexCount,
             neckY,
             modelHeight,
             minimumX,
@@ -530,6 +669,13 @@ public final class PlayerPortraitRenderer {
     float[] originalX = Arrays.copyOf(verticesX, vertexCount);
     float[] originalY = Arrays.copyOf(verticesY, vertexCount);
     float[] originalZ = Arrays.copyOf(verticesZ, vertexCount);
+    Set<VertexKey> bodyVertices = null;
+    if (model != bodyModel) {
+      bodyVertices = new HashSet<>(bodyVertexCount * 2);
+      for (int vertex = 0; vertex < bodyVertexCount; vertex++) {
+        bodyVertices.add(new VertexKey(bodyX[vertex], bodyY[vertex], bodyZ[vertex]));
+      }
+    }
     double direction = turnDirection < 0 ? -1.0 : 1.0;
     float fullTurnY = neckY - Math.max(3.0f, modelHeight / 45.0f);
     float stationaryY = neckY + Math.max(7.0f, modelHeight / 18.0f);
@@ -537,6 +683,11 @@ public final class PlayerPortraitRenderer {
     for (int vertex = 0; vertex < vertexCount; vertex++) {
       double weight = turnWeight(originalY[vertex], fullTurnY, stationaryY, transitionHeight);
       if (weight <= 0.0) {
+        continue;
+      }
+      if (bodyVertices != null
+          && !bodyVertices.contains(
+              new VertexKey(originalX[vertex], originalY[vertex], originalZ[vertex]))) {
         continue;
       }
       double angle = direction * HEAD_TURN_RADIANS * weight;
@@ -737,6 +888,13 @@ public final class PlayerPortraitRenderer {
     private final int maxY;
   }
 
+  @Value
+  private static class VertexKey {
+    float x;
+    float y;
+    float z;
+  }
+
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   private static final class NeckTurn {
     private final float[] verticesX;
@@ -756,7 +914,6 @@ public final class PlayerPortraitRenderer {
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   private static final class Candidate {
-    private final BufferedImage image;
     private final int minX;
     private final int minY;
     private final int maxX;

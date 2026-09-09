@@ -157,6 +157,7 @@ public final class SlayerMethodRuleCatalog {
       applyBossBankTagRules(task, rules, strategy);
       return;
     }
+    applyDragonfireProtection(task, rules, strategy);
     if (strategy.hasTag(TaskStrategy.MethodTag.TURAEL_POINT_BOOST)) {
       applyTuraelBoostRules(task, rules, strategy);
       return;
@@ -174,17 +175,6 @@ public final class SlayerMethodRuleCatalog {
               1,
               MethodRules.InventoryGroup.UTILITY,
               SlayerLoadoutData.array("wilderness_escape_items"));
-      if (isDragonEncounter(task)) {
-        rules.requiredSlots(
-            strategy.getStyle() == TaskStrategy.CombatStyle.MELEE
-                ? PotionPolicy.EXTENDED_SUPER_ANTIFIRE_DISPLAY
-                : PotionPolicy.EXTENDED_ANTIFIRE_DISPLAY,
-            1,
-            MethodRules.InventoryGroup.PROTECTION,
-            strategy.getStyle() == TaskStrategy.CombatStyle.MELEE
-                ? PotionPolicy.potionOnlyAntifireAlternatives()
-                : PotionPolicy.shieldedAntifireAlternatives());
-      }
       applyGodWarsProtection(task, location, rules);
       return;
     }
@@ -220,26 +210,11 @@ public final class SlayerMethodRuleCatalog {
       SlayerRegularInventoryAuditCatalog.apply(task, rules, strategy);
       return;
     }
-    if (isDragonEncounter(task)) {
+    if (SlayerEncounterStandards.isDragonTask(task)) {
       var melee = strategy.getStyle() == TaskStrategy.CombatStyle.MELEE;
-      var reviewedChromatic = matches(task, SlayerLoadoutData.array("reviewed_chromatic_dragons"));
       var metal = isMetalDragonTask(task);
-      if (reviewedChromatic || metal) {
-        rules.requiredSlots(
-            melee
-                ? PotionPolicy.EXTENDED_SUPER_ANTIFIRE_DISPLAY
-                : PotionPolicy.EXTENDED_ANTIFIRE_DISPLAY,
-            metal ? 2 : 1,
-            MethodRules.InventoryGroup.PROTECTION,
-            melee
-                ? PotionPolicy.potionOnlyAntifireAlternatives()
-                : PotionPolicy.shieldedAntifireAlternatives());
-      }
       if (task.equals("blue dragon") || task.equals("blue dragons")) {
-        var safespot =
-            strategy != null
-                && (strategy.getStyle() == TaskStrategy.CombatStyle.RANGED
-                    || strategy.getStyle() == TaskStrategy.CombatStyle.MAGIC);
+        var safespot = SlayerEncounterStandards.isSafespot(strategy);
         rules.loot(safespot ? 24 : 12).restoreSlots(0).food(safespot ? 0 : 6);
         return;
       }
@@ -404,8 +379,22 @@ public final class SlayerMethodRuleCatalog {
         || matches(task, SlayerLoadoutData.array("wilderness_encounters"));
   }
 
-  private static boolean isDragonEncounter(String task) {
-    return task.contains("dragon") || task.contains("wyvern");
+  private static void applyDragonfireProtection(
+      String task, MethodRules.Builder rules, TaskStrategy strategy) {
+    if (!SlayerEncounterStandards.isDragonTask(task)
+        || SlayerEncounterStandards.isSafespot(strategy)) {
+      return;
+    }
+    var melee = strategy.getStyle() == TaskStrategy.CombatStyle.MELEE;
+    rules.requiredSlots(
+        melee
+            ? PotionPolicy.EXTENDED_SUPER_ANTIFIRE_DISPLAY
+            : PotionPolicy.EXTENDED_ANTIFIRE_DISPLAY,
+        isMetalDragonTask(task) ? 2 : 1,
+        MethodRules.InventoryGroup.PROTECTION,
+        melee
+            ? PotionPolicy.potionOnlyAntifireAlternatives()
+            : PotionPolicy.shieldedAntifireAlternatives());
   }
 
   private static boolean isMetalDragonTask(String task) {

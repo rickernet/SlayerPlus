@@ -989,10 +989,6 @@ public final class PreparationCatalog {
       return active ? "Spellbook" : "";
     }
 
-    public String getEncounterName() {
-      return "";
-    }
-
     public int getRequiredMagicLevel() {
       String normalized = spellName.toLowerCase(Locale.ENGLISH);
       if (normalized.contains("ice barrage")) {
