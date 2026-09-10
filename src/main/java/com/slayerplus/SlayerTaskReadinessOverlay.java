@@ -24,7 +24,7 @@ class SlayerTaskReadinessOverlay extends OverlayPanel {
     setLayer(OverlayLayer.ABOVE_SCENE);
     setResizable(false);
     setClearChildren(false);
-    panelComponent.setPreferredSize(new Dimension(285, 0));
+    panelComponent.setPreferredSize(new Dimension(240, 0));
   }
 
   void update(PreparationCatalog.PreparationPlan plan) {
@@ -55,6 +55,17 @@ class SlayerTaskReadinessOverlay extends OverlayPanel {
                 .right(plan.isSpellbookReady() ? "Ready" : "Switch")
                 .rightColor(plan.isSpellbookReady() ? READY : MISSING)
                 .build());
+    if (!plan.getRequiredItemName().isEmpty()) {
+      panelComponent
+          .getChildren()
+          .add(
+              LineComponent.builder()
+                  .left(plan.getRequiredItemName())
+                  .leftColor(MUTED)
+                  .right(plan.isRequiredItemReady() ? "Ready" : "Missing")
+                  .rightColor(plan.isRequiredItemReady() ? READY : MISSING)
+                  .build());
+    }
     if (!plan.getSpellName().isEmpty()) {
       for (String spell : plan.getSpellName().split("\\s*\\+\\s*")) {
         panelComponent
@@ -125,6 +136,10 @@ class SlayerTaskReadinessOverlay extends OverlayPanel {
             .append(plan.getMagicLevel())
             .append('|')
             .append(plan.getRequiredMagicLevel())
+            .append('|')
+            .append(plan.getRequiredItemName())
+            .append('|')
+            .append(plan.isRequiredItemReady())
             .append('|')
             .append(plan.getSpellName())
             .append('|')

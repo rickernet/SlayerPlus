@@ -71,6 +71,7 @@ public class SlayerPlusPlugin extends Plugin {
   private static final int REFRESH_DEBOUNCE_TICKS = 5;
   private static final int PORTRAIT_APPEARANCE_POLL_TICKS = 5;
   private static final int PORTRAIT_CACHE_SIZE = 8;
+  private static final WorldPoint TORMENTED_ROCKS_APPROACH = new WorldPoint(3241, 9524, 2);
   private static final int[] INFERNO_PREPARATION_TRAVEL_ITEM_IDS = {
     ItemID.CA_OFFHAND_GRANDMASTER,
     ItemID.INFERNAL_DEFENDER_GHOMMAL_6,
@@ -195,9 +196,11 @@ public class SlayerPlusPlugin extends Plugin {
   private boolean directTeleportPending;
   private boolean directTeleportArrived;
   private String directTeleportName = "";
+  private String travelStageInstruction = "";
   private Set<Integer> cachedTravelCandidateIds = Collections.emptySet();
   private String cachedRoutePathKey = "";
   private List<WorldPoint> cachedRoutePath = Collections.emptyList();
+  private long routeRefreshTick = -1;
   private long tick;
 
   @Override
@@ -312,9 +315,11 @@ public class SlayerPlusPlugin extends Plugin {
     directTeleportPending = false;
     directTeleportArrived = false;
     directTeleportName = "";
+    travelStageInstruction = "";
     cachedTravelCandidateIds = Collections.emptySet();
     cachedRoutePathKey = "";
     cachedRoutePath = Collections.emptyList();
+    routeRefreshTick = -1;
     if (shortestPathBridge != null) {
       shortestPathBridge.clear();
     }
@@ -383,6 +388,10 @@ public class SlayerPlusPlugin extends Plugin {
     }
     reconcileBankInterfaceState();
     if (travelHighlightActive) {
+      if (routeRefreshTick >= 0 && tick >= routeRefreshTick) {
+        shortestPathBridge.invalidate();
+        routeRefreshTick = -1;
+      }
       updateShortestPathRoute();
     }
   }
@@ -429,6 +438,9 @@ public class SlayerPlusPlugin extends Plugin {
   @Subscribe
   public void onGameStateChanged(GameStateChanged event) {
     if (event.getGameState() == GameState.LOGGED_IN) {
+      if (travelHighlightActive && shortestPathBridge != null) {
+        routeRefreshTick = tick + 2;
+      }
       portraitPending = true;
       portraitRetry = 0;
       clientThread.invokeLater(
@@ -834,6 +846,7 @@ public class SlayerPlusPlugin extends Plugin {
     bankInterfaceOpen = false;
     directTeleportArrived = false;
     directTeleportName = "";
+    travelStageInstruction = "";
     bankReachedForRestock = true;
     scheduleRefresh(false);
     pendingRefreshDeadlineTick = tick;
@@ -2147,6 +2160,7 @@ public class SlayerPlusPlugin extends Plugin {
 
   private void updateShortestPathRoute() {
     directTeleportPending = false;
+    travelStageInstruction = "";
     routeNeedsTravelItem = false;
     if (shortestPathBridge == null) {
       return;
@@ -2190,6 +2204,10 @@ public class SlayerPlusPlugin extends Plugin {
     int agilityLevel = client.getRealSkillLevel(Skill.AGILITY);
     Player localPlayer = client.getLocalPlayer();
     int combatLevel = localPlayer == null ? 0 : localPlayer.getCombatLevel();
+    WorldPoint here =
+        localPlayer == null
+            ? null
+            : WorldPoint.fromLocalInstance(client, localPlayer.getLocalLocation());
     KitItem travelItem = selectedTravelItem();
     routeNeedsTravelItem = travelItem != null;
     String routePathKey =
@@ -2215,7 +2233,15 @@ public class SlayerPlusPlugin extends Plugin {
       cachedRoutePathKey = routePathKey;
       cachedRoutePath = path;
     }
-    WorldPoint waypoint = nextUnreachedStage(path);
+    if (path.isEmpty()) {
+      shortestPathBridge.clear();
+      return;
+    }
+    boolean tormentedTemple = trip(target.location).equals("ancient guthixian temple");
+    boolean taskAreaVisible =
+        tormentedTemple && isInScene(path.get(path.size() - 1));
+    WorldPoint waypoint =
+        taskAreaVisible ? path.get(path.size() - 1) : nextUnreachedStage(here, path);
     if (waypoint == null) {
       shortestPathBridge.clear();
       return;
@@ -2223,7 +2249,6 @@ public class SlayerPlusPlugin extends Plugin {
     routeNeedsTravelItem = waypoint.equals(path.get(0));
     String teleportName = directTeleportName(travelItem);
     if (!teleportName.isEmpty()) {
-      WorldPoint here = localPlayer == null ? null : localPlayer.getWorldLocation();
       boolean away = needsDirectTeleport(here, waypoint, path.get(0));
       directTeleportPending = updateDirectTeleportTrip(teleportName, here != null, away);
       routeNeedsTravelItem = directTeleportPending;
@@ -2232,7 +2257,45 @@ public class SlayerPlusPlugin extends Plugin {
         return;
       }
     }
-    shortestPathBridge.routeTo(waypoint, false, routeNeedsTravelItem);
+    travelStageInstruction =
+        taskAreaVisible ? "" : tormentedManualInstruction(target.location, here);
+    boolean stagedRoute =
+        tormentedTemple
+            && !taskAreaVisible
+            && here != null
+            && here.getX() >= 4032
+            && here.getX() <= 4223
+            && here.getY() > 4422
+            && here.getY() <= 4607;
+    if (stagedRoute && path.size() > 1) {
+      waypoint = path.get(path.size() - 2);
+      routeNeedsTravelItem = false;
+    }
+    if (!travelStageInstruction.isEmpty()) {
+      routeNeedsTravelItem = false;
+      shortestPathBridge.clear();
+      return;
+    }
+    if (tormentedTemple) {
+      shortestPathBridge.routeToTaskArea(
+          waypoint,
+          routeNeedsTravelItem,
+          routeNeedsTravelItem
+              && travelItem != null
+              && usesPohTravelItem(travelItem.getDisplayName()),
+          stagedRoute);
+    } else {
+      shortestPathBridge.routeTo(waypoint, false, routeNeedsTravelItem);
+    }
+  }
+
+  private boolean isInScene(WorldPoint target) {
+    for (WorldPoint local : WorldPoint.toLocalInstance(client, target)) {
+      if (local.isInScene(client)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static boolean needsDirectTeleport(WorldPoint here, WorldPoint waypoint, WorldPoint entrance) {
@@ -2252,10 +2315,11 @@ public class SlayerPlusPlugin extends Plugin {
     return locationKnown && away && !directTeleportArrived;
   }
 
-  String directTeleportInstruction() {
-    return directTeleportPending && travelHighlightActive && !bankInterfaceOpen
-        ? "Use " + directTeleportName
-        : "";
+  String travelInstruction() {
+    if (!travelHighlightActive || bankInterfaceOpen) {
+      return "";
+    }
+    return directTeleportPending ? "Use " + directTeleportName : travelStageInstruction;
   }
 
   private static String directTeleportName(KitItem item) {
@@ -2269,15 +2333,39 @@ public class SlayerPlusPlugin extends Plugin {
     return name.equals("guthixian temple teleport") ? "Guthixian temple teleport" : "";
   }
 
+  static String tormentedManualInstruction(String location, WorldPoint here) {
+    if (!trip(location).equals("ancient guthixian temple") || here == null) {
+      return "";
+    }
+    WorldPoint rocksApproach = TORMENTED_ROCKS_APPROACH;
+    if (here.getRegionID() == rocksApproach.getRegionID()
+        && here.getPlane() == rocksApproach.getPlane()
+        && chebyshevDistance(here, rocksApproach) <= 12) {
+      if (here.getX() < 3241) {
+        return "Use a lit sapphire lantern on a light creature";
+      }
+      if (chebyshevDistance(here, rocksApproach) <= 3) {
+        return "Climb the rocks";
+      }
+    }
+    return "";
+  }
+
   static List<WorldPoint> prioritizeTravelArrival(
       List<WorldPoint> path, String location, String item) {
     String destination = trip(location);
     String travel = trip(item);
     if (destination.equals("ancient guthixian temple")) {
-      if (travel.contains("games necklace")) {
-        return Collections.singletonList(new WorldPoint(3245, 9500, 2));
+      if (travel.contains("guthixian temple teleport")) {
+        return path;
       }
-      return path.isEmpty() ? path : Collections.singletonList(path.get(0));
+      List<WorldPoint> result = new ArrayList<>();
+      if (usesPohTravelItem(item)) {
+        result.add(new WorldPoint(3245, 9500, 0));
+      }
+      result.add(TORMENTED_ROCKS_APPROACH);
+      result.addAll(path);
+      return Collections.unmodifiableList(result);
     }
     if (!destination.equals("fremennik slayer dungeon") || !travel.contains("slayer ring")) {
       return path;
@@ -2293,15 +2381,6 @@ public class SlayerPlusPlugin extends Plugin {
   }
 
   private static final int DUNGEON_ENTRANCE_ARRIVAL_RADIUS = 3;
-
-  private WorldPoint nextUnreachedStage(List<WorldPoint> path) {
-    if (path == null || path.isEmpty()) {
-      return null;
-    }
-    Player player = client.getLocalPlayer();
-    WorldPoint here = player == null ? null : player.getWorldLocation();
-    return nextUnreachedStage(here, path);
-  }
 
   static WorldPoint nextUnreachedStage(WorldPoint here, List<WorldPoint> path) {
     if (path == null || path.isEmpty()) {
@@ -2387,12 +2466,33 @@ public class SlayerPlusPlugin extends Plugin {
     Recommendation selected = recommendation;
     String fromTravelText =
         trip(destinationFromTravelText(selected == null ? "" : selected.getTravel()));
-    if (!fromTravelText.isEmpty() && !GENERIC_TRAVEL_DESTINATIONS.contains(fromTravelText)) {
-      return fromTravelText;
-    }
     Target target = resolveTaskTarget();
     String fromLocation = target == null ? "" : trip(target.location);
-    return GENERIC_TRAVEL_DESTINATIONS.contains(fromLocation) ? "" : fromLocation;
+    String destination =
+        !fromTravelText.isEmpty() && !GENERIC_TRAVEL_DESTINATIONS.contains(fromTravelText)
+            ? fromTravelText
+            : GENERIC_TRAVEL_DESTINATIONS.contains(fromLocation) ? "" : fromLocation;
+    KitItem travelItem = selectedTravelItem();
+    return pohTravelDestination(
+        fromLocation, travelItem == null ? "" : travelItem.getDisplayName(), destination);
+  }
+
+  static String pohTravelDestination(String location, String item, String destination) {
+    String area = trip(location);
+    return (area.equals("waterbirth island dungeon")
+            || area.equals("ancient guthixian temple"))
+            && usesPohTravelItem(item)
+        ? "home"
+        : destination;
+  }
+
+  static boolean usesPohTravelItem(String item) {
+    String name = trip(item);
+    return name.contains("max cape")
+        || name.contains("construct cape")
+        || name.contains("construction cape")
+        || name.contains("teleport to house")
+        || name.contains("house tab");
   }
 
   private static String destinationFromTravelText(String travel) {

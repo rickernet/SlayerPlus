@@ -46,7 +46,7 @@ public class SlayerPreparationReminderTest {
     assertEquals(OverlayPosition.TOP_RIGHT, overlay.getPosition());
     assertTrue(overlay.isMovable());
     assertFalse(overlay.isResizable());
-    assertEquals(285, overlay.getPanelComponent().getPreferredSize().width);
+    assertEquals(240, overlay.getPanelComponent().getPreferredSize().width);
     assertFalse(overlay.isClearChildren());
     int count = overlay.getPanelComponent().getChildren().size();
     assertEquals(6, count); // Title, spellbook, spell, three rune rows; no explanatory footer.
@@ -81,6 +81,33 @@ public class SlayerPreparationReminderTest {
   }
 
   @Test
+  public void requiredSupportingItemIsVisibleInsteadOfBeingAHiddenBlocker() {
+    PreparationCatalog.PreparationPlan plan =
+        new PreparationCatalog.PreparationPlan(
+            true,
+            false,
+            "Setup",
+            "Bring Book of the dead.",
+            "",
+            "",
+            Collections.emptyList(),
+            MethodRules.Spellbook.ARCEUUS,
+            true,
+            true,
+            99,
+            Collections.emptyList(),
+            "Resurrect Greater Ghost",
+            0,
+            true,
+            "Book of the dead",
+            false);
+    SlayerTaskReadinessOverlay overlay = new SlayerTaskReadinessOverlay(new SlayerPlusPlugin());
+    overlay.update(plan);
+    assertEquals(4, overlay.getPanelComponent().getChildren().size());
+    assertFalse(plan.isRequiredItemReady());
+  }
+
+  @Test
   public void arceuusReminderListsEachActualSpellEvenWithNoRunes() {
     TaskStrategy strategy =
         SlayerTaskStrategyCatalog.resolve(
@@ -99,7 +126,11 @@ public class SlayerPreparationReminderTest {
     overlay.update(plan);
     int spellCount = plan.getSpellName().split("\\s*\\+\\s*").length;
     assertEquals(
-        2 + spellCount + (plan.isLevelReady() ? 0 : 1) + plan.getRuneStatuses().size(),
+        2
+            + spellCount
+            + (plan.getRequiredItemName().isEmpty() ? 0 : 1)
+            + (plan.isLevelReady() ? 0 : 1)
+            + plan.getRuneStatuses().size(),
         overlay.getPanelComponent().getChildren().size());
   }
 

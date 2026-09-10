@@ -54,6 +54,20 @@ public class RunePolicyTest {
         resolve(Map.of(ItemID.COSMICRUNE, 0, ItemID.AETHERRUNE, 100), ItemID.COSMICRUNE));
   }
 
+  @Test
+  public void aetherQuantityCoversOneCosmicAndOneSoulCast() {
+    MethodRules rules =
+        MethodRules.builder()
+            .pouchRune(ItemID.COSMICRUNE, "Cosmic", 1)
+            .pouchRune(ItemID.SOULRUNE, "Soul", 1)
+            .build();
+    RunePolicy.Resolution result =
+        RunePolicy.resolve(rules.getPouchRunes(), Map.of(ItemID.AETHERRUNE, 100));
+    assertEquals(1, result.getRunes().size());
+    assertEquals(ItemID.AETHERRUNE, result.getRunes().get(0).getItemId());
+    assertEquals(2, result.getRunes().get(0).getMinimumQuantity());
+  }
+
   private static List<Integer> resolve(Map<Integer, Integer> owned, int... required) {
     MethodRules.Builder rules = MethodRules.builder();
     for (int id : required) {

@@ -590,17 +590,54 @@ public class SlayerRegressionTest {
   }
 
   @Test
-  public void tormentedDemonRouteStopsWhereSupportedTravelEnds() {
+  public void tormentedDemonRouteKeepsEachTravelStage() {
     List<WorldPoint> templePath =
-        Arrays.asList(new WorldPoint(4097, 4419, 0), new WorldPoint(4136, 4372, 0));
+        Arrays.asList(new WorldPoint(4097, 4419, 0), new WorldPoint(4077, 4446, 0));
     assertEquals(
-        Collections.singletonList(new WorldPoint(4097, 4419, 0)),
+        templePath,
+        SlayerTaskWaypoints.findPath("Tormented demons", "Ancient Guthixian Temple"));
+    assertEquals(
+        templePath,
         SlayerPlusPlugin.prioritizeTravelArrival(
             templePath, "Ancient Guthixian Temple", "Guthixian temple teleport"));
     assertEquals(
-        Collections.singletonList(new WorldPoint(3245, 9500, 2)),
+        Arrays.asList(
+            new WorldPoint(3241, 9524, 2),
+            new WorldPoint(4097, 4419, 0),
+            new WorldPoint(4077, 4446, 0)),
         SlayerPlusPlugin.prioritizeTravelArrival(
             templePath, "Ancient Guthixian Temple", "Games necklace(8)"));
+    List<WorldPoint> pohPath =
+        SlayerPlusPlugin.prioritizeTravelArrival(
+            templePath, "Ancient Guthixian Temple", "Max cape");
+    assertEquals(new WorldPoint(3245, 9500, 0), pohPath.get(0));
+    assertEquals(new WorldPoint(3241, 9524, 2), pohPath.get(1));
+    assertEquals(
+        pohPath.get(1),
+        SlayerPlusPlugin.nextUnreachedStage(new WorldPoint(3245, 9500, 2), pohPath));
+    List<WorldPoint> fallbackPath =
+        SlayerPlusPlugin.prioritizeTravelArrival(
+            templePath, "Ancient Guthixian Temple", "Games necklace(8)");
+    assertEquals(
+        fallbackPath.get(0), SlayerPlusPlugin.nextUnreachedStage(fallbackPath.get(0), fallbackPath));
+    assertEquals(
+        fallbackPath.get(2), SlayerPlusPlugin.nextUnreachedStage(fallbackPath.get(1), fallbackPath));
+    assertEquals(
+        "Climb the rocks",
+        SlayerPlusPlugin.tormentedManualInstruction(
+            "Ancient Guthixian Temple", fallbackPath.get(0)));
+    assertEquals(
+        "Use a lit sapphire lantern on a light creature",
+        SlayerPlusPlugin.tormentedManualInstruction(
+            "Ancient Guthixian Temple", new WorldPoint(3239, 9525, 2)));
+    assertEquals(
+        "",
+        SlayerPlusPlugin.tormentedManualInstruction(
+            "Ancient Guthixian Temple", new WorldPoint(4065, 4557, 0)));
+    assertEquals(
+        "",
+        SlayerPlusPlugin.tormentedManualInstruction(
+            "Fremennik Slayer Dungeon", fallbackPath.get(0)));
   }
 
   @Test
@@ -1498,6 +1535,33 @@ public class SlayerRegressionTest {
   }
 
   @Test
+  public void tormentedDemonSwitchesUseCompactRows() {
+    final List<BankTagLayout.InventoryPlacement> placements =
+        BankTagLayout.planInventoryForBankTag(
+            Arrays.asList(
+                groupItem("Games necklace", MethodRules.InventoryGroup.TRAVEL),
+                item("Divine rune pouch"),
+                switchItem("Scorching bow", KitItem.SwitchStyle.RANGED),
+                switchItem("Masori body (f)", KitItem.SwitchStyle.RANGED),
+                switchItem("Masori chaps (f)", KitItem.SwitchStyle.RANGED),
+                switchItem("Dharok's greataxe", KitItem.SwitchStyle.MELEE),
+                switchItem("Burning claws", KitItem.SwitchStyle.MELEE),
+                item("Divine ranging potion(4)"),
+                item("Divine super combat potion(4)")),
+            -1,
+            true,
+            true);
+
+    assertEquals(0, slotFor(placements, "Scorching bow"));
+    assertEquals(1, slotFor(placements, "Masori body (f)"));
+    assertEquals(2, slotFor(placements, "Masori chaps (f)"));
+    assertEquals(3, slotFor(placements, "Dharok's greataxe"));
+    assertEquals(4, slotFor(placements, "Burning claws"));
+    assertEquals(26, slotFor(placements, "Games necklace"));
+    assertEquals(27, slotFor(placements, "Divine rune pouch"));
+  }
+
+  @Test
   public void wikiEquipmentProgressionsReachOwnedTiersAndDriveBankTags() {
     final TaskStrategy melee =
         TaskStrategy.builder(TaskStrategy.CombatStyle.MELEE, "General melee Slayer")
@@ -2263,18 +2327,19 @@ public class SlayerRegressionTest {
     assertTrue(tormentedRules.requiresRunePouch());
     assertTrue(
         tormentedRules.getPouchRunes().stream()
-            .anyMatch(rune -> rune.getName().equals("Fire") && rune.getMinimumQuantity() >= 1000));
+            .anyMatch(rune -> rune.getName().equals("Fire") && rune.getMinimumQuantity() == 10));
     assertTrue(
         tormentedRules.getPouchRunes().stream()
-            .anyMatch(rune -> rune.getName().equals("Cosmic") && rune.getMinimumQuantity() >= 500));
+            .anyMatch(rune -> rune.getName().equals("Cosmic") && rune.getMinimumQuantity() == 1));
     assertTrue(
         tormentedRules.getPouchRunes().stream()
-            .anyMatch(rune -> rune.getName().equals("Soul") && rune.getMinimumQuantity() >= 500));
+            .anyMatch(rune -> rune.getName().equals("Soul") && rune.getMinimumQuantity() == 1));
     for (final String required :
         Arrays.asList(
             "Secondary weapon switch",
             "Secondary body switch",
             "Secondary legs switch",
+            "Ranged cape switch",
             "Magic off-hand switch",
             "Shield-down crush weapon",
             "Special attack weapon")) {
@@ -2282,6 +2347,23 @@ public class SlayerRegressionTest {
           tormentedRules.getRequiredItems().stream()
               .anyMatch(item -> item.getDisplayName().equals(required)));
     }
+    assertFalse(
+        tormentedRules.getRequiredItems().stream()
+            .anyMatch(item -> item.getDisplayName().equals("Emergency teleport")));
+    assertEquals(
+        "Max cape",
+        SlayerLoadoutAnalyzer.preferredInventoryItemForTest(
+            Arrays.asList("Max cape", "Games necklace"),
+            "max cape",
+            "construction cape",
+            "games necklace"));
+    assertEquals(
+        "Max cape",
+        SlayerLoadoutAnalyzer.preferredInventoryItemForTest(
+            Collections.singletonList("Max cape"),
+            "games necklace",
+            "max cape",
+            "construction cape"));
     assertTrue(
         tormentedRules.getRequiredItems().stream()
             .filter(item -> item.getDisplayName().equals("Secondary weapon switch"))

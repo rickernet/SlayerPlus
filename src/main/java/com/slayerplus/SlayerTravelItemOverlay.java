@@ -35,7 +35,7 @@ class SlayerTravelItemOverlay extends WidgetItemOverlay {
   @Override
   public Dimension render(Graphics2D graphics) {
     activeItemId = plugin.getTravelItemIdForOverlay();
-    String instruction = plugin.directTeleportInstruction();
+    String instruction = plugin.travelInstruction();
     if (!instruction.isEmpty()) {
       Player player = client.getLocalPlayer();
       Point point = player == null ? null : player.getCanvasTextLocation(graphics, instruction, 40);

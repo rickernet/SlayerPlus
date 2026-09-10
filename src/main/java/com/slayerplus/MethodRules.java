@@ -2,6 +2,7 @@ package com.slayerplus;
 
 import java.util.*;
 import lombok.Getter;
+import net.runelite.api.gameval.ItemID;
 
 @Getter
 public final class MethodRules {
@@ -612,47 +613,45 @@ public final class MethodRules {
       }
       pouchRunes.clear();
       if (thralls && deathCharge) {
-        boolean tormentedDemonCombatMagic =
-            coverageKey.toLowerCase(java.util.Locale.ENGLISH).contains("tormented demon");
-        addRune(554, "Fire", tormentedDemonCombatMagic ? 1000 : 10);
+        addRune(ItemID.FIRERUNE, "Fire", 10);
         if (ward) {
-          addRune(30843, "Aether", tormentedDemonCombatMagic ? 1000 : 6);
+          addRune(ItemID.AETHERRUNE, "Aether", 6);
         } else {
-          addRune(564, "Cosmic", tormentedDemonCombatMagic ? 500 : 1);
-          addRune(566, "Soul", tormentedDemonCombatMagic ? 500 : 1);
+          addRune(ItemID.COSMICRUNE, "Cosmic", 1);
+          addRune(ItemID.SOULRUNE, "Soul", 1);
         }
-        addRune(565, "Blood", tormentedDemonCombatMagic ? 500 : 6);
-        addRune(560, "Death", tormentedDemonCombatMagic ? 500 : 1);
+        addRune(ItemID.BLOODRUNE, "Blood", 6);
+        addRune(ItemID.DEATHRUNE, "Death", 1);
         if (ward) {
-          addRune(561, "Nature", 2);
+          addRune(ItemID.NATURERUNE, "Nature", 2);
         }
         return;
       }
       if (thralls) {
-        addRune(554, "Fire", 10);
-        addRune(565, "Blood", 5);
+        addRune(ItemID.FIRERUNE, "Fire", 10);
+        addRune(ItemID.BLOODRUNE, "Blood", 5);
         if (ward) {
-          addRune(30843, "Aether", 5);
-          addRune(561, "Nature", 2);
+          addRune(ItemID.AETHERRUNE, "Aether", 5);
+          addRune(ItemID.NATURERUNE, "Nature", 2);
         } else {
-          addRune(564, "Cosmic", 1);
+          addRune(ItemID.COSMICRUNE, "Cosmic", 1);
         }
         return;
       }
       if (deathCharge) {
-        addRune(565, "Blood", 1);
-        addRune(560, "Death", 1);
+        addRune(ItemID.BLOODRUNE, "Blood", 1);
+        addRune(ItemID.DEATHRUNE, "Death", 1);
         if (ward) {
-          addRune(30843, "Aether", 5);
-          addRune(561, "Nature", 2);
+          addRune(ItemID.AETHERRUNE, "Aether", 5);
+          addRune(ItemID.NATURERUNE, "Nature", 2);
         } else {
-          addRune(566, "Soul", 1);
+          addRune(ItemID.SOULRUNE, "Soul", 1);
         }
         return;
       }
-      addRune(566, "Soul", 4);
-      addRune(561, "Nature", 2);
-      addRune(564, "Cosmic", 1);
+      addRune(ItemID.SOULRUNE, "Soul", 4);
+      addRune(ItemID.NATURERUNE, "Nature", 2);
+      addRune(ItemID.COSMICRUNE, "Cosmic", 1);
     }
 
     private void addRune(int itemId, String name, int minimumQuantity) {

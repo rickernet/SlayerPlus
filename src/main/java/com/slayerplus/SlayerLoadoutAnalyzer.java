@@ -2219,7 +2219,7 @@ public final class SlayerLoadoutAnalyzer {
                 ? KitItem.SwitchStyle.MAGIC
                 : inferSwitchStyle(required, style);
         require = require.asEquipmentSwitch(switchStyle);
-        if (isAlreadyEquippedInPlan(require, equipmentLayout)) {
+        if (containsPlannedItem(require, equipmentLayout) || containsPlannedItem(require, layout)) {
           continue;
         }
       }
@@ -2464,6 +2464,9 @@ public final class SlayerLoadoutAnalyzer {
     if (requirement.equals("divine ranging potion")) {
       return isPurgingStaff(secondaryWeapon);
     }
+    if (requirement.equals("ranged cape switch")) {
+      return isPurgingStaff(secondaryWeapon);
+    }
     return false;
   }
 
@@ -2542,22 +2545,22 @@ public final class SlayerLoadoutAnalyzer {
         .asEquipmentSwitch(KitItem.SwitchStyle.RANGED);
   }
 
-  private static boolean isAlreadyEquippedInPlan(KitItem candidate, List<KitItem> equipmentLayout) {
-    if (candidate == null || equipmentLayout == null) {
+  private static boolean containsPlannedItem(KitItem candidate, List<KitItem> items) {
+    if (candidate == null || items == null) {
       return false;
     }
-    for (KitItem equipped : equipmentLayout) {
-      if (equipped == null) {
+    for (KitItem item : items) {
+      if (item == null) {
         continue;
       }
       if (candidate.hasItemId()
-          && equipped.hasItemId()
-          && candidate.getItemId() == equipped.getItemId()) {
+          && item.hasItemId()
+          && candidate.getItemId() == item.getItemId()) {
         return true;
       }
       if (!candidate.hasItemId()
-          && !equipped.hasItemId()
-          && normalize(candidate.getDisplayName()).equals(normalize(equipped.getDisplayName()))) {
+          && !item.hasItemId()
+          && normalize(candidate.getDisplayName()).equals(normalize(item.getDisplayName()))) {
         return true;
       }
     }
@@ -3060,7 +3063,16 @@ public final class SlayerLoadoutAnalyzer {
     if (normalizedTask.equals("tormented demons")) {
       OwnedItem direct = exactOwned(pool, "guthixian temple teleport");
       return direct == null
-          ? chooseExact("Games necklace / POH jewellery box", 1, pool, scanned, "games necklace")
+          ? chooseTravelFamily(
+              "Games necklace / POH jewellery box",
+              1,
+              pool,
+              scanned,
+              "max cape",
+              "construction cape",
+              "games necklace",
+              "teleport to house",
+              "house tab")
           : direct.toItem(1);
     }
     if (combined.contains("cowbell")) {

@@ -125,13 +125,17 @@ public final class BankTagLayout {
     List<Candidate> inventoryCandidates = new ArrayList<>();
     for (int sourceIndex = 0; sourceIndex < inventoryItems.size(); sourceIndex++) {
       KitItem item = inventoryItems.get(sourceIndex);
-      if (!concrete(item) || isLightbearer(item)) {
+      if (!concrete(item) || isLightbearer(item) || duplicatesConcreteEquipment(item, equipment)) {
         continue;
       }
       inventoryCandidates.add(new Candidate(item, sourceIndex));
     }
     for (InventoryPlacement placement :
-        planInventoryCandidates(inventoryCandidates, -1, analyzerSourceZeroIsTravel)) {
+        planInventoryCandidates(
+            inventoryCandidates,
+            -1,
+            analyzerSourceZeroIsTravel,
+            normalizeName(plan.getLayoutTitle()).contains("tormented demons"))) {
       int slotIndex = placement.getSlotIndex();
       int row = 2 + slotIndex / 4;
       int column = 4 + slotIndex % 4;
@@ -490,6 +494,14 @@ public final class BankTagLayout {
 
   static List<InventoryPlacement> planInventoryForBankTag(
       List<KitItem> source, int reservedSlotIndex, boolean sourceSlotZeroIsTravel) {
+    return planInventoryForBankTag(source, reservedSlotIndex, sourceSlotZeroIsTravel, false);
+  }
+
+  static List<InventoryPlacement> planInventoryForBankTag(
+      List<KitItem> source,
+      int reservedSlotIndex,
+      boolean sourceSlotZeroIsTravel,
+      boolean rowSwitches) {
     if (source == null || source.isEmpty()) {
       return Collections.emptyList();
     }
@@ -500,11 +512,15 @@ public final class BankTagLayout {
         candidates.add(new Candidate(item, index));
       }
     }
-    return planInventoryCandidates(candidates, reservedSlotIndex, sourceSlotZeroIsTravel);
+    return planInventoryCandidates(
+        candidates, reservedSlotIndex, sourceSlotZeroIsTravel, rowSwitches);
   }
 
   private static List<InventoryPlacement> planInventoryCandidates(
-      List<Candidate> source, int requestedReservedSlotIndex, boolean sourceSlotZeroIsTravel) {
+      List<Candidate> source,
+      int requestedReservedSlotIndex,
+      boolean sourceSlotZeroIsTravel,
+      boolean rowSwitches) {
     if (source == null || source.isEmpty()) {
       return Collections.emptyList();
     }
@@ -538,7 +554,7 @@ public final class BankTagLayout {
         }
       }
     }
-    placeEquipmentSwitchGroups(remaining, occupied, result);
+    placeEquipmentSwitchGroups(remaining, occupied, result, rowSwitches);
     List<Candidate> tops = new ArrayList<>();
     List<Candidate> legs = new ArrayList<>();
     for (Candidate candidate : remaining) {
@@ -710,7 +726,10 @@ public final class BankTagLayout {
   }
 
   private static void placeEquipmentSwitchGroups(
-      List<Candidate> remaining, boolean[] occupied, List<InventoryPlacement> result) {
+      List<Candidate> remaining,
+      boolean[] occupied,
+      List<InventoryPlacement> result,
+      boolean rowSwitches) {
     List<SwitchGroup> groups = new ArrayList<>();
     for (Candidate candidate : remaining) {
       if (!candidate.item.isEquipmentSwitch()) {
@@ -730,6 +749,20 @@ public final class BankTagLayout {
       matching.items.add(candidate);
     }
     groups.sort((left, right) -> Integer.compare(right.items.size(), left.items.size()));
+    if (rowSwitches) {
+      for (SwitchGroup group : groups) {
+        for (Candidate candidate : group.items) {
+          int slot = firstFreeSlot(occupied);
+          if (slot < 0) {
+            return;
+          }
+          occupied[slot] = true;
+          result.add(new InventoryPlacement(candidate.item, slot));
+          remaining.remove(candidate);
+        }
+      }
+      return;
+    }
     List<Integer> verticalColumns = new ArrayList<>();
     int[] topRows = {0, 2, 4};
     for (int topRow : topRows) {

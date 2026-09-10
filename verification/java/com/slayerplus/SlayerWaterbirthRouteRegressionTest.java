@@ -57,4 +57,23 @@ public class SlayerWaterbirthRouteRegressionTest {
     assertEquals(
         ROUTE.get(4), SlayerPlusPlugin.nextUnreachedStage(new WorldPoint(1815, 4405, 2), ROUTE));
   }
+
+  @Test
+  public void maxCapeWaterbirthRouteHighlightsHome() {
+    assertEquals(true, SlayerPlusPlugin.usesPohTravelItem("Max cape"));
+    assertEquals(true, SlayerPlusPlugin.usesPohTravelItem("Construction cape"));
+    assertEquals(false, SlayerPlusPlugin.usesPohTravelItem("Games necklace(8)"));
+    assertEquals(
+        "home",
+        SlayerPlusPlugin.pohTravelDestination(
+            "Waterbirth Island Dungeon", "Max cape", "rellekka"));
+    assertEquals(
+        "rellekka",
+        SlayerPlusPlugin.pohTravelDestination(
+            "Waterbirth Island Dungeon", "Fremennik sea boots 4", "rellekka"));
+    assertEquals(
+        "home",
+        SlayerPlusPlugin.pohTravelDestination(
+            "Ancient Guthixian Temple", "Max cape", "tears of guthix"));
+  }
 }

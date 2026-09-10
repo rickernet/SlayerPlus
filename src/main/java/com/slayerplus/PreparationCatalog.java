@@ -239,7 +239,9 @@ public final class PreparationCatalog {
         runeStatuses,
         utility,
         0,
-        missing.isEmpty());
+        missing.isEmpty(),
+        rules.requiresBookOfDead() ? "Book of the dead" : "",
+        bookReady);
   }
 
   private static PreparationPlan resolveAncients(
@@ -906,6 +908,8 @@ public final class PreparationCatalog {
     private final String spellName;
     private final int castsAvailable;
     private final boolean runesReady;
+    private final String requiredItemName;
+    private final boolean requiredItemReady;
 
     private PreparationPlan(
         boolean active,
@@ -931,7 +935,9 @@ public final class PreparationCatalog {
           Collections.emptyList(),
           headline,
           0,
-          ready);
+          ready,
+          "",
+          true);
     }
 
     PreparationPlan(
@@ -950,6 +956,44 @@ public final class PreparationCatalog {
         String spellName,
         int castsAvailable,
         boolean runesReady) {
+      this(
+          active,
+          ready,
+          headline,
+          detail,
+          bankNote,
+          routeWarning,
+          tagIds,
+          book,
+          spellbookReady,
+          levelReady,
+          magicLevel,
+          runeStatuses,
+          spellName,
+          castsAvailable,
+          runesReady,
+          "",
+          true);
+    }
+
+    PreparationPlan(
+        boolean active,
+        boolean ready,
+        String headline,
+        String detail,
+        String bankNote,
+        String routeWarning,
+        List<Integer> tagIds,
+        MethodRules.Spellbook book,
+        boolean spellbookReady,
+        boolean levelReady,
+        int magicLevel,
+        List<RuneStatus> runeStatuses,
+        String spellName,
+        int castsAvailable,
+        boolean runesReady,
+        String requiredItemName,
+        boolean requiredItemReady) {
       this.active = active;
       this.ready = ready;
       this.headline = safe(headline);
@@ -967,6 +1011,8 @@ public final class PreparationCatalog {
       this.spellName = safe(spellName);
       this.castsAvailable = Math.max(0, castsAvailable);
       this.runesReady = runesReady;
+      this.requiredItemName = safe(requiredItemName);
+      this.requiredItemReady = requiredItemReady;
     }
 
     public static PreparationPlan none() {
@@ -996,6 +1042,15 @@ public final class PreparationCatalog {
       }
       if (normalized.contains("ice burst")) {
         return ICE_BURST_LEVEL;
+      }
+      if (normalized.contains("death charge")) {
+        return 80;
+      }
+      if (normalized.contains("resurrect greater")) {
+        return 76;
+      }
+      if (normalized.contains("ward of arceuus")) {
+        return 73;
       }
       return 0;
     }
